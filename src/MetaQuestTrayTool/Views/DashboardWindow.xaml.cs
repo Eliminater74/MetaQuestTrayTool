@@ -36,8 +36,11 @@ public partial class DashboardWindow : Window
         DebugToolText.Text = debugTool.IsAvailable
             ? "OculusDebugToolCLI found"
             : "OculusDebugToolCLI not found";
+        LinkSettingsText.Text = App.Instance.Settings.Current.LinkSettings.Describe();
+        LinkLiveText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
         LastApplyText.Text = debugTool.LastResult?.Summary
-                             ?? "Right-click the tray icon to change SS / ASW.";
+                             ?? App.Instance.Link.LastResult?.Summary
+                             ?? "Right-click the tray icon for Link and game settings.";
     }
 
     private void StartService_Click(object sender, RoutedEventArgs e) => RunService(App.Instance.Oculus.Start);
@@ -51,6 +54,16 @@ public partial class DashboardWindow : Window
             Owner = this
         };
         window.Show();
+    }
+
+    private void LinkSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new LinkSettingsWindow
+        {
+            Owner = this
+        };
+        window.ShowDialog();
+        RefreshStatus();
     }
 
     private void ApplyGameSettings_Click(object sender, RoutedEventArgs e)

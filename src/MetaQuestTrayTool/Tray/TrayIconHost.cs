@@ -14,6 +14,7 @@ public sealed class TrayIconHost : IDisposable
     private DashboardWindow? _dashboard;
     private AboutWindow? _about;
     private ProfilesWindow? _profiles;
+    private LinkSettingsWindow? _linkSettings;
 
     public TrayIconHost(App app)
     {
@@ -92,7 +93,7 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(BuildGameSettingsMenu());
 
         menu.Items.Add(BuildProfilesMenu());
-        menu.Items.Add(PlaceholderItem("Quest Link / Air Link"));
+        menu.Items.Add(BuildLinkMenu());
         menu.Items.Add(PlaceholderItem("Audio Switching"));
         menu.Items.Add(PlaceholderItem("Power Plan"));
         menu.Items.Add(new ToolStripSeparator());
@@ -157,6 +158,7 @@ public sealed class TrayIconHost : IDisposable
 
         SyncGameSettingChecks(menu);
         RebuildProfileItems(menu);
+        SyncLinkChecks(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
     }
 
@@ -355,6 +357,171 @@ public sealed class TrayIconHost : IDisposable
         _profiles.Show();
         _profiles.Activate();
         _profiles.WindowState = WindowState.Normal;
+    }
+
+    private ToolStripMenuItem BuildLinkMenu()
+    {
+        var menu = new ToolStripMenuItem("Quest Link / Air Link") { Name = "LinkMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open Link settings…", null, (_, _) => ShowLinkSettings()));
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        var bitrateMenu = new ToolStripMenuItem("Bitrate") { Name = "LinkBitrateMenu" };
+        foreach (var bitrate in LinkSettings.BitratePresets)
+        {
+            var captured = bitrate;
+            bitrateMenu.DropDownItems.Add(new ToolStripMenuItem(
+                bitrate <= 0 ? "Default" : $"{bitrate} Mbps",
+                null,
+                (_, _) =>
+                {
+                    _app.Settings.Current.LinkSettings.BitrateMbps = captured;
+                    ApplyLinkSettings();
+                })
+            {
+                Name = $"LinkBitrate_{bitrate}",
+                Tag = bitrate
+            });
+        }
+
+        var encodeMenu = new ToolStripMenuItem("Encode width") { Name = "LinkEncodeMenu" };
+        foreach (var width in LinkSettings.EncodeWidthPresets)
+        {
+            var captured = width;
+            encodeMenu.DropDownItems.Add(new ToolStripMenuItem(
+                width <= 0 ? "Auto / default" : width.ToString(),
+                null,
+                (_, _) =>
+                {
+                    _app.Settings.Current.LinkSettings.EncodeResolutionWidth = captured;
+                    ApplyLinkSettings();
+                })
+            {
+                Name = $"LinkEncode_{width}",
+                Tag = width
+            });
+        }
+
+        var hevc = new ToolStripMenuItem("Prefer HEVC")
+        {
+            Name = "LinkHevc",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.LinkSettings.PreferHevc
+        };
+        hevc.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.LinkSettings.PreferHevc = hevc.Checked;
+            ApplyLinkSettings();
+        };
+
+        var slices = new ToolStripMenuItem("Disable sliced encoding")
+        {
+            Name = "LinkSlices",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.LinkSettings.DisableSlicedEncoding
+        };
+        slices.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.LinkSettings.DisableSlicedEncoding = slices.Checked;
+            ApplyLinkSettings();
+        };
+
+        var applyOnStart = new ToolStripMenuItem("Apply on app start")
+        {
+            Name = "LinkApplyOnStart",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.ApplyLinkSettingsOnStart
+        };
+        applyOnStart.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.ApplyLinkSettingsOnStart = applyOnStart.Checked;
+            _app.Settings.Save();
+        };
+
+        menu.DropDownItems.Add(bitrateMenu);
+        menu.DropDownItems.Add(encodeMenu);
+        menu.DropDownItems.Add(hevc);
+        menu.DropDownItems.Add(slices);
+        menu.DropDownItems.Add(new ToolStripSeparator());
+        menu.DropDownItems.Add(new ToolStripMenuItem("Apply now", null, (_, _) => ApplyLinkSettings()));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Apply + restart OVRService", null, (_, _) =>
+        {
+            ApplyLinkSettings();
+            RunServiceAction(_app.Oculus.Restart);
+        }));
+        menu.DropDownItems.Add(applyOnStart);
+        return menu;
+    }
+
+    private void SyncLinkChecks(ContextMenuStrip root)
+    {
+        var link = _app.Settings.Current.LinkSettings;
+
+        if (FindItem(root.Items, "LinkBitrateMenu") is ToolStripMenuItem bitrateMenu)
+        {
+            foreach (ToolStripItem item in bitrateMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is int bitrate)
+                {
+                    menuItem.Checked = bitrate == link.BitrateMbps;
+                }
+            }
+        }
+
+        if (FindItem(root.Items, "LinkEncodeMenu") is ToolStripMenuItem encodeMenu)
+        {
+            foreach (ToolStripItem item in encodeMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is int width)
+                {
+                    menuItem.Checked = width == link.EncodeResolutionWidth;
+                }
+            }
+        }
+
+        if (FindItem(root.Items, "LinkHevc") is ToolStripMenuItem hevc)
+        {
+            hevc.Checked = link.PreferHevc;
+        }
+
+        if (FindItem(root.Items, "LinkSlices") is ToolStripMenuItem slices)
+        {
+            slices.Checked = link.DisableSlicedEncoding;
+        }
+
+        if (FindItem(root.Items, "LinkApplyOnStart") is ToolStripMenuItem applyOnStart)
+        {
+            applyOnStart.Checked = _app.Settings.Current.ApplyLinkSettingsOnStart;
+        }
+    }
+
+    private void ApplyLinkSettings()
+    {
+        _app.Settings.Save();
+        var result = _app.Link.Apply(_app.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+        if (result.Succeeded)
+        {
+            _app.Log.Info(result.Summary);
+        }
+        else
+        {
+            _app.Log.Error(result.Summary);
+        }
+
+        Notify("Quest Link", result.Summary);
+        _dashboard?.RefreshStatus();
+    }
+
+    private void ShowLinkSettings()
+    {
+        if (_linkSettings is null || !_linkSettings.IsLoaded)
+        {
+            _linkSettings = new LinkSettingsWindow();
+            _linkSettings.Closed += (_, _) => _linkSettings = null;
+        }
+
+        _linkSettings.Show();
+        _linkSettings.Activate();
+        _linkSettings.WindowState = WindowState.Normal;
     }
 
     private static string FormatSuperSampling(double value) =>

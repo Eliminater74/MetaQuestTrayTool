@@ -1,0 +1,52 @@
+<Window x:Class="MetaQuestTrayTool.Views.LinkSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Quest Link / Air Link"
+        Height="480"
+        Width="520"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="20">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button Content="Apply" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
+      <Button Content="Apply + Restart Service" Style="{StaticResource GhostButtonStyle}" Click="ApplyRestart_Click"/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+    </StackPanel>
+
+    <StackPanel>
+      <TextBlock Text="Quest Link / Air Link"
+                 FontSize="22"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource AppAccentBrush}"/>
+      <TextBlock x:Name="LiveStatusText"
+                 Margin="0,6,0,16"
+                 TextWrapping="Wrap"
+                 Foreground="{StaticResource AppMutedBrush}"/>
+
+      <TextBlock Text="Encode bitrate (Mbps)" Foreground="{StaticResource AppMutedBrush}"/>
+      <ComboBox x:Name="BitrateBox" Margin="0,4,0,12" Padding="6"/>
+
+      <TextBlock Text="Encode resolution width" Foreground="{StaticResource AppMutedBrush}"/>
+      <ComboBox x:Name="EncodeWidthBox" Margin="0,4,0,12" Padding="6"/>
+
+      <CheckBox x:Name="HevcBox"
+                Margin="0,0,0,8"
+                Foreground="{StaticResource AppTextBrush}"
+                Content="Prefer HEVC (H.265) — can break wired Link on some setups"/>
+
+      <CheckBox x:Name="SlicesBox"
+                Margin="0,0,0,8"
+                Foreground="{StaticResource AppTextBrush}"
+                Content="Disable sliced encoding (numSlices = 1)"/>
+
+      <CheckBox x:Name="ApplyOnStartBox"
+                Margin="0,0,0,12"
+                Foreground="{StaticResource AppTextBrush}"
+                Content="Re-apply these values when the tray app starts"/>
+
+      <TextBlock TextWrapping="Wrap"
+                 Foreground="{StaticResource AppMutedBrush}"
+                 Text="Values are written to HKCU\Software\Oculus\RemoteHeadset. Reconnect Link or restart OVRService after applying."/>
+    </StackPanel>
+  </DockPanel>
+</Window>

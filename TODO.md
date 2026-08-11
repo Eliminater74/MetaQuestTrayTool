@@ -37,7 +37,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [x] Link settings model (bitrate, encode resolution, dynamic bitrate)
 - [x] Apply / read Link-related settings
-- [ ] Tray + dashboard UI
+- [x] Tray + dashboard UI
 
 ## Phase 4 — audio
 
@@ -53,6 +53,6 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Housekeeping
 
-- [ ] Keep README "what works now" in sync after each phase
-- [ ] Bump version in the csproj when a phase ships
+- [x] Keep README "what works now" in sync after each phase
+- [x] Bump version in the csproj when a phase ships
 - [ ] Decide on a license before a public release

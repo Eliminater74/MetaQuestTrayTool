@@ -13,7 +13,7 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
 Update both files whenever a phase ships so they stay useful after a break.
 
-## What works now (v0.1 + Phase 1)
+## What works now (through Phase 3)
 
 - Runs in the notification area with a right-click popup menu
 - Opens a small dashboard on left-click / Open Dashboard
@@ -25,10 +25,11 @@ Update both files whenever a phase ships so they stay useful after a break.
 - Dashboard **Apply Game Settings** and last-apply status
 - Create / edit / delete / apply **profiles** from the tray or dashboard
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
+- **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding via `HKCU\Software\Oculus\RemoteHeadset`
 
-Still placeholders: Quest Link / Air Link, audio switching, and power-plan tweaks.
+Still placeholders: audio switching and power-plan / USB tweaks.
 
-Newer Meta runtimes sometimes reject `server:` ASW commands. The log will say so if that happens. Pixel density still needs a new VR session to take effect.
+Newer Meta runtimes sometimes reject `server:` ASW commands. The log will say so if that happens. Pixel density still needs a new VR session to take effect. Link registry changes usually need a Link reconnect or `OVRService` restart.
 
 ## Requirements
 
