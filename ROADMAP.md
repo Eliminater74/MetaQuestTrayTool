@@ -29,8 +29,9 @@ Per-game overrides, the other half of OTT.
 
 - [x] Create / edit / delete profiles (name, process, SS, ASW, FOV, CPU priority, notes)
 - [x] Profile list on the dashboard and tray
-- [ ] Watch running processes and apply the matching profile
-- [ ] Restore defaults when the game exits
+- [x] Watch running processes and apply the matching profile
+- [x] Restore defaults when the game exits
+- [x] CPU priority for the detected process
 - [ ] Ignore-list for noisy processes
 
 ### Phase 3 — Quest Link / Air Link

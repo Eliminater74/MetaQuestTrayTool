@@ -11,6 +11,7 @@ public partial class App : System.Windows.Application
 
     private Mutex? _singleInstanceMutex;
     private TrayIconHost? _tray;
+    private ProcessWatcherService? _processWatcher;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -70,10 +71,14 @@ public partial class App : System.Windows.Application
 
         _tray = new TrayIconHost(this);
         _tray.Show();
+
+        _processWatcher = new ProcessWatcherService(this);
+        _processWatcher.Start();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _processWatcher?.Dispose();
         _tray?.Dispose();
         Settings.Save();
         _singleInstanceMutex?.ReleaseMutex();

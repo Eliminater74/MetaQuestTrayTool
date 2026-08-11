@@ -24,8 +24,9 @@ Update both files whenever a phase ships so they stay useful after a break.
 - Tray **Game Settings**: Super Sampling and ASW, applied through `OculusDebugToolCLI.exe`
 - Dashboard **Apply Game Settings** and last-apply status
 - Create / edit / delete / apply **profiles** from the tray or dashboard
+- Auto-apply a profile when the matching process starts, then restore defaults when it exits
 
-Still placeholders: auto-apply profiles when a game launches, Quest Link / Air Link, audio switching, and power-plan tweaks.
+Still placeholders: Quest Link / Air Link, audio switching, and power-plan tweaks.
 
 Newer Meta runtimes sometimes reject `server:` ASW commands. The log will say so if that happens. Pixel density still needs a new VR session to take effect.
 

@@ -150,6 +150,11 @@ public sealed class TrayIconHost : IDisposable
             applyOnStart.Checked = _app.Settings.Current.ApplyGameSettingsOnStart;
         }
 
+        if (FindItem(menu.Items, "AutoApplyProfiles") is ToolStripMenuItem autoApply)
+        {
+            autoApply.Checked = _app.Settings.Current.AutoApplyProfiles;
+        }
+
         SyncGameSettingChecks(menu);
         RebuildProfileItems(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
@@ -206,12 +211,28 @@ public sealed class TrayIconHost : IDisposable
             _app.Settings.Save();
         };
 
+        var autoApply = new ToolStripMenuItem("Auto-apply when a game launches")
+        {
+            Name = "AutoApplyProfiles",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.AutoApplyProfiles
+        };
+        autoApply.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.AutoApplyProfiles = autoApply.Checked;
+            _app.Settings.Save();
+            _app.Log.Info(autoApply.Checked
+                ? "Profile auto-apply enabled."
+                : "Profile auto-apply disabled.");
+        };
+
         gameSettings.DropDownItems.Add(ssMenu);
         gameSettings.DropDownItems.Add(aswMenu);
         gameSettings.DropDownItems.Add(PlaceholderItem("CPU Priority"));
         gameSettings.DropDownItems.Add(new ToolStripSeparator());
         gameSettings.DropDownItems.Add(new ToolStripMenuItem("Apply now", null, (_, _) => ApplyGameSettings()));
         gameSettings.DropDownItems.Add(applyOnStart);
+        gameSettings.DropDownItems.Add(autoApply);
         return gameSettings;
     }
 

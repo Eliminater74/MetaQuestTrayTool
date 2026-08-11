@@ -16,7 +16,7 @@
     <TextBlock DockPanel.Dock="Top"
                Margin="0,4,0,16"
                Foreground="{StaticResource AppMutedBrush}"
-               Text="Settings applied when that process is running. Process watching is the next step."/>
+               Text="When auto-apply is on, these settings are pushed when that process starts and defaults are restored when it exits."/>
 
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,16,0,0">
       <Button Content="New" Style="{StaticResource AccentButtonStyle}" Click="New_Click"/>
