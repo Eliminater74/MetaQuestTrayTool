@@ -1,0 +1,29 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.TrayToolPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="Tray Tool" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="How the app behaves in Windows — startup, tray, audio switching, and notifications."/>
+
+      <CheckBox x:Name="StartWithWindowsBox" Content="Start with Windows" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StartMinimizedBox" Content="Start minimized" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <CheckBox x:Name="AudioSwitchBox" Content="Use Audio Switcher" VerticalAlignment="Center" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="AudioConfigure_Click"/>
+      </StackPanel>
+      <CheckBox x:Name="HideAltTabBox" Content="Hide from Alt+Tab" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="MinimizeOnCloseBox" Content="Minimize Tool on X" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <CheckBox x:Name="HotKeysBox" Content="Enable HotKeys" VerticalAlignment="Center" IsEnabled="False"/>
+        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" IsEnabled="False"/>
+        <TextBlock Text="Coming next" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource AppMutedBrush}"/>
+      </StackPanel>
+      <CheckBox x:Name="UpdatesBox" Content="Check for updates on start (placeholder)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="NotificationsBox" Content="Show tray notifications" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+
+      <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,29 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.ServiceStartupPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="Service &amp; Startup" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Control OVRService and automate start/stop with the tray tool."/>
+
+      <TextBlock Text="Oculus Service" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="Start" Style="{StaticResource AccentButtonStyle}" Click="Start_Click"/>
+        <Button Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"/>
+        <Button Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"/>
+      </StackPanel>
+      <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,16" FontWeight="SemiBold"/>
+
+      <CheckBox x:Name="StartOnToolBox" Content="Start Oculus service when tool starts" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StopOnExitBox" Content="Stop Oculus service when tool exits" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="RestartOnWakeBox" Content="Restart Oculus service when computer wakes up" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="LaunchHomeOnServiceBox" Content="Launch Oculus Home on service start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="LaunchHomeOnToolBox" Content="Launch Oculus Home on tool start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+
+      <TextBlock Margin="0,12,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"
+                 Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Home launch uses OculusClient.exe when present."/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

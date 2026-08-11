@@ -1,0 +1,53 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.PowerOptionsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="Power Options" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Switch Windows power plans for VR sessions and keep USB ports awake so Link stays connected."/>
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Set Power Plan on Start" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="VrPlanBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="1" Text="Set Power Plan on Exit" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="FallbackPlanBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="2" Text="Apply Power Plan on" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="TriggerBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="3" Text="USB Selective Suspend" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="UsbBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="4" Text="Auto switch" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="AutoSwitchBox" Grid.Row="4" Grid.Column="1" Content="Enable automatic power plan switching" Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="5" Text="After sleep" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="SleepBox" Grid.Row="5" Grid.Column="1" Content="Restart Oculus service when the PC wakes" Margin="0,0,0,10"/>
+      </Grid>
+
+      <TextBlock x:Name="ActivePlanText" Margin="0,4,0,12" Foreground="{StaticResource AppMutedBrush}"/>
+
+      <StackPanel Orientation="Horizontal">
+        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
+        <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"/>
+        <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"/>
+        <Button Content="Use current as fallback" Style="{StaticResource GhostButtonStyle}" Click="Capture_Click"/>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

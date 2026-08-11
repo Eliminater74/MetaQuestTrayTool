@@ -60,6 +60,15 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] USB selective suspend option
 - [x] Restart `OVRService` after sleep
 
+## Phase 6 — OTT-style shell (v0.6)
+
+- [x] Sidebar MainShell with OTT tab layout
+- [x] Game / Tray / Power / Service / Log / Advanced / Quest Link pages
+- [x] Wire existing services into the shell
+- [x] Tray left-click opens shell
+- [ ] Hotkeys
+- [ ] Legacy OTT extras (Homeless, voice, HUD) — decide keep or drop
+
 ## Housekeeping
 
 - [x] Keep README "what works now" in sync after each phase

@@ -9,11 +9,19 @@ public sealed class PowerPlanInfo
     public override string ToString() => IsActive ? $"{Name} (active)" : Name;
 }
 
+public enum PowerPlanTrigger
+{
+    LinkAudioSession,
+    OculusService,
+    ToolStartExit
+}
+
 public sealed class PowerSettings
 {
     public bool AutoSwitchEnabled { get; set; }
+    public PowerPlanTrigger ApplyOn { get; set; } = PowerPlanTrigger.LinkAudioSession;
     public string? VrPlanGuid { get; set; }
     public string? FallbackPlanGuid { get; set; }
-    public bool DisableUsbSelectiveSuspendWhileRunning { get; set; }
-    public bool RestartServiceAfterSleep { get; set; }
+    public bool DisableUsbSelectiveSuspendWhileRunning { get; set; } = true;
+    public bool RestartServiceAfterSleep { get; set; } = true;
 }

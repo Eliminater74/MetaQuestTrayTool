@@ -1,7 +1,7 @@
 namespace MetaQuestTrayTool.Models;
 
 /// <summary>
-/// Runtime values pushed through OculusDebugToolCLI.
+/// Runtime values pushed through OculusDebugToolCLI / stored as global defaults.
 /// SuperSampling 0 means "do not override" (same as original OTT).
 /// </summary>
 public sealed class GameSettings
@@ -21,19 +21,41 @@ public sealed class GameSettings
 
     public double SuperSampling { get; set; } = 1.0;
     public AswMode AswMode { get; set; } = AswMode.Auto;
-    public double FovMultiplier { get; set; } = 1.0;
+    public double FovMultiplierHorizontal { get; set; } = 1.0;
+    public double FovMultiplierVertical { get; set; } = 1.0;
+
+    /// <summary>Backward-compatible single FOV value used by older settings files.</summary>
+    public double FovMultiplier
+    {
+        get => FovMultiplierHorizontal;
+        set
+        {
+            FovMultiplierHorizontal = value;
+            FovMultiplierVertical = value;
+        }
+    }
+
+    public bool AdaptiveGpuScaling { get; set; } = true;
+    public string OvrServerPriority { get; set; } = "Normal";
+    public bool ForceMipMapOnLayers { get; set; }
+    public double OffsetMipMapOnLayers { get; set; }
 
     public GameSettings Clone() => new()
     {
         SuperSampling = SuperSampling,
         AswMode = AswMode,
-        FovMultiplier = FovMultiplier
+        FovMultiplierHorizontal = FovMultiplierHorizontal,
+        FovMultiplierVertical = FovMultiplierVertical,
+        AdaptiveGpuScaling = AdaptiveGpuScaling,
+        OvrServerPriority = OvrServerPriority,
+        ForceMipMapOnLayers = ForceMipMapOnLayers,
+        OffsetMipMapOnLayers = OffsetMipMapOnLayers
     };
 
     public string Describe()
     {
         var ss = SuperSampling <= 0 ? "off" : SuperSampling.ToString("0.0");
-        var fov = FovMultiplier.ToString("0.00");
+        var fov = $"{FovMultiplierHorizontal:0.00}/{FovMultiplierVertical:0.00}";
         return $"SS {ss}, ASW {AswMode}, FOV {fov}";
     }
 }

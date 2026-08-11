@@ -43,4 +43,11 @@ public sealed class SettingsService
         var json = JsonSerializer.Serialize(Current, JsonOptions);
         File.WriteAllText(AppPaths.SettingsFile, json);
     }
+
+    public void ResetKeepingProfiles()
+    {
+        var profiles = Current.Profiles.ToList();
+        Current = new AppSettings { Profiles = profiles };
+        Save();
+    }
 }

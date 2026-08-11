@@ -19,7 +19,7 @@ Tray + dashboard push pixel density and ASW through `OculusDebugToolCLI.exe`.
 - [x] Tray submenu to change defaults and apply now
 - [x] Persist last-used defaults in `settings.json`
 - [x] Log CLI stdout/stderr and warn when Meta rejects `server:` commands
-- [ ] FOV multiplier UI (CLI command is already sent when the stored value is not 1.0)
+- [x] FOV multiplier UI (CLI command is already sent when the stored value is not 1.0)
 
 ### Phase 2 — Profiles
 
@@ -65,6 +65,17 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - [x] Restart `OVRService` after resume from sleep
 - [x] Tray + power settings window
 
+### Phase 6 — OTT-style settings shell (v0.6)
+
+Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Meta Link / OVRService stack.
+
+- [x] Sidebar: Game Settings, Tray Tool, Power Options, Service & Startup, Log, Advanced, Quest Link
+- [x] Tray opens the shell instead of the old dashboard
+- [x] Service automation (start/stop with tool, wake restart, optional Home launch)
+- [x] Expanded settings model for FOV H/V, Link sharpening, power triggers
+- [ ] Hotkeys configure UI
+- [ ] Voice / Homeless / Visual HUD (legacy OTT features — evaluate if still useful)
+
 ## Later
 
 - Hotkeys
@@ -72,11 +83,11 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - ADB helpers for Quest
 - Elevated helper process so the tray app itself stays unelevated
 - Profile ignore-list
-- FOV multiplier UI
 - Detect wired Link vs Air Link
-- Dynamic bitrate max UI
+- Dynamic bitrate max registry write (UI exists; needs verification)
 - Separate communications audio device pickers in the UI
 - Launch games directly from the library picker
+- In-app update checks
 
 ## Non-goals for now
 

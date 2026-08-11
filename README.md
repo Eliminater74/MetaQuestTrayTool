@@ -13,22 +13,23 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
 Update both files whenever a phase ships so they stay useful after a break.
 
-## What works now (through Phase 5)
+## What works now (v0.6)
 
 - Runs in the notification area with a right-click popup menu
-- Opens a small dashboard on left-click / Open Dashboard
+- Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
 - Detects the Oculus PC install and `OVRService` status
-- Start / stop / restart the Oculus runtime service
+- Start / stop / restart the Oculus runtime service, with optional start/stop automation
 - Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
-- Optional Start with Windows (current user Run key)
+- Optional Start with Windows, start minimized, minimize-on-close, hide from Alt+Tab
 - Tray **Game Settings**: Super Sampling and ASW, applied through `OculusDebugToolCLI.exe`
-- Dashboard **Apply Game Settings** and last-apply status
-- Create / edit / delete / apply **profiles** from the tray or dashboard
+- Create / edit / delete / apply **profiles** from the tray or shell
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
-- **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding via `HKCU\Software\Oculus\RemoteHeadset`
+- **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening via `HKCU\Software\Oculus\RemoteHeadset`
 - **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops
-- **Power plan**: auto-switch plans with the Oculus service, optional USB selective-suspend off, restart service after sleep
+- **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** for personal profiles, plus separate **global defaults**
+
+Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates.
 
 See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 
@@ -57,7 +58,7 @@ dotnet build .\MetaQuestTrayTool.sln -c Debug
 dotnet run --project .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj
 ```
 
-The app has no main window on startup. Look for the headset icon in the system tray. If Windows hides it, open the overflow chevron.
+The app can start minimized to the tray (default). Left-click the headset icon or choose **Open Settings** to open the sidebar shell. If Windows hides the icon, open the overflow chevron.
 
 Starting or stopping `OVRService` may require running Visual Studio / the exe as Administrator. The app itself starts unelevated so it can live in the tray without a UAC prompt.
 

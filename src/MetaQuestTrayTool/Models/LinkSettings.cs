@@ -1,9 +1,8 @@
 namespace MetaQuestTrayTool.Models;
 
 /// <summary>
-/// Quest Link / Air Link streaming overrides persisted under
-/// HKCU\Software\Oculus\RemoteHeadset (same place the Meta runtime reads).
-/// 0 means "do not override / use Meta default" for numeric fields.
+/// Quest Link / Air Link streaming overrides.
+/// Numeric 0 / Default enum values mean "do not override".
 /// </summary>
 public sealed class LinkSettings
 {
@@ -17,22 +16,25 @@ public sealed class LinkSettings
         0, 2016, 2352, 2608, 2912, 3136, 3664
     ];
 
-    /// <summary>Encode bitrate in Mbps. 0 = Meta default.</summary>
-    public int BitrateMbps { get; set; }
-
-    /// <summary>Encode resolution width. 0 = Meta default / auto.</summary>
+    public string PresetName { get; set; } = "Custom";
+    public DistortionCurvature DistortionCurvature { get; set; } = DistortionCurvature.Default;
     public int EncodeResolutionWidth { get; set; }
-
-    /// <summary>Prefer HEVC/H.265 when the runtime supports it.</summary>
+    public int BitrateMbps { get; set; }
+    public EncodeDynamicBitrateMode EncodeDynamicBitrate { get; set; } = EncodeDynamicBitrateMode.Default;
+    public int DynamicBitrateMax { get; set; }
+    public LinkSharpeningMode Sharpening { get; set; } = LinkSharpeningMode.Default;
     public bool PreferHevc { get; set; }
-
-    /// <summary>Disable sliced encoding (helps some wired Link artifacts).</summary>
     public bool DisableSlicedEncoding { get; set; }
 
     public LinkSettings Clone() => new()
     {
-        BitrateMbps = BitrateMbps,
+        PresetName = PresetName,
+        DistortionCurvature = DistortionCurvature,
         EncodeResolutionWidth = EncodeResolutionWidth,
+        BitrateMbps = BitrateMbps,
+        EncodeDynamicBitrate = EncodeDynamicBitrate,
+        DynamicBitrateMax = DynamicBitrateMax,
+        Sharpening = Sharpening,
         PreferHevc = PreferHevc,
         DisableSlicedEncoding = DisableSlicedEncoding
     };
@@ -41,8 +43,6 @@ public sealed class LinkSettings
     {
         var bitrate = BitrateMbps <= 0 ? "default" : $"{BitrateMbps} Mbps";
         var width = EncodeResolutionWidth <= 0 ? "auto" : EncodeResolutionWidth.ToString();
-        var codec = PreferHevc ? "HEVC" : "H.264";
-        var slices = DisableSlicedEncoding ? "slices off" : "slices default";
-        return $"Bitrate {bitrate}, Encode {width}, {codec}, {slices}";
+        return $"Preset {PresetName}, Bitrate {bitrate}, Encode {width}, {EncodeDynamicBitrate}, Sharpen {Sharpening}";
     }
 }

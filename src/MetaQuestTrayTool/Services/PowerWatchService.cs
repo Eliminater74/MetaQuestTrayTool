@@ -32,12 +32,14 @@ public sealed class PowerWatchService : IDisposable
     private void Poll()
     {
         var settings = _app.Settings.Current.Power;
-        if (!settings.AutoSwitchEnabled)
+        if (!settings.AutoSwitchEnabled || settings.ApplyOn == Models.PowerPlanTrigger.ToolStartExit)
         {
             _wasRunning = null;
             return;
         }
 
+        // LinkAudioSession and OculusService both currently key off OVRService running state.
+        // Audio auto-switch handles headset presence separately.
         _app.Oculus.Refresh();
         var running = _app.Oculus.IsServiceRunning;
         if (_wasRunning is null)
@@ -90,7 +92,14 @@ public sealed class PowerWatchService : IDisposable
 
     private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
-        if (e.Mode != PowerModes.Resume || !_app.Settings.Current.Power.RestartServiceAfterSleep)
+        if (e.Mode != PowerModes.Resume)
+        {
+            return;
+        }
+
+        var restart = _app.Settings.Current.Service.RestartServiceWhenComputerWakes
+                      || _app.Settings.Current.Power.RestartServiceAfterSleep;
+        if (!restart)
         {
             return;
         }

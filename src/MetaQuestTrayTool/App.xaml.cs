@@ -1,6 +1,8 @@
 ﻿using System.Windows;
+using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Services;
 using MetaQuestTrayTool.Tray;
+using MetaQuestTrayTool.Views.Pages;
 
 namespace MetaQuestTrayTool;
 
@@ -69,6 +71,20 @@ public partial class App : System.Windows.Application
             ? $"Debug Tool CLI: {DebugTool.CliPath}"
             : "Debug Tool CLI was not found.");
 
+        if (Settings.Current.Service.StartServiceWhenToolStarts)
+        {
+            Log.Info(Oculus.Start());
+            if (Settings.Current.Service.LaunchOculusHomeOnServiceStart)
+            {
+                ServiceStartupPage.TryLaunchHome();
+            }
+        }
+
+        if (Settings.Current.Service.LaunchOculusHomeOnToolStart)
+        {
+            ServiceStartupPage.TryLaunchHome();
+        }
+
         if (Settings.Current.ApplyGameSettingsOnStart && DebugTool.IsAvailable)
         {
             var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
@@ -83,6 +99,11 @@ public partial class App : System.Windows.Application
         else
         {
             Log.Info(Link.DescribeRegistryStatus());
+        }
+
+        if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
+        {
+            Log.Info(Power.ApplyVrPlan(Settings.Current.Power));
         }
 
         _tray = new TrayIconHost(this);
@@ -100,6 +121,21 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        if (Settings.Current.Service.CloseOculusHomeOnToolExit)
+        {
+            ServiceStartupPage.TryCloseHome();
+        }
+
+        if (Settings.Current.Service.StopServiceWhenToolExits)
+        {
+            Log.Info(Oculus.Stop());
+        }
+
+        if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
+        {
+            Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
+        }
+
         _powerWatcher?.Dispose();
         _audioWatcher?.Dispose();
         _processWatcher?.Dispose();

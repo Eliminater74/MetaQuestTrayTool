@@ -1,0 +1,74 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.GameSettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="Game Settings" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Global defaults applied through OculusDebugToolCLI. Personal per-app profiles override these when a matching game launches."/>
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Profiles" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+          <Button Content="View &amp; Edit" Style="{StaticResource AccentButtonStyle}" Click="Profiles_Click"/>
+          <Button Content="Global defaults" Style="{StaticResource GhostButtonStyle}" Click="GlobalDefaults_Click"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" Text="Default Super Sampling" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="SuperSamplingBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="2" Text="Default ASW Mode" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="AswBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="3" Text="Adaptive GPU Scaling" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="AdaptiveGpuBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="4" Text="FoV Multiplier (H / V)" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+          <TextBox x:Name="FovHBox" Width="80" Padding="6" Margin="0,0,8,0"/>
+          <TextBox x:Name="FovVBox" Width="80" Padding="6" Margin="0,0,8,0"/>
+          <Button Content="Save" Style="{StaticResource GhostButtonStyle}" Click="SaveFov_Click"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="5" Text="OVR Server Priority" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="PriorityBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="6" Text="Force MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="ForceMipBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="7" Text="Offset MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="OffsetMipBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="8" Text="Voice / Homeless / HUD" Style="{StaticResource SettingLabelStyle}"/>
+        <TextBlock Grid.Row="8" Grid.Column="1" Margin="0,0,0,10"
+                   Foreground="{StaticResource AppMutedBrush}"
+                   Text="Not ported yet — Oculus Homeless / voice / visual HUD from classic OTT."/>
+      </Grid>
+
+      <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+        <Button Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
+        <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"/>
+        <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"/>
+        <CheckBox x:Name="AutoApplyBox" Content="Auto-apply profiles" VerticalAlignment="Center" Margin="16,0,0,0"/>
+      </StackPanel>
+
+      <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

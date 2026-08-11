@@ -11,7 +11,7 @@ public sealed class TrayIconHost : IDisposable
     private readonly App _app;
     private readonly NotifyIcon _notifyIcon;
     private Icon? _icon;
-    private DashboardWindow? _dashboard;
+    private MainShellWindow? _shell;
     private AboutWindow? _about;
     private ProfilesWindow? _profiles;
     private LinkSettingsWindow? _linkSettings;
@@ -35,7 +35,12 @@ public sealed class TrayIconHost : IDisposable
         _notifyIcon.ContextMenuStrip = BuildMenu();
         _notifyIcon.Visible = true;
         _notifyIcon.MouseClick += OnMouseClick;
-        _notifyIcon.DoubleClick += (_, _) => ShowDashboard();
+        _notifyIcon.DoubleClick += (_, _) => ShowShell();
+
+        if (!_app.Settings.Current.Tray.StartMinimized)
+        {
+            ShowShell();
+        }
 
         if (_app.Settings.Current.ShowNotifications)
         {
@@ -68,7 +73,7 @@ public sealed class TrayIconHost : IDisposable
     {
         if (e.Button == MouseButtons.Left)
         {
-            ShowDashboard();
+            ShowShell();
         }
     }
 
@@ -81,7 +86,7 @@ public sealed class TrayIconHost : IDisposable
 
         menu.Opening += (_, _) => RefreshDynamicItems(menu);
 
-        menu.Items.Add(new ToolStripMenuItem("Open Dashboard", null, (_, _) => ShowDashboard()));
+        menu.Items.Add(new ToolStripMenuItem("Open Settings", null, (_, _) => ShowShell()));
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");
@@ -124,7 +129,11 @@ public sealed class TrayIconHost : IDisposable
 
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(new ToolStripMenuItem("About", null, (_, _) => ShowAbout()));
-        menu.Items.Add(new ToolStripMenuItem("Exit", null, (_, _) => _app.Shutdown()));
+        menu.Items.Add(new ToolStripMenuItem("Exit", null, (_, _) =>
+        {
+            _shell?.ForceClose();
+            _app.Shutdown();
+        }));
 
         return menu;
     }
@@ -298,7 +307,7 @@ public sealed class TrayIconHost : IDisposable
         }
 
         Notify("Game Settings", result.Summary);
-        _dashboard?.RefreshStatus();
+        _shell?.RefreshActivePage();
         _profiles?.Reload();
     }
 
@@ -333,7 +342,7 @@ public sealed class TrayIconHost : IDisposable
                 var result = _app.DebugTool.Apply(captured.Settings);
                 _app.Log.Info($"Applied profile '{captured.Name}': {result.Summary}");
                 Notify("Profile", result.Summary);
-                _dashboard?.RefreshStatus();
+                _shell?.RefreshActivePage();
             })
             {
                 Name = "Profile_" + profile.Name.Replace(' ', '_')
@@ -512,7 +521,7 @@ public sealed class TrayIconHost : IDisposable
         }
 
         Notify("Quest Link", result.Summary);
-        _dashboard?.RefreshStatus();
+        _shell?.RefreshActivePage();
     }
 
     private void ShowLinkSettings()
@@ -689,7 +698,7 @@ public sealed class TrayIconHost : IDisposable
         var result = action();
         _app.Log.Info(result);
         Notify("Oculus Service", result);
-        _dashboard?.RefreshStatus();
+        _shell?.RefreshActivePage();
     }
 
     private void ToggleStartWithWindows(bool enabled)
@@ -714,17 +723,18 @@ public sealed class TrayIconHost : IDisposable
         }
     }
 
-    private void ShowDashboard()
+    private void ShowShell()
     {
-        if (_dashboard is null || !_dashboard.IsLoaded)
+        if (_shell is null || !_shell.IsLoaded)
         {
-            _dashboard = new DashboardWindow();
-            _dashboard.Closed += (_, _) => _dashboard = null;
+            _shell = new MainShellWindow();
+            _shell.Closed += (_, _) => _shell = null;
         }
 
-        _dashboard.Show();
-        _dashboard.Activate();
-        _dashboard.WindowState = WindowState.Normal;
+        _shell.Show();
+        _shell.Activate();
+        _shell.WindowState = WindowState.Normal;
+        _shell.RefreshActivePage();
     }
 
     private void ShowAbout()

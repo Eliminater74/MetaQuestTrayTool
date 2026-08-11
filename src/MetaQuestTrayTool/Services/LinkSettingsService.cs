@@ -15,6 +15,7 @@ public sealed class LinkSettingsService
     private const string EncodeWidthValue = "EncodeResolutionWidth";
     private const string HevcValue = "HEVC";
     private const string NumSlicesValue = "numSlices";
+    private const string SharpeningValue = "LinkSharpeningEnabled";
 
     public LinkSettings? LastApplied { get; private set; }
     public LinkApplyResult? LastResult { get; private set; }
@@ -32,7 +33,14 @@ public sealed class LinkSettingsService
             BitrateMbps = ReadDword(key, BitrateValue),
             EncodeResolutionWidth = ReadDword(key, EncodeWidthValue),
             PreferHevc = ReadDword(key, HevcValue) == 1,
-            DisableSlicedEncoding = ReadDword(key, NumSlicesValue) == 1
+            DisableSlicedEncoding = ReadDword(key, NumSlicesValue) == 1,
+            Sharpening = ReadDword(key, SharpeningValue) switch
+            {
+                0 => LinkSharpeningMode.Disabled,
+                1 => LinkSharpeningMode.Normal,
+                2 or 3 => LinkSharpeningMode.Quality,
+                _ => LinkSharpeningMode.Default
+            }
         };
     }
 
@@ -62,6 +70,26 @@ public sealed class LinkSettingsService
             else
             {
                 key.DeleteValue(NumSlicesValue, throwOnMissingValue: false);
+            }
+
+            switch (settings.Sharpening)
+            {
+                case LinkSharpeningMode.Disabled:
+                    key.SetValue(SharpeningValue, 0, RegistryValueKind.DWord);
+                    break;
+                case LinkSharpeningMode.Normal:
+                    key.SetValue(SharpeningValue, 1, RegistryValueKind.DWord);
+                    break;
+                case LinkSharpeningMode.Quality:
+                    key.SetValue(SharpeningValue, 3, RegistryValueKind.DWord);
+                    break;
+                default:
+                    if (deleteUnsetOverrides)
+                    {
+                        key.DeleteValue(SharpeningValue, throwOnMissingValue: false);
+                    }
+
+                    break;
             }
 
             LastApplied = settings.Clone();

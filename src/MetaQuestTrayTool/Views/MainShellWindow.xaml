@@ -1,0 +1,92 @@
+<Window x:Class="MetaQuestTrayTool.Views.MainShellWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Meta Quest Tray Tool"
+        Height="720"
+        Width="980"
+        MinHeight="580"
+        MinWidth="860"
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="220"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <Border Grid.Column="0"
+            Background="#101826"
+            BorderBrush="{StaticResource AppBorderBrush}"
+            BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Margin="12,8,12,16">
+          <Button Content="About"
+                  Style="{StaticResource GhostButtonStyle}"
+                  Margin="0,0,0,8"
+                  HorizontalAlignment="Stretch"
+                  Click="About_Click"/>
+          <TextBlock x:Name="VersionText"
+                     HorizontalAlignment="Center"
+                     Foreground="{StaticResource AppMutedBrush}"
+                     FontSize="11"/>
+        </StackPanel>
+
+        <StackPanel Margin="0,16,0,0">
+          <TextBlock Text="META QUEST"
+                     Margin="18,0,0,2"
+                     FontSize="11"
+                     FontWeight="Bold"
+                     Foreground="{StaticResource AppMutedBrush}"/>
+          <TextBlock Text="Tray Tool"
+                     Margin="18,0,0,16"
+                     FontSize="18"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource AppAccentBrush}"/>
+
+          <RadioButton x:Name="NavGame" Content="Game Settings" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"/>
+          <RadioButton x:Name="NavTray" Content="Tray Tool" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Tray"/>
+          <RadioButton x:Name="NavPower" Content="Power Options" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Power"/>
+          <RadioButton x:Name="NavService" Content="Service &amp; Startup" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Service"/>
+          <RadioButton x:Name="NavLog" Content="Log Window" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Log"/>
+          <RadioButton x:Name="NavAdvanced" Content="Advanced" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Advanced"/>
+          <RadioButton x:Name="NavLink" Content="Quest Link" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"/>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Column="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+
+      <DockPanel Grid.Row="0" Margin="24,16,24,0">
+        <TextBlock DockPanel.Dock="Right"
+                   Text="Modern OTT-style shell"
+                   Foreground="{StaticResource AppMutedBrush}"
+                   VerticalAlignment="Center"/>
+        <TextBlock x:Name="PageHeaderText"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource AppTextBrush}"/>
+      </DockPanel>
+
+      <Border Grid.Row="1"
+              Margin="16"
+              Background="{StaticResource AppSurfaceBrush}"
+              BorderBrush="{StaticResource AppBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="12"
+              Padding="20">
+        <ContentControl x:Name="PageHost"/>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

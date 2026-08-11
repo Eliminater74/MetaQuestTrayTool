@@ -51,10 +51,11 @@ public sealed class OculusDebugToolService
                 break;
         }
 
-        if (Math.Abs(settings.FovMultiplier - 1.0) > 0.001)
+        var fovH = settings.FovMultiplierHorizontal;
+        var fovV = settings.FovMultiplierVertical;
+        if (Math.Abs(fovH - 1.0) > 0.001 || Math.Abs(fovV - 1.0) > 0.001)
         {
-            var fov = FormatNumber(settings.FovMultiplier);
-            lines.Add($"service set-client-fov-tan-angle-multiplier {fov} {fov}");
+            lines.Add($"service set-client-fov-tan-angle-multiplier {FormatNumber(fovH)} {FormatNumber(fovV)}");
         }
 
         lines.Add("exit");

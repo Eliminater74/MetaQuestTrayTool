@@ -1,0 +1,64 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.QuestLinkPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="Quest Link" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="These settings are for Quest when using Link / Air Link. Higher encode values need more GPU and PC encode headroom. Written to HKCU\Software\Oculus\RemoteHeadset."/>
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Encode Resolution" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="EncodeWidthBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="1" Text="Encode Bitrate" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="BitrateBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="2" Text="Encode Dynamic Bitrate" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="DynamicBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="3" Text="Dynamic Bitrate Max" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="DynamicMaxBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="4" Text="Sharpening" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="SharpenBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="5" Text="Distortion Curvature" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="DistortionBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="6" Text="Prefer HEVC" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="HevcBox" Grid.Row="6" Grid.Column="1" Content="Prefer HEVC (H.265)" Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="7" Text="Sliced encoding" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="SlicesBox" Grid.Row="7" Grid.Column="1" Content="Disable sliced encoding (numSlices = 1)" Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="8" Text="Apply on start" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="ApplyOnStartBox" Grid.Row="8" Grid.Column="1" Content="Re-apply when the tray tool starts" Margin="0,0,0,10"/>
+      </Grid>
+
+      <TextBlock x:Name="LiveStatusText" Margin="0,4,0,12" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+
+      <StackPanel Orientation="Horizontal">
+        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
+        <Button Content="Save &amp; Restart Service" Style="{StaticResource GhostButtonStyle}" Click="SaveRestart_Click"/>
+        <Button Content="Read live registry" Style="{StaticResource GhostButtonStyle}" Click="ReadLive_Click"/>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
