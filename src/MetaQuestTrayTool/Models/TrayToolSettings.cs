@@ -8,4 +8,5 @@ public sealed class TrayToolSettings
     public bool HideFromAltTab { get; set; }
     public bool CheckForUpdatesOnStart { get; set; }
     public bool EnableHotKeys { get; set; }
+    public AppTheme Theme { get; set; } = AppTheme.Black;
 }

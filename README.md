@@ -21,6 +21,7 @@ Update both files whenever a phase ships so they stay useful after a break.
 - Start / stop / restart the Oculus runtime service, with optional start/stop automation
 - Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
 - Optional Start with Windows, start minimized, minimize-on-close, hide from Alt+Tab
+- **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
 - Tray **Game Settings**: Super Sampling and ASW, applied through `OculusDebugToolCLI.exe`
 - Create / edit / delete / apply **profiles** from the tray or shell
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits

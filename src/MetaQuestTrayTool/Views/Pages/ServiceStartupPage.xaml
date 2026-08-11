@@ -22,7 +22,7 @@
       <CheckBox x:Name="LaunchHomeOnToolBox" Content="Launch Oculus Home on tool start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
-      <TextBlock Margin="0,12,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"
+      <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
                  Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Home launch uses OculusClient.exe when present."/>
     </StackPanel>
   </ScrollViewer>

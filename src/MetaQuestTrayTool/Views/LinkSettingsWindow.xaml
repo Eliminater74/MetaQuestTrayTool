@@ -5,7 +5,9 @@
         Height="480"
         Width="520"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
       <Button Content="Apply" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
@@ -17,35 +19,35 @@
       <TextBlock Text="Quest Link / Air Link"
                  FontSize="22"
                  FontWeight="SemiBold"
-                 Foreground="{StaticResource AppAccentBrush}"/>
+                 Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="LiveStatusText"
                  Margin="0,6,0,16"
                  TextWrapping="Wrap"
-                 Foreground="{StaticResource AppMutedBrush}"/>
+                 Foreground="{DynamicResource AppMutedBrush}"/>
 
-      <TextBlock Text="Encode bitrate (Mbps)" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Encode bitrate (Mbps)" Foreground="{DynamicResource AppMutedBrush}"/>
       <ComboBox x:Name="BitrateBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="Encode resolution width" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Encode resolution width" Foreground="{DynamicResource AppMutedBrush}"/>
       <ComboBox x:Name="EncodeWidthBox" Margin="0,4,0,12" Padding="6"/>
 
       <CheckBox x:Name="HevcBox"
                 Margin="0,0,0,8"
-                Foreground="{StaticResource AppTextBrush}"
+                Foreground="{DynamicResource AppTextBrush}"
                 Content="Prefer HEVC (H.265) — can break wired Link on some setups"/>
 
       <CheckBox x:Name="SlicesBox"
                 Margin="0,0,0,8"
-                Foreground="{StaticResource AppTextBrush}"
+                Foreground="{DynamicResource AppTextBrush}"
                 Content="Disable sliced encoding (numSlices = 1)"/>
 
       <CheckBox x:Name="ApplyOnStartBox"
                 Margin="0,0,0,12"
-                Foreground="{StaticResource AppTextBrush}"
+                Foreground="{DynamicResource AppTextBrush}"
                 Content="Re-apply these values when the tray app starts"/>
 
       <TextBlock TextWrapping="Wrap"
-                 Foreground="{StaticResource AppMutedBrush}"
+                 Foreground="{DynamicResource AppMutedBrush}"
                  Text="Values are written to HKCU\Software\Oculus\RemoteHeadset. Reconnect Link or restart OVRService after applying."/>
     </StackPanel>
   </DockPanel>

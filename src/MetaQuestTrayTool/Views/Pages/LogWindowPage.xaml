@@ -11,15 +11,15 @@
     </DockPanel>
     <TextBlock DockPanel.Dock="Top" Style="{StaticResource PageHintStyle}"
                Text="Startup checks, service actions, profile applies, Link writes, and audio/power events."/>
-    <Border Background="#0B1220"
-            BorderBrush="{StaticResource AppBorderBrush}"
+    <Border Background="{DynamicResource AppFieldBrush}"
+            BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="1"
             CornerRadius="8"
             Padding="8">
       <ListBox x:Name="LogList"
                Background="Transparent"
                BorderThickness="0"
-               Foreground="{StaticResource AppTextBrush}"
+               Foreground="{DynamicResource AppTextBrush}"
                ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
     </Border>
   </DockPanel>

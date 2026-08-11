@@ -6,17 +6,19 @@
         Width="720"
         MinHeight="420"
         MinWidth="560"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}">
   <DockPanel Margin="20">
     <TextBlock DockPanel.Dock="Top"
                Text="Profiles"
                FontSize="22"
                FontWeight="SemiBold"
-               Foreground="{StaticResource AppAccentBrush}"/>
+               Foreground="{DynamicResource AppAccentBrush}"/>
     <TextBlock DockPanel.Dock="Top"
                Margin="0,4,0,16"
                TextWrapping="Wrap"
-               Foreground="{StaticResource AppMutedBrush}"
+               Foreground="{DynamicResource AppMutedBrush}"
                Text="Personal profiles override global defaults for one process. Add games from your Steam or Meta library, or create a custom profile manually."/>
 
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,16,0,0">
@@ -43,15 +45,15 @@
               Click="Close_Click"/>
     </StackPanel>
 
-    <Border Background="{StaticResource AppSurfaceBrush}"
-            BorderBrush="{StaticResource AppBorderBrush}"
+    <Border Background="{DynamicResource AppSurfaceBrush}"
+            BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="1"
             CornerRadius="10"
             Padding="8">
       <ListBox x:Name="ProfileList"
                Background="Transparent"
                BorderThickness="0"
-               Foreground="{StaticResource AppTextBrush}"
+               Foreground="{DynamicResource AppTextBrush}"
                MouseDoubleClick="ProfileList_MouseDoubleClick"/>
     </Border>
   </DockPanel>

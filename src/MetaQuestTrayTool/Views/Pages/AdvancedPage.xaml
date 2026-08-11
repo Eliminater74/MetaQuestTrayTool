@@ -48,11 +48,11 @@
 
         <TextBlock Grid.Row="6" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
         <TextBlock Grid.Row="6" Grid.Column="1" Margin="0,0,0,10"
-                   Foreground="{StaticResource AppMutedBrush}"
+                   Foreground="{DynamicResource AppMutedBrush}"
                    Text="In-app update checks will land after the first public release."/>
       </Grid>
 
-      <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+      <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

@@ -64,6 +64,7 @@ public partial class App : System.Windows.Application
         };
 
         Settings.Load();
+        ThemeService.Apply(Settings.Current.Tray.Theme);
         Log.Info($"{AppName} {GetVersion()} started.");
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());

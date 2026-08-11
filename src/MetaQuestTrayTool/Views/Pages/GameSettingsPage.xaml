@@ -57,7 +57,7 @@
 
         <TextBlock Grid.Row="8" Text="Voice / Homeless / HUD" Style="{StaticResource SettingLabelStyle}"/>
         <TextBlock Grid.Row="8" Grid.Column="1" Margin="0,0,0,10"
-                   Foreground="{StaticResource AppMutedBrush}"
+                   Foreground="{DynamicResource AppMutedBrush}"
                    Text="Not ported yet — Oculus Homeless / voice / visual HUD from classic OTT."/>
       </Grid>
 
@@ -68,7 +68,7 @@
         <CheckBox x:Name="AutoApplyBox" Content="Auto-apply profiles" VerticalAlignment="Center" Margin="16,0,0,0"/>
       </StackPanel>
 
-      <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+      <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

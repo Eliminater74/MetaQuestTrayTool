@@ -6,16 +6,18 @@
         Width="900"
         MinHeight="540"
         MinWidth="760"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Top">
       <TextBlock Text="Meta Quest Tray Tool"
                  FontSize="22"
                  FontWeight="SemiBold"
-                 Foreground="{StaticResource AppAccentBrush}"/>
+                 Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="VersionText"
                  Margin="0,4,0,16"
-                 Foreground="{StaticResource AppMutedBrush}"/>
+                 Foreground="{DynamicResource AppMutedBrush}"/>
     </StackPanel>
 
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,16,0,0">
@@ -56,8 +58,8 @@
       </Grid.RowDefinitions>
 
       <Border Grid.Row="0"
-              Background="{StaticResource AppSurfaceBrush}"
-              BorderBrush="{StaticResource AppBorderBrush}"
+              Background="{DynamicResource AppSurfaceBrush}"
+              BorderBrush="{DynamicResource AppBorderBrush}"
               BorderThickness="1"
               CornerRadius="10"
               Padding="16">
@@ -69,26 +71,26 @@
             <ColumnDefinition Width="*"/>
           </Grid.ColumnDefinitions>
           <StackPanel>
-            <TextBlock Text="OCULUS RUNTIME" FontSize="11" Foreground="{StaticResource AppMutedBrush}"/>
+            <TextBlock Text="OCULUS RUNTIME" FontSize="11" Foreground="{DynamicResource AppMutedBrush}"/>
             <TextBlock x:Name="InstallPathText" Margin="0,8,12,0" TextWrapping="Wrap"/>
             <TextBlock x:Name="ServiceStatusText" Margin="0,8,12,0" FontWeight="SemiBold"/>
           </StackPanel>
           <StackPanel Grid.Column="1">
-            <TextBlock Text="GAME SETTINGS" FontSize="11" Foreground="{StaticResource AppMutedBrush}"/>
+            <TextBlock Text="GAME SETTINGS" FontSize="11" Foreground="{DynamicResource AppMutedBrush}"/>
             <TextBlock x:Name="GameSettingsText" Margin="0,8,12,0" TextWrapping="Wrap"/>
             <TextBlock x:Name="DebugToolText" Margin="0,8,12,0" TextWrapping="Wrap"/>
           </StackPanel>
           <StackPanel Grid.Column="2">
-            <TextBlock Text="QUEST LINK" FontSize="11" Foreground="{StaticResource AppMutedBrush}"/>
+            <TextBlock Text="QUEST LINK" FontSize="11" Foreground="{DynamicResource AppMutedBrush}"/>
             <TextBlock x:Name="LinkSettingsText" Margin="0,8,12,0" TextWrapping="Wrap"/>
             <TextBlock x:Name="LinkLiveText" Margin="0,8,12,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource AppMutedBrush}"/>
+                       Foreground="{DynamicResource AppMutedBrush}"/>
           </StackPanel>
           <StackPanel Grid.Column="3">
-            <TextBlock Text="SETTINGS FILE" FontSize="11" Foreground="{StaticResource AppMutedBrush}"/>
+            <TextBlock Text="SETTINGS FILE" FontSize="11" Foreground="{DynamicResource AppMutedBrush}"/>
             <TextBlock x:Name="SettingsPathText" Margin="0,8,0,0" TextWrapping="Wrap"/>
             <TextBlock x:Name="LastApplyText" Margin="0,8,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource AppMutedBrush}"/>
+                       Foreground="{DynamicResource AppMutedBrush}"/>
           </StackPanel>
         </Grid>
       </Border>
@@ -98,16 +100,16 @@
                    Text="ACTIVITY LOG"
                    FontSize="11"
                    Margin="0,0,0,8"
-                   Foreground="{StaticResource AppMutedBrush}"/>
-        <Border Background="{StaticResource AppSurfaceBrush}"
-                BorderBrush="{StaticResource AppBorderBrush}"
+                   Foreground="{DynamicResource AppMutedBrush}"/>
+        <Border Background="{DynamicResource AppSurfaceBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="10"
                 Padding="8">
           <ListBox x:Name="LogList"
                    Background="Transparent"
                    BorderThickness="0"
-                   Foreground="{StaticResource AppTextBrush}"
+                   Foreground="{DynamicResource AppTextBrush}"
                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
         </Border>
       </DockPanel>

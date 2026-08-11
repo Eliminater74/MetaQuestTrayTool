@@ -18,12 +18,15 @@
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <CheckBox x:Name="HotKeysBox" Content="Enable HotKeys" VerticalAlignment="Center" IsEnabled="False"/>
         <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" IsEnabled="False"/>
-        <TextBlock Text="Coming next" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource AppMutedBrush}"/>
+        <TextBlock Text="Coming next" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource AppMutedBrush}"/>
       </StackPanel>
       <CheckBox x:Name="UpdatesBox" Content="Check for updates on start (placeholder)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="NotificationsBox" Content="Show tray notifications" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
-      <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+      <TextBlock Text="Theme" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,8"/>
+      <ComboBox x:Name="ThemeBox" MaxWidth="280" HorizontalAlignment="Left" Padding="6" SelectionChanged="Theme_Changed"/>
+
+      <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

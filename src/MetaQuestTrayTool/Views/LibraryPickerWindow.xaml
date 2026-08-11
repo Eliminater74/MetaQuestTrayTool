@@ -6,16 +6,18 @@
         Width="720"
         MinHeight="420"
         MinWidth="560"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}">
   <DockPanel Margin="20">
     <TextBlock DockPanel.Dock="Top"
                Text="Steam &amp; Meta library"
                FontSize="22"
                FontWeight="SemiBold"
-               Foreground="{StaticResource AppAccentBrush}"/>
+               Foreground="{DynamicResource AppAccentBrush}"/>
     <TextBlock DockPanel.Dock="Top"
                Margin="0,4,0,12"
-               Foreground="{StaticResource AppMutedBrush}"
+               Foreground="{DynamicResource AppMutedBrush}"
                Text="Pick an installed game to create a personal profile. Process name is filled automatically when possible."/>
 
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
@@ -47,17 +49,17 @@
     <TextBlock x:Name="StatusText"
                DockPanel.Dock="Bottom"
                Margin="0,8,0,0"
-               Foreground="{StaticResource AppMutedBrush}"/>
+               Foreground="{DynamicResource AppMutedBrush}"/>
 
-    <Border Background="{StaticResource AppSurfaceBrush}"
-            BorderBrush="{StaticResource AppBorderBrush}"
+    <Border Background="{DynamicResource AppSurfaceBrush}"
+            BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="1"
             CornerRadius="10"
             Padding="8">
       <ListBox x:Name="GameList"
                Background="Transparent"
                BorderThickness="0"
-               Foreground="{StaticResource AppTextBrush}"
+               Foreground="{DynamicResource AppTextBrush}"
                MouseDoubleClick="GameList_MouseDoubleClick"/>
     </Border>
   </DockPanel>

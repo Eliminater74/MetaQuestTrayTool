@@ -40,7 +40,7 @@
         <CheckBox x:Name="SleepBox" Grid.Row="5" Grid.Column="1" Content="Restart Oculus service when the PC wakes" Margin="0,0,0,10"/>
       </Grid>
 
-      <TextBlock x:Name="ActivePlanText" Margin="0,4,0,12" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock x:Name="ActivePlanText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}"/>
 
       <StackPanel Orientation="Horizontal">
         <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>

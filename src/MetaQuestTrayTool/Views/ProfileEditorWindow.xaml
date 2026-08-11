@@ -5,7 +5,9 @@
         Height="560"
         Width="500"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
@@ -16,12 +18,12 @@
       <TextBlock x:Name="ScopeText"
                  Margin="0,0,0,12"
                  TextWrapping="Wrap"
-                 Foreground="{StaticResource AppMutedBrush}"/>
+                 Foreground="{DynamicResource AppMutedBrush}"/>
 
-      <TextBlock Text="Name" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Name" Foreground="{DynamicResource AppMutedBrush}"/>
       <TextBox x:Name="NameBox" Margin="0,4,0,12" Padding="8,6"/>
 
-      <TextBlock Text="Process name (without .exe)" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Process name (without .exe)" Foreground="{DynamicResource AppMutedBrush}"/>
       <DockPanel Margin="0,4,0,12">
         <Button DockPanel.Dock="Right"
                 Content="From library"
@@ -31,22 +33,22 @@
         <TextBox x:Name="ProcessBox" Padding="8,6"/>
       </DockPanel>
 
-      <TextBlock Text="Platform" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Platform" Foreground="{DynamicResource AppMutedBrush}"/>
       <ComboBox x:Name="PlatformBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="Super Sampling" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Super Sampling" Foreground="{DynamicResource AppMutedBrush}"/>
       <ComboBox x:Name="SuperSamplingBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="ASW mode" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="ASW mode" Foreground="{DynamicResource AppMutedBrush}"/>
       <ComboBox x:Name="AswBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="FOV multiplier (1.00 = unchanged)" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="FOV multiplier (1.00 = unchanged)" Foreground="{DynamicResource AppMutedBrush}"/>
       <TextBox x:Name="FovBox" Margin="0,4,0,12" Padding="8,6" Text="1.00"/>
 
-      <TextBlock Text="CPU priority" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="CPU priority" Foreground="{DynamicResource AppMutedBrush}"/>
       <ComboBox x:Name="PriorityBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="Notes" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock Text="Notes" Foreground="{DynamicResource AppMutedBrush}"/>
       <TextBox x:Name="CommentsBox" Margin="0,4,0,0" Padding="8,6"/>
     </StackPanel>
   </DockPanel>

@@ -5,7 +5,9 @@
         Height="640"
         Width="600"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
       <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
@@ -19,40 +21,40 @@
         <TextBlock Text="Audio Switching"
                    FontSize="22"
                    FontWeight="SemiBold"
-                   Foreground="{StaticResource AppAccentBrush}"/>
+                   Foreground="{DynamicResource AppAccentBrush}"/>
         <TextBlock x:Name="StatusText"
                    Margin="0,6,0,16"
                    TextWrapping="Wrap"
-                   Foreground="{StaticResource AppMutedBrush}"/>
+                   Foreground="{DynamicResource AppMutedBrush}"/>
 
         <CheckBox x:Name="AutoSwitchBox"
                   Margin="0,0,0,8"
-                  Foreground="{StaticResource AppTextBrush}"
+                  Foreground="{DynamicResource AppTextBrush}"
                   Content="Auto-switch when Link is active / inactive"/>
 
-        <TextBlock Text="Detect Link using" Foreground="{StaticResource AppMutedBrush}"/>
+        <TextBlock Text="Detect Link using" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="TriggerBox" Margin="0,4,0,12" Padding="6"/>
 
         <CheckBox x:Name="CaptureEachSessionBox"
                   Margin="0,0,0,8"
-                  Foreground="{StaticResource AppTextBrush}"
+                  Foreground="{DynamicResource AppTextBrush}"
                   Content="Capture current desktop devices as fallback each time Link connects"/>
 
         <CheckBox x:Name="CommunicationsBox"
                   Margin="0,0,0,12"
-                  Foreground="{StaticResource AppTextBrush}"
+                  Foreground="{DynamicResource AppTextBrush}"
                   Content="Also restore / set Communications role"/>
 
-        <TextBlock Text="VR playback (while Link active)" Foreground="{StaticResource AppMutedBrush}"/>
+        <TextBlock Text="VR playback (while Link active)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="VrPlaybackBox" Margin="0,4,0,12" Padding="6"/>
 
-        <TextBlock Text="VR recording (while Link active)" Foreground="{StaticResource AppMutedBrush}"/>
+        <TextBlock Text="VR recording (while Link active)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="VrRecordingBox" Margin="0,4,0,12" Padding="6"/>
 
-        <TextBlock Text="Fallback playback (when Link inactive)" Foreground="{StaticResource AppMutedBrush}"/>
+        <TextBlock Text="Fallback playback (when Link inactive)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="FallbackPlaybackBox" Margin="0,4,0,12" Padding="6"/>
 
-        <TextBlock Text="Fallback recording (when Link inactive)" Foreground="{StaticResource AppMutedBrush}"/>
+        <TextBlock Text="Fallback recording (when Link inactive)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="FallbackRecordingBox" Margin="0,4,0,8" Padding="6"/>
 
         <Button Content="Use current defaults as fallback"

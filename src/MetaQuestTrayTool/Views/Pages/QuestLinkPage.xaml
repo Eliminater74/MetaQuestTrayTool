@@ -52,7 +52,7 @@
         <CheckBox x:Name="ApplyOnStartBox" Grid.Row="8" Grid.Column="1" Content="Re-apply when the tray tool starts" Margin="0,0,0,10"/>
       </Grid>
 
-      <TextBlock x:Name="LiveStatusText" Margin="0,4,0,12" Foreground="{StaticResource AppMutedBrush}" TextWrapping="Wrap"/>
+      <TextBlock x:Name="LiveStatusText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <StackPanel Orientation="Horizontal">
         <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>

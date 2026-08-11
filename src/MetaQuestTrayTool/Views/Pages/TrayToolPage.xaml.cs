@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
+using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -10,6 +12,9 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
     public TrayToolPage()
     {
         InitializeComponent();
+        ThemeBox.Items.Add(new ComboBoxItem { Content = "Pure Black", Tag = AppTheme.Black });
+        ThemeBox.Items.Add(new ComboBoxItem { Content = "Dark", Tag = AppTheme.Dark });
+        ThemeBox.Items.Add(new ComboBoxItem { Content = "Light", Tag = AppTheme.Light });
     }
 
     public void Refresh()
@@ -24,8 +29,41 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         HotKeysBox.IsChecked = app.Tray.EnableHotKeys;
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
         NotificationsBox.IsChecked = app.ShowNotifications;
+        SelectTheme(app.Tray.Theme);
         StatusText.Text = "Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
         _loading = false;
+    }
+
+    private void Theme_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        if (ThemeBox.SelectedItem is not ComboBoxItem { Tag: AppTheme theme })
+        {
+            return;
+        }
+
+        App.Instance.Settings.Current.Tray.Theme = theme;
+        App.Instance.Settings.Save();
+        ThemeService.Apply(theme);
+        App.Instance.Log.Info($"Theme set to {theme}.");
+    }
+
+    private void SelectTheme(AppTheme theme)
+    {
+        foreach (ComboBoxItem item in ThemeBox.Items)
+        {
+            if (item.Tag is AppTheme value && value == theme)
+            {
+                ThemeBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        ThemeBox.SelectedIndex = 0;
     }
 
     private void Persist_Changed(object sender, RoutedEventArgs e)

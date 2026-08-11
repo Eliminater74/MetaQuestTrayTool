@@ -7,6 +7,8 @@
         MinHeight="580"
         MinWidth="860"
         WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}"
         Closing="Window_Closing">
   <Grid>
     <Grid.ColumnDefinitions>
@@ -15,8 +17,8 @@
     </Grid.ColumnDefinitions>
 
     <Border Grid.Column="0"
-            Background="#101826"
-            BorderBrush="{StaticResource AppBorderBrush}"
+            Background="{DynamicResource AppSidebarBrush}"
+            BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="0,0,1,0">
       <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Margin="12,8,12,16">
@@ -27,7 +29,7 @@
                   Click="About_Click"/>
           <TextBlock x:Name="VersionText"
                      HorizontalAlignment="Center"
-                     Foreground="{StaticResource AppMutedBrush}"
+                     Foreground="{DynamicResource AppMutedBrush}"
                      FontSize="11"/>
         </StackPanel>
 
@@ -36,12 +38,12 @@
                      Margin="18,0,0,2"
                      FontSize="11"
                      FontWeight="Bold"
-                     Foreground="{StaticResource AppMutedBrush}"/>
+                     Foreground="{DynamicResource AppMutedBrush}"/>
           <TextBlock Text="Tray Tool"
                      Margin="18,0,0,16"
                      FontSize="18"
                      FontWeight="SemiBold"
-                     Foreground="{StaticResource AppAccentBrush}"/>
+                     Foreground="{DynamicResource AppAccentBrush}"/>
 
           <RadioButton x:Name="NavGame" Content="Game Settings" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"/>
@@ -70,18 +72,18 @@
       <DockPanel Grid.Row="0" Margin="24,16,24,0">
         <TextBlock DockPanel.Dock="Right"
                    Text="Modern OTT-style shell"
-                   Foreground="{StaticResource AppMutedBrush}"
+                   Foreground="{DynamicResource AppMutedBrush}"
                    VerticalAlignment="Center"/>
         <TextBlock x:Name="PageHeaderText"
                    FontSize="16"
                    FontWeight="SemiBold"
-                   Foreground="{StaticResource AppTextBrush}"/>
+                   Foreground="{DynamicResource AppTextBrush}"/>
       </DockPanel>
 
       <Border Grid.Row="1"
               Margin="16"
-              Background="{StaticResource AppSurfaceBrush}"
-              BorderBrush="{StaticResource AppBorderBrush}"
+              Background="{DynamicResource AppSurfaceBrush}"
+              BorderBrush="{DynamicResource AppBorderBrush}"
               BorderThickness="1"
               CornerRadius="12"
               Padding="20">
