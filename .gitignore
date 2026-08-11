@@ -1,0 +1,64 @@
+## Visual Studio / .NET
+.vs/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.log
+*.vspscc
+*.vssscc
+*.pidb
+*.svclog
+*.scc
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Build results
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Rider / VS Code
+.idea/
+*.sln.iml
+.vscode/
+
+## Local / secrets
+*.pfx
+*.snk
+appsettings.*.local.json
+.env
+.env.*
+
+## Publish
+publish/
+[Pp]ublish/
+*.publishproj

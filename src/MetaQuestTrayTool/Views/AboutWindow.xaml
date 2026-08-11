@@ -1,0 +1,28 @@
+<Window x:Class="MetaQuestTrayTool.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About"
+        Height="360"
+        Width="480"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+  <DockPanel Margin="24">
+    <Button DockPanel.Dock="Bottom"
+            HorizontalAlignment="Right"
+            Content="Close"
+            Style="{StaticResource AccentButtonStyle}"
+            Click="Close_Click"/>
+
+    <StackPanel>
+      <TextBlock Text="Meta Quest Tray Tool"
+                 FontSize="22"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource AppAccentBrush}"/>
+      <TextBlock x:Name="VersionText" Margin="0,6,0,16" Foreground="{StaticResource AppMutedBrush}"/>
+      <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                 Text="A new Windows-only rewrite inspired by ApollyonVR's Oculus Tray Tool. This first build is the tray host, settings store, and Oculus service controls."/>
+      <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppMutedBrush}"
+                 Text="Original OTT is no longer maintained. This project is a clean C# start, not a decompiled port of the old VB.NET app."/>
+    </StackPanel>
+  </DockPanel>
+</Window>
