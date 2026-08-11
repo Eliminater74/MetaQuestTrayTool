@@ -58,7 +58,11 @@ appsettings.*.local.json
 .env
 .env.*
 
-## Publish
-publish/
-[Pp]ublish/
-*.publishproj
+## Temp
+TEMP/
+[Tt]emp/
+[Tt]mp/
+*.tmp
+*.temp
+*.swp
+*~
