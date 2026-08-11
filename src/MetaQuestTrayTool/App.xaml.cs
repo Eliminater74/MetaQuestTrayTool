@@ -12,6 +12,7 @@ public partial class App : System.Windows.Application
     private Mutex? _singleInstanceMutex;
     private TrayIconHost? _tray;
     private ProcessWatcherService? _processWatcher;
+    private AudioSwitchWatcher? _audioWatcher;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -86,10 +87,14 @@ public partial class App : System.Windows.Application
 
         _processWatcher = new ProcessWatcherService(this);
         _processWatcher.Start();
+
+        _audioWatcher = new AudioSwitchWatcher(this);
+        _audioWatcher.Start();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _audioWatcher?.Dispose();
         _processWatcher?.Dispose();
         _tray?.Dispose();
         Settings.Save();

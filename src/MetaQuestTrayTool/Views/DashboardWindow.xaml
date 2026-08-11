@@ -34,6 +34,9 @@
       <Button Content="Link Settings"
               Style="{StaticResource GhostButtonStyle}"
               Click="LinkSettings_Click"/>
+      <Button Content="Audio"
+              Style="{StaticResource GhostButtonStyle}"
+              Click="AudioSettings_Click"/>
       <Button Content="Apply Game Settings"
               Style="{StaticResource AccentButtonStyle}"
               Click="ApplyGameSettings_Click"/>

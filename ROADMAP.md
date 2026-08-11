@@ -45,10 +45,11 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 
 ### Phase 4 — Audio switching
 
-- List playback / recording devices
-- Switch to headset devices when VR starts
-- Restore previous defaults when VR stops
-- Optional separate communications devices
+- [x] List playback / recording devices
+- [x] Switch to headset devices when Oculus service starts
+- [x] Restore fallback devices when the service stops
+- [x] Tray + audio settings window
+- [ ] Optional separate communications devices (currently one toggle for communications role)
 
 ### Phase 5 — Power and USB
 

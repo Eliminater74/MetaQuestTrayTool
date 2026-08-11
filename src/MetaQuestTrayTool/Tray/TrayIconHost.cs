@@ -15,6 +15,7 @@ public sealed class TrayIconHost : IDisposable
     private AboutWindow? _about;
     private ProfilesWindow? _profiles;
     private LinkSettingsWindow? _linkSettings;
+    private AudioSettingsWindow? _audioSettings;
 
     public TrayIconHost(App app)
     {
@@ -94,7 +95,7 @@ public sealed class TrayIconHost : IDisposable
 
         menu.Items.Add(BuildProfilesMenu());
         menu.Items.Add(BuildLinkMenu());
-        menu.Items.Add(PlaceholderItem("Audio Switching"));
+        menu.Items.Add(BuildAudioMenu());
         menu.Items.Add(PlaceholderItem("Power Plan"));
         menu.Items.Add(new ToolStripSeparator());
 
@@ -159,6 +160,7 @@ public sealed class TrayIconHost : IDisposable
         SyncGameSettingChecks(menu);
         RebuildProfileItems(menu);
         SyncLinkChecks(menu);
+        SyncAudioChecks(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
     }
 
@@ -522,6 +524,69 @@ public sealed class TrayIconHost : IDisposable
         _linkSettings.Show();
         _linkSettings.Activate();
         _linkSettings.WindowState = WindowState.Normal;
+    }
+
+    private ToolStripMenuItem BuildAudioMenu()
+    {
+        var menu = new ToolStripMenuItem("Audio Switching") { Name = "AudioMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open audio settings…", null, (_, _) => ShowAudioSettings()));
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        var auto = new ToolStripMenuItem("Auto-switch with Oculus service")
+        {
+            Name = "AudioAutoSwitch",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.Audio.AutoSwitchEnabled
+        };
+        auto.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.Audio.AutoSwitchEnabled = auto.Checked;
+            _app.Settings.Save();
+            _app.Log.Info(auto.Checked ? "Audio auto-switch enabled." : "Audio auto-switch disabled.");
+        };
+
+        menu.DropDownItems.Add(auto);
+        menu.DropDownItems.Add(new ToolStripMenuItem("Switch to VR devices now", null, (_, _) =>
+        {
+            var result = _app.Audio.ApplyVrDevices(_app.Settings.Current.Audio);
+            _app.Log.Info(result);
+            Notify("Audio", result);
+        }));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Restore fallback devices", null, (_, _) =>
+        {
+            var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
+            _app.Log.Info(result);
+            Notify("Audio", result);
+        }));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Capture current defaults as fallback", null, (_, _) =>
+        {
+            var result = _app.Audio.CaptureCurrentAsFallback(_app.Settings.Current.Audio);
+            _app.Settings.Save();
+            _app.Log.Info(result);
+            Notify("Audio", result);
+        }));
+        return menu;
+    }
+
+    private void SyncAudioChecks(ContextMenuStrip root)
+    {
+        if (FindItem(root.Items, "AudioAutoSwitch") is ToolStripMenuItem auto)
+        {
+            auto.Checked = _app.Settings.Current.Audio.AutoSwitchEnabled;
+        }
+    }
+
+    private void ShowAudioSettings()
+    {
+        if (_audioSettings is null || !_audioSettings.IsLoaded)
+        {
+            _audioSettings = new AudioSettingsWindow();
+            _audioSettings.Closed += (_, _) => _audioSettings = null;
+        }
+
+        _audioSettings.Show();
+        _audioSettings.Activate();
+        _audioSettings.WindowState = WindowState.Normal;
     }
 
     private static string FormatSuperSampling(double value) =>

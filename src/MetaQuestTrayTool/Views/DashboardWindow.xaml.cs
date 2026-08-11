@@ -66,6 +66,16 @@ public partial class DashboardWindow : Window
         RefreshStatus();
     }
 
+    private void AudioSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new AudioSettingsWindow
+        {
+            Owner = this
+        };
+        window.ShowDialog();
+        RefreshStatus();
+    }
+
     private void ApplyGameSettings_Click(object sender, RoutedEventArgs e)
     {
         var result = App.Instance.DebugTool.Apply(App.Instance.Settings.Current.DefaultGameSettings);
