@@ -41,9 +41,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Phase 4 — audio
 
-- [ ] Enumerate playback and recording devices
+- [x] Enumerate playback and recording devices
 - [ ] Switch defaults when Oculus / Link becomes active
 - [ ] Restore previous devices when VR stops
+- [ ] Tray / dashboard UI for VR and fallback devices
 
 ## Phase 5 — power / USB
 

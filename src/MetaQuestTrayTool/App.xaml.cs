@@ -20,6 +20,7 @@ public partial class App : System.Windows.Application
     public OculusDebugToolService DebugTool { get; }
     public ProfileService Profiles { get; }
     public LinkSettingsService Link { get; } = new();
+    public AudioDeviceService Audio { get; } = new();
     public StartupRegistrationService StartupRegistration { get; } = new();
 
     public App()
