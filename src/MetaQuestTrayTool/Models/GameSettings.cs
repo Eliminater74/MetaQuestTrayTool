@@ -39,6 +39,8 @@ public sealed class GameSettings
     public string OvrServerPriority { get; set; } = "Normal";
     public bool ForceMipMapOnLayers { get; set; }
     public double OffsetMipMapOnLayers { get; set; }
+    public bool UseFovStencil { get; set; } = true;
+    public VisualHudMode VisualHud { get; set; } = VisualHudMode.None;
 
     public GameSettings Clone() => new()
     {
@@ -49,7 +51,9 @@ public sealed class GameSettings
         AdaptiveGpuScaling = AdaptiveGpuScaling,
         OvrServerPriority = OvrServerPriority,
         ForceMipMapOnLayers = ForceMipMapOnLayers,
-        OffsetMipMapOnLayers = OffsetMipMapOnLayers
+        OffsetMipMapOnLayers = OffsetMipMapOnLayers,
+        UseFovStencil = UseFovStencil,
+        VisualHud = VisualHud
     };
 
     public string Describe()

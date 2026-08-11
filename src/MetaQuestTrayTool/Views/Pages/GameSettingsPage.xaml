@@ -22,6 +22,8 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Profiles" Style="{StaticResource SettingLabelStyle}"/>
@@ -55,10 +57,16 @@
         <TextBlock Grid.Row="7" Text="Offset MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
         <ComboBox x:Name="OffsetMipBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="8" Text="Voice / Homeless / HUD" Style="{StaticResource SettingLabelStyle}"/>
-        <TextBlock Grid.Row="8" Grid.Column="1" Margin="0,0,0,10"
+        <TextBlock Grid.Row="8" Text="Use FOV Stencil" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="FovStencilBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="9" Text="Visual HUD" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="HudBox" Grid.Row="9" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="10" Text="Voice / Homeless" Style="{StaticResource SettingLabelStyle}"/>
+        <TextBlock Grid.Row="10" Grid.Column="1" Margin="0,0,0,10"
                    Foreground="{DynamicResource AppMutedBrush}"
-                   Text="Not ported yet — Oculus Homeless / voice / visual HUD from classic OTT."/>
+                   Text="Not ported — those classic OTT extras have no Debug Tool CLI command."/>
       </Grid>
 
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">

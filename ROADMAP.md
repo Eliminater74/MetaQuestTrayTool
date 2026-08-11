@@ -15,7 +15,9 @@ The app lives in the notification area, opens a dashboard, tracks `OVRService`, 
 Tray + dashboard push pixel density and ASW through `OculusDebugToolCLI.exe`.
 
 - [x] Apply supersampling (`service set-pixels-per-display-pixel-override`)
-- [x] Apply ASW (`server:asw.Off` / `Auto` / `Clock45`)
+- [x] Apply ASW (`server:asw.Off` / `Auto` / `Clock45` / `Clock30` / `Clock18`)
+- [x] Adaptive GPU scale, force/offset mip on layers, FOV stencil, Perf HUD
+- [x] `server:EnumHmd` headset serial probe at startup
 - [x] Tray submenu to change defaults and apply now
 - [x] Persist last-used defaults in `settings.json`
 - [x] Log CLI stdout/stderr and warn when Meta rejects `server:` commands

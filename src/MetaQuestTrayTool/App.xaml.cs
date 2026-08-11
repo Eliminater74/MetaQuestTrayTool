@@ -71,6 +71,18 @@ public partial class App : System.Windows.Application
         Log.Info(DebugTool.IsAvailable
             ? $"Debug Tool CLI: {DebugTool.CliPath}"
             : "Debug Tool CLI was not found.");
+        if (DebugTool.IsAvailable)
+        {
+            var headsets = DebugTool.EnumerateHeadsets();
+            Log.Info(headsets.Count == 0
+                ? "Debug Tool reported no headset serials (headset may be idle/disconnected)."
+                : "Debug Tool headsets: " + string.Join(", ", headsets));
+            var asw = DebugTool.QueryAswMode();
+            if (!string.IsNullOrWhiteSpace(asw))
+            {
+                Log.Info($"Debug Tool live ASW mode: {asw}");
+            }
+        }
 
         if (Settings.Current.Service.StartServiceWhenToolStarts)
         {

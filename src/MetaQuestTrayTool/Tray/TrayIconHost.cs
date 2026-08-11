@@ -684,6 +684,8 @@ public sealed class TrayIconHost : IDisposable
         AswMode.Off => "Off",
         AswMode.Auto => "Auto",
         AswMode.Clock45 => "45 FPS",
+        AswMode.Clock30 => "30 FPS",
+        AswMode.Clock18 => "18 FPS",
         _ => mode.ToString()
     };
 

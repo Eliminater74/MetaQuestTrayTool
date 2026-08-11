@@ -36,9 +36,15 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         ForceMipBox.Items.Add(new ComboBoxItem { Content = "False", Tag = false });
         ForceMipBox.Items.Add(new ComboBoxItem { Content = "True", Tag = true });
 
-        foreach (var offset in new[] { 0.0, -1.0, -2.0, 1.0, 2.0 })
+        OffsetMipBox.Items.Add(new ComboBoxItem { Content = "False", Tag = 0.0 });
+        OffsetMipBox.Items.Add(new ComboBoxItem { Content = "True", Tag = 1.0 });
+
+        FovStencilBox.Items.Add(new ComboBoxItem { Content = "On", Tag = true });
+        FovStencilBox.Items.Add(new ComboBoxItem { Content = "Off", Tag = false });
+
+        foreach (VisualHudMode hud in Enum.GetValues<VisualHudMode>())
         {
-            OffsetMipBox.Items.Add(new ComboBoxItem { Content = offset.ToString("0"), Tag = offset });
+            HudBox.Items.Add(new ComboBoxItem { Content = FormatHud(hud), Tag = hud });
         }
 
         SuperSamplingBox.SelectionChanged += (_, _) => PersistIfReady();
@@ -47,6 +53,8 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         PriorityBox.SelectionChanged += (_, _) => PersistIfReady();
         ForceMipBox.SelectionChanged += (_, _) => PersistIfReady();
         OffsetMipBox.SelectionChanged += (_, _) => PersistIfReady();
+        FovStencilBox.SelectionChanged += (_, _) => PersistIfReady();
+        HudBox.SelectionChanged += (_, _) => PersistIfReady();
         ApplyOnStartBox.Checked += (_, _) => PersistFlags();
         ApplyOnStartBox.Unchecked += (_, _) => PersistFlags();
         AutoApplyBox.Checked += (_, _) => PersistFlags();
@@ -62,14 +70,14 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         SelectByTag(AdaptiveGpuBox, game.AdaptiveGpuScaling);
         SelectByTag(PriorityBox, game.OvrServerPriority);
         SelectByTag(ForceMipBox, game.ForceMipMapOnLayers);
-        SelectByTag(OffsetMipBox, game.OffsetMipMapOnLayers);
+        SelectByTag(OffsetMipBox, Math.Abs(game.OffsetMipMapOnLayers) > 0.001 ? 1.0 : 0.0);
+        SelectByTag(FovStencilBox, game.UseFovStencil);
+        SelectByTag(HudBox, game.VisualHud);
         FovHBox.Text = game.FovMultiplierHorizontal.ToString("0.00", CultureInfo.InvariantCulture);
         FovVBox.Text = game.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
         ApplyOnStartBox.IsChecked = settings.ApplyGameSettingsOnStart;
         AutoApplyBox.IsChecked = settings.AutoApplyProfiles;
-        StatusText.Text = App.Instance.DebugTool.IsAvailable
-            ? $"CLI: {App.Instance.DebugTool.CliPath}"
-            : "OculusDebugToolCLI not found. Install Meta Quest PC software.";
+        StatusText.Text = BuildStatus();
     }
 
     private void Profiles_Click(object sender, RoutedEventArgs e)
@@ -198,6 +206,16 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
             game.OffsetMipMapOnLayers = offset;
         }
 
+        if (FovStencilBox.SelectedItem is ComboBoxItem { Tag: bool stencil })
+        {
+            game.UseFovStencil = stencil;
+        }
+
+        if (HudBox.SelectedItem is ComboBoxItem { Tag: VisualHudMode hud })
+        {
+            game.VisualHud = hud;
+        }
+
         PersistFlags();
         return true;
     }
@@ -231,8 +249,38 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         AswMode.Off => "Off",
         AswMode.Auto => "Auto",
         AswMode.Clock45 => "45 FPS",
+        AswMode.Clock30 => "30 FPS",
+        AswMode.Clock18 => "18 FPS",
         _ => mode.ToString()
     };
+
+    private static string FormatHud(VisualHudMode mode) => mode switch
+    {
+        VisualHudMode.None => "None",
+        VisualHudMode.Performance => "Performance",
+        VisualHudMode.AppRenderTiming => "App render timing",
+        VisualHudMode.CompositorTiming => "Compositor timing",
+        VisualHudMode.PerformanceHeadroom => "Performance headroom",
+        VisualHudMode.Version => "Version",
+        VisualHudMode.AsynchronousSpacewarp => "ASW",
+        _ => mode.ToString()
+    };
+
+    private static string BuildStatus()
+    {
+        var debug = App.Instance.DebugTool;
+        if (!debug.IsAvailable)
+        {
+            return "OculusDebugToolCLI not found. Install Meta Quest PC software.";
+        }
+
+        var headsets = debug.LastHeadsetSerials;
+        var headsetText = headsets.Count == 0
+            ? "No headset serial cached yet (probed at startup when OVRService is up)."
+            : "Headset serials: " + string.Join(", ", headsets);
+        var aswText = string.IsNullOrWhiteSpace(debug.LastAswMode) ? "ASW mode unknown" : $"Live ASW: {debug.LastAswMode}";
+        return $"{headsetText}  ·  {aswText}  ·  CLI: {debug.CliPath}";
+    }
 
     private static void SelectByTag(System.Windows.Controls.ComboBox box, object? tag)
     {

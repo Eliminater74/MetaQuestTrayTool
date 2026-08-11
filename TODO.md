@@ -23,6 +23,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Persist default SS / ASW / FOV
 - [x] Show Debug Tool path and last apply result on the dashboard
 - [x] Warn in the log when Meta rejects `server:` commands
+- [x] Wire Adaptive GPU, mip layer flags, FOV stencil, Visual HUD, ASW 30/18
+- [x] Probe headset serials via `server:EnumHmd`
 
 ## Phase 2 — profiles
 

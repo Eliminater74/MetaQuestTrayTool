@@ -20,6 +20,8 @@ public sealed class OculusDebugToolService
 
     public DebugToolApplyResult? LastResult { get; private set; }
     public GameSettings? LastApplied { get; private set; }
+    public IReadOnlyList<string> LastHeadsetSerials { get; private set; } = [];
+    public string? LastAswMode { get; private set; }
 
     public string? CliPath
     {
@@ -49,6 +51,12 @@ public sealed class OculusDebugToolService
             case AswMode.Clock45:
                 lines.Add("server:asw.Clock45");
                 break;
+            case AswMode.Clock30:
+                lines.Add("server:asw.Clock30");
+                break;
+            case AswMode.Clock18:
+                lines.Add("server:asw.Clock18");
+                break;
         }
 
         var fovH = settings.FovMultiplierHorizontal;
@@ -58,26 +66,87 @@ public sealed class OculusDebugToolService
             lines.Add($"service set-client-fov-tan-angle-multiplier {FormatNumber(fovH)} {FormatNumber(fovV)}");
         }
 
+        lines.Add($"service enable-adaptive-gpu-perf-scale {FormatBool(settings.AdaptiveGpuScaling)}");
+        lines.Add($"service set-force-mip-gen-on-all-layers {FormatBool(settings.ForceMipMapOnLayers)}");
+        lines.Add($"service set-offset-mip-bias-on-all-layers {FormatBool(Math.Abs(settings.OffsetMipMapOnLayers) > 0.001)}");
+        lines.Add($"service set-use-fov-stencil {FormatBool(settings.UseFovStencil)}");
+
+        if (settings.VisualHud == VisualHudMode.None)
+        {
+            lines.Add("perfhud reset");
+        }
+        else
+        {
+            lines.Add($"perfhud set-mode {(int)settings.VisualHud}");
+        }
+
         lines.Add("exit");
         return lines;
     }
 
+    public IReadOnlyList<string> EnumerateHeadsets()
+    {
+        var result = RunCommands(["server:EnumHmd", "exit"], timeoutMs: 8_000);
+        if (result is null || string.IsNullOrWhiteSpace(result.Output))
+        {
+            return [];
+        }
+
+        LastHeadsetSerials = result.Output
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Trim())
+            .Where(line =>
+                line.Length > 0
+                && !line.StartsWith("=>", StringComparison.Ordinal)
+                && !line.StartsWith("Found these", StringComparison.OrdinalIgnoreCase)
+                && !line.Contains("no headset serial", StringComparison.OrdinalIgnoreCase)
+                && !line.Contains("Error:", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return LastHeadsetSerials;
+    }
+
+    public string? QueryAswMode()
+    {
+        var result = RunCommands(["server:asw.Mode", "exit"], timeoutMs: 8_000);
+        var line = result.Output
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(item => item.Trim())
+            .LastOrDefault(item => !item.StartsWith("=>", StringComparison.Ordinal));
+        LastAswMode = string.IsNullOrWhiteSpace(line) ? null : line;
+        return LastAswMode;
+    }
+
     public DebugToolApplyResult Apply(GameSettings settings)
+    {
+        var commands = BuildCommands(settings);
+        var result = RunCommands(commands, timeoutMs: 15_000);
+        if (result.CliFound && result.Started)
+        {
+            LastApplied = settings.Clone();
+            result.Summary = result.LooksRejected
+                ? "Debug Tool ran, but Meta rejected one or more commands. Check the log — newer runtimes often block server: ASW commands."
+                : $"Applied {settings.Describe()}.";
+        }
+
+        LastResult = result;
+        return result;
+    }
+
+    private DebugToolApplyResult RunCommands(IReadOnlyList<string> commands, int timeoutMs)
     {
         _oculus.Refresh();
         var cli = _oculus.DebugToolCliPath;
 
         if (string.IsNullOrWhiteSpace(cli) || !File.Exists(cli))
         {
-            LastResult = new DebugToolApplyResult
+            return new DebugToolApplyResult
             {
                 CliFound = false,
+                Commands = commands,
                 Summary = "OculusDebugToolCLI.exe was not found. Install the Meta Quest / Oculus PC software."
             };
-            return LastResult;
         }
 
-        var commands = BuildCommands(settings);
         var commandFile = System.IO.Path.Combine(AppPaths.AppDataDirectory, "odt-commands.txt");
         AppPaths.EnsureAppDataDirectory();
         File.WriteAllLines(commandFile, commands);
@@ -118,20 +187,19 @@ public sealed class OculusDebugToolService
 
             if (!process.Start())
             {
-                LastResult = new DebugToolApplyResult
+                return new DebugToolApplyResult
                 {
                     CliFound = true,
                     Started = false,
                     Commands = commands,
                     Summary = "OculusDebugToolCLI.exe did not start."
                 };
-                return LastResult;
             }
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            if (!process.WaitForExit(15_000))
+            if (!process.WaitForExit(timeoutMs))
             {
                 try
                 {
@@ -142,23 +210,19 @@ public sealed class OculusDebugToolService
                     // Best effort.
                 }
 
-                LastResult = new DebugToolApplyResult
+                return new DebugToolApplyResult
                 {
                     CliFound = true,
                     Started = true,
                     Commands = commands,
                     Output = output.ToString(),
                     Error = error.ToString(),
-                    Summary = "OculusDebugToolCLI.exe timed out after 15 seconds."
+                    Summary = $"OculusDebugToolCLI.exe timed out after {timeoutMs / 1000} seconds."
                 };
-                return LastResult;
             }
 
             var combined = output + Environment.NewLine + error;
-            var rejected = LooksRejected(combined);
-
-            LastApplied = settings.Clone();
-            LastResult = new DebugToolApplyResult
+            return new DebugToolApplyResult
             {
                 CliFound = true,
                 Started = true,
@@ -166,23 +230,19 @@ public sealed class OculusDebugToolService
                 Commands = commands,
                 Output = output.ToString().Trim(),
                 Error = error.ToString().Trim(),
-                LooksRejected = rejected,
-                Summary = rejected
-                    ? "Debug Tool ran, but Meta rejected one or more commands. Check the log — newer runtimes often block server: ASW commands."
-                    : $"Applied {settings.Describe()}."
+                LooksRejected = LooksRejected(combined),
+                Summary = "OculusDebugToolCLI finished."
             };
-            return LastResult;
         }
         catch (Exception ex)
         {
-            LastResult = new DebugToolApplyResult
+            return new DebugToolApplyResult
             {
                 CliFound = true,
                 Started = false,
                 Commands = commands,
                 Summary = $"Could not run OculusDebugToolCLI.exe: {ex.Message}"
             };
-            return LastResult;
         }
     }
 
@@ -193,5 +253,8 @@ public sealed class OculusDebugToolService
                || text.Contains("failed with status", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string FormatNumber(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+    private static string FormatNumber(double value) =>
+        value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string FormatBool(bool value) => value ? "true" : "false";
 }

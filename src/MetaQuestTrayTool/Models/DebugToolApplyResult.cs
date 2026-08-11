@@ -9,5 +9,5 @@ public sealed class DebugToolApplyResult
     public string Output { get; init; } = string.Empty;
     public string Error { get; init; } = string.Empty;
     public bool LooksRejected { get; init; }
-    public string Summary { get; init; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
 }
