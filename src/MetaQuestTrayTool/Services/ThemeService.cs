@@ -6,8 +6,12 @@ namespace MetaQuestTrayTool.Services;
 
 public static class ThemeService
 {
+    public static event EventHandler<AppTheme>? Changed;
+    public static AppTheme Current { get; private set; } = AppTheme.Black;
+
     public static void Apply(AppTheme theme)
     {
+        Current = theme;
         var palette = Palette(theme);
         Set("AppBackgroundBrush", palette.Background);
         Set("AppSurfaceBrush", palette.Surface);
@@ -23,7 +27,25 @@ public static class ThemeService
         Set("AppNavSelectedBrush", palette.NavSelected);
         Set("AppGhostButtonBrush", palette.Ghost);
         Set("AppGhostButtonHoverBrush", palette.GhostHover);
+        Changed?.Invoke(null, theme);
     }
+
+    public static TrayMenuPalette MenuPalette(AppTheme? theme = null)
+    {
+        var colors = Palette(theme ?? Current);
+        return new TrayMenuPalette(
+            Background: ToDrawing(colors.Background),
+            Surface: ToDrawing(colors.Surface),
+            Text: ToDrawing(colors.Text),
+            Muted: ToDrawing(colors.Muted),
+            Border: ToDrawing(colors.Border),
+            Hover: ToDrawing(colors.Hover),
+            Accent: ToDrawing(colors.Accent),
+            AccentDark: ToDrawing(colors.AccentDark));
+    }
+
+    private static System.Drawing.Color ToDrawing(Color color) =>
+        System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
 
     private static void Set(string key, Color color)
     {

@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 using MetaQuestTrayTool.Views;
 
 namespace MetaQuestTrayTool.Tray;
@@ -10,6 +11,7 @@ public sealed class TrayIconHost : IDisposable
 {
     private readonly App _app;
     private readonly NotifyIcon _notifyIcon;
+    private ContextMenuStrip? _menu;
     private Icon? _icon;
     private MainShellWindow? _shell;
     private AboutWindow? _about;
@@ -32,7 +34,10 @@ public sealed class TrayIconHost : IDisposable
     {
         _icon = LoadIcon();
         _notifyIcon.Icon = _icon;
-        _notifyIcon.ContextMenuStrip = BuildMenu();
+        _menu = BuildMenu();
+        ApplyMenuTheme();
+        ThemeService.Changed += OnThemeChanged;
+        _notifyIcon.ContextMenuStrip = _menu;
         _notifyIcon.Visible = true;
         _notifyIcon.MouseClick += OnMouseClick;
         _notifyIcon.DoubleClick += (_, _) => ShowShell();
@@ -64,9 +69,44 @@ public sealed class TrayIconHost : IDisposable
 
     public void Dispose()
     {
+        ThemeService.Changed -= OnThemeChanged;
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
         _icon?.Dispose();
+    }
+
+    private void OnThemeChanged(object? sender, AppTheme theme) => ApplyMenuTheme();
+
+    private void ApplyMenuTheme()
+    {
+        if (_menu is null)
+        {
+            return;
+        }
+
+        var palette = ThemeService.MenuPalette();
+        var renderer = new ThemedToolStripRenderer(palette);
+        ToolStripManager.Renderer = renderer;
+        ToolStripManager.RenderMode = ToolStripManagerRenderMode.Professional;
+        _menu.Renderer = renderer;
+        _menu.RenderMode = ToolStripRenderMode.Professional;
+        PaintMenu(_menu, palette);
+    }
+
+    private static void PaintMenu(ToolStrip menu, TrayMenuPalette palette)
+    {
+        menu.BackColor = palette.Background;
+        menu.ForeColor = palette.Text;
+        foreach (ToolStripItem item in menu.Items)
+        {
+            item.BackColor = palette.Background;
+            item.ForeColor = item.Enabled ? palette.Text : palette.Muted;
+            if (item is ToolStripMenuItem menuItem && menuItem.HasDropDownItems)
+            {
+                menuItem.DropDown.Renderer = menu.Renderer;
+                PaintMenu(menuItem.DropDown, palette);
+            }
+        }
     }
 
     private void OnMouseClick(object? sender, MouseEventArgs e)
@@ -81,10 +121,15 @@ public sealed class TrayIconHost : IDisposable
     {
         var menu = new ContextMenuStrip
         {
-            ShowImageMargin = false
+            ShowImageMargin = true,
+            ShowCheckMargin = true
         };
 
-        menu.Opening += (_, _) => RefreshDynamicItems(menu);
+        menu.Opening += (_, _) =>
+        {
+            RefreshDynamicItems(menu);
+            PaintMenu(menu, ThemeService.MenuPalette());
+        };
 
         menu.Items.Add(new ToolStripMenuItem("Open Settings", null, (_, _) => ShowShell()));
         menu.Items.Add(new ToolStripSeparator());
