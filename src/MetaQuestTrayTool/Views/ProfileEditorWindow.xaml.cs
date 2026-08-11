@@ -36,13 +36,43 @@ public partial class ProfileEditorWindow : Window
             PriorityBox.Items.Add(priority);
         }
 
+        PlatformBox.Items.Add(GamePlatform.Custom);
+        PlatformBox.Items.Add(GamePlatform.Steam);
+        PlatformBox.Items.Add(GamePlatform.Meta);
+
         NameBox.Text = profile.Name;
         ProcessBox.Text = profile.ProcessName;
+        PlatformBox.SelectedItem = profile.Platform;
+        ScopeText.Text = profile.Scope == ProfileScope.Personal
+            ? "Scope: Personal app profile (overrides global defaults while this process runs)"
+            : "Scope: Global";
         FovBox.Text = profile.Settings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
         CommentsBox.Text = profile.Comments ?? string.Empty;
         SelectByTag(SuperSamplingBox, profile.Settings.SuperSampling);
         SelectByTag(AswBox, profile.Settings.AswMode);
         PriorityBox.SelectedItem = Priorities.Contains(profile.CpuPriority) ? profile.CpuPriority : "Normal";
+    }
+
+    private void BrowseLibrary_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new LibraryPickerWindow
+        {
+            Owner = this
+        };
+        if (picker.ShowDialog() != true || picker.SelectedGame is not { } game)
+        {
+            return;
+        }
+
+        NameBox.Text = game.Name;
+        ProcessBox.Text = game.ProcessName;
+        PlatformBox.SelectedItem = game.Platform;
+        Profile.AppId = game.AppId;
+        Profile.InstallPath = game.InstallPath;
+        if (string.IsNullOrWhiteSpace(CommentsBox.Text))
+        {
+            CommentsBox.Text = $"{game.PlatformLabel} library import";
+        }
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -68,6 +98,8 @@ public partial class ProfileEditorWindow : Window
 
         Profile.Name = NameBox.Text.Trim();
         Profile.ProcessName = ProfileService.NormalizeProcessName(ProcessBox.Text);
+        Profile.Platform = PlatformBox.SelectedItem is GamePlatform platform ? platform : GamePlatform.Custom;
+        Profile.Scope = ProfileScope.Personal;
         Profile.Settings.SuperSampling = SuperSamplingBox.SelectedItem is ComboBoxItem ssItem && ssItem.Tag is double ss
             ? ss
             : 1.0;

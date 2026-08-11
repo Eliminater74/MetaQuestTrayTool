@@ -21,19 +21,81 @@ public partial class ProfilesWindow : Window
             .ToList();
     }
 
+    private void AddFromLibrary_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new LibraryPickerWindow
+        {
+            Owner = this
+        };
+
+        if (picker.ShowDialog() != true || picker.SelectedGame is not { } game)
+        {
+            return;
+        }
+
+        var existing = App.Instance.Profiles.FindByProcess(game.ProcessName);
+        if (existing is not null)
+        {
+            var overwrite = System.Windows.MessageBox.Show(
+                this,
+                $"A personal profile for '{existing.ProcessName}' already exists ({existing.Name}). Open it?",
+                App.AppName,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (overwrite == MessageBoxResult.Yes)
+            {
+                Edit(existing);
+                App.Instance.Profiles.Save();
+                Reload();
+            }
+
+            return;
+        }
+
+        var profile = new GameProfile
+        {
+            Name = game.Name,
+            ProcessName = game.ProcessName,
+            Platform = game.Platform,
+            Scope = ProfileScope.Personal,
+            AppId = game.AppId,
+            InstallPath = game.InstallPath,
+            Settings = App.Instance.Settings.Current.DefaultGameSettings.Clone(),
+            Comments = $"{game.PlatformLabel} library import"
+        };
+
+        if (Edit(profile) == true)
+        {
+            App.Instance.Profiles.Add(profile);
+            App.Instance.Log.Info($"Created personal profile '{profile.Name}' from {game.PlatformLabel}.");
+            Reload();
+        }
+    }
+
     private void New_Click(object sender, RoutedEventArgs e)
     {
         var profile = new GameProfile
         {
+            Scope = ProfileScope.Personal,
+            Platform = GamePlatform.Custom,
             Settings = App.Instance.Settings.Current.DefaultGameSettings.Clone()
         };
 
         if (Edit(profile) == true)
         {
             App.Instance.Profiles.Add(profile);
-            App.Instance.Log.Info($"Created profile '{profile.Name}' for {profile.ProcessName}.");
+            App.Instance.Log.Info($"Created custom personal profile '{profile.Name}' for {profile.ProcessName}.");
             Reload();
         }
+    }
+
+    private void GlobalDefaults_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new GlobalDefaultsWindow
+        {
+            Owner = this
+        };
+        window.ShowDialog();
     }
 
     private void Edit_Click(object sender, RoutedEventArgs e) => EditSelected();
@@ -49,7 +111,7 @@ public partial class ProfilesWindow : Window
 
         var confirm = System.Windows.MessageBox.Show(
             this,
-            $"Delete profile '{profile.Name}'?",
+            $"Delete personal profile '{profile.Name}'?",
             App.AppName,
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
@@ -72,7 +134,7 @@ public partial class ProfilesWindow : Window
         }
 
         var result = App.Instance.DebugTool.Apply(profile.Settings);
-        App.Instance.Log.Info($"Applied profile '{profile.Name}': {result.Summary}");
+        App.Instance.Log.Info($"Applied personal profile '{profile.Name}': {result.Summary}");
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
@@ -108,7 +170,15 @@ public partial class ProfilesWindow : Window
     {
         public GameProfile Profile { get; } = profile;
 
-        public override string ToString() =>
-            $"{Profile.Name}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}";
+        public override string ToString()
+        {
+            var platform = Profile.Platform switch
+            {
+                GamePlatform.Steam => "Steam",
+                GamePlatform.Meta => "Meta",
+                _ => "Custom"
+            };
+            return $"{Profile.Name}  ·  {platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}";
+        }
     }
 }
