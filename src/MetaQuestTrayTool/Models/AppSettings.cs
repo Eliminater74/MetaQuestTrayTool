@@ -4,7 +4,7 @@ public sealed class AppSettings
 {
     public bool StartWithWindows { get; set; }
     public bool ShowNotifications { get; set; } = true;
-    public double DefaultSuperSampling { get; set; } = 1.0;
-    public string DefaultAswMode { get; set; } = "Auto";
+    public bool ApplyGameSettingsOnStart { get; set; }
+    public GameSettings DefaultGameSettings { get; set; } = new();
     public List<GameProfile> Profiles { get; set; } = [];
 }

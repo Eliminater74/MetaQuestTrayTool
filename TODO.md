@@ -16,7 +16,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Phase 1 — game settings (Debug Tool CLI)
 
-- [ ] `OculusDebugToolService` that writes a command file and runs `OculusDebugToolCLI.exe -f`
+- [x] `OculusDebugToolService` that writes a command file and runs `OculusDebugToolCLI.exe -f`
 - [ ] Super Sampling options on the tray menu
 - [ ] ASW mode options on the tray menu
 - [ ] Apply current defaults from the dashboard

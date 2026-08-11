@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
@@ -9,7 +10,8 @@ public sealed class SettingsService
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public AppSettings Current { get; private set; } = new();

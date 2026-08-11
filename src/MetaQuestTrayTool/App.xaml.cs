@@ -16,7 +16,14 @@ public partial class App : System.Windows.Application
     public SettingsService Settings { get; } = new();
     public LogService Log { get; } = new();
     public OculusRuntimeService Oculus { get; } = new();
+    public OculusDebugToolService DebugTool { get; }
     public StartupRegistrationService StartupRegistration { get; } = new();
+
+    public App()
+    {
+        InitializeComponent();
+        DebugTool = new OculusDebugToolService(Oculus);
+    }
 
     protected override void OnStartup(StartupEventArgs e)
     {
