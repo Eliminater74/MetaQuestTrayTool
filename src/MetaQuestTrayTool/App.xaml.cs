@@ -21,6 +21,7 @@ public partial class App : System.Windows.Application
     public OculusRuntimeService Oculus { get; } = new();
     public OculusDebugToolService DebugTool { get; }
     public ProfileService Profiles { get; }
+    public GameLibraryService Library { get; } = new();
     public LinkSettingsService Link { get; } = new();
     public AudioDeviceService Audio { get; } = new();
     public PowerPlanService Power { get; } = new();
