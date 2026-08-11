@@ -48,9 +48,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Phase 5 — power / USB
 
-- [ ] Power plan switch while VR is running
-- [ ] USB selective suspend option
-- [ ] Restart `OVRService` after sleep
+- [x] Power plan switch while VR is running
+- [x] USB selective suspend option
+- [x] Restart `OVRService` after sleep
 
 ## Housekeeping
 

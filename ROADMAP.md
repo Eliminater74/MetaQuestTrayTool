@@ -53,17 +53,23 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 
 ### Phase 5 — Power and USB
 
-- Switch Windows power plan while VR is active
-- USB selective suspend
-- Restart `OVRService` after resume from sleep
+- [x] Switch Windows power plan while VR / Oculus service is active
+- [x] USB selective suspend option
+- [x] Restart `OVRService` after resume from sleep
+- [x] Tray + power settings window
 
-### Later
+## Later
 
 - Steam / Meta library scan and launch
 - Hotkeys
 - Optional voice commands (low priority)
 - ADB helpers for Quest
 - Elevated helper process so the tray app itself stays unelevated
+- Profile ignore-list
+- FOV multiplier UI
+- Detect wired Link vs Air Link
+- Dynamic bitrate max UI
+- Separate communications audio devices
 
 ## Non-goals for now
 

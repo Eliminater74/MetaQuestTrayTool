@@ -10,5 +10,6 @@ public sealed class AppSettings
     public GameSettings DefaultGameSettings { get; set; } = new();
     public LinkSettings LinkSettings { get; set; } = new();
     public AudioSwitchSettings Audio { get; set; } = new();
+    public PowerSettings Power { get; set; } = new();
     public List<GameProfile> Profiles { get; set; } = [];
 }

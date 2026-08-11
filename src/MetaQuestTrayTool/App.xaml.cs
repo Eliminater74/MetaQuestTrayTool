@@ -13,6 +13,7 @@ public partial class App : System.Windows.Application
     private TrayIconHost? _tray;
     private ProcessWatcherService? _processWatcher;
     private AudioSwitchWatcher? _audioWatcher;
+    private PowerWatchService? _powerWatcher;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -22,6 +23,7 @@ public partial class App : System.Windows.Application
     public ProfileService Profiles { get; }
     public LinkSettingsService Link { get; } = new();
     public AudioDeviceService Audio { get; } = new();
+    public PowerPlanService Power { get; } = new();
     public StartupRegistrationService StartupRegistration { get; } = new();
 
     public App()
@@ -90,10 +92,14 @@ public partial class App : System.Windows.Application
 
         _audioWatcher = new AudioSwitchWatcher(this);
         _audioWatcher.Start();
+
+        _powerWatcher = new PowerWatchService(this);
+        _powerWatcher.Start();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _powerWatcher?.Dispose();
         _audioWatcher?.Dispose();
         _processWatcher?.Dispose();
         _tray?.Dispose();

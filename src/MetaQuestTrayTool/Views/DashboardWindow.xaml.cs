@@ -76,6 +76,16 @@ public partial class DashboardWindow : Window
         RefreshStatus();
     }
 
+    private void PowerSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new PowerSettingsWindow
+        {
+            Owner = this
+        };
+        window.ShowDialog();
+        RefreshStatus();
+    }
+
     private void ApplyGameSettings_Click(object sender, RoutedEventArgs e)
     {
         var result = App.Instance.DebugTool.Apply(App.Instance.Settings.Current.DefaultGameSettings);

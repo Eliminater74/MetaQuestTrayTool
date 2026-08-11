@@ -16,6 +16,7 @@ public sealed class TrayIconHost : IDisposable
     private ProfilesWindow? _profiles;
     private LinkSettingsWindow? _linkSettings;
     private AudioSettingsWindow? _audioSettings;
+    private PowerSettingsWindow? _powerSettings;
 
     public TrayIconHost(App app)
     {
@@ -96,7 +97,7 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(BuildProfilesMenu());
         menu.Items.Add(BuildLinkMenu());
         menu.Items.Add(BuildAudioMenu());
-        menu.Items.Add(PlaceholderItem("Power Plan"));
+        menu.Items.Add(BuildPowerMenu());
         menu.Items.Add(new ToolStripSeparator());
 
         var startWithWindows = new ToolStripMenuItem("Start with Windows")
@@ -161,6 +162,7 @@ public sealed class TrayIconHost : IDisposable
         RebuildProfileItems(menu);
         SyncLinkChecks(menu);
         SyncAudioChecks(menu);
+        SyncPowerChecks(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
     }
 
@@ -587,6 +589,81 @@ public sealed class TrayIconHost : IDisposable
         _audioSettings.Show();
         _audioSettings.Activate();
         _audioSettings.WindowState = WindowState.Normal;
+    }
+
+    private ToolStripMenuItem BuildPowerMenu()
+    {
+        var menu = new ToolStripMenuItem("Power Plan") { Name = "PowerMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open power settings…", null, (_, _) => ShowPowerSettings()));
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        var auto = new ToolStripMenuItem("Auto-switch with Oculus service")
+        {
+            Name = "PowerAutoSwitch",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.Power.AutoSwitchEnabled
+        };
+        auto.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.Power.AutoSwitchEnabled = auto.Checked;
+            _app.Settings.Save();
+            _app.Log.Info(auto.Checked ? "Power plan auto-switch enabled." : "Power plan auto-switch disabled.");
+        };
+
+        var sleep = new ToolStripMenuItem("Restart OVRService after sleep")
+        {
+            Name = "PowerRestartAfterSleep",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.Power.RestartServiceAfterSleep
+        };
+        sleep.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.Power.RestartServiceAfterSleep = sleep.Checked;
+            _app.Settings.Save();
+        };
+
+        menu.DropDownItems.Add(auto);
+        menu.DropDownItems.Add(sleep);
+        menu.DropDownItems.Add(new ToolStripMenuItem("Apply VR plan now", null, (_, _) =>
+        {
+            var result = _app.Power.ApplyVrPlan(_app.Settings.Current.Power);
+            _app.Settings.Save();
+            _app.Log.Info(result);
+            Notify("Power", result);
+        }));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Restore fallback plan", null, (_, _) =>
+        {
+            var result = _app.Power.RestoreFallbackPlan(_app.Settings.Current.Power);
+            _app.Log.Info(result);
+            Notify("Power", result);
+        }));
+        return menu;
+    }
+
+    private void SyncPowerChecks(ContextMenuStrip root)
+    {
+        if (FindItem(root.Items, "PowerAutoSwitch") is ToolStripMenuItem auto)
+        {
+            auto.Checked = _app.Settings.Current.Power.AutoSwitchEnabled;
+        }
+
+        if (FindItem(root.Items, "PowerRestartAfterSleep") is ToolStripMenuItem sleep)
+        {
+            sleep.Checked = _app.Settings.Current.Power.RestartServiceAfterSleep;
+        }
+    }
+
+    private void ShowPowerSettings()
+    {
+        if (_powerSettings is null || !_powerSettings.IsLoaded)
+        {
+            _powerSettings = new PowerSettingsWindow();
+            _powerSettings.Closed += (_, _) => _powerSettings = null;
+        }
+
+        _powerSettings.Show();
+        _powerSettings.Activate();
+        _powerSettings.WindowState = WindowState.Normal;
     }
 
     private static string FormatSuperSampling(double value) =>

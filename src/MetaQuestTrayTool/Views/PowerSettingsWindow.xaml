@@ -1,0 +1,54 @@
+<Window x:Class="MetaQuestTrayTool.Views.PowerSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Power Plan"
+        Height="420"
+        Width="520"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="20">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
+      <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"/>
+      <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+    </StackPanel>
+
+    <StackPanel>
+      <TextBlock Text="Power Plan"
+                 FontSize="22"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource AppAccentBrush}"/>
+      <TextBlock x:Name="ActivePlanText"
+                 Margin="0,6,0,16"
+                 TextWrapping="Wrap"
+                 Foreground="{StaticResource AppMutedBrush}"/>
+
+      <CheckBox x:Name="AutoSwitchBox"
+                Margin="0,0,0,8"
+                Foreground="{StaticResource AppTextBrush}"
+                Content="Auto-switch with Oculus service"/>
+
+      <CheckBox x:Name="UsbBox"
+                Margin="0,0,0,8"
+                Foreground="{StaticResource AppTextBrush}"
+                Content="Disable USB selective suspend while VR plan is active"/>
+
+      <CheckBox x:Name="SleepBox"
+                Margin="0,0,0,12"
+                Foreground="{StaticResource AppTextBrush}"
+                Content="Restart OVRService after the PC wakes from sleep"/>
+
+      <TextBlock Text="VR power plan" Foreground="{StaticResource AppMutedBrush}"/>
+      <ComboBox x:Name="VrPlanBox" Margin="0,4,0,12" Padding="6"/>
+
+      <TextBlock Text="Fallback power plan" Foreground="{StaticResource AppMutedBrush}"/>
+      <ComboBox x:Name="FallbackPlanBox" Margin="0,4,0,8" Padding="6"/>
+
+      <Button Content="Use current plan as fallback"
+              HorizontalAlignment="Left"
+              Style="{StaticResource GhostButtonStyle}"
+              Click="CaptureFallback_Click"/>
+    </StackPanel>
+  </DockPanel>
+</Window>
