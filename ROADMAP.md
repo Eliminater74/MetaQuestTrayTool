@@ -27,11 +27,11 @@ Mostly done. Tray + dashboard can push pixel density and ASW through `OculusDebu
 
 Per-game overrides, the other half of OTT.
 
-- Create / edit / delete profiles (name, process, SS, ASW, FOV, CPU priority, notes)
-- Profile list on the dashboard and tray
-- Watch running processes and apply the matching profile
-- Restore defaults when the game exits
-- Ignore-list for noisy processes
+- [x] Create / edit / delete profiles (name, process, SS, ASW, FOV, CPU priority, notes)
+- [x] Profile list on the dashboard and tray
+- [ ] Watch running processes and apply the matching profile
+- [ ] Restore defaults when the game exits
+- [ ] Ignore-list for noisy processes
 
 ### Phase 3 — Quest Link / Air Link
 

@@ -28,6 +28,9 @@
       <Button Content="Restart Service"
               Style="{StaticResource GhostButtonStyle}"
               Click="RestartService_Click"/>
+      <Button Content="Profiles"
+              Style="{StaticResource GhostButtonStyle}"
+              Click="Profiles_Click"/>
       <Button Content="Apply Game Settings"
               Style="{StaticResource AccentButtonStyle}"
               Click="ApplyGameSettings_Click"/>

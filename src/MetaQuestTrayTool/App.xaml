@@ -46,6 +46,19 @@
       </Style.Triggers>
     </Style>
 
+    <Style TargetType="TextBox">
+      <Setter Property="Background" Value="#0B1220"/>
+      <Setter Property="Foreground" Value="{StaticResource AppTextBrush}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}"/>
+      <Setter Property="CaretBrush" Value="{StaticResource AppAccentBrush}"/>
+    </Style>
+
+    <Style TargetType="ComboBox">
+      <Setter Property="Background" Value="#0B1220"/>
+      <Setter Property="Foreground" Value="{StaticResource AppTextBrush}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}"/>
+    </Style>
+
     <Style x:Key="GhostButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
       <Setter Property="Background" Value="#243049"/>
       <Style.Triggers>

@@ -13,6 +13,7 @@ public sealed class TrayIconHost : IDisposable
     private Icon? _icon;
     private DashboardWindow? _dashboard;
     private AboutWindow? _about;
+    private ProfilesWindow? _profiles;
 
     public TrayIconHost(App app)
     {
@@ -90,7 +91,7 @@ public sealed class TrayIconHost : IDisposable
 
         menu.Items.Add(BuildGameSettingsMenu());
 
-        menu.Items.Add(PlaceholderItem("Profiles"));
+        menu.Items.Add(BuildProfilesMenu());
         menu.Items.Add(PlaceholderItem("Quest Link / Air Link"));
         menu.Items.Add(PlaceholderItem("Audio Switching"));
         menu.Items.Add(PlaceholderItem("Power Plan"));
@@ -150,6 +151,7 @@ public sealed class TrayIconHost : IDisposable
         }
 
         SyncGameSettingChecks(menu);
+        RebuildProfileItems(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
     }
 
@@ -270,6 +272,68 @@ public sealed class TrayIconHost : IDisposable
 
         Notify("Game Settings", result.Summary);
         _dashboard?.RefreshStatus();
+        _profiles?.Reload();
+    }
+
+    private ToolStripMenuItem BuildProfilesMenu()
+    {
+        var menu = new ToolStripMenuItem("Profiles") { Name = "ProfilesMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Manage profiles…", null, (_, _) => ShowProfiles()));
+        menu.DropDownItems.Add(new ToolStripSeparator { Name = "ProfilesSeparator" });
+        return menu;
+    }
+
+    private void RebuildProfileItems(ContextMenuStrip root)
+    {
+        if (FindItem(root.Items, "ProfilesMenu") is not ToolStripMenuItem menu)
+        {
+            return;
+        }
+
+        for (var i = menu.DropDownItems.Count - 1; i >= 0; i--)
+        {
+            if (menu.DropDownItems[i].Name?.StartsWith("Profile_", StringComparison.Ordinal) == true)
+            {
+                menu.DropDownItems.RemoveAt(i);
+            }
+        }
+
+        foreach (var profile in _app.Profiles.All.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var captured = profile;
+            menu.DropDownItems.Add(new ToolStripMenuItem($"{profile.Name}  ({profile.ProcessName})", null, (_, _) =>
+            {
+                var result = _app.DebugTool.Apply(captured.Settings);
+                _app.Log.Info($"Applied profile '{captured.Name}': {result.Summary}");
+                Notify("Profile", result.Summary);
+                _dashboard?.RefreshStatus();
+            })
+            {
+                Name = "Profile_" + profile.Name.Replace(' ', '_')
+            });
+        }
+
+        if (_app.Profiles.All.Count == 0)
+        {
+            menu.DropDownItems.Add(new ToolStripMenuItem("No profiles yet")
+            {
+                Name = "Profile_Empty",
+                Enabled = false
+            });
+        }
+    }
+
+    private void ShowProfiles()
+    {
+        if (_profiles is null || !_profiles.IsLoaded)
+        {
+            _profiles = new ProfilesWindow();
+            _profiles.Closed += (_, _) => _profiles = null;
+        }
+
+        _profiles.Show();
+        _profiles.Activate();
+        _profiles.WindowState = WindowState.Normal;
     }
 
     private static string FormatSuperSampling(double value) =>

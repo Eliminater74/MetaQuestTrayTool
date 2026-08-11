@@ -26,9 +26,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Phase 2 — profiles
 
-- [ ] Profile model + JSON store
-- [ ] Profile editor window
-- [ ] Tray submenu of saved profiles
+- [x] Profile model + JSON store
+- [x] Profile editor window
+- [x] Tray submenu of saved profiles
 - [ ] Process watcher that applies a profile on game launch
 - [ ] Restore defaults when the watched process exits
 - [ ] CPU priority for the detected process

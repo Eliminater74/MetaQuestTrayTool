@@ -44,6 +44,15 @@ public partial class DashboardWindow : Window
     private void StopService_Click(object sender, RoutedEventArgs e) => RunService(App.Instance.Oculus.Stop);
     private void RestartService_Click(object sender, RoutedEventArgs e) => RunService(App.Instance.Oculus.Restart);
 
+    private void Profiles_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new ProfilesWindow
+        {
+            Owner = this
+        };
+        window.Show();
+    }
+
     private void ApplyGameSettings_Click(object sender, RoutedEventArgs e)
     {
         var result = App.Instance.DebugTool.Apply(App.Instance.Settings.Current.DefaultGameSettings);
