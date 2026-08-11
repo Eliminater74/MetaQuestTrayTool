@@ -151,4 +151,27 @@ public partial class App : System.Windows.Application
     {
         return typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0";
     }
+
+    public string ApplyProfile(GameProfile profile)
+    {
+        var result = DebugTool.Apply(profile.Settings);
+        var summary = result.Summary;
+        if (profile.Link.HasAny)
+        {
+            var merged = profile.Link.Overlay(Settings.Current.LinkSettings);
+            var link = Link.Apply(merged, deleteUnsetOverrides: true);
+            summary += " " + (link.Succeeded
+                ? profile.Link.Describe() + " (reconnect Link if the stream does not change)."
+                : link.Summary);
+        }
+
+        return summary;
+    }
+
+    public string RestoreGlobalDefaults()
+    {
+        var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
+        var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+        return $"{result.Summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}). {link.Summary}";
+    }
 }

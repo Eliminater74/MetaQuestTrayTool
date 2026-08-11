@@ -133,8 +133,8 @@ public partial class ProfilesWindow : Window
             return;
         }
 
-        var result = App.Instance.DebugTool.Apply(profile.Settings);
-        App.Instance.Log.Info($"Applied personal profile '{profile.Name}': {result.Summary}");
+        var summary = App.Instance.ApplyProfile(profile);
+        App.Instance.Log.Info($"Applied personal profile '{profile.Name}': {summary}");
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
@@ -178,7 +178,7 @@ public partial class ProfilesWindow : Window
                 GamePlatform.Meta => "Meta",
                 _ => "Custom"
             };
-            return $"{Profile.Name}  ·  {platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}";
+            return $"{Profile.Name}  ·  {platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}  ·  {Profile.Link.Describe()}";
         }
     }
 }

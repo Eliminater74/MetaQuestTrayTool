@@ -2,54 +2,86 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Personal profile"
-        Height="560"
-        Width="500"
-        ResizeMode="NoResize"
+        Width="520"
+        MinHeight="620"
+        Height="700"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}">
-  <DockPanel Margin="20">
-    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+  <DockPanel Margin="24">
+    <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Margin="0,20,0,0">
       <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
       <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="Cancel_Click"/>
     </StackPanel>
 
-    <StackPanel>
-      <TextBlock x:Name="ScopeText"
-                 Margin="0,0,0,12"
-                 TextWrapping="Wrap"
-                 Foreground="{DynamicResource AppMutedBrush}"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <StackPanel>
+        <TextBlock Text="Personal profile"
+                   FontSize="22"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource AppAccentBrush}"/>
+        <TextBlock x:Name="ScopeText"
+                   Margin="0,8,0,20"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource AppMutedBrush}"/>
 
-      <TextBlock Text="Name" Foreground="{DynamicResource AppMutedBrush}"/>
-      <TextBox x:Name="NameBox" Margin="0,4,0,12" Padding="8,6"/>
+        <TextBlock Text="Name" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBox x:Name="NameBox" Margin="0,0,0,16"/>
 
-      <TextBlock Text="Process name (without .exe)" Foreground="{DynamicResource AppMutedBrush}"/>
-      <DockPanel Margin="0,4,0,12">
-        <Button DockPanel.Dock="Right"
-                Content="From library"
-                Margin="8,0,0,0"
-                Style="{StaticResource GhostButtonStyle}"
-                Click="BrowseLibrary_Click"/>
-        <TextBox x:Name="ProcessBox" Padding="8,6"/>
-      </DockPanel>
+        <TextBlock Text="Process name (without .exe)" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <DockPanel Margin="0,0,0,16">
+          <Button DockPanel.Dock="Right"
+                  Content="From library"
+                  Margin="8,0,0,0"
+                  Style="{StaticResource GhostButtonStyle}"
+                  Click="BrowseLibrary_Click"/>
+          <TextBox x:Name="ProcessBox"/>
+        </DockPanel>
 
-      <TextBlock Text="Platform" Foreground="{DynamicResource AppMutedBrush}"/>
-      <ComboBox x:Name="PlatformBox" Margin="0,4,0,12" Padding="6"/>
+        <TextBlock Text="Platform" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="PlatformBox" Margin="0,0,0,16"/>
 
-      <TextBlock Text="Super Sampling" Foreground="{DynamicResource AppMutedBrush}"/>
-      <ComboBox x:Name="SuperSamplingBox" Margin="0,4,0,12" Padding="6"/>
+        <TextBlock Text="Super Sampling" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16"/>
 
-      <TextBlock Text="ASW mode" Foreground="{DynamicResource AppMutedBrush}"/>
-      <ComboBox x:Name="AswBox" Margin="0,4,0,12" Padding="6"/>
+        <TextBlock Text="ASW mode" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="AswBox" Margin="0,0,0,16"/>
 
-      <TextBlock Text="FOV multiplier (1.00 = unchanged)" Foreground="{DynamicResource AppMutedBrush}"/>
-      <TextBox x:Name="FovBox" Margin="0,4,0,12" Padding="8,6" Text="1.00"/>
+        <TextBlock Text="FOV multiplier" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBox x:Name="FovBox" Margin="0,0,0,4" Text="1.00"/>
+        <TextBlock Text="1.00 leaves FOV unchanged. Range 0.50 – 1.50."
+                   Foreground="{DynamicResource AppMutedBrush}"
+                   FontSize="12"
+                   Margin="0,0,0,16"/>
 
-      <TextBlock Text="CPU priority" Foreground="{DynamicResource AppMutedBrush}"/>
-      <ComboBox x:Name="PriorityBox" Margin="0,4,0,12" Padding="6"/>
+        <TextBlock Text="CPU priority" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="PriorityBox" Margin="0,0,0,20"/>
 
-      <TextBlock Text="Notes" Foreground="{DynamicResource AppMutedBrush}"/>
-      <TextBox x:Name="CommentsBox" Margin="0,4,0,0" Padding="8,6"/>
-    </StackPanel>
+        <TextBlock Text="Link overrides"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource AppAccentBrush}"
+                   Margin="0,0,0,6"/>
+        <TextBlock Text="Inherit keeps your global Quest Link page. Changing these writes HKCU\Software\Oculus\RemoteHeadset — reconnect Link if the stream does not update."
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource AppMutedBrush}"
+                   Margin="0,0,0,16"/>
+
+        <TextBlock Text="Link sharpening" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="SharpenBox" Margin="0,0,0,16"/>
+
+        <TextBlock Text="Encode bitrate" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="BitrateBox" Margin="0,0,0,16"/>
+
+        <TextBlock Text="Encode resolution" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="EncodeWidthBox" Margin="0,0,0,16"/>
+
+        <TextBlock Text="Notes" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBox x:Name="CommentsBox" Margin="0,0,0,8" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+      </StackPanel>
+    </ScrollViewer>
   </DockPanel>
 </Window>

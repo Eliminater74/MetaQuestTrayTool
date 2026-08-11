@@ -32,6 +32,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Process watcher that applies a profile on game launch
 - [x] Restore defaults when the watched process exits
 - [x] CPU priority for the detected process
+- [x] Optional Link overrides on personal profiles (sharpening, bitrate, encode width)
 
 ## Phase 3 — Quest Link / Air Link
 

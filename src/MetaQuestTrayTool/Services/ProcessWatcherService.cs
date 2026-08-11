@@ -96,17 +96,17 @@ public sealed class ProcessWatcherService : IDisposable
 
     private void ApplyProfile(GameProfile profile, string processName)
     {
-        var result = _app.DebugTool.Apply(profile.Settings);
+        var summary = _app.ApplyProfile(profile);
         TrySetPriority(processName, profile.CpuPriority);
         _activeProcess = processName;
         _activeProfileName = profile.Name;
-        _app.Log.Info($"Detected {processName}.exe — applied profile '{profile.Name}'. {result.Summary}");
+        _app.Log.Info($"Detected {processName}.exe — applied profile '{profile.Name}'. {summary}");
     }
 
     private void RestoreDefaults(string processName)
     {
-        var result = _app.DebugTool.Apply(_app.Settings.Current.DefaultGameSettings);
-        _app.Log.Info($"{processName}.exe exited — restored default game settings. {result.Summary}");
+        var summary = _app.RestoreGlobalDefaults();
+        _app.Log.Info($"{processName}.exe exited — restored global defaults. {summary}");
         _activeProcess = null;
         _activeProfileName = null;
     }

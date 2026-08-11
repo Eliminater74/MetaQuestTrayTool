@@ -24,6 +24,7 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
 - Tray **Game Settings**: Super Sampling and ASW, applied through `OculusDebugToolCLI.exe`
 - Create / edit / delete / apply **profiles** from the tray or shell
+- Personal profiles can override **Link sharpening / bitrate / encode width** (inherit keeps global Quest Link settings; restored when the game exits)
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
 - **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening via `HKCU\Software\Oculus\RemoteHeadset`
 - **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops

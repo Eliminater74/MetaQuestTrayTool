@@ -12,6 +12,14 @@ public sealed class GameProfile
     public string? AppId { get; set; }
     public string? InstallPath { get; set; }
     public GameSettings Settings { get; set; } = new();
+
+    private LinkProfileOverrides _link = new();
+    public LinkProfileOverrides Link
+    {
+        get => _link;
+        set => _link = value ?? new();
+    }
+
     public string CpuPriority { get; set; } = "Normal";
     public string? Comments { get; set; }
 }

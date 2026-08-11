@@ -28,6 +28,7 @@ Tray + dashboard push pixel density and ASW through `OculusDebugToolCLI.exe`.
 - [x] Watch running processes and apply the matching profile
 - [x] Restore defaults when the game exits
 - [x] CPU priority for the detected process
+- [x] Optional Link overrides on personal profiles (sharpening, bitrate, encode width; inherit = keep global)
 - [ ] Ignore-list for noisy processes
 
 ### Phase 3 — Quest Link / Air Link

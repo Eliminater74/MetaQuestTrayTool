@@ -40,16 +40,44 @@ public partial class ProfileEditorWindow : Window
         PlatformBox.Items.Add(GamePlatform.Steam);
         PlatformBox.Items.Add(GamePlatform.Meta);
 
+        SharpenBox.Items.Add(new ComboBoxItem { Content = "Inherit (use global)", Tag = LinkSharpeningMode.Default });
+        SharpenBox.Items.Add(new ComboBoxItem { Content = "Off", Tag = LinkSharpeningMode.Disabled });
+        SharpenBox.Items.Add(new ComboBoxItem { Content = "Normal", Tag = LinkSharpeningMode.Normal });
+        SharpenBox.Items.Add(new ComboBoxItem { Content = "Quality", Tag = LinkSharpeningMode.Quality });
+
+        BitrateBox.Items.Add(new ComboBoxItem { Content = "Inherit (use global)", Tag = null });
+        foreach (var bitrate in LinkSettings.BitratePresets)
+        {
+            BitrateBox.Items.Add(new ComboBoxItem
+            {
+                Content = bitrate <= 0 ? "Meta default" : $"{bitrate} Mbps",
+                Tag = bitrate
+            });
+        }
+
+        EncodeWidthBox.Items.Add(new ComboBoxItem { Content = "Inherit (use global)", Tag = null });
+        foreach (var width in LinkSettings.EncodeWidthPresets)
+        {
+            EncodeWidthBox.Items.Add(new ComboBoxItem
+            {
+                Content = width <= 0 ? "Auto / default" : width.ToString(),
+                Tag = width
+            });
+        }
+
         NameBox.Text = profile.Name;
         ProcessBox.Text = profile.ProcessName;
         PlatformBox.SelectedItem = profile.Platform;
         ScopeText.Text = profile.Scope == ProfileScope.Personal
-            ? "Scope: Personal app profile (overrides global defaults while this process runs)"
+            ? "Scope: Personal app profile (overrides global defaults while this process runs)."
             : "Scope: Global";
         FovBox.Text = profile.Settings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
         CommentsBox.Text = profile.Comments ?? string.Empty;
         SelectByTag(SuperSamplingBox, profile.Settings.SuperSampling);
         SelectByTag(AswBox, profile.Settings.AswMode);
+        SelectByTag(SharpenBox, profile.Link.Sharpening);
+        SelectNullableInt(BitrateBox, profile.Link.BitrateMbps);
+        SelectNullableInt(EncodeWidthBox, profile.Link.EncodeResolutionWidth);
         PriorityBox.SelectedItem = Priorities.Contains(profile.CpuPriority) ? profile.CpuPriority : "Normal";
     }
 
@@ -107,6 +135,15 @@ public partial class ProfileEditorWindow : Window
             ? mode
             : AswMode.Inherit;
         Profile.Settings.FovMultiplier = fov;
+        Profile.Link.Sharpening = SharpenBox.SelectedItem is ComboBoxItem { Tag: LinkSharpeningMode sharpen }
+            ? sharpen
+            : LinkSharpeningMode.Default;
+        Profile.Link.BitrateMbps = BitrateBox.SelectedItem is ComboBoxItem bitrateItem && bitrateItem.Tag is int bitrate
+            ? bitrate
+            : null;
+        Profile.Link.EncodeResolutionWidth = EncodeWidthBox.SelectedItem is ComboBoxItem encodeItem && encodeItem.Tag is int width
+            ? width
+            : null;
         Profile.CpuPriority = PriorityBox.SelectedItem as string ?? "Normal";
         Profile.Comments = string.IsNullOrWhiteSpace(CommentsBox.Text) ? null : CommentsBox.Text.Trim();
         DialogResult = true;
@@ -135,5 +172,25 @@ public partial class ProfileEditorWindow : Window
         {
             box.SelectedIndex = 0;
         }
+    }
+
+    private static void SelectNullableInt(System.Windows.Controls.ComboBox box, int? value)
+    {
+        foreach (ComboBoxItem item in box.Items)
+        {
+            if (value is null && item.Tag is null)
+            {
+                box.SelectedItem = item;
+                return;
+            }
+
+            if (value is int selected && item.Tag is int tag && tag == selected)
+            {
+                box.SelectedItem = item;
+                return;
+            }
+        }
+
+        box.SelectedIndex = 0;
     }
 }

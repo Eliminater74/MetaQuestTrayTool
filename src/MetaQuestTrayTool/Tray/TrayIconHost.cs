@@ -339,9 +339,9 @@ public sealed class TrayIconHost : IDisposable
             var captured = profile;
             menu.DropDownItems.Add(new ToolStripMenuItem($"{profile.Name}  ({profile.ProcessName})", null, (_, _) =>
             {
-                var result = _app.DebugTool.Apply(captured.Settings);
-                _app.Log.Info($"Applied profile '{captured.Name}': {result.Summary}");
-                Notify("Profile", result.Summary);
+                var summary = _app.ApplyProfile(captured);
+                _app.Log.Info($"Applied profile '{captured.Name}': {summary}");
+                Notify("Profile", summary);
                 _shell?.RefreshActivePage();
             })
             {
