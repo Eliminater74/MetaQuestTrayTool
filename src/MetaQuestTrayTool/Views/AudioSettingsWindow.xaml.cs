@@ -9,6 +9,16 @@ public partial class AudioSettingsWindow : Window
     public AudioSettingsWindow()
     {
         InitializeComponent();
+        TriggerBox.Items.Add(new ComboBoxItem
+        {
+            Content = "Headset audio device (recommended for Air Link / USB Link)",
+            Tag = AudioSwitchTrigger.LinkAudioDevice
+        });
+        TriggerBox.Items.Add(new ComboBoxItem
+        {
+            Content = "Oculus service running (legacy)",
+            Tag = AudioSwitchTrigger.OculusService
+        });
         ReloadDevices();
     }
 
@@ -20,7 +30,11 @@ public partial class AudioSettingsWindow : Window
         Populate(FallbackPlaybackBox, AudioDeviceKind.Playback, audio.FallbackPlaybackDeviceId);
         Populate(FallbackRecordingBox, AudioDeviceKind.Recording, audio.FallbackRecordingDeviceId);
         AutoSwitchBox.IsChecked = audio.AutoSwitchEnabled;
+        CaptureEachSessionBox.IsChecked = audio.CaptureFallbackOnEachLinkSession;
         CommunicationsBox.IsChecked = audio.AlsoSetCommunicationsRole;
+        SelectTrigger(audio.Trigger);
+        StatusText.Text = App.Instance.Audio.DescribeLinkAudioState(audio)
+                          + " Pick your speakers/mic as fallback so hardware returns after Link disconnects.";
     }
 
     private void Populate(System.Windows.Controls.ComboBox box, AudioDeviceKind kind, string? selectedId)
@@ -31,9 +45,10 @@ public partial class AudioSettingsWindow : Window
         foreach (var device in App.Instance.Audio.ListDevices(kind))
         {
             var marker = device.IsDefaultMultimedia ? "  [default]" : string.Empty;
+            var headset = App.Instance.Audio.LooksLikeHeadset(device) ? "  [headset]" : string.Empty;
             box.Items.Add(new ComboBoxItem
             {
-                Content = device.Name + marker,
+                Content = device.Name + marker + headset,
                 Tag = device.Id
             });
         }
@@ -50,12 +65,27 @@ public partial class AudioSettingsWindow : Window
         box.SelectedIndex = 0;
     }
 
+    private void SelectTrigger(AudioSwitchTrigger trigger)
+    {
+        foreach (ComboBoxItem item in TriggerBox.Items)
+        {
+            if (item.Tag is AudioSwitchTrigger value && value == trigger)
+            {
+                TriggerBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        TriggerBox.SelectedIndex = 0;
+    }
+
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         WriteToSettings();
         App.Instance.Settings.Save();
         App.Instance.Log.Info("Saved audio switching settings.");
         System.Windows.MessageBox.Show(this, "Audio settings saved.", App.AppName);
+        ReloadDevices();
     }
 
     private void SwitchVr_Click(object sender, RoutedEventArgs e)
@@ -91,7 +121,11 @@ public partial class AudioSettingsWindow : Window
     {
         var audio = App.Instance.Settings.Current.Audio;
         audio.AutoSwitchEnabled = AutoSwitchBox.IsChecked == true;
+        audio.CaptureFallbackOnEachLinkSession = CaptureEachSessionBox.IsChecked == true;
         audio.AlsoSetCommunicationsRole = CommunicationsBox.IsChecked == true;
+        audio.Trigger = TriggerBox.SelectedItem is ComboBoxItem triggerItem && triggerItem.Tag is AudioSwitchTrigger trigger
+            ? trigger
+            : AudioSwitchTrigger.LinkAudioDevice;
         audio.VrPlaybackDeviceId = SelectedId(VrPlaybackBox);
         audio.VrRecordingDeviceId = SelectedId(VrRecordingBox);
         audio.FallbackPlaybackDeviceId = SelectedId(FallbackPlaybackBox);

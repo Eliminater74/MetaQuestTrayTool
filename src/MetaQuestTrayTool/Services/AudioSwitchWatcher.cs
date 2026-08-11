@@ -1,16 +1,18 @@
 using System.Windows.Threading;
+using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
 /// <summary>
-/// Switches to configured VR audio devices while OVRService is running,
-/// then restores fallback devices when the service stops.
+/// Switches to VR audio while Link is active, then restores desktop hardware when Link drops.
+/// Default trigger watches headset audio endpoints — not OVRService — because the service often
+/// stays running after Air Link / USB Link disconnects.
 /// </summary>
 public sealed class AudioSwitchWatcher : IDisposable
 {
     private readonly App _app;
     private readonly DispatcherTimer _timer;
-    private bool? _wasRunning;
+    private bool? _wasActive;
     private bool _vrDevicesActive;
 
     public AudioSwitchWatcher(App app)
@@ -18,7 +20,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(3)
+            Interval = TimeSpan.FromSeconds(2)
         };
         _timer.Tick += (_, _) => Poll();
     }
@@ -32,45 +34,57 @@ public sealed class AudioSwitchWatcher : IDisposable
         var settings = _app.Settings.Current.Audio;
         if (!settings.AutoSwitchEnabled)
         {
-            _wasRunning = null;
+            _wasActive = null;
             return;
         }
 
-        _app.Oculus.Refresh();
-        var running = _app.Oculus.IsServiceRunning;
-
-        if (_wasRunning is null)
+        var active = IsSessionActive(settings);
+        if (_wasActive is null)
         {
-            _wasRunning = running;
-            if (running && !_vrDevicesActive)
+            _wasActive = active;
+            if (active && !_vrDevicesActive)
             {
-                SwitchToVr("Oculus service is already running.");
+                SwitchToVr("Link audio session already active.");
             }
 
             return;
         }
 
-        if (running == _wasRunning)
+        if (active == _wasActive)
         {
             return;
         }
 
-        _wasRunning = running;
-        if (running)
+        _wasActive = active;
+        if (active)
         {
-            SwitchToVr("Oculus service started.");
+            SwitchToVr("Link / headset audio became active.");
         }
         else
         {
-            RestoreFallback("Oculus service stopped.");
+            RestoreFallback("Link / headset audio became inactive.");
         }
+    }
+
+    private bool IsSessionActive(AudioSwitchSettings settings) =>
+        settings.Trigger switch
+        {
+            AudioSwitchTrigger.OculusService => IsOculusServiceRunning(),
+            _ => _app.Audio.IsLinkAudioSessionActive(settings)
+        };
+
+    private bool IsOculusServiceRunning()
+    {
+        _app.Oculus.Refresh();
+        return _app.Oculus.IsServiceRunning;
     }
 
     private void SwitchToVr(string reason)
     {
         var audio = _app.Settings.Current.Audio;
-        if (string.IsNullOrWhiteSpace(audio.FallbackPlaybackDeviceId)
-            && string.IsNullOrWhiteSpace(audio.FallbackRecordingDeviceId))
+        if (audio.CaptureFallbackOnEachLinkSession
+            || (string.IsNullOrWhiteSpace(audio.FallbackPlaybackDeviceId)
+                && string.IsNullOrWhiteSpace(audio.FallbackRecordingDeviceId)))
         {
             var captured = _app.Audio.CaptureCurrentAsFallback(audio);
             _app.Settings.Save();
@@ -86,6 +100,6 @@ public sealed class AudioSwitchWatcher : IDisposable
     {
         var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
         _vrDevicesActive = false;
-        _app.Log.Info($"{reason} Restored fallback audio. {result}");
+        _app.Log.Info($"{reason} Restored desktop/fallback audio. {result}");
     }
 }

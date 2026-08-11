@@ -534,7 +534,7 @@ public sealed class TrayIconHost : IDisposable
         menu.DropDownItems.Add(new ToolStripMenuItem("Open audio settings…", null, (_, _) => ShowAudioSettings()));
         menu.DropDownItems.Add(new ToolStripSeparator());
 
-        var auto = new ToolStripMenuItem("Auto-switch with Oculus service")
+        var auto = new ToolStripMenuItem("Auto-switch on Link active/inactive")
         {
             Name = "AudioAutoSwitch",
             CheckOnClick = true,

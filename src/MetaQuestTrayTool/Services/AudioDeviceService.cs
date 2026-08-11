@@ -6,6 +6,15 @@ namespace MetaQuestTrayTool.Services;
 
 public sealed class AudioDeviceService
 {
+    private static readonly string[] HeadsetNameHints =
+    [
+        "oculus",
+        "quest",
+        "rift",
+        "meta virtual audio",
+        "headphones (oculus"
+    ];
+
     public IReadOnlyList<AudioDeviceInfo> ListDevices(AudioDeviceKind kind)
     {
         using var enumerator = new MMDeviceEnumerator();
@@ -45,9 +54,49 @@ public sealed class AudioDeviceService
             .ToList();
     }
 
-    public AudioDeviceInfo? GetDefault(AudioDeviceKind kind)
+    public AudioDeviceInfo? GetDefault(AudioDeviceKind kind, bool communications = false)
     {
-        return ListDevices(kind).FirstOrDefault(device => device.IsDefaultMultimedia);
+        return ListDevices(kind).FirstOrDefault(device =>
+            communications ? device.IsDefaultCommunications : device.IsDefaultMultimedia);
+    }
+
+    public bool IsDeviceActive(string? deviceId)
+    {
+        if (string.IsNullOrWhiteSpace(deviceId))
+        {
+            return false;
+        }
+
+        return ListDevices(AudioDeviceKind.Playback)
+            .Concat(ListDevices(AudioDeviceKind.Recording))
+            .Any(device => device.Id.Equals(deviceId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public bool LooksLikeHeadset(AudioDeviceInfo device) =>
+        HeadsetNameHints.Any(hint => device.Name.Contains(hint, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// True while Air Link / USB Link audio endpoints are present.
+    /// This is more accurate than watching OVRService, which often stays running after Link ends.
+    /// </summary>
+    public bool IsLinkAudioSessionActive(AudioSwitchSettings settings)
+    {
+        var playback = ListDevices(AudioDeviceKind.Playback);
+        if (!string.IsNullOrWhiteSpace(settings.VrPlaybackDeviceId))
+        {
+            return playback.Any(device => device.Id.Equals(settings.VrPlaybackDeviceId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return playback.Any(LooksLikeHeadset);
+    }
+
+    public string DescribeLinkAudioState(AudioSwitchSettings settings)
+    {
+        var active = IsLinkAudioSessionActive(settings);
+        var playbackDefault = GetDefault(AudioDeviceKind.Playback)?.Name ?? "none";
+        return active
+            ? $"Link audio active. Default playback: {playbackDefault}"
+            : $"Link audio inactive. Default playback: {playbackDefault}";
     }
 
     public string SetDefault(string deviceId, bool includeCommunications)
@@ -64,22 +113,61 @@ public sealed class AudioDeviceService
         }
     }
 
+    public string SetCommunicationsDefault(string deviceId)
+    {
+        try
+        {
+            PolicyConfig.SetDefaultEndpoint(deviceId, setMultimedia: false, setCommunications: true);
+            var name = FindName(deviceId) ?? deviceId;
+            return $"Default communications device set to '{name}'.";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not set communications device: {ex.Message}";
+        }
+    }
+
     public string ApplyVrDevices(AudioSwitchSettings settings)
     {
         var messages = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(settings.VrPlaybackDeviceId))
         {
-            messages.Add(SetDefault(settings.VrPlaybackDeviceId, settings.AlsoSetCommunicationsRole));
+            if (!IsDeviceActive(settings.VrPlaybackDeviceId))
+            {
+                messages.Add("VR playback device is not active yet (headset may still be connecting).");
+            }
+            else
+            {
+                messages.Add(SetDefault(settings.VrPlaybackDeviceId, includeCommunications: false));
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(settings.VrRecordingDeviceId))
         {
-            messages.Add(SetDefault(settings.VrRecordingDeviceId, settings.AlsoSetCommunicationsRole));
+            if (IsDeviceActive(settings.VrRecordingDeviceId))
+            {
+                messages.Add(SetDefault(settings.VrRecordingDeviceId, includeCommunications: false));
+            }
+        }
+
+        if (settings.AlsoSetCommunicationsRole)
+        {
+            var commPlayback = settings.VrCommunicationsPlaybackDeviceId ?? settings.VrPlaybackDeviceId;
+            var commRecording = settings.VrCommunicationsRecordingDeviceId ?? settings.VrRecordingDeviceId;
+            if (!string.IsNullOrWhiteSpace(commPlayback) && IsDeviceActive(commPlayback))
+            {
+                messages.Add(SetCommunicationsDefault(commPlayback));
+            }
+
+            if (!string.IsNullOrWhiteSpace(commRecording) && IsDeviceActive(commRecording))
+            {
+                messages.Add(SetCommunicationsDefault(commRecording));
+            }
         }
 
         return messages.Count == 0
-            ? "No VR audio devices are configured."
+            ? "No VR audio devices are configured or active."
             : string.Join(" ", messages);
     }
 
@@ -87,25 +175,74 @@ public sealed class AudioDeviceService
     {
         var messages = new List<string>();
 
-        if (!string.IsNullOrWhiteSpace(settings.FallbackPlaybackDeviceId))
+        if (!string.IsNullOrWhiteSpace(settings.FallbackPlaybackDeviceId)
+            && IsDeviceActive(settings.FallbackPlaybackDeviceId))
         {
-            messages.Add(SetDefault(settings.FallbackPlaybackDeviceId, settings.AlsoSetCommunicationsRole));
+            messages.Add(SetDefault(settings.FallbackPlaybackDeviceId, includeCommunications: false));
         }
 
-        if (!string.IsNullOrWhiteSpace(settings.FallbackRecordingDeviceId))
+        if (!string.IsNullOrWhiteSpace(settings.FallbackRecordingDeviceId)
+            && IsDeviceActive(settings.FallbackRecordingDeviceId))
         {
-            messages.Add(SetDefault(settings.FallbackRecordingDeviceId, settings.AlsoSetCommunicationsRole));
+            messages.Add(SetDefault(settings.FallbackRecordingDeviceId, includeCommunications: false));
+        }
+
+        if (settings.AlsoSetCommunicationsRole)
+        {
+            var commPlayback = settings.FallbackCommunicationsPlaybackDeviceId ?? settings.FallbackPlaybackDeviceId;
+            var commRecording = settings.FallbackCommunicationsRecordingDeviceId ?? settings.FallbackRecordingDeviceId;
+            if (!string.IsNullOrWhiteSpace(commPlayback) && IsDeviceActive(commPlayback))
+            {
+                messages.Add(SetCommunicationsDefault(commPlayback));
+            }
+
+            if (!string.IsNullOrWhiteSpace(commRecording) && IsDeviceActive(commRecording))
+            {
+                messages.Add(SetCommunicationsDefault(commRecording));
+            }
         }
 
         return messages.Count == 0
-            ? "No fallback audio devices are configured."
+            ? "No fallback audio devices are configured or currently available."
             : string.Join(" ", messages);
     }
 
     public string CaptureCurrentAsFallback(AudioSwitchSettings settings)
     {
-        settings.FallbackPlaybackDeviceId = GetDefault(AudioDeviceKind.Playback)?.Id;
-        settings.FallbackRecordingDeviceId = GetDefault(AudioDeviceKind.Recording)?.Id;
+        var playback = GetDefault(AudioDeviceKind.Playback);
+        var recording = GetDefault(AudioDeviceKind.Recording);
+        var commPlayback = GetDefault(AudioDeviceKind.Playback, communications: true);
+        var commRecording = GetDefault(AudioDeviceKind.Recording, communications: true);
+
+        // Never store the headset itself as the fallback.
+        if (playback is not null
+            && !IsConfiguredVrDevice(settings, playback.Id)
+            && !LooksLikeHeadset(playback))
+        {
+            settings.FallbackPlaybackDeviceId = playback.Id;
+        }
+
+        if (recording is not null
+            && !IsConfiguredVrDevice(settings, recording.Id)
+            && !LooksLikeHeadset(recording))
+        {
+            settings.FallbackRecordingDeviceId = recording.Id;
+        }
+
+        if (commPlayback is not null
+            && !IsConfiguredVrDevice(settings, commPlayback.Id)
+            && !LooksLikeHeadset(commPlayback))
+        {
+            settings.FallbackCommunicationsPlaybackDeviceId = commPlayback.Id;
+        }
+
+        if (commRecording is not null
+            && !IsConfiguredVrDevice(settings, commRecording.Id)
+            && !LooksLikeHeadset(commRecording))
+        {
+            settings.FallbackCommunicationsRecordingDeviceId = commRecording.Id;
+        }
+
         return $"Stored fallback playback='{FindName(settings.FallbackPlaybackDeviceId) ?? "none"}', recording='{FindName(settings.FallbackRecordingDeviceId) ?? "none"}'.";
     }
 
@@ -121,4 +258,10 @@ public sealed class AudioDeviceService
             .FirstOrDefault(device => device.Id.Equals(deviceId, StringComparison.OrdinalIgnoreCase))
             ?.Name;
     }
+
+    private static bool IsConfiguredVrDevice(AudioSwitchSettings settings, string deviceId) =>
+        string.Equals(settings.VrPlaybackDeviceId, deviceId, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(settings.VrRecordingDeviceId, deviceId, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(settings.VrCommunicationsPlaybackDeviceId, deviceId, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(settings.VrCommunicationsRecordingDeviceId, deviceId, StringComparison.OrdinalIgnoreCase);
 }

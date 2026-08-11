@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Audio Switching"
-        Height="520"
-        Width="560"
+        Height="640"
+        Width="600"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner">
   <DockPanel Margin="20">
@@ -14,42 +14,52 @@
       <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
     </StackPanel>
 
-    <StackPanel>
-      <TextBlock Text="Audio Switching"
-                 FontSize="22"
-                 FontWeight="SemiBold"
-                 Foreground="{StaticResource AppAccentBrush}"/>
-      <TextBlock Margin="0,6,0,16"
-                 TextWrapping="Wrap"
-                 Foreground="{StaticResource AppMutedBrush}"
-                 Text="When auto-switch is on, VR devices are applied while OVRService is running and fallback devices are restored when it stops."/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <StackPanel>
+        <TextBlock Text="Audio Switching"
+                   FontSize="22"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource AppAccentBrush}"/>
+        <TextBlock x:Name="StatusText"
+                   Margin="0,6,0,16"
+                   TextWrapping="Wrap"
+                   Foreground="{StaticResource AppMutedBrush}"/>
 
-      <CheckBox x:Name="AutoSwitchBox"
-                Margin="0,0,0,8"
-                Foreground="{StaticResource AppTextBrush}"
-                Content="Auto-switch with Oculus service"/>
+        <CheckBox x:Name="AutoSwitchBox"
+                  Margin="0,0,0,8"
+                  Foreground="{StaticResource AppTextBrush}"
+                  Content="Auto-switch when Link is active / inactive"/>
 
-      <CheckBox x:Name="CommunicationsBox"
-                Margin="0,0,0,12"
-                Foreground="{StaticResource AppTextBrush}"
-                Content="Also set Communications role"/>
+        <TextBlock Text="Detect Link using" Foreground="{StaticResource AppMutedBrush}"/>
+        <ComboBox x:Name="TriggerBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="VR playback device" Foreground="{StaticResource AppMutedBrush}"/>
-      <ComboBox x:Name="VrPlaybackBox" Margin="0,4,0,12" Padding="6"/>
+        <CheckBox x:Name="CaptureEachSessionBox"
+                  Margin="0,0,0,8"
+                  Foreground="{StaticResource AppTextBrush}"
+                  Content="Capture current desktop devices as fallback each time Link connects"/>
 
-      <TextBlock Text="VR recording device" Foreground="{StaticResource AppMutedBrush}"/>
-      <ComboBox x:Name="VrRecordingBox" Margin="0,4,0,12" Padding="6"/>
+        <CheckBox x:Name="CommunicationsBox"
+                  Margin="0,0,0,12"
+                  Foreground="{StaticResource AppTextBrush}"
+                  Content="Also restore / set Communications role"/>
 
-      <TextBlock Text="Fallback playback device" Foreground="{StaticResource AppMutedBrush}"/>
-      <ComboBox x:Name="FallbackPlaybackBox" Margin="0,4,0,12" Padding="6"/>
+        <TextBlock Text="VR playback (while Link active)" Foreground="{StaticResource AppMutedBrush}"/>
+        <ComboBox x:Name="VrPlaybackBox" Margin="0,4,0,12" Padding="6"/>
 
-      <TextBlock Text="Fallback recording device" Foreground="{StaticResource AppMutedBrush}"/>
-      <ComboBox x:Name="FallbackRecordingBox" Margin="0,4,0,8" Padding="6"/>
+        <TextBlock Text="VR recording (while Link active)" Foreground="{StaticResource AppMutedBrush}"/>
+        <ComboBox x:Name="VrRecordingBox" Margin="0,4,0,12" Padding="6"/>
 
-      <Button Content="Use current defaults as fallback"
-              HorizontalAlignment="Left"
-              Style="{StaticResource GhostButtonStyle}"
-              Click="CaptureFallback_Click"/>
-    </StackPanel>
+        <TextBlock Text="Fallback playback (when Link inactive)" Foreground="{StaticResource AppMutedBrush}"/>
+        <ComboBox x:Name="FallbackPlaybackBox" Margin="0,4,0,12" Padding="6"/>
+
+        <TextBlock Text="Fallback recording (when Link inactive)" Foreground="{StaticResource AppMutedBrush}"/>
+        <ComboBox x:Name="FallbackRecordingBox" Margin="0,4,0,8" Padding="6"/>
+
+        <Button Content="Use current defaults as fallback"
+                HorizontalAlignment="Left"
+                Style="{StaticResource GhostButtonStyle}"
+                Click="CaptureFallback_Click"/>
+      </StackPanel>
+    </ScrollViewer>
   </DockPanel>
 </Window>

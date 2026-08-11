@@ -46,10 +46,17 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 ### Phase 4 — Audio switching
 
 - [x] List playback / recording devices
-- [x] Switch to headset devices when Oculus service starts
-- [x] Restore fallback devices when the service stops
+- [x] Switch to headset devices when Link audio becomes active
+- [x] Restore fallback devices when Link audio disappears
 - [x] Tray + audio settings window
-- [ ] Optional separate communications devices (currently one toggle for communications role)
+- [x] Trigger modes: Link audio device (default) or Oculus service
+- [ ] Optional separate communications device pickers in the UI
+
+### Phase 2 / library polish
+
+- [x] Steam + Meta library scan
+- [x] Add personal profiles from library
+- [x] Global defaults editor vs personal per-app profiles
 
 ### Phase 5 — Power and USB
 
@@ -60,7 +67,6 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 
 ## Later
 
-- Steam / Meta library scan and launch
 - Hotkeys
 - Optional voice commands (low priority)
 - ADB helpers for Quest
@@ -69,7 +75,8 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - FOV multiplier UI
 - Detect wired Link vs Air Link
 - Dynamic bitrate max UI
-- Separate communications audio devices
+- Separate communications audio device pickers in the UI
+- Launch games directly from the library picker
 
 ## Non-goals for now
 

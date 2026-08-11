@@ -17,6 +17,11 @@ internal static class PolicyConfig
 
     public static void SetDefaultEndpoint(string deviceId, bool includeCommunications)
     {
+        SetDefaultEndpoint(deviceId, setMultimedia: true, setCommunications: includeCommunications);
+    }
+
+    public static void SetDefaultEndpoint(string deviceId, bool setMultimedia, bool setCommunications)
+    {
         object? comObject = null;
         try
         {
@@ -28,9 +33,13 @@ internal static class PolicyConfig
                 throw new InvalidOperationException("Could not cast PolicyConfig COM object to IPolicyConfig.");
             }
 
-            Marshal.ThrowExceptionForHR(policy.SetDefaultEndpoint(deviceId, ERole.Console));
-            Marshal.ThrowExceptionForHR(policy.SetDefaultEndpoint(deviceId, ERole.Multimedia));
-            if (includeCommunications)
+            if (setMultimedia)
+            {
+                Marshal.ThrowExceptionForHR(policy.SetDefaultEndpoint(deviceId, ERole.Console));
+                Marshal.ThrowExceptionForHR(policy.SetDefaultEndpoint(deviceId, ERole.Multimedia));
+            }
+
+            if (setCommunications)
             {
                 Marshal.ThrowExceptionForHR(policy.SetDefaultEndpoint(deviceId, ERole.Communications));
             }
