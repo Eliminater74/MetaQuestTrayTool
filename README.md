@@ -4,7 +4,16 @@ Windows tray utility for Meta Quest / Oculus Link. This is a **new C# project**,
 
 Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
-## What this first build does
+## Project docs
+
+| File | Use when you need to… |
+| --- | --- |
+| [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
+| [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
+
+Update both files whenever a phase ships so they stay useful after a break.
+
+## What works now (v0.1)
 
 - Runs in the notification area with a right-click popup menu
 - Opens a small dashboard on left-click / Open Dashboard
