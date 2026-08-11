@@ -47,6 +47,9 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
             HudBox.Items.Add(new ComboBoxItem { Content = FormatHud(hud), Tag = hud });
         }
 
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "Meta / Oculus", Tag = OpenXrRuntimeKind.Meta });
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "SteamVR", Tag = OpenXrRuntimeKind.SteamVr });
+
         SuperSamplingBox.SelectionChanged += (_, _) => PersistIfReady();
         AswBox.SelectionChanged += (_, _) => PersistIfReady();
         AdaptiveGpuBox.SelectionChanged += (_, _) => PersistIfReady();
@@ -55,6 +58,9 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         OffsetMipBox.SelectionChanged += (_, _) => PersistIfReady();
         FovStencilBox.SelectionChanged += (_, _) => PersistIfReady();
         HudBox.SelectionChanged += (_, _) => PersistIfReady();
+        OpenXrBox.SelectionChanged += (_, _) => PersistOpenXr();
+        OpenXrOnStartBox.Checked += (_, _) => PersistOpenXr();
+        OpenXrOnStartBox.Unchecked += (_, _) => PersistOpenXr();
         ApplyOnStartBox.Checked += (_, _) => PersistFlags();
         ApplyOnStartBox.Unchecked += (_, _) => PersistFlags();
         AutoApplyBox.Checked += (_, _) => PersistFlags();
@@ -77,6 +83,12 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         FovVBox.Text = game.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
         ApplyOnStartBox.IsChecked = settings.ApplyGameSettingsOnStart;
         AutoApplyBox.IsChecked = settings.AutoApplyProfiles;
+        SelectByTag(OpenXrBox, settings.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+            ? OpenXrRuntimeKind.Meta
+            : settings.OpenXr.PreferredRuntime);
+        OpenXrOnStartBox.IsChecked = settings.OpenXr.ApplyOnStart;
+        OpenXrStatusText.Text = App.Instance.OpenXr.Describe()
+            + "  Writes HKLM\\SOFTWARE\\Khronos\\OpenXR\\1\\ActiveRuntime (may prompt for Administrator).";
         StatusText.Text = BuildStatus();
     }
 
@@ -152,6 +164,39 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         }
 
         TryWriteAll(showErrors: false);
+        App.Instance.Settings.Save();
+    }
+
+    private void SwitchOpenXr_Click(object sender, RoutedEventArgs e)
+    {
+        PersistOpenXr();
+        if (OpenXrBox.SelectedItem is not ComboBoxItem { Tag: OpenXrRuntimeKind kind }
+            || kind is OpenXrRuntimeKind.Inherit)
+        {
+            return;
+        }
+
+        var result = App.Instance.OpenXr.Set(kind);
+        App.Instance.Log.Info(result);
+        OpenXrStatusText.Text = App.Instance.OpenXr.Describe() + "  " + result;
+        System.Windows.MessageBox.Show(Window.GetWindow(this), result, App.AppName);
+    }
+
+    private void PersistOpenXr()
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        var settings = App.Instance.Settings.Current.OpenXr;
+        if (OpenXrBox.SelectedItem is ComboBoxItem { Tag: OpenXrRuntimeKind kind }
+            && kind is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            settings.PreferredRuntime = kind;
+        }
+
+        settings.ApplyOnStart = OpenXrOnStartBox.IsChecked == true;
         App.Instance.Settings.Save();
     }
 

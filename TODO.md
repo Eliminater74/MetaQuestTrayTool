@@ -63,6 +63,12 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] USB selective suspend option
 - [x] Restart `OVRService` after sleep
 
+## Phase 7 — OpenXR switch (v0.7)
+
+- [x] Meta vs SteamVR ActiveRuntime registry switch
+- [x] Global + personal profile OpenXR choice
+- [x] Restore previous / global runtime when the game exits
+
 ## Phase 6 — OTT-style shell (v0.6)
 
 - [x] Sidebar MainShell with OTT tab layout

@@ -146,6 +146,7 @@ public sealed class TrayIconHost : IDisposable
 
         menu.Items.Add(BuildProfilesMenu());
         menu.Items.Add(BuildLinkMenu());
+        menu.Items.Add(BuildOpenXrMenu());
         menu.Items.Add(BuildAudioMenu());
         menu.Items.Add(BuildPowerMenu());
         menu.Items.Add(new ToolStripSeparator());
@@ -215,9 +216,10 @@ public sealed class TrayIconHost : IDisposable
         SyncGameSettingChecks(menu);
         RebuildProfileItems(menu);
         SyncLinkChecks(menu);
+        SyncOpenXrChecks(menu);
         SyncAudioChecks(menu);
         SyncPowerChecks(menu);
-        _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
+        _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}\nOpenXR: {OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
     }
 
     private ToolStripMenuItem BuildGameSettingsMenu()
@@ -580,6 +582,70 @@ public sealed class TrayIconHost : IDisposable
         _linkSettings.Show();
         _linkSettings.Activate();
         _linkSettings.WindowState = WindowState.Normal;
+    }
+
+    private ToolStripMenuItem BuildOpenXrMenu()
+    {
+        var menu = new ToolStripMenuItem("OpenXR Runtime") { Name = "OpenXrMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Status: Unknown") { Enabled = false, Name = "OpenXrStatus" });
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        var meta = new ToolStripMenuItem("Meta / Oculus") { Name = "OpenXrMeta" };
+        meta.Click += (_, _) => SwitchOpenXr(OpenXrRuntimeKind.Meta);
+        var steam = new ToolStripMenuItem("SteamVR") { Name = "OpenXrSteam" };
+        steam.Click += (_, _) => SwitchOpenXr(OpenXrRuntimeKind.SteamVr);
+
+        var applyOnStart = new ToolStripMenuItem("Apply preferred on app start")
+        {
+            Name = "OpenXrApplyOnStart",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.OpenXr.ApplyOnStart
+        };
+        applyOnStart.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.OpenXr.ApplyOnStart = applyOnStart.Checked;
+            _app.Settings.Save();
+        };
+
+        menu.DropDownItems.Add(meta);
+        menu.DropDownItems.Add(steam);
+        menu.DropDownItems.Add(new ToolStripSeparator());
+        menu.DropDownItems.Add(applyOnStart);
+        return menu;
+    }
+
+    private void SyncOpenXrChecks(ContextMenuStrip root)
+    {
+        var live = _app.OpenXr.ReadActiveKind();
+        if (FindItem(root.Items, "OpenXrStatus") is ToolStripMenuItem status)
+        {
+            status.Text = _app.OpenXr.Describe();
+        }
+
+        if (FindItem(root.Items, "OpenXrMeta") is ToolStripMenuItem meta)
+        {
+            meta.Checked = live == OpenXrRuntimeKind.Meta;
+        }
+
+        if (FindItem(root.Items, "OpenXrSteam") is ToolStripMenuItem steam)
+        {
+            steam.Checked = live == OpenXrRuntimeKind.SteamVr;
+        }
+
+        if (FindItem(root.Items, "OpenXrApplyOnStart") is ToolStripMenuItem applyOnStart)
+        {
+            applyOnStart.Checked = _app.Settings.Current.OpenXr.ApplyOnStart;
+        }
+    }
+
+    private void SwitchOpenXr(OpenXrRuntimeKind kind)
+    {
+        _app.Settings.Current.OpenXr.PreferredRuntime = kind;
+        _app.Settings.Save();
+        var result = _app.OpenXr.Set(kind);
+        _app.Log.Info(result);
+        Notify("OpenXR", result);
+        _shell?.RefreshActivePage();
     }
 
     private ToolStripMenuItem BuildAudioMenu()

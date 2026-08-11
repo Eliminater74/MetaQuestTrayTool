@@ -25,9 +25,15 @@ public partial class GlobalDefaultsWindow : Window
             AswBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
         }
 
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "Meta / Oculus", Tag = OpenXrRuntimeKind.Meta });
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "SteamVR", Tag = OpenXrRuntimeKind.SteamVr });
+
         var defaults = App.Instance.Settings.Current.DefaultGameSettings;
         SelectByTag(SuperSamplingBox, defaults.SuperSampling);
         SelectByTag(AswBox, defaults.AswMode);
+        SelectByTag(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+            ? OpenXrRuntimeKind.Meta
+            : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = defaults.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
     }
 
@@ -75,6 +81,12 @@ public partial class GlobalDefaultsWindow : Window
             ? mode
             : AswMode.Auto;
         settings.FovMultiplier = fov;
+        if (OpenXrBox.SelectedItem is ComboBoxItem { Tag: OpenXrRuntimeKind openXr }
+            && openXr is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            App.Instance.Settings.Current.OpenXr.PreferredRuntime = openXr;
+        }
+
         return true;
     }
 

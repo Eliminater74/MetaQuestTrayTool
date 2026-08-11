@@ -27,6 +27,7 @@ public partial class App : System.Windows.Application
     public LinkSettingsService Link { get; } = new();
     public AudioDeviceService Audio { get; } = new();
     public PowerPlanService Power { get; } = new();
+    public OpenXrRuntimeService OpenXr { get; } = new();
     public StartupRegistrationService StartupRegistration { get; } = new();
 
     public App()
@@ -114,6 +115,13 @@ public partial class App : System.Windows.Application
             Log.Info(Link.DescribeRegistryStatus());
         }
 
+        Log.Info(OpenXr.Describe());
+        if (Settings.Current.OpenXr.ApplyOnStart
+            && Settings.Current.OpenXr.PreferredRuntime is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            Log.Info(OpenXr.Set(Settings.Current.OpenXr.PreferredRuntime));
+        }
+
         if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
         {
             Log.Info(Power.ApplyVrPlan(Settings.Current.Power));
@@ -177,6 +185,12 @@ public partial class App : System.Windows.Application
                 : link.Summary);
         }
 
+        if (profile.OpenXrRuntime is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            OpenXr.CaptureBeforeProfile();
+            summary += " " + OpenXr.Set(profile.OpenXrRuntime);
+        }
+
         return summary;
     }
 
@@ -184,6 +198,7 @@ public partial class App : System.Windows.Application
     {
         var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
         var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        return $"{result.Summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}). {link.Summary}";
+        var openXr = OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime);
+        return $"{result.Summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}). {link.Summary} {openXr}";
     }
 }

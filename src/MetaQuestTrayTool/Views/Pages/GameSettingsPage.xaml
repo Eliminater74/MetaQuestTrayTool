@@ -7,6 +7,14 @@
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="Global defaults applied through OculusDebugToolCLI. Personal per-app profiles override these when a matching game launches."/>
 
+      <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+        <ComboBox x:Name="OpenXrBox" MaxWidth="280" MinWidth="220" Padding="6"/>
+        <Button Content="Switch now" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0" Click="SwitchOpenXr_Click"/>
+      </StackPanel>
+      <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,16"/>
+      <TextBlock x:Name="OpenXrStatusText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
+
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="220"/>

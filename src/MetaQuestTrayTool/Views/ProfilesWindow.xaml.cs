@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views;
 
@@ -178,7 +179,7 @@ public partial class ProfilesWindow : Window
                 GamePlatform.Meta => "Meta",
                 _ => "Custom"
             };
-            return $"{Profile.Name}  ·  {platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}  ·  {Profile.Link.Describe()}";
+            return $"{Profile.Name}  ·  {platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}  ·  {Profile.Link.Describe()}  ·  XR {OpenXrRuntimeService.Label(Profile.OpenXrRuntime)}";
         }
     }
 }

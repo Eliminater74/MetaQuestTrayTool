@@ -68,6 +68,13 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - [x] Restart `OVRService` after resume from sleep
 - [x] Tray + power settings window
 
+### Phase 7 — OpenXR runtime switch (v0.7)
+
+- [x] Detect Meta and SteamVR OpenXR JSON manifests
+- [x] Switch `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` (elevate if needed)
+- [x] Global preferred runtime + apply on start
+- [x] Per-game profile override with restore on exit
+
 ### Phase 6 — OTT-style settings shell (v0.6)
 
 Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Meta Link / OVRService stack.

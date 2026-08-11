@@ -55,6 +55,10 @@ public partial class ProfileEditorWindow : Window
             });
         }
 
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "Inherit (use global)", Tag = OpenXrRuntimeKind.Inherit });
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "Meta / Oculus", Tag = OpenXrRuntimeKind.Meta });
+        OpenXrBox.Items.Add(new ComboBoxItem { Content = "SteamVR", Tag = OpenXrRuntimeKind.SteamVr });
+
         EncodeWidthBox.Items.Add(new ComboBoxItem { Content = "Inherit (use global)", Tag = null });
         foreach (var width in LinkSettings.EncodeWidthPresets)
         {
@@ -78,6 +82,7 @@ public partial class ProfileEditorWindow : Window
         SelectByTag(SharpenBox, profile.Link.Sharpening);
         SelectNullableInt(BitrateBox, profile.Link.BitrateMbps);
         SelectNullableInt(EncodeWidthBox, profile.Link.EncodeResolutionWidth);
+        SelectByTag(OpenXrBox, profile.OpenXrRuntime);
         PriorityBox.SelectedItem = Priorities.Contains(profile.CpuPriority) ? profile.CpuPriority : "Normal";
     }
 
@@ -144,6 +149,9 @@ public partial class ProfileEditorWindow : Window
         Profile.Link.EncodeResolutionWidth = EncodeWidthBox.SelectedItem is ComboBoxItem encodeItem && encodeItem.Tag is int width
             ? width
             : null;
+        Profile.OpenXrRuntime = OpenXrBox.SelectedItem is ComboBoxItem { Tag: OpenXrRuntimeKind openXr }
+            ? openXr
+            : OpenXrRuntimeKind.Inherit;
         Profile.CpuPriority = PriorityBox.SelectedItem as string ?? "Normal";
         Profile.Comments = string.IsNullOrWhiteSpace(CommentsBox.Text) ? null : CommentsBox.Text.Trim();
         DialogResult = true;

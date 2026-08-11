@@ -20,6 +20,7 @@ public sealed class GameProfile
         set => _link = value ?? new();
     }
 
+    public OpenXrRuntimeKind OpenXrRuntime { get; set; } = OpenXrRuntimeKind.Inherit;
     public string CpuPriority { get; set; } = "Normal";
     public string? Comments { get; set; }
 }

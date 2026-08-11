@@ -41,6 +41,13 @@
       <TextBlock Text="1.00 leaves FOV unchanged. Typical range is 0.50 – 1.50."
                  Foreground="{DynamicResource AppMutedBrush}"
                  FontSize="12"
+                 Margin="0,0,0,16"/>
+
+      <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <ComboBox x:Name="OpenXrBox" Margin="0,0,0,4" HorizontalAlignment="Stretch"/>
+      <TextBlock Text="Used when a personal profile is set to Inherit, and when restoring after a game exits."
+                 Foreground="{DynamicResource AppMutedBrush}"
+                 FontSize="12"
                  Margin="0,0,0,8"/>
     </StackPanel>
   </DockPanel>

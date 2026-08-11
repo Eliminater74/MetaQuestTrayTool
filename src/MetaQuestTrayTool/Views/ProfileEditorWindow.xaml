@@ -58,7 +58,15 @@
                    Margin="0,0,0,16"/>
 
         <TextBlock Text="CPU priority" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="PriorityBox" Margin="0,0,0,20"/>
+        <ComboBox x:Name="PriorityBox" Margin="0,0,0,16"/>
+
+        <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <ComboBox x:Name="OpenXrBox" Margin="0,0,0,4"/>
+        <TextBlock Text="Inherit keeps the global Meta / SteamVR choice. A switch writes HKLM OpenXR ActiveRuntime and may prompt for Administrator."
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource AppMutedBrush}"
+                   FontSize="12"
+                   Margin="0,0,0,20"/>
 
         <TextBlock Text="Link overrides"
                    FontSize="16"
