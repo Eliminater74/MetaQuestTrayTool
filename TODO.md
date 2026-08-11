@@ -17,12 +17,12 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ## Phase 1 — game settings (Debug Tool CLI)
 
 - [x] `OculusDebugToolService` that writes a command file and runs `OculusDebugToolCLI.exe -f`
-- [ ] Super Sampling options on the tray menu
-- [ ] ASW mode options on the tray menu
-- [ ] Apply current defaults from the dashboard
-- [ ] Persist default SS / ASW / FOV
-- [ ] Show Debug Tool path and last apply result on the dashboard
-- [ ] Warn in the log when Meta rejects `server:` commands
+- [x] Super Sampling options on the tray menu
+- [x] ASW mode options on the tray menu
+- [x] Apply current defaults from the dashboard
+- [x] Persist default SS / ASW / FOV
+- [x] Show Debug Tool path and last apply result on the dashboard
+- [x] Warn in the log when Meta rejects `server:` commands
 
 ## Phase 2 — profiles
 

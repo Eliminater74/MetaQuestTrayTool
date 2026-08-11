@@ -13,7 +13,7 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
 Update both files whenever a phase ships so they stay useful after a break.
 
-## What works now (v0.1)
+## What works now (v0.1 + Phase 1)
 
 - Runs in the notification area with a right-click popup menu
 - Opens a small dashboard on left-click / Open Dashboard
@@ -21,8 +21,12 @@ Update both files whenever a phase ships so they stay useful after a break.
 - Start / stop / restart the Oculus runtime service
 - Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
 - Optional Start with Windows (current user Run key)
+- Tray **Game Settings**: Super Sampling and ASW, applied through `OculusDebugToolCLI.exe`
+- Dashboard **Apply Game Settings** and last-apply status
 
-Game profiles, supersampling, ASW, Quest Link / Air Link, audio switching, and power-plan tweaks are on the tray menu as placeholders for the next pass.
+Still placeholders: per-game profiles, Quest Link / Air Link, audio switching, and power-plan tweaks.
+
+Newer Meta runtimes sometimes reject `server:` ASW commands. The log will say so if that happens. Pixel density still needs a new VR session to take effect.
 
 ## Requirements
 

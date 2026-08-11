@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
+using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Views;
 
 namespace MetaQuestTrayTool.Tray;
@@ -87,11 +88,7 @@ public sealed class TrayIconHost : IDisposable
         serviceMenu.DropDownItems.Add(new ToolStripMenuItem("Status: Unknown") { Enabled = false, Name = "ServiceStatus" });
         menu.Items.Add(serviceMenu);
 
-        var gameSettings = new ToolStripMenuItem("Game Settings");
-        gameSettings.DropDownItems.Add(PlaceholderItem("Super Sampling"));
-        gameSettings.DropDownItems.Add(PlaceholderItem("ASW Mode"));
-        gameSettings.DropDownItems.Add(PlaceholderItem("CPU Priority"));
-        menu.Items.Add(gameSettings);
+        menu.Items.Add(BuildGameSettingsMenu());
 
         menu.Items.Add(PlaceholderItem("Profiles"));
         menu.Items.Add(PlaceholderItem("Quest Link / Air Link"));
@@ -147,8 +144,151 @@ public sealed class TrayIconHost : IDisposable
             notifications.Checked = _app.Settings.Current.ShowNotifications;
         }
 
+        if (FindItem(menu.Items, "ApplyOnStart") is ToolStripMenuItem applyOnStart)
+        {
+            applyOnStart.Checked = _app.Settings.Current.ApplyGameSettingsOnStart;
+        }
+
+        SyncGameSettingChecks(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}";
     }
+
+    private ToolStripMenuItem BuildGameSettingsMenu()
+    {
+        var gameSettings = new ToolStripMenuItem("Game Settings");
+
+        var ssMenu = new ToolStripMenuItem("Super Sampling") { Name = "SuperSamplingMenu" };
+        foreach (var value in GameSettings.SuperSamplingPresets)
+        {
+            var label = FormatSuperSampling(value);
+            var item = new ToolStripMenuItem(label)
+            {
+                Name = SuperSamplingItemName(value),
+                Tag = value
+            };
+            var captured = value;
+            item.Click += (_, _) =>
+            {
+                _app.Settings.Current.DefaultGameSettings.SuperSampling = captured;
+                ApplyGameSettings();
+            };
+            ssMenu.DropDownItems.Add(item);
+        }
+
+        var aswMenu = new ToolStripMenuItem("ASW Mode") { Name = "AswModeMenu" };
+        foreach (AswMode mode in Enum.GetValues<AswMode>())
+        {
+            var item = new ToolStripMenuItem(FormatAswMode(mode))
+            {
+                Name = AswItemName(mode),
+                Tag = mode
+            };
+            var captured = mode;
+            item.Click += (_, _) =>
+            {
+                _app.Settings.Current.DefaultGameSettings.AswMode = captured;
+                ApplyGameSettings();
+            };
+            aswMenu.DropDownItems.Add(item);
+        }
+
+        var applyOnStart = new ToolStripMenuItem("Apply defaults when the app starts")
+        {
+            Name = "ApplyOnStart",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.ApplyGameSettingsOnStart
+        };
+        applyOnStart.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.ApplyGameSettingsOnStart = applyOnStart.Checked;
+            _app.Settings.Save();
+        };
+
+        gameSettings.DropDownItems.Add(ssMenu);
+        gameSettings.DropDownItems.Add(aswMenu);
+        gameSettings.DropDownItems.Add(PlaceholderItem("CPU Priority"));
+        gameSettings.DropDownItems.Add(new ToolStripSeparator());
+        gameSettings.DropDownItems.Add(new ToolStripMenuItem("Apply now", null, (_, _) => ApplyGameSettings()));
+        gameSettings.DropDownItems.Add(applyOnStart);
+        return gameSettings;
+    }
+
+    private void SyncGameSettingChecks(ContextMenuStrip menu)
+    {
+        var current = _app.Settings.Current.DefaultGameSettings;
+
+        if (FindItem(menu.Items, "SuperSamplingMenu") is ToolStripMenuItem ssMenu)
+        {
+            foreach (ToolStripItem item in ssMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is double value)
+                {
+                    menuItem.Checked = Math.Abs(value - current.SuperSampling) < 0.001;
+                }
+            }
+        }
+
+        if (FindItem(menu.Items, "AswModeMenu") is ToolStripMenuItem aswMenu)
+        {
+            foreach (ToolStripItem item in aswMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is AswMode mode)
+                {
+                    menuItem.Checked = mode == current.AswMode;
+                }
+            }
+        }
+    }
+
+    private void ApplyGameSettings()
+    {
+        _app.Settings.Save();
+        var result = _app.DebugTool.Apply(_app.Settings.Current.DefaultGameSettings);
+
+        if (!result.CliFound || !result.Started)
+        {
+            _app.Log.Error(result.Summary);
+        }
+        else if (result.LooksRejected)
+        {
+            _app.Log.Warn(result.Summary);
+        }
+        else
+        {
+            _app.Log.Info(result.Summary);
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Output))
+        {
+            _app.Log.Info("ODT: " + Truncate(result.Output));
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            _app.Log.Warn("ODT error: " + Truncate(result.Error));
+        }
+
+        Notify("Game Settings", result.Summary);
+        _dashboard?.RefreshStatus();
+    }
+
+    private static string FormatSuperSampling(double value) =>
+        value <= 0 ? "Off (no override)" : value.ToString("0.0");
+
+    private static string FormatAswMode(AswMode mode) => mode switch
+    {
+        AswMode.Inherit => "Inherit (leave unchanged)",
+        AswMode.Off => "Off",
+        AswMode.Auto => "Auto",
+        AswMode.Clock45 => "45 FPS",
+        _ => mode.ToString()
+    };
+
+    private static string SuperSamplingItemName(double value) => $"SS_{value:0.0}";
+    private static string AswItemName(AswMode mode) => $"ASW_{mode}";
+
+    private static string Truncate(string text, int max = 240) =>
+        text.Length <= max ? text : text[..max] + "…";
 
     private void RunServiceAction(Func<string> action)
     {

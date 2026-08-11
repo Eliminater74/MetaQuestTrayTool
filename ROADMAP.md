@@ -8,18 +8,20 @@ Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (Apolly
 
 Done. The app lives in the notification area, opens a dashboard, tracks `OVRService`, and stores settings.
 
-## Next
+## In progress
 
 ### Phase 1 — Game settings via Oculus Debug Tool CLI
 
-OTT's main job: push pixel density and ASW into the runtime without opening the Debug Tool GUI.
+Mostly done. Tray + dashboard can push pixel density and ASW through `OculusDebugToolCLI.exe`.
 
-- Apply supersampling (`service set-pixels-per-display-pixel-override`)
-- Apply ASW (`server:asw.Off` / `Auto` / `Clock45`)
-- Optional FOV multiplier (`service set-client-fov-tan-angle-multiplier`)
-- Tray submenu to change defaults and apply now
-- Persist last-used defaults in `settings.json`
-- Log CLI stdout/stderr. Newer Meta builds may reject `server:` commands — surface that clearly
+- [x] Apply supersampling (`service set-pixels-per-display-pixel-override`)
+- [x] Apply ASW (`server:asw.Off` / `Auto` / `Clock45`)
+- [x] Tray submenu to change defaults and apply now
+- [x] Persist last-used defaults in `settings.json`
+- [x] Log CLI stdout/stderr and warn when Meta rejects `server:` commands
+- [ ] FOV multiplier UI (CLI command is already sent when the stored value is not 1.0)
+
+## Next
 
 ### Phase 2 — Profiles
 

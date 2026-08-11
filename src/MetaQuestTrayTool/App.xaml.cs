@@ -56,6 +56,15 @@ public partial class App : System.Windows.Application
         Log.Info($"{AppName} {GetVersion()} started.");
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
+        Log.Info(DebugTool.IsAvailable
+            ? $"Debug Tool CLI: {DebugTool.CliPath}"
+            : "Debug Tool CLI was not found.");
+
+        if (Settings.Current.ApplyGameSettingsOnStart && DebugTool.IsAvailable)
+        {
+            var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
+            Log.Info(result.Summary);
+        }
 
         _tray = new TrayIconHost(this);
         _tray.Show();
