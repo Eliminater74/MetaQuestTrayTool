@@ -19,6 +19,7 @@ public partial class App : System.Windows.Application
     public OculusRuntimeService Oculus { get; } = new();
     public OculusDebugToolService DebugTool { get; }
     public ProfileService Profiles { get; }
+    public LinkSettingsService Link { get; } = new();
     public StartupRegistrationService StartupRegistration { get; } = new();
 
     public App()
@@ -67,6 +68,16 @@ public partial class App : System.Windows.Application
         {
             var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
             Log.Info(result.Summary);
+        }
+
+        if (Settings.Current.ApplyLinkSettingsOnStart)
+        {
+            var linkResult = Link.Apply(Settings.Current.LinkSettings);
+            Log.Info(linkResult.Summary);
+        }
+        else
+        {
+            Log.Info(Link.DescribeRegistryStatus());
         }
 
         _tray = new TrayIconHost(this);

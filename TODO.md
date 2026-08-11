@@ -35,8 +35,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Phase 3 — Quest Link / Air Link
 
-- [ ] Link settings model (bitrate, encode resolution, dynamic bitrate)
-- [ ] Apply / read Link-related settings
+- [x] Link settings model (bitrate, encode resolution, dynamic bitrate)
+- [x] Apply / read Link-related settings
 - [ ] Tray + dashboard UI
 
 ## Phase 4 — audio
