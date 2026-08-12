@@ -66,7 +66,7 @@ Headset entries include:
 | `supportsOculusLink` | headset supports Link |
 | `serialNumber` | HMD serial |
 
-The tray **Info** page probes this file, plus Oculus USB VIDs (`VID_2833` / `VID_2BEC`), `server:EnumHmd`, and SteamVR / Virtual Desktop processes for Steam Link / VD sessions.
+The tray **Info** page probes this file, plus Oculus USB VIDs (`VID_2833` / `VID_2BEC`), `server:EnumHmd`, and SteamVR / Virtual Desktop processes for Steam Link / VD sessions. Meta often **auto-connects** when the headset wakes on Wi‑Fi (DeviceCache `connectionState=connected`) without launching the Link UI — and can stay `connected` + `inoperable` while **Steam Link** is the real streamer. The probe prefers live `vrserver` / VD processes unless a strong Meta signal is present (Link audio default, EnumHmd, or `rdConnectionState` connected).
 
 When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the tray automatically **skips** Meta Link registry writes and OculusDebugToolCLI (SS / ASW / FOV). Headset ADB, OpenXR, power, and audio still run — bitrate/codec for those streamers belongs in their own apps.
 

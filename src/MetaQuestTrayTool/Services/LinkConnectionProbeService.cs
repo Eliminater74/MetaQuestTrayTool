@@ -33,7 +33,9 @@ public sealed class LinkConnectionProbeService
 
     public VrConnectionStatus Probe(bool includeEnumHmd = true)
     {
-        var steamVr = IsProcessRunning("vrserver") || IsProcessRunning("vrmonitor");
+        // Quest Steam Link runs full SteamVR (vrserver). vrmonitor alone can be a leftover UI.
+        var steamVr = IsProcessRunning("vrserver")
+                      || (IsProcessRunning("vrmonitor") && IsProcessRunning("vrcompositor"));
         var virtualDesktop = IsProcessRunning("VirtualDesktop.Streamer")
                              || IsProcessRunning("VirtualDesktop.Server")
                              || IsProcessRunning("VirtualDesktop.Service");
@@ -50,18 +52,15 @@ public sealed class LinkConnectionProbeService
             // audio probe optional
         }
 
-        // Prefer Meta DeviceCache / HMD / Link-audio over leftover SteamVR processes.
-        var metaSession = LooksLikeActiveMetaSession(cache, metaHmd, audioLink);
+        // Healthy Meta Link wins only with a strong live signal. Meta often auto-connects when
+        // the headset wakes on Wi‑Fi (DeviceCache connected/primary) without launching Link —
+        // that must not hide an active Steam Link / SteamVR or Virtual Desktop session.
+        var strongMeta = LooksLikeStrongMetaSession(cache, metaHmd, audioLink);
+        var cacheMeta = LooksLikeActiveMetaSession(cache, metaHmd, audioLink);
 
-        if (metaSession)
+        if (strongMeta)
         {
             return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
-        }
-
-        var brokenMeta = TryDescribeBrokenMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop);
-        if (brokenMeta is not null)
-        {
-            return brokenMeta;
         }
 
         if (virtualDesktop)
@@ -84,11 +83,17 @@ public sealed class LinkConnectionProbeService
 
         if (steamVr)
         {
+            var staleMeta = cache is not null
+                            && (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase)
+                                || IsConnectedState(cache.ConnectionState, cache.RdConnectionState)
+                                || string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase));
             return new VrConnectionStatus
             {
                 Kind = VrConnectionKind.SteamLinkOrSteamVr,
                 Summary = "SteamVR session (Steam Link / SteamVR)",
-                Detail = "vrserver/vrmonitor running without an active Meta Link HMD",
+                Detail = staleMeta
+                    ? "SteamVR running — Meta DeviceCache may still show auto-connect/inoperable (normal; Steam Link is active)"
+                    : "vrserver running without an active Meta Link session",
                 SessionActive = true,
                 UsbHeadsetPresent = usb,
                 MetaHmdReported = metaHmd,
@@ -98,6 +103,18 @@ public sealed class LinkConnectionProbeService
                 HeadsetSerial = cache?.SerialNumber,
                 DeviceCacheConnectionState = cache?.ConnectionState
             };
+        }
+
+        // No Steam/VD — DeviceCache-only Meta (including auto-connect / broken) is fine to show.
+        if (cacheMeta)
+        {
+            return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
+        }
+
+        var brokenMeta = TryDescribeBrokenMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop);
+        if (brokenMeta is not null)
+        {
+            return brokenMeta;
         }
 
         if (cache?.IsUsingAirLink is bool lastAir)
@@ -157,9 +174,36 @@ public sealed class LinkConnectionProbeService
 
     public VrSessionCapabilities GetCapabilities() => VrSessionCapabilities.From(Probe());
 
-    private static bool LooksLikeActiveMetaSession(HeadsetCacheEntry? cache, bool metaHmd, bool audioLink)
+    /// <summary>
+    /// Live Meta Link stream signals that should beat SteamVR/VD process detection
+    /// (e.g. Meta Link + SteamVR OpenXR). DeviceCache auto-connect alone is not enough —
+    /// Meta often marks the headset connected when it wakes on Wi‑Fi without launching Link.
+    /// </summary>
+    private static bool LooksLikeStrongMetaSession(HeadsetCacheEntry? cache, bool metaHmd, bool audioLink)
     {
         if (metaHmd || audioLink)
+        {
+            return true;
+        }
+
+        if (cache is null)
+        {
+            return false;
+        }
+
+        if (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        // rdConnectionState tracks the actual remote-desktop / Link stream more reliably than
+        // connectionState, which Meta sets on headset wake / auto-connect.
+        return LooksConnected(cache.RdConnectionState);
+    }
+
+    private static bool LooksLikeActiveMetaSession(HeadsetCacheEntry? cache, bool metaHmd, bool audioLink)
+    {
+        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink))
         {
             return true;
         }
