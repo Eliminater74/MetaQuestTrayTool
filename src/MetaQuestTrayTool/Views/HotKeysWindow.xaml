@@ -47,10 +47,10 @@
 
       <ListView x:Name="BindingsList"
                 MinHeight="280"
-                BorderBrush="{DynamicResource AppBorderBrush}"
+                Style="{StaticResource ThemedListViewStyle}"
                 SelectionChanged="BindingsList_SelectionChanged">
         <ListView.View>
-          <GridView>
+          <GridView ColumnHeaderContainerStyle="{StaticResource ThemedGridViewColumnHeaderStyle}">
             <GridViewColumn Header="Action" Width="320" DisplayMemberBinding="{Binding ActionLabel}"/>
             <GridViewColumn Header="Shortcut" Width="220" DisplayMemberBinding="{Binding ChordLabel}"/>
           </GridView>

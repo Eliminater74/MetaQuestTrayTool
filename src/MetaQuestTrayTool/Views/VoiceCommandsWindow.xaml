@@ -41,9 +41,11 @@
         </StackPanel>
 
         <TextBlock Text="Supported phrases" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
-        <ListView x:Name="PhrasesList" MinHeight="240" BorderBrush="{DynamicResource AppBorderBrush}">
+        <ListView x:Name="PhrasesList"
+                  MinHeight="240"
+                  Style="{StaticResource ThemedListViewStyle}">
           <ListView.View>
-            <GridView>
+            <GridView ColumnHeaderContainerStyle="{StaticResource ThemedGridViewColumnHeaderStyle}">
               <GridViewColumn Header="Say this" Width="280" DisplayMemberBinding="{Binding Phrase}"/>
               <GridViewColumn Header="Action" Width="320" DisplayMemberBinding="{Binding ActionLabel}"/>
             </GridView>
