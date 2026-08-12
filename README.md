@@ -116,7 +116,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 ### 8. Tips
 
 - **Themes:** Pure Black (default), Dark, or Light — change on the **Tray Tool** page.
-- **Updates:** Tray Tool → Check for updates on start (on by default), or **Check now** / tray menu **Check for updates…**. Confirms, downloads the latest Setup.exe from GitHub, exits the app, then installs over the current location.
+- **Updates:** Tray Tool → Check for updates on start (on by default), **Also check while running** (default weekly: daily / 3 days / week / 2 weeks / month / off), or **Check now** / tray menu **Check for updates…**. Confirms, downloads the latest Setup.exe from GitHub, exits the app, then installs over the current location.
 - **Start minimized** and **minimize-on-close** keep the app in the tray instead of the taskbar.
 - **Service & Startup** highlights **Start** or **Stop** based on whether `OVRService` is running.
 - Newer Meta runtimes may reject some `server:` ASW commands; check **Log** if something does not apply.
@@ -164,7 +164,7 @@ Release **[v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
 - **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys
 - **Service & Startup**: Start/Stop button accent follows live `OVRService` state
-- **In-app updates**: checks GitHub latest release (`v*`), downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu)
+- **In-app updates**: checks GitHub latest release (`v*`) on start, on a user-chosen schedule while running, or manually; downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu)
 
 Not yet: Oculus Homeless, Permanent AirLink, custom voice phrases / mic picker.
 

@@ -18,6 +18,7 @@ public partial class App : System.Windows.Application
     private AudioSwitchWatcher? _audioWatcher;
     private PowerWatchService? _powerWatcher;
     private HeadsetWatchService? _headsetWatcher;
+    private UpdateWatchService? _updateWatcher;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -167,6 +168,9 @@ public partial class App : System.Windows.Application
         HotKeys.Reload();
         Voice.Reload();
 
+        _updateWatcher = new UpdateWatchService(this);
+        _updateWatcher.Start();
+
         if (Settings.Current.Tray.CheckForUpdatesOnStart)
         {
             _ = CheckForUpdatesOnStartAsync();
@@ -207,6 +211,7 @@ public partial class App : System.Windows.Application
             Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
         }
 
+        _updateWatcher?.Dispose();
         _headsetWatcher?.Dispose();
         _powerWatcher?.Dispose();
         _audioWatcher?.Dispose();

@@ -16,6 +16,15 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         ThemeBox.Items.Add(new ComboBoxItem { Content = "Pure Black", Tag = AppTheme.Black });
         ThemeBox.Items.Add(new ComboBoxItem { Content = "Dark", Tag = AppTheme.Dark });
         ThemeBox.Items.Add(new ComboBoxItem { Content = "Light", Tag = AppTheme.Light });
+
+        foreach (UpdateCheckInterval interval in Enum.GetValues<UpdateCheckInterval>())
+        {
+            UpdateIntervalBox.Items.Add(new ComboBoxItem
+            {
+                Content = UpdateCheckIntervalHelper.Describe(interval),
+                Tag = interval
+            });
+        }
     }
 
     public void Refresh()
@@ -32,10 +41,12 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         HotKeysBox.IsChecked = app.HotKeys.Enabled;
         VoiceBox.IsChecked = app.Voice.Enabled;
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
+        SelectUpdateInterval(app.Tray.AutoUpdateCheckInterval);
         NotificationsBox.IsChecked = app.ShowNotifications;
         SelectTheme(app.Tray.Theme);
         StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
-                          + " Voice: " + App.Instance.Voice.Status;
+                          + " Voice: " + App.Instance.Voice.Status
+                          + " " + App.Instance.Updates.DescribeSchedule();
         _loading = false;
     }
 
@@ -69,6 +80,40 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         }
 
         ThemeBox.SelectedIndex = 0;
+    }
+
+    private void SelectUpdateInterval(UpdateCheckInterval interval)
+    {
+        foreach (ComboBoxItem item in UpdateIntervalBox.Items)
+        {
+            if (item.Tag is UpdateCheckInterval value && value == interval)
+            {
+                UpdateIntervalBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        UpdateIntervalBox.SelectedIndex = (int)UpdateCheckInterval.Weekly;
+    }
+
+    private void UpdateInterval_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        if (UpdateIntervalBox.SelectedItem is not ComboBoxItem { Tag: UpdateCheckInterval interval })
+        {
+            return;
+        }
+
+        App.Instance.Settings.Current.Tray.AutoUpdateCheckInterval = interval;
+        App.Instance.Settings.Save();
+        StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                          + " Voice: " + App.Instance.Voice.Status
+                          + " " + App.Instance.Updates.DescribeSchedule();
+        App.Instance.Log.Info($"Auto update check set to {UpdateCheckIntervalHelper.Describe(interval)}.");
     }
 
     private void Persist_Changed(object sender, RoutedEventArgs e)
@@ -174,6 +219,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         StatusText.Text = "Checking GitHub for updates…";
         await App.Instance.Updates.CheckInteractivelyAsync(Window.GetWindow(this), quietIfUpToDate: false);
         StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
-                          + " Voice: " + App.Instance.Voice.Status;
+                          + " Voice: " + App.Instance.Voice.Status
+                          + " " + App.Instance.Updates.DescribeSchedule();
     }
 }

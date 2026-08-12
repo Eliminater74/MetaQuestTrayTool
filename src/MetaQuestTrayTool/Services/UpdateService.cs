@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Windows;
+using MetaQuestTrayTool.Models;
 using IOPath = System.IO.Path;
 
 namespace MetaQuestTrayTool.Services;
@@ -247,12 +248,36 @@ public sealed class UpdateService
         {
             _app.Log.Info("Checking GitHub for updates…");
             var result = await CheckLatestAsync().ConfigureAwait(false);
+            if (result.Succeeded)
+            {
+                MarkLastCheck();
+            }
+
             await HandleCheckResultAsync(owner, result, quietIfUpToDate).ConfigureAwait(false);
         }
         finally
         {
             Interlocked.Exchange(ref _busy, 0);
         }
+    }
+
+    public void MarkLastCheck()
+    {
+        _app.Settings.Current.Tray.LastUpdateCheckUtc = DateTimeOffset.UtcNow;
+        _app.Settings.Save();
+    }
+
+    public string DescribeSchedule()
+    {
+        var tray = _app.Settings.Current.Tray;
+        var interval = UpdateCheckIntervalHelper.Describe(tray.AutoUpdateCheckInterval);
+        if (tray.LastUpdateCheckUtc is null)
+        {
+            return $"Auto-check: {interval}. Not checked yet.";
+        }
+
+        var local = tray.LastUpdateCheckUtc.Value.ToLocalTime();
+        return $"Auto-check: {interval}. Last check: {local:g}.";
     }
 
     private async Task HandleCheckResultAsync(Window? owner, UpdateCheckResult result, bool quietIfUpToDate)

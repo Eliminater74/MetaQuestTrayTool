@@ -29,10 +29,16 @@
                   Checked="Voice_Changed" Unchecked="Voice_Changed"/>
         <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="VoiceConfigure_Click"/>
       </StackPanel>
-      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
         <CheckBox x:Name="UpdatesBox" Content="Check for updates on start" VerticalAlignment="Center"
                   Checked="Persist_Changed" Unchecked="Persist_Changed"/>
         <Button Content="Check now" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="CheckUpdates_Click"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="28,0,0,8">
+        <TextBlock Text="Also check while running:" VerticalAlignment="Center" Margin="0,0,8,0"
+                   Foreground="{DynamicResource AppMutedBrush}"/>
+        <ComboBox x:Name="UpdateIntervalBox" MinWidth="200" MaxWidth="280" Padding="6"
+                  SelectionChanged="UpdateInterval_Changed"/>
       </StackPanel>
       <CheckBox x:Name="NotificationsBox" Content="Show tray notifications" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
