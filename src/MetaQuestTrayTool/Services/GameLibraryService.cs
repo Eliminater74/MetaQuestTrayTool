@@ -6,6 +6,10 @@ public sealed class GameLibraryService
 {
     private readonly SteamLibraryService _steam = new();
     private readonly MetaLibraryService _meta = new();
+    public LibraryArtworkService Artwork { get; } = new();
+
+    public IReadOnlyList<string> GetMetaStoreAssetRoots() => _meta.GetStoreAssetRoots();
+    public string? DetectSteamRoot() => _steam.DetectSteamRoot();
 
     public IReadOnlyList<LibraryGame> GetAllGames()
     {

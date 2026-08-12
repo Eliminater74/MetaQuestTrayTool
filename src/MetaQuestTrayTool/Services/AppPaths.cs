@@ -10,9 +10,11 @@ public static class AppPaths
 
     public static string SettingsFile { get; } = IOPath.Combine(AppDataDirectory, "settings.json");
     public static string LogFile { get; } = IOPath.Combine(AppDataDirectory, "app.log");
+    public static string ArtworkDirectory { get; } = IOPath.Combine(AppDataDirectory, "artwork");
 
     public static void EnsureAppDataDirectory()
     {
         System.IO.Directory.CreateDirectory(AppDataDirectory);
+        System.IO.Directory.CreateDirectory(ArtworkDirectory);
     }
 }

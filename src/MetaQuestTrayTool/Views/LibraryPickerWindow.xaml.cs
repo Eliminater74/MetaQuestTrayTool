@@ -8,6 +8,7 @@ namespace MetaQuestTrayTool.Views;
 public partial class LibraryPickerWindow : Window
 {
     private IReadOnlyList<LibraryGame> _all = [];
+    private CancellationTokenSource? _prefetch;
 
     public LibraryGame? SelectedGame { get; private set; }
 
@@ -18,14 +19,43 @@ public partial class LibraryPickerWindow : Window
         FilterBox.Items.Add("Steam");
         FilterBox.Items.Add("Meta");
         FilterBox.SelectedIndex = 0;
+        Closed += (_, _) => _prefetch?.Cancel();
         Reload();
     }
 
     private void Reload()
     {
+        _prefetch?.Cancel();
         _all = App.Instance.Library.GetAllGames();
         ApplyFilter();
-        StatusText.Text = $"{_all.Count(game => game.Platform == GamePlatform.Steam)} Steam · {_all.Count(game => game.Platform == GamePlatform.Meta)} Meta";
+        var missingArt = _all.Count(game => string.IsNullOrWhiteSpace(game.ArtworkPath));
+        StatusText.Text = $"{_all.Count(game => game.Platform == GamePlatform.Steam)} Steam · {_all.Count(game => game.Platform == GamePlatform.Meta)} Meta"
+                          + (missingArt > 0 ? " · fetching missing Steam covers…" : string.Empty);
+        _prefetch = new CancellationTokenSource();
+        _ = PrefetchMissingSteamArtAsync(_prefetch.Token);
+    }
+
+    private async Task PrefetchMissingSteamArtAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await App.Instance.Library.Artwork.PrefetchSteamAsync(
+                _all,
+                (game, path) => Dispatcher.Invoke(() => game.ArtworkPath = path),
+                cancellationToken).ConfigureAwait(true);
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                StatusText.Text = $"{_all.Count(game => game.Platform == GamePlatform.Steam)} Steam · {_all.Count(game => game.Platform == GamePlatform.Meta)} Meta";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // window closed or refreshed
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn($"Library artwork download failed: {ex.Message}");
+        }
     }
 
     private void ApplyFilter()

@@ -57,6 +57,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Scan Meta / Oculus installed apps
 - [x] Library picker for personal profiles
 - [x] Global defaults editor separate from personal profiles
+- [x] Steam + Meta cover art in the library picker and profiles list
 
 ## Phase 5 — power / USB
 

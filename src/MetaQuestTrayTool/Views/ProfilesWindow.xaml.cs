@@ -170,16 +170,25 @@ public partial class ProfilesWindow : Window
     private sealed class ProfileRow(GameProfile profile)
     {
         public GameProfile Profile { get; } = profile;
+        public string Name => Profile.Name;
+        public string PlatformGlyph => Profile.Platform == GamePlatform.Steam ? "S" : Profile.Platform == GamePlatform.Meta ? "M" : "•";
+        public string? Artwork { get; } = App.Instance.Library.Artwork.ResolveForProfile(
+            profile,
+            App.Instance.Library.DetectSteamRoot(),
+            App.Instance.Library.GetMetaStoreAssetRoots());
 
-        public override string ToString()
+        public string Detail
         {
-            var platform = Profile.Platform switch
+            get
             {
-                GamePlatform.Steam => "Steam",
-                GamePlatform.Meta => "Meta",
-                _ => "Custom"
-            };
-            return $"{Profile.Name}  ·  {platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}  ·  {Profile.Link.Describe()}  ·  XR {OpenXrRuntimeService.Label(Profile.OpenXrRuntime)}";
+                var platform = Profile.Platform switch
+                {
+                    GamePlatform.Steam => "Steam",
+                    GamePlatform.Meta => "Meta",
+                    _ => "Custom"
+                };
+                return $"{platform}  ·  {Profile.ProcessName}  ·  {Profile.Settings.Describe()}  ·  {Profile.Link.Describe()}  ·  XR {OpenXrRuntimeService.Label(Profile.OpenXrRuntime)}";
+            }
         }
     }
 }

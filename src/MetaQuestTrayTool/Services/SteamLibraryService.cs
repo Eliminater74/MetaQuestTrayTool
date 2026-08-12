@@ -7,6 +7,8 @@ namespace MetaQuestTrayTool.Services;
 
 public sealed class SteamLibraryService
 {
+    private readonly LibraryArtworkService _artwork = new();
+
     private static readonly Regex PathRegex = new("\"path\"\\s*\"([^\"]+)\"", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex AppIdRegex = new("\"appid\"\\s*\"(\\d+)\"", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex NameRegex = new("\"name\"\\s*\"([^\"]+)\"", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -83,14 +85,22 @@ public sealed class SteamLibraryService
 
                     var installPath = System.IO.Path.Combine(steamApps, "common", installDir.Groups[1].Value);
                     var process = GuessProcessName(installPath);
+                    var id = appId.Groups[1].Value;
+                    var artwork = _artwork.FindSteamLocal(root, id)
+                                  ?? _artwork.FindExeIcon(
+                                      Directory.Exists(installPath) ? installPath : null,
+                                      process is null ? null : process + ".exe",
+                                      $"steam_{id}");
                     games.Add(new LibraryGame
                     {
                         Name = name.Groups[1].Value,
                         Platform = GamePlatform.Steam,
-                        AppId = appId.Groups[1].Value,
+                        AppId = id,
                         InstallPath = Directory.Exists(installPath) ? installPath : null,
                         LaunchFile = process is null ? null : process + ".exe",
-                        ProcessName = process ?? string.Empty
+                        ProcessName = process ?? string.Empty,
+                        ArtworkPath = artwork,
+                        ArtworkUrl = artwork is null ? _artwork.SteamCdnUrl(id) : null
                     });
                 }
                 catch

@@ -33,7 +33,7 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening via `HKCU\Software\Oculus\RemoteHeadset`
 - **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
-- **Steam / Meta library picker** for personal profiles, plus separate **global defaults**
+- **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
 
 Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates.
 

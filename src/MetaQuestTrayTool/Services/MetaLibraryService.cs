@@ -7,6 +7,8 @@ namespace MetaQuestTrayTool.Services;
 
 public sealed class MetaLibraryService
 {
+    private readonly LibraryArtworkService _artwork = new();
+
     public IReadOnlyList<string> GetLibraryRoots()
     {
         var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -42,6 +44,7 @@ public sealed class MetaLibraryService
     public IReadOnlyList<LibraryGame> GetInstalledGames()
     {
         var games = new Dictionary<string, LibraryGame>(StringComparer.OrdinalIgnoreCase);
+        var storeAssets = GetStoreAssetRoots();
 
         foreach (var root in GetLibraryRoots())
         {
@@ -90,7 +93,15 @@ public sealed class MetaLibraryService
                     var thirdParty = rootElement.TryGetProperty("thirdParty", out var third) && third.ValueKind is JsonValueKind.True;
                     var process = System.IO.Path.GetFileNameWithoutExtension(launchFile) ?? string.Empty;
                     var installPath = System.IO.Path.Combine(root, "Software", canonical);
-                    var display = HumanizeCanonicalName(canonical);
+                    var display = rootElement.TryGetProperty("displayName", out var displayName)
+                                  && !string.IsNullOrWhiteSpace(displayName.GetString())
+                        ? displayName.GetString()!
+                        : HumanizeCanonicalName(canonical);
+                    var artwork = _artwork.FindMetaLocal(canonical, storeAssets)
+                                  ?? _artwork.FindExeIcon(
+                                      Directory.Exists(installPath) ? installPath : null,
+                                      launchFile,
+                                      $"meta_{appId ?? canonical}");
 
                     var game = new LibraryGame
                     {
@@ -100,7 +111,9 @@ public sealed class MetaLibraryService
                         InstallPath = Directory.Exists(installPath) ? installPath : null,
                         LaunchFile = System.IO.Path.GetFileName(launchFile),
                         ProcessName = process,
-                        IsThirdParty = thirdParty
+                        IsThirdParty = thirdParty,
+                        CanonicalName = canonical,
+                        ArtworkPath = artwork
                     };
 
                     var key = appId ?? canonical;
@@ -116,6 +129,22 @@ public sealed class MetaLibraryService
         return games.Values
             .OrderBy(game => game.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    public IReadOnlyList<string> GetStoreAssetRoots()
+    {
+        var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            @"C:\Program Files\Oculus\CoreData\Software\StoreAssets"
+        };
+
+        foreach (var library in GetLibraryRoots())
+        {
+            roots.Add(System.IO.Path.Combine(library, "Software", "StoreAssets"));
+            roots.Add(System.IO.Path.Combine(library, "CoreData", "Software", "StoreAssets"));
+        }
+
+        return roots.ToList();
     }
 
     private static string HumanizeCanonicalName(string canonical)
