@@ -5,7 +5,7 @@
     <StackPanel>
       <TextBlock Text="Info" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Live status for OpenXR, Oculus service, and the connected Quest. ADB commands only run on your trusted headset serial."/>
+                 Text="Live status for OpenXR, Oculus service, and a connected VR headset. Phones, tablets, and emulators are ignored. ADB commands only run on your trusted VR headset."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
         <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"/>

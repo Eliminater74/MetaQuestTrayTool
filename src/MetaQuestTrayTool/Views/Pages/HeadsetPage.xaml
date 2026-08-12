@@ -5,7 +5,7 @@
     <StackPanel>
       <TextBlock Text="Headset" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="SideQuest-style Quest tweaks over ADB. Meta does not keep these after a reboot — leave “apply when the headset connects” on so the tray pushes them again while you are in VR. Developer Mode + USB debugging (or wireless ADB) required."/>
+                 Text="SideQuest-style tweaks over ADB for VR headsets only (Quest 2/3/3S/Pro, Samsung Galaxy XR, HTC Vive standalone, Pico, Steam Frame). Phones, tablets, and emulators are ignored and never receive commands. Meta does not keep these after a reboot — leave apply-on-connect on so the tray pushes them again in VR."/>
 
       <TextBlock x:Name="StatusText" Margin="0,0,0,12" FontWeight="SemiBold" TextWrapping="Wrap"/>
       <CheckBox x:Name="ApplyOnConnectBox" Content="Apply these settings automatically when the headset connects"
@@ -83,7 +83,7 @@
 
       <TextBlock Text="Trusted headset" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="The first Quest that connects is remembered. A different serial is blocked so a rogue ADB device cannot receive your commands."/>
+                 Text="The first real VR headset that connects is remembered. Emulators, phones, and tablets are never trusted. A different VR serial is blocked."/>
       <CheckBox x:Name="RequireTrustBox" Content="Only run ADB commands on the trusted headset"
                 Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"/>
       <TextBlock x:Name="TrustText" TextWrapping="Wrap" Margin="0,0,0,8"/>

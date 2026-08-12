@@ -36,7 +36,7 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
 
 - **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
-- **Trusted headset**: first connected serial is remembered; a different ADB device is blocked
+- **Trusted headset**: first connected **VR headset** serial is remembered; a different VR serial is blocked. Phones, tablets, and Android emulators are ignored and never receive ADB commands or auto-apply
 - **Custom commands**: extra OculusDebugToolCLI + ADB lines on global defaults and personal profiles
 - **Backup**: export / import settings from Advanced
 - **Info** page: live OpenXR (Meta vs SteamVR), OVRService, and detailed headset identity

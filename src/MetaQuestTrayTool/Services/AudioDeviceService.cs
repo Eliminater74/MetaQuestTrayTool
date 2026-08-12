@@ -12,7 +12,11 @@ public sealed class AudioDeviceService
         "quest",
         "rift",
         "meta virtual audio",
-        "headphones (oculus"
+        "headphones (oculus",
+        "steamvr",
+        "vive",
+        "index",
+        "galaxy xr"
     ];
 
     public IReadOnlyList<AudioDeviceInfo> ListDevices(AudioDeviceKind kind)

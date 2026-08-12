@@ -11,21 +11,31 @@ public sealed class HeadsetSettingsService
         _adb = adb;
     }
 
-    public HeadsetIdentity ReadIdentity(HeadsetSettings settings) =>
-        _adb.ReadIdentity(settings.TrustedSerial);
+    public HeadsetIdentity ReadIdentity(HeadsetSettings settings)
+    {
+        ForgetInvalidTrust(settings);
+        return _adb.ReadIdentity(settings.TrustedSerial);
+    }
 
     public string TrustCurrentHeadset(HeadsetSettings settings)
     {
         var identity = ReadIdentity(settings);
-        if (!identity.IsReady || string.IsNullOrWhiteSpace(identity.Serial))
+        if (identity.IsIgnored)
         {
-            throw new InvalidOperationException("Connect a Quest with USB debugging authorized first.");
+            throw new InvalidOperationException(identity.IgnoreReason
+                ?? "That ADB device is not a VR headset. Phones, tablets, and emulators cannot be trusted.");
+        }
+
+        if (!identity.IsReady || !identity.IsVrHeadset || string.IsNullOrWhiteSpace(identity.Serial))
+        {
+            throw new InvalidOperationException(
+                $"Connect a VR headset ({VrHeadsetClassifier.AllowedHeadsetList}) with USB debugging authorized first.");
         }
 
         settings.TrustedSerial = identity.Serial;
         settings.TrustedModel = identity.Model;
         settings.RequireTrustedHeadset = true;
-        return $"Trusted headset {identity.Model ?? "Quest"} ({identity.Serial}). Commands will not run on any other device.";
+        return $"Trusted VR headset {identity.Model ?? "headset"} ({identity.Serial}). Commands will not run on phones, tablets, emulators, or any other device.";
     }
 
     public string Apply(HeadsetSettings settings, IReadOnlyList<string>? extraAdb = null)
@@ -180,12 +190,28 @@ public sealed class HeadsetSettingsService
         return _adb.SendText(quest.Serial, text);
     }
 
+    private void ForgetInvalidTrust(HeadsetSettings settings)
+    {
+        var model = settings.TrustedModel ?? string.Empty;
+        if (VrHeadsetClassifier.LooksLikeNonHeadsetSerial(settings.TrustedSerial)
+            || model.Contains("sdk_google", StringComparison.OrdinalIgnoreCase)
+            || model.Contains("emulator", StringComparison.OrdinalIgnoreCase))
+        {
+            settings.TrustedSerial = null;
+            settings.TrustedModel = null;
+        }
+    }
+
     private AdbDevice RequireReadyHeadset(HeadsetSettings settings)
     {
+        ForgetInvalidTrust(settings);
         var quest = _adb.FindQuest();
         if (quest is null)
         {
-            throw new InvalidOperationException("No Quest headset was found over ADB. Enable Developer Mode and connect USB.");
+            var ignored = _adb.DescribeIgnoredDevices();
+            throw new InvalidOperationException(ignored is null
+                ? $"No VR headset was found over ADB. Connect a {VrHeadsetClassifier.AllowedHeadsetList} with Developer Mode."
+                : ignored);
         }
 
         if (quest.NeedsAuthorization)

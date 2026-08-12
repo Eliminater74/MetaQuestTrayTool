@@ -16,7 +16,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
         var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
         HeadsetBanner.Text = headset.Summary;
-        HeadsetBanner.Foreground = headset.IsRogue
+        HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
             ? System.Windows.Media.Brushes.OrangeRed
             : (System.Windows.Media.Brush)FindResource("AppTextBrush");
         ReportBox.Text = SystemInfoService.BuildReport();

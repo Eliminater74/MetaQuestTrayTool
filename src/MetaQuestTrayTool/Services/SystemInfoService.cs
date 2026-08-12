@@ -22,7 +22,13 @@ public static class SystemInfoService
         text.AppendLine($"ADB: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
         text.AppendLine("Headset");
+        text.AppendLine($"  VR headset: {headset.IsVrHeadset}");
         text.AppendLine($"  Connected: {headset.IsReady}");
+        text.AppendLine($"  Ignored (phone/tablet/emulator): {headset.IsIgnored}");
+        if (!string.IsNullOrWhiteSpace(headset.IgnoreReason))
+        {
+            text.AppendLine($"  Why: {headset.IgnoreReason}");
+        }
         text.AppendLine($"  ADB state: {headset.State ?? "disconnected"}");
         text.AppendLine($"  Model: {headset.Model ?? "—"}");
         text.AppendLine($"  Device: {headset.Device ?? "—"}");

@@ -86,6 +86,8 @@ public partial class App : System.Windows.Application
         Settings.Save();
         Log.Info(StartupRegistration.DescribeStatus());
         Adb.Refresh();
+        Headset.ReadIdentity(Settings.Current.Headset);
+        Settings.Save();
         Log.Info(Adb.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
@@ -271,7 +273,7 @@ public partial class App : System.Windows.Application
             try
             {
                 var quest = Headset.ReadIdentity(Settings.Current.Headset);
-                if (quest.IsReady && !quest.IsRogue && !string.IsNullOrWhiteSpace(quest.AdbSerial))
+                if (quest.IsVrHeadset && quest.IsReady && !quest.IsRogue && !string.IsNullOrWhiteSpace(quest.AdbSerial))
                 {
                     summary += " " + CustomCommands.ApplyAdb(profile.CustomCommands.AdbCommands, quest.AdbSerial);
                 }
@@ -325,11 +327,13 @@ public partial class App : System.Windows.Application
         try
         {
             var quest = Headset.ReadIdentity(Settings.Current.Headset);
-            if (!quest.IsReady || quest.IsRogue || string.IsNullOrWhiteSpace(quest.AdbSerial))
+            if (!quest.IsVrHeadset || !quest.IsReady || quest.IsRogue || string.IsNullOrWhiteSpace(quest.AdbSerial))
             {
-                return quest.IsRogue
-                    ? "Custom ADB skipped (untrusted headset)."
-                    : "Custom ADB skipped (no headset).";
+                return quest.IsIgnored
+                    ? "Custom ADB skipped (not a VR headset)."
+                    : quest.IsRogue
+                        ? "Custom ADB skipped (untrusted headset)."
+                        : "Custom ADB skipped (no VR headset).";
             }
 
             return CustomCommands.ApplyAdb(commands, quest.AdbSerial);

@@ -12,6 +12,7 @@ public sealed class HeadsetWatchService : IDisposable
     private readonly DispatcherTimer _timer;
     private string? _lastSerial;
     private bool _appliedForSerial;
+    private string? _lastIgnoredMessage;
 
     public HeadsetWatchService(App app)
     {
@@ -44,8 +45,17 @@ public sealed class HeadsetWatchService : IDisposable
             {
                 _lastSerial = null;
                 _appliedForSerial = false;
+                var ignored = _app.Adb.DescribeIgnoredDevices();
+                if (ignored is not null && !string.Equals(ignored, _lastIgnoredMessage, StringComparison.Ordinal))
+                {
+                    _lastIgnoredMessage = ignored;
+                    _app.Log.Info(ignored);
+                }
+
                 return;
             }
+
+            _lastIgnoredMessage = null;
 
             var connected = !string.Equals(_lastSerial, serial, StringComparison.OrdinalIgnoreCase);
             _lastSerial = serial;
