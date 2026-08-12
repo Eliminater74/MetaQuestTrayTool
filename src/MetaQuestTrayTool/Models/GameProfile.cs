@@ -23,4 +23,10 @@ public sealed class GameProfile
     public OpenXrRuntimeKind OpenXrRuntime { get; set; } = OpenXrRuntimeKind.Inherit;
     public string CpuPriority { get; set; } = "Normal";
     public string? Comments { get; set; }
+    private CustomCommandSet _customCommands = new();
+    public CustomCommandSet CustomCommands
+    {
+        get => _customCommands;
+        set => _customCommands = value ?? new();
+    }
 }

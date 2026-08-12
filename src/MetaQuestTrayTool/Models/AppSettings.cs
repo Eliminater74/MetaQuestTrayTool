@@ -23,5 +23,11 @@ public sealed class AppSettings
     public AudioSwitchSettings Audio { get; set; } = new() { AutoSwitchEnabled = true };
     public PowerSettings Power { get; set; } = new();
     public HeadsetSettings Headset { get; set; } = new();
+    private CustomCommandSet _customCommands = new();
+    public CustomCommandSet CustomCommands
+    {
+        get => _customCommands;
+        set => _customCommands = value ?? new();
+    }
     public List<GameProfile> Profiles { get; set; } = [];
 }

@@ -9,7 +9,7 @@ namespace MetaQuestTrayTool;
 
 public partial class App : System.Windows.Application
 {
-    public const string AppName = "Meta Quest Tray Tool";
+    public static string AppName => AppInfo.ProductName;
     private const string MutexName = @"Global\MetaQuestTrayTool.SingleInstance";
 
     private Mutex? _singleInstanceMutex;
@@ -33,6 +33,7 @@ public partial class App : System.Windows.Application
     public StartupRegistrationService StartupRegistration { get; } = new();
     public AdbService Adb { get; } = new();
     public HeadsetSettingsService Headset { get; }
+    public CustomCommandService CustomCommands { get; }
 
     public App()
     {
@@ -40,6 +41,7 @@ public partial class App : System.Windows.Application
         DebugTool = new OculusDebugToolService(Oculus);
         Profiles = new ProfileService(Settings);
         Headset = new HeadsetSettingsService(Adb);
+        CustomCommands = new CustomCommandService(DebugTool, Adb);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -119,8 +121,7 @@ public partial class App : System.Windows.Application
 
         if (Settings.Current.ApplyGameSettingsOnStart && DebugTool.IsAvailable)
         {
-            var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
-            Log.Info(result.Summary);
+            Log.Info(ApplyGlobalGameSettings());
         }
 
         if (Settings.Current.ApplyLinkSettingsOnStart)
@@ -201,10 +202,7 @@ public partial class App : System.Windows.Application
         base.OnExit(e);
     }
 
-    public static string GetVersion()
-    {
-        return typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0";
-    }
+    public static string GetVersion() => AppInfo.Version;
 
     private static bool TryTakeSingleInstance(bool restarting, out Mutex? mutex)
     {
@@ -266,8 +264,23 @@ public partial class App : System.Windows.Application
 
     public string ApplyProfile(GameProfile profile)
     {
-        var result = DebugTool.Apply(profile.Settings);
+        var result = DebugTool.Apply(profile.Settings, profile.CustomCommands.CliCommands);
         var summary = result.Summary;
+        if (profile.CustomCommands.AdbCommands.Count > 0)
+        {
+            try
+            {
+                var quest = Headset.ReadIdentity(Settings.Current.Headset);
+                if (quest.IsReady && !quest.IsRogue && !string.IsNullOrWhiteSpace(quest.AdbSerial))
+                {
+                    summary += " " + CustomCommands.ApplyAdb(profile.CustomCommands.AdbCommands, quest.AdbSerial);
+                }
+            }
+            catch (Exception ex)
+            {
+                summary += " Custom ADB skipped: " + ex.Message;
+            }
+        }
         if (profile.Link.HasAny)
         {
             var merged = profile.Link.Overlay(Settings.Current.LinkSettings);
@@ -288,9 +301,42 @@ public partial class App : System.Windows.Application
 
     public string RestoreGlobalDefaults()
     {
-        var result = DebugTool.Apply(Settings.Current.DefaultGameSettings);
+        var summary = ApplyGlobalGameSettings();
         var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
         var openXr = OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime);
-        return $"{result.Summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}). {link.Summary} {openXr}";
+        return $"{summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}). {link.Summary} {openXr}";
+    }
+
+    public string ApplyGlobalGameSettings()
+    {
+        var extras = Settings.Current.CustomCommands;
+        var result = DebugTool.Apply(Settings.Current.DefaultGameSettings, extras.CliCommands);
+        var summary = result.Summary;
+        if (extras.AdbCommands.Count > 0)
+        {
+            summary += " " + TryApplyCustomAdb(extras.AdbCommands);
+        }
+
+        return summary.Trim();
+    }
+
+    private string TryApplyCustomAdb(IReadOnlyList<string> commands)
+    {
+        try
+        {
+            var quest = Headset.ReadIdentity(Settings.Current.Headset);
+            if (!quest.IsReady || quest.IsRogue || string.IsNullOrWhiteSpace(quest.AdbSerial))
+            {
+                return quest.IsRogue
+                    ? "Custom ADB skipped (untrusted headset)."
+                    : "Custom ADB skipped (no headset).";
+            }
+
+            return CustomCommands.ApplyAdb(commands, quest.AdbSerial);
+        }
+        catch (Exception ex)
+        {
+            return "Custom ADB skipped: " + ex.Message;
+        }
     }
 }

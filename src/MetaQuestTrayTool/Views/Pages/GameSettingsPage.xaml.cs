@@ -89,6 +89,8 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         OpenXrOnStartBox.IsChecked = settings.OpenXr.ApplyOnStart;
         OpenXrStatusText.Text = App.Instance.OpenXr.Describe()
             + "  Writes HKLM\\SOFTWARE\\Khronos\\OpenXR\\1\\ActiveRuntime (may prompt for Administrator).";
+        CliCommandsBox.Text = settings.CustomCommands.ToCliText();
+        AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
         StatusText.Text = BuildStatus();
     }
 
@@ -139,21 +141,22 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         }
 
         App.Instance.Settings.Save();
-        var result = App.Instance.DebugTool.Apply(App.Instance.Settings.Current.DefaultGameSettings);
-        if (!result.CliFound || !result.Started)
+        var summary = App.Instance.ApplyGlobalGameSettings();
+        App.Instance.Log.Info(summary);
+        StatusText.Text = summary;
+    }
+
+    private void CustomCommands_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (!IsLoaded)
         {
-            App.Instance.Log.Error(result.Summary);
-        }
-        else if (result.LooksRejected)
-        {
-            App.Instance.Log.Warn(result.Summary);
-        }
-        else
-        {
-            App.Instance.Log.Info(result.Summary);
+            return;
         }
 
-        StatusText.Text = result.Summary;
+        var commands = App.Instance.Settings.Current.CustomCommands;
+        commands.SetCliFromText(CliCommandsBox.Text);
+        commands.SetAdbFromText(AdbCommandsBox.Text);
+        App.Instance.Settings.Save();
     }
 
     private void PersistIfReady()
@@ -262,6 +265,9 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         }
 
         PersistFlags();
+        var commands = App.Instance.Settings.Current.CustomCommands;
+        commands.SetCliFromText(CliCommandsBox.Text);
+        commands.SetAdbFromText(AdbCommandsBox.Text);
         return true;
     }
 

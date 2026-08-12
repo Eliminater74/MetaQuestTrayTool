@@ -87,6 +87,20 @@
         <TextBlock Text="Encode resolution" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <ComboBox x:Name="EncodeWidthBox" Margin="0,0,0,16"/>
 
+        <TextBlock Text="Custom OculusDebugToolCLI commands"
+                   Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBlock Text="One command per line, after built-in SS / ASW / FOV. Example: set-pixels-per-display-pixel-override 1.3"
+                   TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}" FontSize="12" Margin="0,0,0,6"/>
+        <TextBox x:Name="CliCommandsBox" Margin="0,0,0,16" MinHeight="72" AcceptsReturn="True"
+                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+
+        <TextBlock Text="Custom headset ADB commands"
+                   Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBlock Text="One shell command per line, run only on your trusted Quest. You can omit the adb shell prefix."
+                   TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}" FontSize="12" Margin="0,0,0,6"/>
+        <TextBox x:Name="AdbCommandsBox" Margin="0,0,0,16" MinHeight="72" AcceptsReturn="True"
+                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+
         <TextBlock Text="Notes" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <TextBox x:Name="CommentsBox" Margin="0,0,0,8" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
       </StackPanel>

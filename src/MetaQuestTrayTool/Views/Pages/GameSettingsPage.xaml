@@ -77,6 +77,20 @@
                    Text="Not ported — those classic OTT extras have no Debug Tool CLI command."/>
       </Grid>
 
+      <TextBlock Text="Custom OculusDebugToolCLI commands" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="One command per line. Applied with global defaults (Apply now, tool start, and after a personal profile ends)."/>
+      <TextBox x:Name="CliCommandsBox" Margin="0,0,0,12" MinHeight="72" AcceptsReturn="True"
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                 LostFocus="CustomCommands_LostFocus"/>
+
+      <TextBlock Text="Custom headset ADB commands" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="One shell command per line. Runs only on your trusted Quest when global defaults are applied."/>
+      <TextBox x:Name="AdbCommandsBox" Margin="0,0,0,12" MinHeight="72" AcceptsReturn="True"
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                 LostFocus="CustomCommands_LostFocus"/>
+
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
         <Button Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
         <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"/>

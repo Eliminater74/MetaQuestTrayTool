@@ -84,6 +84,16 @@ public sealed class OculusDebugToolService
         return lines;
     }
 
+    public DebugToolApplyResult RunExtraCommands(IReadOnlyList<string> extra)
+    {
+        var commands = extra
+            .Select(line => line.Trim())
+            .Where(line => line.Length > 0 && !line.Equals("exit", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        commands.Add("exit");
+        return RunCommands(commands, timeoutMs: 15_000);
+    }
+
     public IReadOnlyList<string> EnumerateHeadsets()
     {
         var result = RunCommands(["server:EnumHmd", "exit"], timeoutMs: 8_000);
@@ -116,9 +126,27 @@ public sealed class OculusDebugToolService
         return LastAswMode;
     }
 
-    public DebugToolApplyResult Apply(GameSettings settings)
+    public DebugToolApplyResult Apply(GameSettings settings, IEnumerable<string>? extraCli = null)
     {
-        var commands = BuildCommands(settings);
+        var commands = BuildCommands(settings).ToList();
+        if (extraCli is not null)
+        {
+            var exit = commands.FindLastIndex(line => line.Equals("exit", StringComparison.OrdinalIgnoreCase));
+            var extras = extraCli
+                .Select(line => line.Trim())
+                .Where(line => line.Length > 0 && !line.Equals("exit", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (exit >= 0)
+            {
+                commands.InsertRange(exit, extras);
+            }
+            else
+            {
+                commands.AddRange(extras);
+                commands.Add("exit");
+            }
+        }
+
         var result = RunCommands(commands, timeoutMs: 15_000);
         if (result.CliFound && result.Started)
         {

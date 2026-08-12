@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
@@ -99,6 +100,42 @@ public sealed class AdbService
 
         var model = quest.Model ?? GetProp(quest.Serial, "ro.product.model") ?? "Quest";
         return $"Headset connected: {model} ({quest.Serial}).";
+    }
+
+    public HeadsetIdentity ReadIdentity(string? trustedSerial)
+    {
+        var quest = FindQuest();
+        if (quest is null)
+        {
+            return new HeadsetIdentity { State = "disconnected" };
+        }
+
+        var hardwareSerial = quest.IsReady
+            ? GetProp(quest.Serial, "ro.serialno") ?? GetProp(quest.Serial, "ro.boot.serialno")
+            : null;
+        var model = quest.IsReady
+            ? GetProp(quest.Serial, "ro.product.model") ?? quest.Model
+            : quest.Model;
+        var identitySerial = hardwareSerial ?? quest.Serial;
+        var trusted = !string.IsNullOrWhiteSpace(trustedSerial)
+                      && string.Equals(trustedSerial, identitySerial, StringComparison.OrdinalIgnoreCase);
+        var rogue = !string.IsNullOrWhiteSpace(trustedSerial) && !trusted && quest.IsReady;
+
+        return new HeadsetIdentity
+        {
+            AdbSerial = quest.Serial,
+            Serial = identitySerial,
+            Model = model,
+            Device = quest.IsReady ? GetProp(quest.Serial, "ro.product.device") : null,
+            Manufacturer = quest.IsReady ? GetProp(quest.Serial, "ro.product.manufacturer") : null,
+            AndroidVersion = quest.IsReady ? GetProp(quest.Serial, "ro.build.version.release") : null,
+            BuildDisplay = quest.IsReady ? GetProp(quest.Serial, "ro.build.display.id") : null,
+            Fingerprint = quest.IsReady ? GetProp(quest.Serial, "ro.build.fingerprint") : null,
+            State = quest.State,
+            IsReady = quest.IsReady,
+            IsTrusted = trusted,
+            IsRogue = rogue
+        };
     }
 
     public string? GetProp(string serial, string name)

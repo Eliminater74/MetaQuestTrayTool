@@ -22,11 +22,21 @@
             BorderThickness="0,0,1,0">
       <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Margin="12,8,12,16">
+          <Button Content="Donate"
+                  Style="{StaticResource AccentButtonStyle}"
+                  Margin="0,0,0,8"
+                  HorizontalAlignment="Stretch"
+                  Click="Donate_Click"/>
           <Button Content="About"
                   Style="{StaticResource GhostButtonStyle}"
                   Margin="0,0,0,8"
                   HorizontalAlignment="Stretch"
                   Click="About_Click"/>
+          <TextBlock x:Name="AuthorText"
+                     HorizontalAlignment="Center"
+                     Foreground="{DynamicResource AppMutedBrush}"
+                     FontSize="11"
+                     Margin="0,0,0,4"/>
           <TextBlock x:Name="VersionText"
                      HorizontalAlignment="Center"
                      Foreground="{DynamicResource AppMutedBrush}"
@@ -61,6 +71,8 @@
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"/>
           <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"/>
+          <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"/>
         </StackPanel>
       </DockPanel>
     </Border>

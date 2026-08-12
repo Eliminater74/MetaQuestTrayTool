@@ -94,6 +94,14 @@ SideQuest-style `debug.oculus.*` props. They reset on reboot, so the tray re-app
 - [x] Apply on connect + tray + Headset shell page
 - [x] Paste text, proximity, guardian pause
 
+### v1.0.0 — release polish
+
+- [x] Product name **Meta Quest Tray Tool**, author **Eliminater74**, single version in Directory.Build.props
+- [x] Custom CLI + ADB commands on global + personal profiles
+- [x] Settings export / import
+- [x] Trusted headset serial (block rogue ADB devices)
+- [x] Info page + visible Donate (URL still pending)
+
 ### Phase 6 — OTT-style settings shell (v0.6)
 
 Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Meta Link / OVRService stack.

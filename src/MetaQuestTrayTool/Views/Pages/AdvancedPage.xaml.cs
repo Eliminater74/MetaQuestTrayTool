@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Windows.Controls;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -79,5 +78,66 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
     {
         var window = new AudioSettingsWindow { Owner = Window.GetWindow(this) };
         window.ShowDialog();
+    }
+
+    private void Export_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Export Meta Quest Tray Tool settings",
+            Filter = "Settings backup (*.json)|*.json",
+            FileName = $"mqtt-settings-{DateTime.Now:yyyyMMdd}.json"
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        try
+        {
+            App.Instance.Settings.Export(dialog.FileName);
+            App.Instance.Log.Info("Exported settings to " + dialog.FileName);
+            StatusText.Text = "Exported: " + dialog.FileName;
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
+        }
+    }
+
+    private void Import_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Import Meta Quest Tray Tool settings",
+            Filter = "Settings backup (*.json)|*.json"
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        var confirm = System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            "Replace current settings and profiles with this backup?",
+            App.AppName,
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            App.Instance.Settings.Import(dialog.FileName);
+            App.Instance.Log.Info("Imported settings from " + dialog.FileName);
+            Refresh();
+            StatusText.Text = "Imported. Restart the tool if a page still shows old values.";
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
+        }
     }
 }

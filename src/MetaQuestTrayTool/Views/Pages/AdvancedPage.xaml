@@ -20,6 +20,8 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Settings" Style="{StaticResource SettingLabelStyle}"/>
@@ -46,8 +48,14 @@
         <Button Grid.Row="5" Grid.Column="1" Content="Configure devices" HorizontalAlignment="Left"
                 Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Audio_Click"/>
 
-        <TextBlock Grid.Row="6" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
-        <TextBlock Grid.Row="6" Grid.Column="1" Margin="0,0,0,10"
+        <TextBlock Grid.Row="6" Text="Backup" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+          <Button Content="Export settings…" Style="{StaticResource AccentButtonStyle}" Click="Export_Click"/>
+          <Button Content="Import settings…" Style="{StaticResource GhostButtonStyle}" Click="Import_Click"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="7" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
+        <TextBlock Grid.Row="7" Grid.Column="1" Margin="0,0,0,10"
                    Foreground="{DynamicResource AppMutedBrush}"
                    Text="In-app update checks will land after the first public release."/>
       </Grid>

@@ -77,6 +77,8 @@ public partial class ProfileEditorWindow : Window
             : "Scope: Global";
         FovBox.Text = profile.Settings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
         CommentsBox.Text = profile.Comments ?? string.Empty;
+        CliCommandsBox.Text = profile.CustomCommands.ToCliText();
+        AdbCommandsBox.Text = profile.CustomCommands.ToAdbText();
         SelectByTag(SuperSamplingBox, profile.Settings.SuperSampling);
         SelectByTag(AswBox, profile.Settings.AswMode);
         SelectByTag(SharpenBox, profile.Link.Sharpening);
@@ -154,6 +156,8 @@ public partial class ProfileEditorWindow : Window
             : OpenXrRuntimeKind.Inherit;
         Profile.CpuPriority = PriorityBox.SelectedItem as string ?? "Normal";
         Profile.Comments = string.IsNullOrWhiteSpace(CommentsBox.Text) ? null : CommentsBox.Text.Trim();
+        Profile.CustomCommands.SetCliFromText(CliCommandsBox.Text);
+        Profile.CustomCommands.SetAdbFromText(AdbCommandsBox.Text);
         DialogResult = true;
     }
 

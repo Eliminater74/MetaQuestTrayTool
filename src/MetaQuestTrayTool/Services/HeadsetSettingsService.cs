@@ -11,9 +11,26 @@ public sealed class HeadsetSettingsService
         _adb = adb;
     }
 
-    public string Apply(HeadsetSettings settings)
+    public HeadsetIdentity ReadIdentity(HeadsetSettings settings) =>
+        _adb.ReadIdentity(settings.TrustedSerial);
+
+    public string TrustCurrentHeadset(HeadsetSettings settings)
     {
-        var quest = RequireReadyHeadset();
+        var identity = ReadIdentity(settings);
+        if (!identity.IsReady || string.IsNullOrWhiteSpace(identity.Serial))
+        {
+            throw new InvalidOperationException("Connect a Quest with USB debugging authorized first.");
+        }
+
+        settings.TrustedSerial = identity.Serial;
+        settings.TrustedModel = identity.Model;
+        settings.RequireTrustedHeadset = true;
+        return $"Trusted headset {identity.Model ?? "Quest"} ({identity.Serial}). Commands will not run on any other device.";
+    }
+
+    public string Apply(HeadsetSettings settings, IReadOnlyList<string>? extraAdb = null)
+    {
+        var quest = RequireReadyHeadset(settings);
         var applied = new List<string>();
 
         switch (settings.CpuGpuLevel)
@@ -110,15 +127,37 @@ public sealed class HeadsetSettingsService
             applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.capture.eye", "1"));
         }
 
+        var extras = extraAdb ?? settings.CustomAdbCommands;
+        foreach (var line in extras)
+        {
+            var shell = line.Trim();
+            if (shell.Length == 0 || shell.StartsWith('#'))
+            {
+                continue;
+            }
+
+            if (shell.StartsWith("adb ", StringComparison.OrdinalIgnoreCase))
+            {
+                var idx = shell.IndexOf("shell ", StringComparison.OrdinalIgnoreCase);
+                shell = idx >= 0 ? shell[(idx + 6)..].Trim() : shell[4..].Trim();
+            }
+
+            if (shell.Length > 0)
+            {
+                _adb.Shell(quest.Serial, shell);
+                applied.Add(shell);
+            }
+        }
+
         var label = quest.Model ?? quest.Serial;
         return applied.Count == 0
             ? $"Headset {label} connected — all headset overrides are Device/App default (nothing to push)."
-            : $"Applied {applied.Count} headset ADB props on {label}.";
+            : $"Applied {applied.Count} headset ADB command(s) on {label}.";
     }
 
-    public string SetProximitySensor(bool enabled)
+    public string SetProximitySensor(bool enabled, HeadsetSettings settings)
     {
-        var quest = RequireReadyHeadset();
+        var quest = RequireReadyHeadset(settings);
         var action = enabled
             ? "com.oculus.vrpowermanager.prox_open"
             : "com.oculus.vrpowermanager.prox_close";
@@ -128,20 +167,20 @@ public sealed class HeadsetSettingsService
             : "Proximity sensor disabled (headset stays awake).";
     }
 
-    public string SetGuardianPaused(bool paused)
+    public string SetGuardianPaused(bool paused, HeadsetSettings settings)
     {
-        var quest = RequireReadyHeadset();
+        var quest = RequireReadyHeadset(settings);
         _adb.SetProp(quest.Serial, "debug.oculus.guardian_pause", paused ? "1" : "0");
         return paused ? "Guardian paused." : "Guardian enabled.";
     }
 
-    public string SendText(string text)
+    public string SendText(string text, HeadsetSettings settings)
     {
-        var quest = RequireReadyHeadset();
+        var quest = RequireReadyHeadset(settings);
         return _adb.SendText(quest.Serial, text);
     }
 
-    private AdbDevice RequireReadyHeadset()
+    private AdbDevice RequireReadyHeadset(HeadsetSettings settings)
     {
         var quest = _adb.FindQuest();
         if (quest is null)
@@ -157,6 +196,21 @@ public sealed class HeadsetSettingsService
         if (!quest.IsReady)
         {
             throw new InvalidOperationException($"Headset ADB state is '{quest.State}'.");
+        }
+
+        if (settings.RequireTrustedHeadset && string.IsNullOrWhiteSpace(settings.TrustedSerial))
+        {
+            TrustCurrentHeadset(settings);
+        }
+
+        if (settings.RequireTrustedHeadset && !string.IsNullOrWhiteSpace(settings.TrustedSerial))
+        {
+            var identity = _adb.ReadIdentity(settings.TrustedSerial);
+            if (identity.IsRogue)
+            {
+                throw new InvalidOperationException(
+                    $"Blocked untrusted headset {identity.Model} ({identity.Serial}). Trusted device is {settings.TrustedModel} ({settings.TrustedSerial}).");
+            }
         }
 
         return quest;

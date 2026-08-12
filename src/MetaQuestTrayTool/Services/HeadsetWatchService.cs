@@ -60,6 +60,7 @@ public sealed class HeadsetWatchService : IDisposable
             }
 
             var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+            _app.Settings.Save();
             _app.Log.Info(result);
             _appliedForSerial = true;
             if (connected)

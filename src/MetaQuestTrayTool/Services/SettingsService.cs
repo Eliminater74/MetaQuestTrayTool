@@ -50,4 +50,39 @@ public sealed class SettingsService
         Current = new AppSettings { Profiles = profiles };
         Save();
     }
+
+    public void Export(string path)
+    {
+        var backup = new SettingsBackupFile
+        {
+            App = AppInfo.ProductName,
+            Version = AppInfo.Version,
+            ExportedAt = DateTimeOffset.Now,
+            Settings = Current
+        };
+        var json = JsonSerializer.Serialize(backup, JsonOptions);
+        File.WriteAllText(path, json);
+    }
+
+    public void Import(string path)
+    {
+        var json = File.ReadAllText(path);
+        AppSettings? settings = null;
+        try
+        {
+            var backup = JsonSerializer.Deserialize<SettingsBackupFile>(json, JsonOptions);
+            if (backup?.Settings is not null)
+            {
+                settings = backup.Settings;
+            }
+        }
+        catch
+        {
+            // fall through to raw settings.json
+        }
+
+        settings ??= JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
+        Current = settings ?? throw new InvalidOperationException("The backup file could not be read.");
+        Save();
+    }
 }

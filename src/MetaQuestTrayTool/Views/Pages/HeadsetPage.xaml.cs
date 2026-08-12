@@ -80,7 +80,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Select(CaptureBitrateBox, headset.CaptureBitrate);
         StereoBox.IsChecked = headset.StereoCapture;
         FullRateBox.IsChecked = headset.FullRateCapture;
-        StatusText.Text = App.Instance.Adb.DescribeStatus();
+        RequireTrustBox.IsChecked = headset.RequireTrustedHeadset;
+        CustomAdbBox.Text = string.Join(Environment.NewLine, headset.CustomAdbCommands);
+        UpdateTrustBanner();
         _loading = false;
     }
 
@@ -105,17 +107,58 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.CaptureBitrate = Read<HeadsetCaptureBitrate>(CaptureBitrateBox, headset.CaptureBitrate);
         headset.StereoCapture = StereoBox.IsChecked == true;
         headset.FullRateCapture = FullRateBox.IsChecked == true;
+        headset.RequireTrustedHeadset = RequireTrustBox.IsChecked == true;
+        headset.CustomAdbCommands = CustomCommandSet.ParseLines(CustomAdbBox.Text);
         App.Instance.Settings.Save();
     }
 
-    private void Apply_Click(object sender, RoutedEventArgs e) => Run(() => App.Instance.Headset.Apply(App.Instance.Settings.Current.Headset));
-    private void ProxOn_Click(object sender, RoutedEventArgs e) => Run(() => App.Instance.Headset.SetProximitySensor(true));
-    private void ProxOff_Click(object sender, RoutedEventArgs e) => Run(() => App.Instance.Headset.SetProximitySensor(false));
-    private void GuardianPause_Click(object sender, RoutedEventArgs e) => Run(() => App.Instance.Headset.SetGuardianPaused(true));
-    private void GuardianResume_Click(object sender, RoutedEventArgs e) => Run(() => App.Instance.Headset.SetGuardianPaused(false));
+    private void Apply_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.Apply(App.Instance.Settings.Current.Headset));
+    private void ProxOn_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.SetProximitySensor(true, App.Instance.Settings.Current.Headset));
+    private void ProxOff_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.SetProximitySensor(false, App.Instance.Settings.Current.Headset));
+    private void GuardianPause_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.SetGuardianPaused(true, App.Instance.Settings.Current.Headset));
+    private void GuardianResume_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.SetGuardianPaused(false, App.Instance.Settings.Current.Headset));
 
     private void SendText_Click(object sender, RoutedEventArgs e) =>
-        Run(() => App.Instance.Headset.SendText(PasteBox.Text ?? string.Empty));
+        Run(() => App.Instance.Headset.SendText(PasteBox.Text ?? string.Empty, App.Instance.Settings.Current.Headset));
+
+    private void Trust_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Persist_Changed(this, new RoutedEventArgs());
+            var result = App.Instance.Headset.TrustCurrentHeadset(App.Instance.Settings.Current.Headset);
+            App.Instance.Settings.Save();
+            App.Instance.Log.Info(result);
+            ResultText.Text = result;
+            UpdateTrustBanner();
+        }
+        catch (Exception ex)
+        {
+            ResultText.Text = ex.Message;
+        }
+    }
+
+    private void ClearTrust_Click(object sender, RoutedEventArgs e)
+    {
+        var headset = App.Instance.Settings.Current.Headset;
+        headset.TrustedSerial = null;
+        headset.TrustedModel = null;
+        App.Instance.Settings.Save();
+        UpdateTrustBanner();
+        ResultText.Text = "Trusted headset cleared. The next connected Quest will be remembered.";
+    }
+
+    private void UpdateTrustBanner()
+    {
+        var identity = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
+        TrustText.Text = identity.Summary;
+        StatusText.Text = App.Instance.Adb.DescribeStatus();
+    }
 
     private void Run(Func<string> action)
     {
@@ -125,13 +168,14 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             var result = action();
             App.Instance.Log.Info(result);
             ResultText.Text = result;
-            StatusText.Text = App.Instance.Adb.DescribeStatus();
+            App.Instance.Settings.Save();
+            UpdateTrustBanner();
         }
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
             ResultText.Text = ex.Message;
-            StatusText.Text = App.Instance.Adb.DescribeStatus();
+            UpdateTrustBanner();
         }
     }
 

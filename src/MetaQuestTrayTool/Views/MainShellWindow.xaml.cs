@@ -15,11 +15,13 @@ public partial class MainShellWindow : Window
     private readonly AdvancedPage _advancedPage = new();
     private readonly QuestLinkPage _linkPage = new();
     private readonly HeadsetPage _headsetPage = new();
+    private readonly InfoPage _infoPage = new();
     private bool _forceClose;
 
     public MainShellWindow()
     {
         InitializeComponent();
+        AuthorText.Text = $"By {AppInfo.Author}";
         VersionText.Text = $"v{App.GetVersion()}";
         ApplyAltTabPreference();
         NavGame.IsChecked = true;
@@ -36,6 +38,7 @@ public partial class MainShellWindow : Window
             "Advanced" => NavAdvanced,
             "Link" => NavLink,
             "Headset" => NavHeadset,
+            "Info" => NavInfo,
             _ => NavGame
         };
         nav.IsChecked = true;
@@ -75,6 +78,7 @@ public partial class MainShellWindow : Window
             "Advanced" => _advancedPage,
             "Link" => _linkPage,
             "Headset" => _headsetPage,
+            "Info" => _infoPage,
             _ => _gamePage
         };
 
@@ -87,6 +91,7 @@ public partial class MainShellWindow : Window
             "Advanced" => "Advanced",
             "Link" => "Quest Link",
             "Headset" => "Headset",
+            "Info" => "Info",
             _ => "Game Settings"
         };
 
@@ -104,6 +109,9 @@ public partial class MainShellWindow : Window
         var count = App.Instance.Log.Entries.Count;
         NavLog.Content = count > 0 ? $"Log Window ({count})" : "Log Window";
     }
+
+    private void Donate_Click(object sender, RoutedEventArgs e) =>
+        Services.DonateService.Open(this);
 
     private void About_Click(object sender, RoutedEventArgs e)
     {

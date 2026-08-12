@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Single version + product name for the whole app (exe, About, Info, tray). -->
+    <Version>1.0.0</Version>
+    <Product>Meta Quest Tray Tool</Product>
+    <AssemblyTitle>Meta Quest Tray Tool</AssemblyTitle>
+    <Company>Eliminater74</Company>
+    <Authors>Eliminater74</Authors>
+    <Copyright>Copyright © Eliminater74</Copyright>
+  </PropertyGroup>
+</Project>

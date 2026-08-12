@@ -11,12 +11,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>MetaQuestTrayTool</AssemblyName>
     <RootNamespace>MetaQuestTrayTool</RootNamespace>
-    <Product>Meta Quest Tray Tool</Product>
-    <Company>DevOculus</Company>
-    <Authors>DevOculus</Authors>
-    <Version>0.8.1</Version>
     <Description>Windows tray utility for Meta Quest / Oculus Link and VR runtime settings.</Description>
-    <ApplicationTitle>Meta Quest Tray Tool</ApplicationTitle>
+    <ApplicationTitle>$(Product)</ApplicationTitle>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
   </PropertyGroup>
 

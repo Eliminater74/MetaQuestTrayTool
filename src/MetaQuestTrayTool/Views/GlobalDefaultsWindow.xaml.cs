@@ -35,6 +35,8 @@ public partial class GlobalDefaultsWindow : Window
             ? OpenXrRuntimeKind.Meta
             : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = defaults.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        CliCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToCliText();
+        AdbCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToAdbText();
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -51,15 +53,15 @@ public partial class GlobalDefaultsWindow : Window
 
     private void Apply_Click(object sender, RoutedEventArgs e)
     {
-        if (!TryWrite(out var settings))
+        if (!TryWrite(out _))
         {
             return;
         }
 
         App.Instance.Settings.Save();
-        var result = App.Instance.DebugTool.Apply(settings);
-        App.Instance.Log.Info("Applied global defaults: " + result.Summary);
-        System.Windows.MessageBox.Show(this, result.Summary, App.AppName);
+        var summary = App.Instance.ApplyGlobalGameSettings();
+        App.Instance.Log.Info("Applied global defaults: " + summary);
+        System.Windows.MessageBox.Show(this, summary, App.AppName);
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
@@ -87,6 +89,8 @@ public partial class GlobalDefaultsWindow : Window
             App.Instance.Settings.Current.OpenXr.PreferredRuntime = openXr;
         }
 
+        App.Instance.Settings.Current.CustomCommands.SetCliFromText(CliCommandsBox.Text);
+        App.Instance.Settings.Current.CustomCommands.SetAdbFromText(AdbCommandsBox.Text);
         return true;
     }
 

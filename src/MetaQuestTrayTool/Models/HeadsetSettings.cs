@@ -91,4 +91,13 @@ public sealed class HeadsetSettings
     public HeadsetCaptureBitrate CaptureBitrate { get; set; } = HeadsetCaptureBitrate.DeviceDefault;
     public bool StereoCapture { get; set; }
     public bool FullRateCapture { get; set; }
+    public bool RequireTrustedHeadset { get; set; } = true;
+    public string? TrustedSerial { get; set; }
+    public string? TrustedModel { get; set; }
+    private List<string> _customAdbCommands = [];
+    public List<string> CustomAdbCommands
+    {
+        get => _customAdbCommands;
+        set => _customAdbCommands = value ?? [];
+    }
 }

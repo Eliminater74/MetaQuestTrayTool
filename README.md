@@ -1,6 +1,6 @@
 # Meta Quest Tray Tool
 
-Windows tray utility for Meta Quest / Oculus Link. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
+Windows tray utility for Meta Quest / Oculus Link, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
 
 Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
@@ -13,7 +13,7 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
 Update both files whenever a phase ships so they stay useful after a break.
 
-## What works now (v0.7)
+## What works now (v1.0.0)
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -36,8 +36,13 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
 
 - **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
+- **Trusted headset**: first connected serial is remembered; a different ADB device is blocked
+- **Custom commands**: extra OculusDebugToolCLI + ADB lines on global defaults and personal profiles
+- **Backup**: export / import settings from Advanced
+- **Info** page: live OpenXR (Meta vs SteamVR), OVRService, and detailed headset identity
+- **Donate** button (sidebar, About, tray) — paste the live URL into `AppInfo.DonateUrl` when you have it
 
-Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates.
+Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates, donate URL.
 
 See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 

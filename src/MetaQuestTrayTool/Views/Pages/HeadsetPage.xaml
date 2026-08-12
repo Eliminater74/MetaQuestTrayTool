@@ -81,6 +81,24 @@
         <TextBox x:Name="PasteBox"/>
       </DockPanel>
 
+      <TextBlock Text="Trusted headset" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="The first Quest that connects is remembered. A different serial is blocked so a rogue ADB device cannot receive your commands."/>
+      <CheckBox x:Name="RequireTrustBox" Content="Only run ADB commands on the trusted headset"
+                Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"/>
+      <TextBlock x:Name="TrustText" TextWrapping="Wrap" Margin="0,0,0,8"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+        <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"/>
+        <Button Content="Clear trust" Style="{StaticResource GhostButtonStyle}" Click="ClearTrust_Click"/>
+      </StackPanel>
+
+      <TextBlock Text="Custom ADB commands (this headset)" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="One shell command per line. Applied with the tweaks above when the headset connects."/>
+      <TextBox x:Name="CustomAdbBox" Margin="0,0,0,12" MinHeight="80" AcceptsReturn="True"
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+               LostFocus="Persist_Changed"/>
+
       <TextBlock x:Name="ResultText" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
                  Text="Skipped: MTP (use Explorer), BONELAB mods, and SideQuest experimental passthrough — those stay in SideQuest."/>
     </StackPanel>

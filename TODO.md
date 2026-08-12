@@ -96,8 +96,19 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Paste text to headset; proximity / guardian helpers
 - [ ] Wireless ADB pairing UI
 
+## v1.0.0
+
+- [x] Single version + product name in Directory.Build.props
+- [x] Author credit: Eliminater74
+- [x] Custom CLI / ADB commands on global defaults and personal profiles
+- [x] Settings export / import backup
+- [x] Trusted headset serial + rogue-device block
+- [x] Info page (OpenXR live, OVRService, headset identity)
+- [x] Visible Donate (sidebar, About, tray) — URL pending
+- [ ] Paste live donate URL into AppInfo.DonateUrl
+
 ## Housekeeping
 
 - [x] Keep README "what works now" in sync after each phase
-- [x] Bump version in the csproj when a phase ships
+- [x] Bump version in Directory.Build.props when a phase ships
 - [ ] Decide on a license before a public release
