@@ -1,6 +1,9 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.InfoPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
       <TextBlock Text="Info" Style="{StaticResource PageTitleStyle}"/>
@@ -8,10 +11,14 @@
                  Text="Link = Meta Air/wired, Steam Link, or Virtual Desktop. ADB = USB/wireless debugging (optional; not required for Air Link)."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-        <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"/>
-        <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"/>
-        <Button Content="Copy" Style="{StaticResource GhostButtonStyle}" Click="Copy_Click"/>
-        <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"/>
+        <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"
+                ToolTip="Open the donation page to support Meta Quest Tray Tool development."/>
+        <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"
+                ToolTip="Re-read Link, OpenXR, headset, and ADB status into the report below."/>
+        <Button Content="Copy" Style="{StaticResource GhostButtonStyle}" Click="Copy_Click"
+                ToolTip="Copy the full diagnostics report to the clipboard for support or bug reports."/>
+        <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"
+                ToolTip="Remember the connected VR serial as your trusted headset for ADB commands."/>
       </StackPanel>
 
       <TextBlock x:Name="ConnectionBanner" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
@@ -36,7 +43,8 @@
                  Foreground="{DynamicResource AppTextBrush}"
                  FontFamily="Consolas"
                  FontSize="12"
-                 MinHeight="280"/>
+                 MinHeight="280"
+                 ToolTip="Live diagnostics: Link path, OpenXR ActiveRuntime, trusted serial, and ADB. Use Copy to share."/>
       </Border>
     </StackPanel>
   </ScrollViewer>

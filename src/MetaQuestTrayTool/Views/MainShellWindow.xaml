@@ -9,7 +9,10 @@
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="220"/>
@@ -26,12 +29,14 @@
                   Style="{StaticResource AccentButtonStyle}"
                   Margin="0,0,0,8"
                   HorizontalAlignment="Stretch"
-                  Click="Donate_Click"/>
+                  Click="Donate_Click"
+                  ToolTip="Open the donation page to support Meta Quest Tray Tool development."/>
           <Button Content="About"
                   Style="{StaticResource GhostButtonStyle}"
                   Margin="0,0,0,8"
                   HorizontalAlignment="Stretch"
-                  Click="About_Click"/>
+                  Click="About_Click"
+                  ToolTip="Version, author, and project credits."/>
           <TextBlock x:Name="AuthorText"
                      HorizontalAlignment="Center"
                      Foreground="{DynamicResource AppMutedBrush}"
@@ -56,23 +61,32 @@
                      Foreground="{DynamicResource AppAccentBrush}"/>
 
           <RadioButton x:Name="NavGame" Content="Game Settings" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"
+                       ToolTip="OpenXR runtime, global ODT defaults (SS/ASW/FOV), and personal profiles."/>
           <RadioButton x:Name="NavTray" Content="Tray Tool" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Tray"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Tray"
+                       ToolTip="Hotkeys, voice commands, and other tray-side helpers."/>
           <RadioButton x:Name="NavPower" Content="Power Options" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Power"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Power"
+                       ToolTip="Windows power plans and USB selective suspend for VR sessions."/>
           <RadioButton x:Name="NavService" Content="Service &amp; Startup" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Service"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Service"
+                       ToolTip="OVRService start/stop, elevation, Dash → SteamVR, and CoreChannel."/>
           <RadioButton x:Name="NavLog" Content="Log Window" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Log"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Log"
+                       ToolTip="Startup checks, service actions, profile applies, and errors."/>
           <RadioButton x:Name="NavAdvanced" Content="Advanced" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Advanced"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Advanced"
+                       ToolTip="Library import, backup/restore, audio devices, and updates."/>
           <RadioButton x:Name="NavLink" Content="Quest Link" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"
+                       ToolTip="RemoteHeadset encode width, bitrate, DBR, sharpen, HEVC, and Mobile ASW."/>
           <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"
+                       ToolTip="ADB tweaks for your trusted Quest. Props do not survive reboot — apply on connect."/>
           <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"/>
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"
+                       ToolTip="Live Link, OpenXR, and headset diagnostics report."/>
         </StackPanel>
       </DockPanel>
     </Border>

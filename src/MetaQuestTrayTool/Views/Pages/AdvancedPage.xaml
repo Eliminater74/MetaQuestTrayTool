@@ -1,6 +1,9 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.AdvancedPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
       <TextBlock Text="Advanced" Style="{StaticResource PageTitleStyle}"/>
@@ -26,37 +29,46 @@
 
         <TextBlock Grid.Row="0" Text="Settings" Style="{StaticResource SettingLabelStyle}"/>
         <Button Grid.Row="0" Grid.Column="1" Content="Reset all to default" HorizontalAlignment="Left"
-                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="ResetSettings_Click"/>
+                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="ResetSettings_Click"
+                ToolTip="Reset tray settings to factory defaults. Profiles and trusted headset may need separate cleanup."/>
 
         <TextBlock Grid.Row="1" Text="Profiles" Style="{StaticResource SettingLabelStyle}"/>
         <Button Grid.Row="1" Grid.Column="1" Content="Remove all" HorizontalAlignment="Left"
-                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="RemoveProfiles_Click"/>
+                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="RemoveProfiles_Click"
+                ToolTip="Delete every personal profile from profiles.json. Global defaults are kept."/>
 
         <TextBlock Grid.Row="2" Text="Steam + Meta Library" Style="{StaticResource SettingLabelStyle}"/>
         <Button Grid.Row="2" Grid.Column="1" Content="View &amp; Import" HorizontalAlignment="Left"
-                Style="{StaticResource AccentButtonStyle}" Margin="0,0,0,10" Click="Library_Click"/>
+                Style="{StaticResource AccentButtonStyle}" Margin="0,0,0,10" Click="Library_Click"
+                ToolTip="Browse Steam and Meta library games to import as personal profiles."/>
 
         <TextBlock Grid.Row="3" Text="Game Library / Profiles" Style="{StaticResource SettingLabelStyle}"/>
         <Button Grid.Row="3" Grid.Column="1" Content="View &amp; Edit" HorizontalAlignment="Left"
-                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Profiles_Click"/>
+                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Profiles_Click"
+                ToolTip="Open the profiles list to add, edit, delete, or apply personal game tweaks."/>
 
         <TextBlock Grid.Row="4" Text="Global defaults" Style="{StaticResource SettingLabelStyle}"/>
         <Button Grid.Row="4" Grid.Column="1" Content="Edit defaults" HorizontalAlignment="Left"
-                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Defaults_Click"/>
+                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Defaults_Click"
+                ToolTip="Edit SS / ASW / FOV and custom CLI / ADB defaults used when no profile is active."/>
 
         <TextBlock Grid.Row="5" Text="Audio" Style="{StaticResource SettingLabelStyle}"/>
         <Button Grid.Row="5" Grid.Column="1" Content="Configure devices" HorizontalAlignment="Left"
-                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Audio_Click"/>
+                Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Audio_Click"
+                ToolTip="Configure VR vs desktop playback/recording device switching when Link is active."/>
 
         <TextBlock Grid.Row="6" Text="Backup" Style="{StaticResource SettingLabelStyle}"/>
         <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
-          <Button Content="Export settings…" Style="{StaticResource AccentButtonStyle}" Click="Export_Click"/>
-          <Button Content="Import settings…" Style="{StaticResource GhostButtonStyle}" Click="Import_Click"/>
+          <Button Content="Export settings…" Style="{StaticResource AccentButtonStyle}" Click="Export_Click"
+                  ToolTip="Export settings (and related config) to a backup file you can restore later."/>
+          <Button Content="Import settings…" Style="{StaticResource GhostButtonStyle}" Click="Import_Click"
+                  ToolTip="Import a previously exported settings backup. Overwrites current tray settings."/>
         </StackPanel>
 
         <TextBlock Grid.Row="7" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
         <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
-          <Button Content="Check for updates…" Style="{StaticResource AccentButtonStyle}" Click="CheckUpdates_Click"/>
+          <Button Content="Check for updates…" Style="{StaticResource AccentButtonStyle}" Click="CheckUpdates_Click"
+                  ToolTip="Check GitHub for a newer Setup.exe and install over this copy if available."/>
           <TextBlock VerticalAlignment="Center" Margin="12,0,0,0"
                      Foreground="{DynamicResource AppMutedBrush}"
                      Text="Downloads the latest Setup.exe from GitHub and installs over this copy."/>

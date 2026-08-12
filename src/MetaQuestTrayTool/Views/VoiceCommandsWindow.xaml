@@ -8,12 +8,18 @@
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button Content="Test listen once" Style="{StaticResource GhostButtonStyle}" Click="TestListen_Click"/>
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+      <Button Content="Test listen once" Style="{StaticResource GhostButtonStyle}" Click="TestListen_Click"
+              ToolTip="Listen once with Windows speech recognition and show which phrase matched (if any)."/>
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+              ToolTip="Save voice settings and push-to-talk shortcut. No restart required."/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
+              ToolTip="Close without saving unsaved edits."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -29,21 +35,27 @@
                    TextWrapping="Wrap"
                    Foreground="{DynamicResource AppMutedBrush}"/>
 
-        <CheckBox x:Name="EnabledBox" Content="Enable voice commands" Margin="0,0,0,8"/>
-        <CheckBox x:Name="PushToTalkBox" Content="Push-to-talk only (recommended)" Margin="0,0,0,8"/>
-        <CheckBox x:Name="AudioConfirmBox" Content="Spoken confirmation when a command is recognized" Margin="0,0,0,12"/>
+        <CheckBox x:Name="EnabledBox" Content="Enable voice commands" Margin="0,0,0,8"
+                  ToolTip="Listen for supported phrases while the tray runs. Prefer push-to-talk in VR."/>
+        <CheckBox x:Name="PushToTalkBox" Content="Push-to-talk only (recommended)" Margin="0,0,0,8"
+                  ToolTip="Only listen while the push-to-talk shortcut is held. Stops game audio from triggering commands."/>
+        <CheckBox x:Name="AudioConfirmBox" Content="Spoken confirmation when a command is recognized" Margin="0,0,0,12"
+                  ToolTip="Speak a short confirmation when a phrase is recognized so you know it fired in VR."/>
 
         <TextBlock Text="Push-to-talk shortcut" Style="{StaticResource SettingLabelStyle}"/>
         <TextBlock x:Name="PushToTalkText" Margin="0,0,0,8" Foreground="{DynamicResource AppMutedBrush}"/>
         <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-          <Button x:Name="RecordPttButton" Content="Record shortcut…" Style="{StaticResource GhostButtonStyle}" Click="RecordPtt_Click"/>
-          <Button Content="Reset to Ctrl+Shift+V" Style="{StaticResource GhostButtonStyle}" Click="ResetPtt_Click"/>
+          <Button x:Name="RecordPttButton" Content="Record shortcut…" Style="{StaticResource GhostButtonStyle}" Click="RecordPtt_Click"
+                  ToolTip="Capture a new global push-to-talk chord. Esc cancels."/>
+          <Button Content="Reset to Ctrl+Shift+V" Style="{StaticResource GhostButtonStyle}" Click="ResetPtt_Click"
+                  ToolTip="Restore the default push-to-talk shortcut (Ctrl+Shift+V)."/>
         </StackPanel>
 
         <TextBlock Text="Supported phrases" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
         <ListView x:Name="PhrasesList"
                   MinHeight="240"
-                  Style="{StaticResource ThemedListViewStyle}">
+                  Style="{StaticResource ThemedListViewStyle}"
+                  ToolTip="Built-in phrases and the tray actions they run (e.g. kill dash, start service).">
           <ListView.View>
             <GridView ColumnHeaderContainerStyle="{StaticResource ThemedGridViewColumnHeaderStyle}">
               <GridViewColumn Header="Say this" Width="280" DisplayMemberBinding="{Binding Phrase}"/>

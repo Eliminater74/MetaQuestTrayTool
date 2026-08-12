@@ -9,7 +9,10 @@
         MinWidth="560"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
-        Foreground="{DynamicResource AppTextBrush}">
+        Foreground="{DynamicResource AppTextBrush}"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <Window.Resources>
     <converters:PathToImageConverter x:Key="PathToImage"/>
   </Window.Resources>
@@ -29,25 +32,30 @@
                Width="280"
                Padding="8,6"
                VerticalContentAlignment="Center"
-               TextChanged="SearchBox_TextChanged"/>
+               TextChanged="SearchBox_TextChanged"
+               ToolTip="Filter the library list by game name."/>
       <ComboBox x:Name="FilterBox"
                 Margin="8,0,0,0"
                 Width="160"
                 Padding="6"
-                SelectionChanged="FilterBox_SelectionChanged"/>
+                SelectionChanged="FilterBox_SelectionChanged"
+                ToolTip="Show All, Steam only, or Meta / Oculus library games."/>
       <Button Content="Refresh"
               Margin="8,0,0,0"
               Style="{StaticResource GhostButtonStyle}"
-              Click="Refresh_Click"/>
+              Click="Refresh_Click"
+              ToolTip="Rescan installed Steam and Meta library folders."/>
     </StackPanel>
 
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
       <Button Content="Add selected"
               Style="{StaticResource AccentButtonStyle}"
-              Click="Add_Click"/>
+              Click="Add_Click"
+              ToolTip="Create a personal profile for the selected game and open the editor."/>
       <Button Content="Cancel"
               Style="{StaticResource GhostButtonStyle}"
-              Click="Cancel_Click"/>
+              Click="Cancel_Click"
+              ToolTip="Close without adding a profile."/>
     </StackPanel>
 
     <TextBlock x:Name="StatusText"

@@ -7,13 +7,20 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
-        Foreground="{DynamicResource AppTextBrush}">
+        Foreground="{DynamicResource AppTextBrush}"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-      <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"/>
-      <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"/>
-      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+              ToolTip="Save these power plan preferences without switching plans immediately."/>
+      <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"
+              ToolTip="Switch Windows to the selected VR power plan right now."/>
+      <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"
+              ToolTip="Switch Windows back to the fallback (non-VR) power plan."/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
+              ToolTip="Close without saving unsaved edits."/>
     </StackPanel>
 
     <StackPanel>
@@ -29,28 +36,34 @@
       <CheckBox x:Name="AutoSwitchBox"
                 Margin="0,0,0,8"
                 Foreground="{DynamicResource AppTextBrush}"
-                Content="Auto-switch with Oculus service"/>
+                Content="Auto-switch with Oculus service"
+                ToolTip="Switch to the VR plan when OVRService is running and restore fallback when it stops."/>
 
       <CheckBox x:Name="UsbBox"
                 Margin="0,0,0,8"
                 Foreground="{DynamicResource AppTextBrush}"
-                Content="Disable USB selective suspend while VR plan is active"/>
+                Content="Disable USB selective suspend while VR plan is active"
+                ToolTip="Keep USB ports awake under the VR plan so wired Link does not drop mid-session."/>
 
       <CheckBox x:Name="SleepBox"
                 Margin="0,0,0,12"
                 Foreground="{DynamicResource AppTextBrush}"
-                Content="Restart OVRService after the PC wakes from sleep"/>
+                Content="Restart OVRService after the PC wakes from sleep"
+                ToolTip="After sleep/hibernate, restart OVRService so Link recovers more reliably."/>
 
       <TextBlock Text="VR power plan" Foreground="{DynamicResource AppMutedBrush}"/>
-      <ComboBox x:Name="VrPlanBox" Margin="0,4,0,12" Padding="6"/>
+      <ComboBox x:Name="VrPlanBox" Margin="0,4,0,12" Padding="6"
+                ToolTip="Windows power plan for VR sessions (High Performance / Ultimate recommended)."/>
 
       <TextBlock Text="Fallback power plan" Foreground="{DynamicResource AppMutedBrush}"/>
-      <ComboBox x:Name="FallbackPlanBox" Margin="0,4,0,8" Padding="6"/>
+      <ComboBox x:Name="FallbackPlanBox" Margin="0,4,0,8" Padding="6"
+                ToolTip="Plan restored when VR ends. Use Balanced or your everyday plan."/>
 
       <Button Content="Use current plan as fallback"
               HorizontalAlignment="Left"
               Style="{StaticResource GhostButtonStyle}"
-              Click="CaptureFallback_Click"/>
+              Click="CaptureFallback_Click"
+              ToolTip="Remember the currently active Windows power plan as your fallback."/>
     </StackPanel>
   </DockPanel>
 </Window>

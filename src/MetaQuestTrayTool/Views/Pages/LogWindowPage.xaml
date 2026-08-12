@@ -1,13 +1,19 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.LogWindowPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <DockPanel>
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
       <TextBlock DockPanel.Dock="Left" Text="Log Window" Style="{StaticResource PageTitleStyle}"/>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button Content="Clear log" Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"/>
-        <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"/>
-        <Button Content="Open log folder" Style="{StaticResource GhostButtonStyle}" Click="OpenFolder_Click"/>
+        <Button Content="Clear log" Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"
+                ToolTip="Clear the in-memory log view. Does not delete files in the log folder."/>
+        <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"
+                ToolTip="Reload recent log lines from the tray logger into this list."/>
+        <Button Content="Open log folder" Style="{StaticResource GhostButtonStyle}" Click="OpenFolder_Click"
+                ToolTip="Open the on-disk log folder in Explorer for full history and diagnostics."/>
       </StackPanel>
     </DockPanel>
     <TextBlock DockPanel.Dock="Top" Style="{StaticResource PageHintStyle}"

@@ -8,15 +8,21 @@
         ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
-        Foreground="{DynamicResource AppTextBrush}">
+        Foreground="{DynamicResource AppTextBrush}"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="24">
     <StackPanel DockPanel.Dock="Bottom"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right"
                 Margin="0,24,0,0">
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-      <Button Content="Apply now" Style="{StaticResource GhostButtonStyle}" Click="Apply_Click"/>
-      <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="Cancel_Click"/>
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+              ToolTip="Persist these global defaults without applying them yet."/>
+      <Button Content="Apply now" Style="{StaticResource GhostButtonStyle}" Click="Apply_Click"
+              ToolTip="Push current global defaults (ODT + custom CLI/ADB) immediately."/>
+      <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="Cancel_Click"
+              ToolTip="Close without saving changes."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -34,27 +40,33 @@
       <TextBlock Text="Global preset" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <DockPanel Margin="0,0,0,8">
         <Button DockPanel.Dock="Right" Content="Apply preset" Margin="8,0,0,0"
-                Style="{StaticResource GhostButtonStyle}" Click="ApplyPreset_Click"/>
-        <ComboBox x:Name="PresetBox"/>
+                Style="{StaticResource GhostButtonStyle}" Click="ApplyPreset_Click"
+                ToolTip="Fill SS / ASW / FOV fields from the selected preset. Save or Apply now to persist."/>
+        <ComboBox x:Name="PresetBox"
+                  ToolTip="Built-in starting points for global SS / ASW / FOV. Does not write until Apply preset + Save."/>
       </DockPanel>
       <TextBlock x:Name="PresetHintText" TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}"
                  FontSize="12" Margin="0,0,0,16"/>
 
       <TextBlock Text="Super Sampling" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-      <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16" HorizontalAlignment="Stretch"/>
+      <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16" HorizontalAlignment="Stretch"
+                ToolTip="Default OculusDebugToolCLI super sampling when no personal profile is active."/>
 
       <TextBlock Text="ASW mode" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-      <ComboBox x:Name="AswBox" Margin="0,0,0,16" HorizontalAlignment="Stretch"/>
+      <ComboBox x:Name="AswBox" Margin="0,0,0,16" HorizontalAlignment="Stretch"
+                ToolTip="Default Asynchronous Spacewarp mode via OculusDebugToolCLI."/>
 
       <TextBlock Text="FOV multiplier" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-      <TextBox x:Name="FovBox" Margin="0,0,0,4" HorizontalAlignment="Stretch"/>
+      <TextBox x:Name="FovBox" Margin="0,0,0,4" HorizontalAlignment="Stretch"
+               ToolTip="FOV multiplier for OculusDebugToolCLI. 1.00 leaves FOV unchanged; typical range 0.50–1.50."/>
       <TextBlock Text="1.00 leaves FOV unchanged. Typical range is 0.50 – 1.50."
                  Foreground="{DynamicResource AppMutedBrush}"
                  FontSize="12"
                  Margin="0,0,0,16"/>
 
       <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-      <ComboBox x:Name="OpenXrBox" Margin="0,0,0,4" HorizontalAlignment="Stretch"/>
+      <ComboBox x:Name="OpenXrBox" Margin="0,0,0,4" HorizontalAlignment="Stretch"
+                ToolTip="Preferred HKLM OpenXR ActiveRuntime (Meta vs SteamVR) when profiles Inherit or after a game exits."/>
       <TextBlock Text="Used when a personal profile is set to Inherit, and when restoring after a game exits."
                  Foreground="{DynamicResource AppMutedBrush}"
                  FontSize="12"
@@ -64,13 +76,15 @@
       <TextBlock Text="One command per line. Applied with global defaults and when a personal profile ends."
                  Foreground="{DynamicResource AppMutedBrush}" FontSize="12" Margin="0,0,0,6"/>
       <TextBox x:Name="CliCommandsBox" Margin="0,0,0,16" MinHeight="72" AcceptsReturn="True"
-               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+               ToolTip="Extra OculusDebugToolCLI lines applied with globals. One command per line."/>
 
       <TextBlock Text="Custom headset ADB commands" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Text="One shell command per line. Runs only on your trusted headset."
                  Foreground="{DynamicResource AppMutedBrush}" FontSize="12" Margin="0,0,0,6"/>
       <TextBox x:Name="AdbCommandsBox" Margin="0,0,0,8" MinHeight="72" AcceptsReturn="True"
-               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+               ToolTip="Shell commands for your trusted headset when globals apply. Props do not survive reboot."/>
     </StackPanel>
     </ScrollViewer>
   </DockPanel>

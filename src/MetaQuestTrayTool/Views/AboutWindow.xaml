@@ -7,11 +7,16 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackgroundBrush}"
-        Foreground="{DynamicResource AppTextBrush}">
+        Foreground="{DynamicResource AppTextBrush}"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="24">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"/>
-      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+      <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"
+              ToolTip="Open the donation page to support Meta Quest Tray Tool development."/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
+              ToolTip="Close the About window."/>
     </StackPanel>
 
     <StackPanel>

@@ -1,6 +1,9 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.PowerOptionsPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
       <TextBlock Text="Power Options" Style="{StaticResource PageTitleStyle}"/>
@@ -22,31 +25,41 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Set Power Plan on Start" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="VrPlanBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="VrPlanBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"
+                  ToolTip="Windows power plan to use during VR (High Performance / Ultimate recommended). Applied when auto-switch triggers."/>
 
         <TextBlock Grid.Row="1" Text="Set Power Plan on Exit" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="FallbackPlanBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="FallbackPlanBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"
+                  ToolTip="Plan restored when VR ends or the tool exits. Use Balanced (or your everyday plan) as fallback."/>
 
         <TextBlock Grid.Row="2" Text="Apply Power Plan on" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="TriggerBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="TriggerBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"
+                  ToolTip="When to switch plans: tool start, Oculus service, or Link session — pick what matches how you enter VR."/>
 
         <TextBlock Grid.Row="3" Text="USB Selective Suspend" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="UsbBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="UsbBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="360" HorizontalAlignment="Left"
+                  ToolTip="Disable USB selective suspend so wired Link ports stay awake and do not drop the headset mid-session."/>
 
         <TextBlock Grid.Row="4" Text="Auto switch" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="AutoSwitchBox" Grid.Row="4" Grid.Column="1" Content="Enable automatic power plan switching" Margin="0,0,0,10"/>
+        <CheckBox x:Name="AutoSwitchBox" Grid.Row="4" Grid.Column="1" Content="Enable automatic power plan switching" Margin="0,0,0,10"
+                  ToolTip="Automatically switch to the VR plan on trigger and restore the fallback when VR ends."/>
 
         <TextBlock Grid.Row="5" Text="After sleep" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="SleepBox" Grid.Row="5" Grid.Column="1" Content="Restart Oculus service when the PC wakes" Margin="0,0,0,10"/>
+        <CheckBox x:Name="SleepBox" Grid.Row="5" Grid.Column="1" Content="Restart Oculus service when the PC wakes" Margin="0,0,0,10"
+                  ToolTip="After sleep/hibernate, restart OVRService so Link recovers more reliably."/>
       </Grid>
 
       <TextBlock x:Name="ActivePlanText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}"/>
 
       <StackPanel Orientation="Horizontal">
-        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-        <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"/>
-        <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"/>
-        <Button Content="Use current as fallback" Style="{StaticResource GhostButtonStyle}" Click="Capture_Click"/>
+        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+                ToolTip="Save these power options without switching plans immediately."/>
+        <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"
+                ToolTip="Switch Windows to the selected VR power plan right now."/>
+        <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"
+                ToolTip="Switch Windows back to the fallback (non-VR) power plan."/>
+        <Button Content="Use current as fallback" Style="{StaticResource GhostButtonStyle}" Click="Capture_Click"
+                ToolTip="Remember the currently active Windows power plan as your fallback."/>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>

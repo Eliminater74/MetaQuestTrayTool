@@ -8,12 +8,18 @@
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button Content="Restore defaults" Style="{StaticResource GhostButtonStyle}" Click="RestoreDefaults_Click"/>
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+      <Button Content="Restore defaults" Style="{StaticResource GhostButtonStyle}" Click="RestoreDefaults_Click"
+              ToolTip="Reset all hotkey bindings to the built-in defaults (e.g. Ctrl+Num 0 for Dash → SteamVR)."/>
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+              ToolTip="Save bindings and register global shortcuts. No restart required."/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
+              ToolTip="Close without saving unsaved edits."/>
     </StackPanel>
 
     <StackPanel>
@@ -32,7 +38,8 @@
                 Margin="0,0,0,12"
                 Content="Enable HotKeys"
                 Checked="Enabled_Changed"
-                Unchecked="Enabled_Changed"/>
+                Unchecked="Enabled_Changed"
+                ToolTip="Register global hotkeys while the tray runs. Off disables all shortcuts without deleting bindings."/>
 
       <Grid Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
@@ -48,7 +55,8 @@
       <ListView x:Name="BindingsList"
                 MinHeight="280"
                 Style="{StaticResource ThemedListViewStyle}"
-                SelectionChanged="BindingsList_SelectionChanged">
+                SelectionChanged="BindingsList_SelectionChanged"
+                ToolTip="Select a binding to edit or remove. Double-check chords that games may also use.">
         <ListView.View>
           <GridView ColumnHeaderContainerStyle="{StaticResource ThemedGridViewColumnHeaderStyle}">
             <GridViewColumn Header="Action" Width="320" DisplayMemberBinding="{Binding ActionLabel}"/>
@@ -58,8 +66,10 @@
       </ListView>
 
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-        <Button Content="Add binding" Style="{StaticResource GhostButtonStyle}" Click="AddBinding_Click"/>
-        <Button x:Name="RemoveButton" Content="Remove" Style="{StaticResource GhostButtonStyle}" Click="RemoveBinding_Click" IsEnabled="False"/>
+        <Button Content="Add binding" Style="{StaticResource GhostButtonStyle}" Click="AddBinding_Click"
+                ToolTip="Add a new action ↔ shortcut binding, then Record a chord."/>
+        <Button x:Name="RemoveButton" Content="Remove" Style="{StaticResource GhostButtonStyle}" Click="RemoveBinding_Click" IsEnabled="False"
+                ToolTip="Remove the selected binding from the list (Save to persist)."/>
       </StackPanel>
 
       <Border x:Name="RecordPanel"
@@ -71,15 +81,18 @@
         <StackPanel>
           <TextBlock Text="Edit binding" Style="{StaticResource SettingLabelStyle}"/>
           <TextBlock Text="Action" Foreground="{DynamicResource AppMutedBrush}" Margin="0,0,0,4"/>
-          <ComboBox x:Name="ActionBox" Margin="0,0,0,12" Padding="6" SelectionChanged="ActionBox_SelectionChanged"/>
+          <ComboBox x:Name="ActionBox" Margin="0,0,0,12" Padding="6" SelectionChanged="ActionBox_SelectionChanged"
+                    ToolTip="Tray action this shortcut will run (service, Dash → SteamVR, profiles, etc.)."/>
           <TextBlock Text="Shortcut" Foreground="{DynamicResource AppMutedBrush}" Margin="0,0,0,4"/>
           <TextBlock x:Name="RecordHintText"
                      Foreground="{DynamicResource AppMutedBrush}"
                      TextWrapping="Wrap"
                      Text="Press the key combination you want to use. Esc cancels."/>
           <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-            <Button x:Name="RecordButton" Content="Record…" Style="{StaticResource AccentButtonStyle}" Click="Record_Click"/>
-            <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="CancelRecord_Click"/>
+            <Button x:Name="RecordButton" Content="Record…" Style="{StaticResource AccentButtonStyle}" Click="Record_Click"
+                    ToolTip="Capture the next key combination as this binding’s shortcut. Esc cancels."/>
+            <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="CancelRecord_Click"
+                    ToolTip="Cancel recording and leave the previous shortcut unchanged."/>
           </StackPanel>
         </StackPanel>
       </Border>

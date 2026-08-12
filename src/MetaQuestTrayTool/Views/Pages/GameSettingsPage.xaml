@@ -1,6 +1,9 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.GameSettingsPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
       <TextBlock Text="Game Settings" Style="{StaticResource PageTitleStyle}"/>
@@ -11,18 +14,24 @@
 
       <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-        <ComboBox x:Name="OpenXrBox" MaxWidth="280" MinWidth="220" Padding="6"/>
-        <Button Content="Switch now" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0" Click="SwitchOpenXr_Click"/>
+        <ComboBox x:Name="OpenXrBox" MaxWidth="280" MinWidth="220" Padding="6"
+                  ToolTip="Preferred OpenXR runtime written to HKLM ActiveRuntime (Meta Quest Link vs SteamVR). Needs Administrator to switch."/>
+        <Button Content="Switch now" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0" Click="SwitchOpenXr_Click"
+                ToolTip="Write the selected OpenXR ActiveRuntime to HKLM now. May prompt for Administrator."/>
       </StackPanel>
-      <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,6"/>
+      <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,6"
+                ToolTip="On tray start, set HKLM OpenXR ActiveRuntime to your preferred Meta or SteamVR runtime."/>
       <CheckBox x:Name="SteamLinkOpenXrBox" Content="When Steam Link / SteamVR is active, switch OpenXR to SteamVR (restore preferred on exit)"
-                Margin="0,0,0,16"/>
+                Margin="0,0,0,16"
+                ToolTip="While Steam Link / SteamVR is active, force OpenXR to SteamVR; restore your preferred runtime when that session ends."/>
       <TextBlock x:Name="OpenXrStatusText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Text="Profiles" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-        <Button Content="View &amp; Edit" Style="{StaticResource AccentButtonStyle}" Click="Profiles_Click"/>
-        <Button Content="Global defaults" Style="{StaticResource GhostButtonStyle}" Click="GlobalDefaults_Click"/>
+        <Button Content="View &amp; Edit" Style="{StaticResource AccentButtonStyle}" Click="Profiles_Click"
+                ToolTip="Open personal game profiles that override these globals while a matching process runs."/>
+        <Button Content="Global defaults" Style="{StaticResource GhostButtonStyle}" Click="GlobalDefaults_Click"
+                ToolTip="Open the focused editor for SS / ASW / FOV and custom CLI / ADB defaults."/>
       </StackPanel>
 
       <Grid x:Name="MetaOdtPanel">
@@ -44,35 +53,46 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Default Super Sampling" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="SuperSamplingBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="SuperSamplingBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="Default OculusDebugToolCLI super sampling. Applied with globals; personal profiles can override. Gated under Steam Link / Virtual Desktop."/>
 
         <TextBlock Grid.Row="1" Text="Default ASW Mode" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="AswBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="AswBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="Default Asynchronous Spacewarp mode via OculusDebugToolCLI. Personal profiles can override while a game runs."/>
 
         <TextBlock Grid.Row="2" Text="Adaptive GPU Scaling" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="AdaptiveGpuBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="AdaptiveGpuBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="ODT adaptive GPU scaling. Lets the runtime lower resolution under load to protect frame time."/>
 
         <TextBlock Grid.Row="3" Text="FoV Multiplier (H / V)" Style="{StaticResource SettingLabelStyle}"/>
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
-          <TextBox x:Name="FovHBox" Width="80" Padding="6" Margin="0,0,8,0"/>
-          <TextBox x:Name="FovVBox" Width="80" Padding="6" Margin="0,0,8,0"/>
-          <Button Content="Save" Style="{StaticResource GhostButtonStyle}" Click="SaveFov_Click"/>
+          <TextBox x:Name="FovHBox" Width="80" Padding="6" Margin="0,0,8,0"
+                   ToolTip="Horizontal FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50."/>
+          <TextBox x:Name="FovVBox" Width="80" Padding="6" Margin="0,0,8,0"
+                   ToolTip="Vertical FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50."/>
+          <Button Content="Save" Style="{StaticResource GhostButtonStyle}" Click="SaveFov_Click"
+                  ToolTip="Save the H/V FOV multipliers into the current global defaults (does not apply until Apply now)."/>
         </StackPanel>
 
         <TextBlock Grid.Row="4" Text="OVR Server Priority" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="PriorityBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="PriorityBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="Windows process priority for OVRServer. Higher can reduce hitching; Extreme may starve other apps."/>
 
         <TextBlock Grid.Row="5" Text="Force MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="ForceMipBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="ForceMipBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="ODT force mipmaps on compositor layers. Can reduce shimmering on overlays."/>
 
         <TextBlock Grid.Row="6" Text="Offset MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="OffsetMipBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="OffsetMipBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="ODT mipmap bias/offset on compositor layers. Fine-tunes sharpness vs aliasing."/>
 
         <TextBlock Grid.Row="7" Text="Use FOV Stencil" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="FovStencilBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="FovStencilBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="ODT FOV stencil. Masks unused pixels for a small GPU win; may clip edges if FOV is widened."/>
 
         <TextBlock Grid.Row="8" Text="Visual HUD" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="HudBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <ComboBox x:Name="HudBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="ODT performance HUD overlay (FPS, latency, etc.). Leave off for normal play."/>
 
         <TextBlock Grid.Row="9" Text="Voice / Homeless" Style="{StaticResource SettingLabelStyle}"/>
         <TextBlock Grid.Row="9" Grid.Column="1" Margin="0,0,0,10"
@@ -85,20 +105,26 @@
                  Text="One command per line. Applied with global defaults (Apply now, tool start, and after a personal profile ends)."/>
       <TextBox x:Name="CliCommandsBox" Margin="0,0,0,12" MinHeight="72" AcceptsReturn="True"
                TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
-                 LostFocus="CustomCommands_LostFocus"/>
+               LostFocus="CustomCommands_LostFocus"
+               ToolTip="Extra OculusDebugToolCLI lines applied with globals. One command per line; runs after built-in SS / ASW / FOV."/>
 
       <TextBlock Text="Custom headset ADB commands" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="One shell command per line. Runs only on your trusted Quest when global defaults are applied."/>
       <TextBox x:Name="AdbCommandsBox" Margin="0,0,0,12" MinHeight="72" AcceptsReturn="True"
                TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
-                 LostFocus="CustomCommands_LostFocus"/>
+               LostFocus="CustomCommands_LostFocus"
+               ToolTip="Shell commands for your trusted headset when globals apply. One per line; ADB props do not survive reboot."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-        <Button x:Name="ApplyNowButton" Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
-        <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"/>
-        <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"/>
-        <CheckBox x:Name="AutoApplyBox" Content="Auto-apply profiles" VerticalAlignment="Center" Margin="16,0,0,0"/>
+        <Button x:Name="ApplyNowButton" Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"
+                ToolTip="Push current global defaults (ODT + custom CLI/ADB) immediately. Under Steam Link / VD some Meta ODT options may be gated."/>
+        <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"
+                ToolTip="Persist these global defaults to settings without applying them yet."/>
+        <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"
+                  ToolTip="When the tray starts, apply global defaults if no personal profile is active."/>
+        <CheckBox x:Name="AutoApplyBox" Content="Auto-apply profiles" VerticalAlignment="Center" Margin="16,0,0,0"
+                  ToolTip="When a matching game process starts, apply its personal profile; restore globals when it exits."/>
       </StackPanel>
 
       <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>

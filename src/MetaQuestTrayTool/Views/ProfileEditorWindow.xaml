@@ -7,14 +7,19 @@
         Height="700"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
-        Foreground="{DynamicResource AppTextBrush}">
+        Foreground="{DynamicResource AppTextBrush}"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="24">
     <StackPanel DockPanel.Dock="Bottom"
                 Orientation="Horizontal"
                 HorizontalAlignment="Right"
                 Margin="0,20,0,0">
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-      <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="Cancel_Click"/>
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+              ToolTip="Save this personal profile to profiles.json."/>
+      <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="Cancel_Click"
+              ToolTip="Close without saving changes."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -31,14 +36,17 @@
       <TextBlock Text="Start from preset" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <DockPanel Margin="0,0,0,8">
         <Button DockPanel.Dock="Right" Content="Apply preset" Margin="8,0,0,0"
-                Style="{StaticResource GhostButtonStyle}" Click="ApplyPreset_Click"/>
-        <ComboBox x:Name="PresetBox" SelectionChanged="PresetBox_SelectionChanged"/>
+                Style="{StaticResource GhostButtonStyle}" Click="ApplyPreset_Click"
+                ToolTip="Fill SS / ASW / FOV / Link fields from the selected preset. Save to persist."/>
+        <ComboBox x:Name="PresetBox" SelectionChanged="PresetBox_SelectionChanged"
+                  ToolTip="Built-in starting points (MSFS, Beat Saber, etc.). Apply preset then Save."/>
       </DockPanel>
       <TextBlock x:Name="PresetHintText" TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}"
                  FontSize="12" Margin="0,0,0,16"/>
 
         <TextBlock Text="Name" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <TextBox x:Name="NameBox" Margin="0,0,0,16"/>
+        <TextBox x:Name="NameBox" Margin="0,0,0,16"
+                 ToolTip="Display name for this profile in the list and tray notifications."/>
 
         <TextBlock Text="Process name (without .exe)" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <DockPanel Margin="0,0,0,16">
@@ -46,31 +54,39 @@
                   Content="From library"
                   Margin="8,0,0,0"
                   Style="{StaticResource GhostButtonStyle}"
-                  Click="BrowseLibrary_Click"/>
-          <TextBox x:Name="ProcessBox"/>
+                  Click="BrowseLibrary_Click"
+                  ToolTip="Pick a Steam or Meta library game to fill the process name."/>
+          <TextBox x:Name="ProcessBox"
+                   ToolTip="Executable name without .exe. Auto-apply matches this process while it runs."/>
         </DockPanel>
 
         <TextBlock Text="Platform" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="PlatformBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="PlatformBox" Margin="0,0,0,16"
+                  ToolTip="Where the game lives (Steam, Meta, custom). Used for library artwork and filtering."/>
 
         <TextBlock Text="Super Sampling" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16"
+                  ToolTip="OculusDebugToolCLI super sampling while this process runs. Inherit keeps globals."/>
 
         <TextBlock Text="ASW mode" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="AswBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="AswBox" Margin="0,0,0,16"
+                  ToolTip="Asynchronous Spacewarp mode via ODT while this process runs. Inherit keeps globals."/>
 
         <TextBlock Text="FOV multiplier" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <TextBox x:Name="FovBox" Margin="0,0,0,4" Text="1.00"/>
+        <TextBox x:Name="FovBox" Margin="0,0,0,4" Text="1.00"
+                 ToolTip="FOV multiplier for ODT. 1.00 leaves FOV unchanged; typical range 0.50–1.50."/>
         <TextBlock Text="1.00 leaves FOV unchanged. Range 0.50 – 1.50."
                    Foreground="{DynamicResource AppMutedBrush}"
                    FontSize="12"
                    Margin="0,0,0,16"/>
 
         <TextBlock Text="CPU priority" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="PriorityBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="PriorityBox" Margin="0,0,0,16"
+                  ToolTip="Windows process priority for the game while this profile is active."/>
 
         <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="OpenXrBox" Margin="0,0,0,4"/>
+        <ComboBox x:Name="OpenXrBox" Margin="0,0,0,4"
+                  ToolTip="HKLM OpenXR ActiveRuntime for this game. Inherit keeps global Meta / SteamVR; switching may need Admin."/>
         <TextBlock Text="Inherit keeps the global Meta / SteamVR choice. A switch writes HKLM OpenXR ActiveRuntime and may prompt for Administrator."
                    TextWrapping="Wrap"
                    Foreground="{DynamicResource AppMutedBrush}"
@@ -88,30 +104,36 @@
                    Margin="0,0,0,16"/>
 
         <TextBlock Text="Link sharpening" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="SharpenBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="SharpenBox" Margin="0,0,0,16"
+                  ToolTip="Per-game Link sharpening override (RemoteHeadset). Inherit keeps the Quest Link page value."/>
 
         <TextBlock Text="Encode bitrate" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="BitrateBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="BitrateBox" Margin="0,0,0,16"
+                  ToolTip="Per-game encode bitrate override (Mbps). Inherit keeps the Quest Link page value."/>
 
         <TextBlock Text="Encode resolution" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <ComboBox x:Name="EncodeWidthBox" Margin="0,0,0,16"/>
+        <ComboBox x:Name="EncodeWidthBox" Margin="0,0,0,16"
+                  ToolTip="Per-game encode width override. Inherit keeps the Quest Link page value."/>
 
         <TextBlock Text="Custom OculusDebugToolCLI commands"
                    Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <TextBlock Text="One command per line, after built-in SS / ASW / FOV. Example: set-pixels-per-display-pixel-override 1.3"
                    TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}" FontSize="12" Margin="0,0,0,6"/>
         <TextBox x:Name="CliCommandsBox" Margin="0,0,0,16" MinHeight="72" AcceptsReturn="True"
-                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                 ToolTip="Extra ODT commands for this profile, after built-in SS / ASW / FOV. One per line."/>
 
         <TextBlock Text="Custom headset ADB commands"
                    Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <TextBlock Text="One shell command per line, run only on your trusted Quest. You can omit the adb shell prefix."
                    TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}" FontSize="12" Margin="0,0,0,6"/>
         <TextBox x:Name="AdbCommandsBox" Margin="0,0,0,16" MinHeight="72" AcceptsReturn="True"
-                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
+                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                 ToolTip="Shell commands for your trusted Quest while this profile applies. Props do not survive reboot."/>
 
         <TextBlock Text="Notes" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
-        <TextBox x:Name="CommentsBox" Margin="0,0,0,8" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+        <TextBox x:Name="CommentsBox" Margin="0,0,0,8" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"
+                 ToolTip="Optional notes for yourself. Not applied to the headset or ODT."/>
       </StackPanel>
     </ScrollViewer>
   </DockPanel>

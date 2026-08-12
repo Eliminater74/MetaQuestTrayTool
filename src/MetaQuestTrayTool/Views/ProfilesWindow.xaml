@@ -9,7 +9,10 @@
         MinWidth="560"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
-        Foreground="{DynamicResource AppTextBrush}">
+        Foreground="{DynamicResource AppTextBrush}"
+        ToolTipService.InitialShowDelay="400"
+        ToolTipService.ShowDuration="20000"
+        ToolTipService.BetweenShowDelay="200">
   <Window.Resources>
     <converters:PathToImageConverter x:Key="PathToImage"/>
   </Window.Resources>
@@ -28,25 +31,32 @@
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,16,0,0">
       <Button Content="Add from library"
               Style="{StaticResource AccentButtonStyle}"
-              Click="AddFromLibrary_Click"/>
+              Click="AddFromLibrary_Click"
+              ToolTip="Import a Steam or Meta library title as a new personal profile."/>
       <Button Content="New custom"
               Style="{StaticResource GhostButtonStyle}"
-              Click="New_Click"/>
+              Click="New_Click"
+              ToolTip="Create a blank personal profile and set process name, SS, ASW, and Link overrides."/>
       <Button Content="Global defaults"
               Style="{StaticResource GhostButtonStyle}"
-              Click="GlobalDefaults_Click"/>
+              Click="GlobalDefaults_Click"
+              ToolTip="Edit the global SS / ASW / FOV defaults used when no profile is active."/>
       <Button Content="Edit"
               Style="{StaticResource GhostButtonStyle}"
-              Click="Edit_Click"/>
+              Click="Edit_Click"
+              ToolTip="Edit the selected personal profile."/>
       <Button Content="Delete"
               Style="{StaticResource GhostButtonStyle}"
-              Click="Delete_Click"/>
+              Click="Delete_Click"
+              ToolTip="Delete the selected profile from profiles.json."/>
       <Button Content="Apply"
               Style="{StaticResource GhostButtonStyle}"
-              Click="Apply_Click"/>
+              Click="Apply_Click"
+              ToolTip="Apply the selected profile’s ODT / Link / ADB tweaks immediately."/>
       <Button Content="Close"
               Style="{StaticResource GhostButtonStyle}"
-              Click="Close_Click"/>
+              Click="Close_Click"
+              ToolTip="Close the profiles window."/>
     </StackPanel>
 
     <Border Background="{DynamicResource AppSurfaceBrush}"
@@ -59,7 +69,8 @@
                BorderThickness="0"
                Foreground="{DynamicResource AppTextBrush}"
                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-               MouseDoubleClick="ProfileList_MouseDoubleClick">
+               MouseDoubleClick="ProfileList_MouseDoubleClick"
+               ToolTip="Personal profiles. Double-click to edit. Auto-apply swaps these in when the process starts.">
         <ListBox.ItemContainerStyle>
           <Style TargetType="ListBoxItem">
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>

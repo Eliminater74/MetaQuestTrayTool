@@ -1,49 +1,74 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.TrayToolPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
       <TextBlock Text="Tray Tool" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="How the app behaves in Windows — startup, tray, audio switching, and notifications."/>
 
-      <CheckBox x:Name="StartWithWindowsBox" Content="Start with Windows" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StartWithWindowsBox" Content="Start with Windows"
+                ToolTip="Launch Meta Quest Tray Tool automatically when you sign in to Windows."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="StartAsAdminBox" Content="Run with Administrator rights (recommended — set and forget)"
+                ToolTip="One Windows approval the first time, then the tray starts elevated at logon so OpenXR, OVRService, and profiles apply in VR without UAC."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="28,0,0,12"
                  Text="On by default. One Windows approval the first time, then the tray starts itself at logon already elevated. OpenXR, Oculus service, and game profiles apply while you are in VR with no extra clicks. Uncheck only if you want a normal unelevated tray."/>
-      <CheckBox x:Name="StartMinimizedBox" Content="Start minimized" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StartMinimizedBox" Content="Start minimized"
+                ToolTip="Start in the notification area only — do not open the settings window at launch."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <CheckBox x:Name="AudioSwitchBox" Content="Use Audio Switcher" VerticalAlignment="Center" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="AudioConfigure_Click"/>
+        <CheckBox x:Name="AudioSwitchBox" Content="Use Audio Switcher" VerticalAlignment="Center"
+                  ToolTip="Automatically switch Windows playback/recording to VR audio when Link is active, and restore desktop audio when it drops."
+                  Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="AudioConfigure_Click"
+                ToolTip="Pick VR and desktop audio devices and when switching should happen."/>
       </StackPanel>
-      <CheckBox x:Name="HideAltTabBox" Content="Hide from Alt+Tab" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="MinimizeOnCloseBox" Content="Close window to tray (stay running)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="HideAltTabBox" Content="Hide from Alt+Tab"
+                ToolTip="Hide the settings window from the Alt+Tab task switcher while it stays in the tray."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="MinimizeOnCloseBox" Content="Close window to tray (stay running)"
+                ToolTip="Closing the settings window keeps the tray running. Use Exit on the tray menu to quit."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <CheckBox x:Name="HotKeysBox" Content="Enable HotKeys" VerticalAlignment="Center"
+                  ToolTip="Global keyboard shortcuts (default Ctrl+Numpad) for ASW, SS, Link, Dash→SteamVR, and more."
                   Checked="HotKeys_Changed" Unchecked="HotKeys_Changed"/>
-        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="HotKeysConfigure_Click"/>
+        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="HotKeysConfigure_Click"
+                ToolTip="Add, change, or restore hotkey bindings."/>
       </StackPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <CheckBox x:Name="VoiceBox" Content="Enable voice commands" VerticalAlignment="Center"
+                  ToolTip="Windows speech recognition for the same actions as hotkeys. Prefer push-to-talk so game audio does not trigger commands."
                   Checked="Voice_Changed" Unchecked="Voice_Changed"/>
-        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="VoiceConfigure_Click"/>
+        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="VoiceConfigure_Click"
+                ToolTip="Push-to-talk shortcut, always-on mode, spoken confirmation, and phrase list."/>
       </StackPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
         <CheckBox x:Name="UpdatesBox" Content="Check for updates on start" VerticalAlignment="Center"
+                  ToolTip="A few seconds after launch, check GitHub for a newer Setup.exe release."
                   Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-        <Button Content="Check now" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="CheckUpdates_Click"/>
+        <Button Content="Check now" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="CheckUpdates_Click"
+                ToolTip="Check GitHub now and offer to download/install if a newer version exists. ADB is stopped before Setup so platform-tools can be replaced."/>
       </StackPanel>
       <StackPanel Orientation="Horizontal" Margin="28,0,0,8">
         <TextBlock Text="Also check while running:" VerticalAlignment="Center" Margin="0,0,8,0"
                    Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="UpdateIntervalBox" MinWidth="200" MaxWidth="280" Padding="6"
+                  ToolTip="How often to re-check GitHub while the tray is running (in addition to Check on start / Check now)."
                   SelectionChanged="UpdateInterval_Changed"/>
       </StackPanel>
-      <CheckBox x:Name="NotificationsBox" Content="Show tray notifications" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="NotificationsBox" Content="Show tray notifications"
+                ToolTip="Balloon tips for profile apply/restore, audio switch, updates, and Dash→SteamVR."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
       <TextBlock Text="Theme" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,8"/>
-      <ComboBox x:Name="ThemeBox" MaxWidth="280" HorizontalAlignment="Left" Padding="6" SelectionChanged="Theme_Changed"/>
+      <ComboBox x:Name="ThemeBox" MaxWidth="280" HorizontalAlignment="Left" Padding="6" SelectionChanged="Theme_Changed"
+                ToolTip="Pure Black, Dark, or Light for the shell and menus."/>
 
       <TextBlock x:Name="StatusText" Margin="0,16,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
     </StackPanel>
