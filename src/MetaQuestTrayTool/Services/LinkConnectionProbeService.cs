@@ -58,6 +58,12 @@ public sealed class LinkConnectionProbeService
             return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
         }
 
+        var brokenMeta = TryDescribeBrokenMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop);
+        if (brokenMeta is not null)
+        {
+            return brokenMeta;
+        }
+
         if (virtualDesktop)
         {
             return new VrConnectionStatus
@@ -163,6 +169,12 @@ public sealed class LinkConnectionProbeService
             return false;
         }
 
+        // "connected" + inoperable is a failed / half Link session — do not treat as healthy.
+        if (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
         if (IsConnectedState(cache.ConnectionState, cache.RdConnectionState))
         {
             return true;
@@ -181,6 +193,48 @@ public sealed class LinkConnectionProbeService
 
         return false;
     }
+
+    private VrConnectionStatus? TryDescribeBrokenMetaSession(
+        HeadsetCacheEntry? cache,
+        bool usb,
+        bool metaHmd,
+        bool steamVr,
+        bool virtualDesktop)
+    {
+        if (cache is null)
+        {
+            return null;
+        }
+
+        var inoperable = string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase);
+        var connectedish = IsConnectedState(cache.ConnectionState, cache.RdConnectionState)
+                           || string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase);
+        if (!inoperable || !connectedish)
+        {
+            return null;
+        }
+
+        var air = cache.IsUsingAirLink == true;
+        return new VrConnectionStatus
+        {
+            Kind = air ? VrConnectionKind.MetaAirLink : VrConnectionKind.MetaWiredLink,
+            Summary = air
+                ? "Meta Air Link — headset inoperable (Link stream failed)"
+                : "Meta wired Link — headset inoperable (Link stream failed)",
+            Detail =
+                $"DeviceCache connectionState={cache.ConnectionState}; operationalState=inoperable. "
+                + "Check Meta service log for pc_link_error_initialization_failed / XRStreaming.",
+            SessionActive = false,
+            IsUsingAirLink = cache.IsUsingAirLink,
+            HeadsetSerial = cache.SerialNumber,
+            DeviceCacheConnectionState = cache.ConnectionState,
+            UsbHeadsetPresent = usb,
+            MetaHmdReported = metaHmd,
+            SteamVrRunning = steamVr,
+            VirtualDesktopRunning = virtualDesktop
+        };
+    }
+
     private VrConnectionStatus ClassifyMetaSession(
         HeadsetCacheEntry? cache,
         bool usb,
