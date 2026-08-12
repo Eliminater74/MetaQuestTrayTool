@@ -87,6 +87,14 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [ ] Hotkeys
 - [ ] Legacy OTT extras (Homeless, voice, HUD) — decide keep or drop
 
+## Phase 9 — headset ADB (v0.8)
+
+- [x] Detect adb.exe (SDK / PATH / SideQuest)
+- [x] CPU/GPU, texture size, refresh, FFR, chroma, capture
+- [x] Auto-apply when the Quest appears on ADB
+- [x] Paste text to headset; proximity / guardian helpers
+- [ ] Wireless ADB pairing UI
+
 ## Housekeeping
 
 - [x] Keep README "what works now" in sync after each phase

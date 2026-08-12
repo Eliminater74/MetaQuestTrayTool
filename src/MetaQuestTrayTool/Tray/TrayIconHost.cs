@@ -157,6 +157,7 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(BuildOpenXrMenu());
         menu.Items.Add(BuildAudioMenu());
         menu.Items.Add(BuildPowerMenu());
+        menu.Items.Add(BuildHeadsetMenu());
         menu.Items.Add(new ToolStripSeparator());
 
         var startWithWindows = new ToolStripMenuItem("Start with Windows")
@@ -252,6 +253,7 @@ public sealed class TrayIconHost : IDisposable
         SyncOpenXrChecks(menu);
         SyncAudioChecks(menu);
         SyncPowerChecks(menu);
+        SyncHeadsetChecks(menu);
         _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}\nOpenXR: {OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
     }
 
@@ -817,6 +819,59 @@ public sealed class TrayIconHost : IDisposable
         _powerSettings.Show();
         _powerSettings.Activate();
         _powerSettings.WindowState = WindowState.Normal;
+    }
+
+    private ToolStripMenuItem BuildHeadsetMenu()
+    {
+        var menu = new ToolStripMenuItem("Headset (ADB)") { Name = "HeadsetMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open headset settings…", null, (_, _) =>
+        {
+            ShowShell();
+            _shell?.ShowPage("Headset");
+        }));
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        var auto = new ToolStripMenuItem("Apply when headset connects")
+        {
+            Name = "HeadsetApplyOnConnect",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.Headset.ApplyWhenHeadsetConnects
+        };
+        auto.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.Headset.ApplyWhenHeadsetConnects = auto.Checked;
+            _app.Settings.Save();
+        };
+        menu.DropDownItems.Add(auto);
+        menu.DropDownItems.Add(new ToolStripMenuItem("Apply to headset now", null, (_, _) =>
+        {
+            try
+            {
+                var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+                _app.Log.Info(result);
+                Notify("Headset", result);
+            }
+            catch (Exception ex)
+            {
+                _app.Log.Warn(ex.Message);
+                Notify("Headset", ex.Message);
+            }
+        }));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Status: Unknown") { Enabled = false, Name = "HeadsetStatus" });
+        return menu;
+    }
+
+    private void SyncHeadsetChecks(ContextMenuStrip root)
+    {
+        if (FindItem(root.Items, "HeadsetApplyOnConnect") is ToolStripMenuItem auto)
+        {
+            auto.Checked = _app.Settings.Current.Headset.ApplyWhenHeadsetConnects;
+        }
+
+        if (FindItem(root.Items, "HeadsetStatus") is ToolStripMenuItem status)
+        {
+            status.Text = _app.Adb.DescribeStatus();
+        }
     }
 
     private static string FormatSuperSampling(double value) =>

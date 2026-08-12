@@ -1,0 +1,88 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.HeadsetPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="Headset" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="SideQuest-style Quest tweaks over ADB. Meta does not keep these after a reboot — leave “apply when the headset connects” on so the tray pushes them again while you are in VR. Developer Mode + USB debugging (or wireless ADB) required."/>
+
+      <TextBlock x:Name="StatusText" Margin="0,0,0,12" FontWeight="SemiBold" TextWrapping="Wrap"/>
+      <CheckBox x:Name="ApplyOnConnectBox" Content="Apply these settings automatically when the headset connects"
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+
+      <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,8"/>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="200"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="CPU / GPU level" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="CpuGpuBox" Grid.Row="0" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+
+        <TextBlock Grid.Row="1" Text="Texture size" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="TextureBox" Grid.Row="1" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+
+        <TextBlock Grid.Row="2" Text="Refresh rate" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="RefreshBox" Grid.Row="2" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+
+        <TextBlock Grid.Row="3" Text="FFR" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="FfrBox" Grid.Row="3" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+
+        <TextBlock Grid.Row="4" Text="Chromatic aberration" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="ChromaBox" Grid.Row="4" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+      </Grid>
+
+      <TextBlock Text="Capture" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,8"/>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="200"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Video size" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="CaptureSizeBox" Grid.Row="0" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+
+        <TextBlock Grid.Row="1" Text="Capture FPS" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="CaptureFpsBox" Grid.Row="1" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+
+        <TextBlock Grid.Row="2" Text="Capture bitrate" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="CaptureBitrateBox" Grid.Row="2" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
+      </Grid>
+      <CheckBox x:Name="StereoBox" Content="Stereo capture (side-by-side)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="FullRateBox" Content="Full-rate capture (native refresh instead of half)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+
+      <StackPanel Orientation="Horizontal" Margin="0,16,0,8">
+        <Button Content="Apply to headset now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
+        <Button Content="Enable proximity" Style="{StaticResource GhostButtonStyle}" Click="ProxOn_Click"/>
+        <Button Content="Disable proximity" Style="{StaticResource GhostButtonStyle}" Click="ProxOff_Click"/>
+        <Button Content="Pause guardian" Style="{StaticResource GhostButtonStyle}" Click="GuardianPause_Click"/>
+        <Button Content="Resume guardian" Style="{StaticResource GhostButtonStyle}" Click="GuardianResume_Click"/>
+      </StackPanel>
+
+      <TextBlock Text="Paste text to headset" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Focus a text field in the headset, then send. Useful for long passwords you do not want to type on the Quest keyboard."/>
+      <DockPanel Margin="0,0,0,8">
+        <Button DockPanel.Dock="Right" Content="Send" Style="{StaticResource AccentButtonStyle}" Margin="8,0,0,0" Click="SendText_Click"/>
+        <TextBox x:Name="PasteBox"/>
+      </DockPanel>
+
+      <TextBlock x:Name="ResultText" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
+                 Text="Skipped: MTP (use Explorer), BONELAB mods, and SideQuest experimental passthrough — those stay in SideQuest."/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -84,6 +84,16 @@ Classic OTT ran elevated so VR-time work needed no UAC. A Windows Service cannot
 - [x] No mid-session UAC for OpenXR / OVRService (unreachable in headset)
 - [x] Opt out from Tray Tool / Service & Startup if you want a normal user tray
 
+### Phase 9 — headset ADB (v0.8)
+
+SideQuest-style `debug.oculus.*` props. They reset on reboot, so the tray re-applies when the headset connects.
+
+- [x] Find adb.exe (platform-tools, PATH, SideQuest)
+- [x] CPU/GPU, texture size, refresh rate, FFR, chromatic aberration
+- [x] Capture size / FPS / bitrate / full-rate
+- [x] Apply on connect + tray + Headset shell page
+- [x] Paste text, proximity, guardian pause
+
 ### Phase 6 — OTT-style settings shell (v0.6)
 
 Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Meta Link / OVRService stack.
@@ -99,7 +109,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 
 - Hotkeys
 - Optional voice commands (low priority)
-- ADB helpers for Quest
+- Wireless ADB pairing UI (USB ADB headset page is in v0.8)
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - Profile ignore-list
 - Detect wired Link vs Air Link

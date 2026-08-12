@@ -59,6 +59,8 @@
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Advanced"/>
           <RadioButton x:Name="NavLink" Content="Quest Link" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"/>
+          <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"/>
         </StackPanel>
       </DockPanel>
     </Border>

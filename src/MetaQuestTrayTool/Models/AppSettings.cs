@@ -22,5 +22,6 @@ public sealed class AppSettings
     public OpenXrSettings OpenXr { get; set; } = new();
     public AudioSwitchSettings Audio { get; set; } = new() { AutoSwitchEnabled = true };
     public PowerSettings Power { get; set; } = new();
+    public HeadsetSettings Headset { get; set; } = new();
     public List<GameProfile> Profiles { get; set; } = [];
 }

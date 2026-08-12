@@ -35,6 +35,8 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
 
+- **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
+
 Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates.
 
 See [ROADMAP.md](ROADMAP.md) for remaining polish items.

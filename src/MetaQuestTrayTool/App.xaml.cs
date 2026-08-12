@@ -16,6 +16,7 @@ public partial class App : System.Windows.Application
     private ProcessWatcherService? _processWatcher;
     private AudioSwitchWatcher? _audioWatcher;
     private PowerWatchService? _powerWatcher;
+    private HeadsetWatchService? _headsetWatcher;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -29,12 +30,15 @@ public partial class App : System.Windows.Application
     public PowerPlanService Power { get; } = new();
     public OpenXrRuntimeService OpenXr { get; } = new();
     public StartupRegistrationService StartupRegistration { get; } = new();
+    public AdbService Adb { get; } = new();
+    public HeadsetSettingsService Headset { get; }
 
     public App()
     {
         InitializeComponent();
         DebugTool = new OculusDebugToolService(Oculus);
         Profiles = new ProfileService(Settings);
+        Headset = new HeadsetSettingsService(Adb);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -79,6 +83,8 @@ public partial class App : System.Windows.Application
 
         Settings.Save();
         Log.Info(StartupRegistration.DescribeStatus());
+        Adb.Refresh();
+        Log.Info(Adb.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
         Log.Info(DebugTool.IsAvailable
@@ -150,7 +156,12 @@ public partial class App : System.Windows.Application
 
         _powerWatcher = new PowerWatchService(this);
         _powerWatcher.Start();
+
+        _headsetWatcher = new HeadsetWatchService(this);
+        _headsetWatcher.Start();
     }
+
+    public void TrayNotify(string title, string message) => _tray?.Notify(title, message);
 
     protected override void OnExit(ExitEventArgs e)
     {
@@ -169,6 +180,7 @@ public partial class App : System.Windows.Application
             Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
         }
 
+        _headsetWatcher?.Dispose();
         _powerWatcher?.Dispose();
         _audioWatcher?.Dispose();
         _processWatcher?.Dispose();

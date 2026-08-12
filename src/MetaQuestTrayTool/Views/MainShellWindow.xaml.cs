@@ -14,6 +14,7 @@ public partial class MainShellWindow : Window
     private readonly LogWindowPage _logPage = new();
     private readonly AdvancedPage _advancedPage = new();
     private readonly QuestLinkPage _linkPage = new();
+    private readonly HeadsetPage _headsetPage = new();
     private bool _forceClose;
 
     public MainShellWindow()
@@ -34,6 +35,7 @@ public partial class MainShellWindow : Window
             "Log" => NavLog,
             "Advanced" => NavAdvanced,
             "Link" => NavLink,
+            "Headset" => NavHeadset,
             _ => NavGame
         };
         nav.IsChecked = true;
@@ -72,6 +74,7 @@ public partial class MainShellWindow : Window
             "Log" => _logPage,
             "Advanced" => _advancedPage,
             "Link" => _linkPage,
+            "Headset" => _headsetPage,
             _ => _gamePage
         };
 
@@ -83,6 +86,7 @@ public partial class MainShellWindow : Window
             "Log" => "Log Window",
             "Advanced" => "Advanced",
             "Link" => "Quest Link",
+            "Headset" => "Headset",
             _ => "Game Settings"
         };
 

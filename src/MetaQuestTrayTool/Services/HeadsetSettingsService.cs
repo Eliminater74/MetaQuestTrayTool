@@ -1,0 +1,198 @@
+using MetaQuestTrayTool.Models;
+
+namespace MetaQuestTrayTool.Services;
+
+public sealed class HeadsetSettingsService
+{
+    private readonly AdbService _adb;
+
+    public HeadsetSettingsService(AdbService adb)
+    {
+        _adb = adb;
+    }
+
+    public string Apply(HeadsetSettings settings)
+    {
+        var quest = RequireReadyHeadset();
+        var applied = new List<string>();
+
+        switch (settings.CpuGpuLevel)
+        {
+            case HeadsetCpuGpuLevel.Level2:
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.cpuLevel", "2"));
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.gpuLevel", "2"));
+                break;
+            case HeadsetCpuGpuLevel.Level4:
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.cpuLevel", "4"));
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.gpuLevel", "4"));
+                break;
+        }
+
+        if (TryTextureSize(settings.TextureSize, out var width, out var height))
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.textureWidth", width.ToString()));
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.textureHeight", height.ToString()));
+        }
+
+        var refresh = settings.RefreshRate switch
+        {
+            HeadsetRefreshRate.Hz60 => 60,
+            HeadsetRefreshRate.Hz72 => 72,
+            HeadsetRefreshRate.Hz80 => 80,
+            HeadsetRefreshRate.Hz90 => 90,
+            HeadsetRefreshRate.Hz120 => 120,
+            _ => (int?)null
+        };
+        if (refresh is not null)
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.refreshRate", refresh.Value.ToString()));
+        }
+
+        var ffr = settings.Ffr switch
+        {
+            HeadsetFfrLevel.Off => 0,
+            HeadsetFfrLevel.Low => 1,
+            HeadsetFfrLevel.Medium => 2,
+            HeadsetFfrLevel.High => 3,
+            HeadsetFfrLevel.HighTop => 4,
+            _ => (int?)null
+        };
+        if (ffr is not null)
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.foveation.level", ffr.Value.ToString()));
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.foveation.dynamic", "0"));
+        }
+
+        switch (settings.ChromaticAberration)
+        {
+            case HeadsetChromaMode.On:
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.forceChroma", "1"));
+                break;
+            case HeadsetChromaMode.Off:
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.forceChroma", "0"));
+                break;
+        }
+
+        if (TryCaptureSize(settings.CaptureSize, out var capW, out var capH))
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.capture.width", capW.ToString()));
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.capture.height", capH.ToString()));
+        }
+
+        var fps = settings.CaptureFps switch
+        {
+            HeadsetCaptureFps.Fps24 => 24,
+            HeadsetCaptureFps.Fps30 => 30,
+            HeadsetCaptureFps.Fps60 => 60,
+            _ => (int?)null
+        };
+        if (fps is not null)
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.capture.fps", fps.Value.ToString()));
+        }
+
+        var bitrate = settings.CaptureBitrate switch
+        {
+            HeadsetCaptureBitrate.Mbps5 => 5_000_000,
+            HeadsetCaptureBitrate.Mbps10 => 10_000_000,
+            HeadsetCaptureBitrate.Mbps15 => 15_000_000,
+            HeadsetCaptureBitrate.Mbps20 => 20_000_000,
+            _ => (int?)null
+        };
+        if (bitrate is not null)
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.capture.bitrate", bitrate.Value.ToString()));
+        }
+
+        applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.fullRateCapture", settings.FullRateCapture ? "1" : "0"));
+        if (settings.StereoCapture)
+        {
+            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.capture.eye", "1"));
+        }
+
+        var label = quest.Model ?? quest.Serial;
+        return applied.Count == 0
+            ? $"Headset {label} connected — all headset overrides are Device/App default (nothing to push)."
+            : $"Applied {applied.Count} headset ADB props on {label}.";
+    }
+
+    public string SetProximitySensor(bool enabled)
+    {
+        var quest = RequireReadyHeadset();
+        var action = enabled
+            ? "com.oculus.vrpowermanager.prox_open"
+            : "com.oculus.vrpowermanager.prox_close";
+        _adb.Shell(quest.Serial, $"am broadcast -a {action}");
+        return enabled
+            ? "Proximity sensor enabled (headset can sleep when removed)."
+            : "Proximity sensor disabled (headset stays awake).";
+    }
+
+    public string SetGuardianPaused(bool paused)
+    {
+        var quest = RequireReadyHeadset();
+        _adb.SetProp(quest.Serial, "debug.oculus.guardian_pause", paused ? "1" : "0");
+        return paused ? "Guardian paused." : "Guardian enabled.";
+    }
+
+    public string SendText(string text)
+    {
+        var quest = RequireReadyHeadset();
+        return _adb.SendText(quest.Serial, text);
+    }
+
+    private AdbDevice RequireReadyHeadset()
+    {
+        var quest = _adb.FindQuest();
+        if (quest is null)
+        {
+            throw new InvalidOperationException("No Quest headset was found over ADB. Enable Developer Mode and connect USB.");
+        }
+
+        if (quest.NeedsAuthorization)
+        {
+            throw new InvalidOperationException("Headset USB debugging is not authorized. Accept the prompt inside the headset.");
+        }
+
+        if (!quest.IsReady)
+        {
+            throw new InvalidOperationException($"Headset ADB state is '{quest.State}'.");
+        }
+
+        return quest;
+    }
+
+    private static bool TryTextureSize(HeadsetTexturePreset preset, out int width, out int height)
+    {
+        (width, height) = preset switch
+        {
+            HeadsetTexturePreset.Quest1 => (1216, 1344),
+            HeadsetTexturePreset.Quest2 => (1440, 1584),
+            HeadsetTexturePreset.Quest3 => (1680, 1760),
+            HeadsetTexturePreset.Square512 => (512, 512),
+            HeadsetTexturePreset.Square768 => (768, 768),
+            HeadsetTexturePreset.Square1024 => (1024, 1024),
+            HeadsetTexturePreset.Square1280 => (1280, 1280),
+            HeadsetTexturePreset.Square1536 => (1536, 1536),
+            HeadsetTexturePreset.Square2048 => (2048, 2048),
+            HeadsetTexturePreset.Square2560 => (2560, 2560),
+            HeadsetTexturePreset.Square3072 => (3072, 3072),
+            _ => (0, 0)
+        };
+        return width > 0;
+    }
+
+    private static bool TryCaptureSize(HeadsetCaptureSize size, out int width, out int height)
+    {
+        (width, height) = size switch
+        {
+            HeadsetCaptureSize.Size640x480 => (640, 480),
+            HeadsetCaptureSize.Size1280x720 => (1280, 720),
+            HeadsetCaptureSize.Size1920x1080 => (1920, 1080),
+            HeadsetCaptureSize.Size1024x1024 => (1024, 1024),
+            HeadsetCaptureSize.Size1600x1600 => (1600, 1600),
+            _ => (0, 0)
+        };
+        return width > 0;
+    }
+}
