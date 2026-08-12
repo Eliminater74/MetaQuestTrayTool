@@ -127,7 +127,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Release version sync + root LICENSE
 - [x] In-app updates (GitHub latest release → Setup.exe → exit → install over)
 - [x] Tag **v1.0.2** with updater included
-- [ ] README screenshots
+- [x] README screenshots + demo video
 
 ## Later
 

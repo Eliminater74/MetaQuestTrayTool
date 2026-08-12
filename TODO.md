@@ -137,7 +137,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tag and publish **v1.0.1** release on GitHub
 - [x] In-app update check (GitHub latest `v*` → download Setup → exit → install over)
 - [x] Tag and publish **v1.0.2** (with in-app updater)
-- [ ] README screenshots
+- [x] README screenshots + demo video
 
 ## Housekeeping
 

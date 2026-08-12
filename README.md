@@ -6,7 +6,33 @@
 
 Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
 
-> **Screenshots:** coming soon — the README will be updated with UI images in a later release.
+### Preview
+
+[Watch a short walkthrough (MP4)](docs/media/demo.mp4)
+
+<p align="center">
+  <img src="docs/media/01-game-settings.png" alt="Game Settings" width="720"/>
+</p>
+
+<details>
+<summary>More screenshots (shell pages)</summary>
+
+| Page | Preview |
+| --- | --- |
+| Game Settings | ![Game Settings](docs/media/01-game-settings.png) |
+| Game Settings (custom CLI / ADB) | ![Game Settings custom commands](docs/media/02-game-settings-custom-commands.png) |
+| Tray Tool | ![Tray Tool](docs/media/03-tray-tool.png) |
+| Power Options | ![Power Options](docs/media/04-power-options.png) |
+| Service & Startup | ![Service and Startup](docs/media/05-service-startup.png) |
+| Log Window | ![Log Window](docs/media/06-log-window.png) |
+| Advanced | ![Advanced](docs/media/07-advanced.png) |
+| Quest Link | ![Quest Link](docs/media/08-quest-link.png) |
+| Headset (capture / trust) | ![Headset capture](docs/media/09-headset-capture.png) |
+| Headset (performance) | ![Headset performance](docs/media/10-headset-performance.png) |
+| Info | ![Info](docs/media/11-info.png) |
+| About | ![About](docs/media/12-about.png) |
+
+</details>
 
 ---
 
@@ -152,6 +178,7 @@ See [ROADMAP.md](ROADMAP.md) and [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTK
 | [docs/README.md](docs/README.md) | Index of all documentation |
 | [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry keys vs CLI commands (from Meta binaries) |
 | [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) | Hotkey shortcuts and voice phrase reference |
+| [docs/media/README.md](docs/media/README.md) | Screenshots and demo video |
 | [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
 | [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
 | [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
