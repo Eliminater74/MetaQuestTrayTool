@@ -55,9 +55,12 @@
         </StackPanel>
 
         <TextBlock Grid.Row="7" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
-        <TextBlock Grid.Row="7" Grid.Column="1" Margin="0,0,0,10"
-                   Foreground="{DynamicResource AppMutedBrush}"
-                   Text="In-app update checks will land after the first public release."/>
+        <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+          <Button Content="Check for updates…" Style="{StaticResource AccentButtonStyle}" Click="CheckUpdates_Click"/>
+          <TextBlock VerticalAlignment="Center" Margin="12,0,0,0"
+                     Foreground="{DynamicResource AppMutedBrush}"
+                     Text="Downloads the latest Setup.exe from GitHub and installs over this copy."/>
+        </StackPanel>
       </Grid>
 
       <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>

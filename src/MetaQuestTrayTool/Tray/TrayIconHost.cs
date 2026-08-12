@@ -208,6 +208,10 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(notifications);
 
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(new ToolStripMenuItem("Check for updates…", null, async (_, _) =>
+        {
+            await _app.Updates.CheckInteractivelyAsync(_shell, quietIfUpToDate: false);
+        }));
         menu.Items.Add(new ToolStripMenuItem("Donate", null, (_, _) => DonateService.Open(_shell)));
         menu.Items.Add(new ToolStripMenuItem("About", null, (_, _) => ShowAbout()));
         menu.Items.Add(new ToolStripMenuItem("Exit", null, (_, _) =>

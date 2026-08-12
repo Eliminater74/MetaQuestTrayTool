@@ -16,7 +16,8 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.1) | MetaQuestTrayTool-Setup-1.0.1.exe (latest — hotkeys, voice preview, Link registry) |
+| [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) | MetaQuestTrayTool-Setup-1.0.2.exe (latest — in-app updater) |
+| [v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.1) | [MetaQuestTrayTool-Setup-1.0.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.1/MetaQuestTrayTool-Setup-1.0.1.exe) |
 | [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) (~52 MB) |
 
 The installer is **self-contained** (includes .NET 8 — no separate runtime install). Settings are stored in `%AppData%\MetaQuestTrayTool\` and are kept if you uninstall.
@@ -86,6 +87,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 ### 8. Tips
 
 - **Themes:** Pure Black (default), Dark, or Light — change on the **Tray Tool** page.
+- **Updates:** Tray Tool → Check for updates on start (on by default), or **Check now** / tray menu **Check for updates…**. Confirms, downloads the latest Setup.exe from GitHub, exits the app, then installs over the current location.
 - **Start minimized** and **minimize-on-close** keep the app in the tray instead of the taskbar.
 - **Service & Startup** highlights **Start** or **Stop** based on whether `OVRService` is running.
 - Newer Meta runtimes may reject some `server:` ASW commands; check **Log** if something does not apply.
@@ -103,7 +105,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** includes hotkeys, voice preview, expanded Link registry writes, profile restore fixes, and service-page UI improvements.
+Release **[v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** includes in-app updates, hotkeys, voice preview, expanded Link registry writes, and profile restore fixes.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -133,8 +135,9 @@ Release **[v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
 - **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys
 - **Service & Startup**: Start/Stop button accent follows live `OVRService` state
+- **In-app updates**: checks GitHub latest release (`v*`), downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu)
 
-Not yet: Oculus Homeless, Permanent AirLink, in-app updates, custom voice phrases / mic picker.
+Not yet: Oculus Homeless, Permanent AirLink, custom voice phrases / mic picker.
 
 See [ROADMAP.md](ROADMAP.md) and [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) for details.
 

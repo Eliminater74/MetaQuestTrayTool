@@ -168,4 +168,12 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
                           + " Voice: " + App.Instance.Voice.Status;
         App.Instance.Log.Info(enabled ? "Voice commands enabled." : "Voice commands disabled.");
     }
+
+    private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        StatusText.Text = "Checking GitHub for updates…";
+        await App.Instance.Updates.CheckInteractivelyAsync(Window.GetWindow(this), quietIfUpToDate: false);
+        StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                          + " Voice: " + App.Instance.Voice.Status;
+    }
 }

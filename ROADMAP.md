@@ -127,6 +127,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Release version sync + root LICENSE
 - [ ] README screenshots
 - [x] Tag **v1.0.1** and publish updated Setup.exe
+- [x] In-app updates (GitHub latest release → Setup.exe → exit → install over)
+- [ ] Tag **v1.0.2** with updater included
 
 ## Later
 
@@ -137,7 +139,6 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - Detect wired Link vs Air Link
 - Separate communications audio device pickers in the UI
 - Launch games directly from the library picker
-- In-app update checks
 
 ## Non-goals for now
 

@@ -144,4 +144,11 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
             System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
         }
     }
+
+    private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        StatusText.Text = "Checking GitHub for updates…";
+        await App.Instance.Updates.CheckInteractivelyAsync(Window.GetWindow(this), quietIfUpToDate: false);
+        StatusText.Text = "Update check finished.";
+    }
 }

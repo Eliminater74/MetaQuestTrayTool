@@ -6,7 +6,7 @@ public sealed class TrayToolSettings
     public bool StartMinimized { get; set; } = true;
     public bool MinimizeOnClose { get; set; } = true;
     public bool HideFromAltTab { get; set; }
-    public bool CheckForUpdatesOnStart { get; set; }
+    public bool CheckForUpdatesOnStart { get; set; } = true;
     public bool EnableHotKeys { get; set; }
     public AppTheme Theme { get; set; } = AppTheme.Black;
 }

@@ -77,6 +77,9 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 - Voice commands via Windows speech — push-to-talk (Ctrl+Shift+V default), optional always-on
 - See repo `docs/VOICE-AND-HOTKEYS.md` for the full list
 
+**Updates**
+- Checks GitHub latest release (`v*`), downloads Setup.exe, closes the app, installs over the current copy
+
 **OpenXR**
 - Switch ActiveRuntime between **Meta / Oculus** and **SteamVR** (global + per-profile)
 - Restore preferred / previous runtime after a profile exits
@@ -106,7 +109,6 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 - Oculus Homeless / some classic OTT extras
 - Permanent AirLink
 - Wireless ADB pairing UI (USB ADB works)
-- In-app update checker
 - Launch games directly from the library picker
 - Profile process ignore-list
 - Detect wired Link vs Air Link reliably

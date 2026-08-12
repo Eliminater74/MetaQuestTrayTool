@@ -37,6 +37,7 @@ public partial class App : System.Windows.Application
     public HotKeyCommandService HotKeyCommands { get; }
     public HotKeyService HotKeys { get; }
     public VoiceCommandService Voice { get; }
+    public UpdateService Updates { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -52,6 +53,7 @@ public partial class App : System.Windows.Application
         HotKeyCommands = new HotKeyCommandService(this);
         HotKeys = new HotKeyService(this, HotKeyCommands);
         Voice = new VoiceCommandService(this, HotKeyCommands);
+        Updates = new UpdateService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -164,6 +166,24 @@ public partial class App : System.Windows.Application
 
         HotKeys.Reload();
         Voice.Reload();
+
+        if (Settings.Current.Tray.CheckForUpdatesOnStart)
+        {
+            _ = CheckForUpdatesOnStartAsync();
+        }
+    }
+
+    private async Task CheckForUpdatesOnStartAsync()
+    {
+        try
+        {
+            await Task.Delay(2500).ConfigureAwait(false);
+            await Updates.CheckInteractivelyAsync(owner: null, quietIfUpToDate: true).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"Startup update check failed: {ex.Message}");
+        }
     }
 
     public void TrayNotify(string title, string message) => _tray?.Notify(title, message);
