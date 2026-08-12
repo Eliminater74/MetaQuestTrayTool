@@ -29,7 +29,7 @@ public sealed class HeadsetIdentity
 
             if (string.IsNullOrWhiteSpace(AdbSerial) && string.IsNullOrWhiteSpace(Serial))
             {
-                return "No VR headset on ADB.";
+                return "none (OK for Air Link)";
             }
 
             var name = Model ?? Device ?? "Headset";

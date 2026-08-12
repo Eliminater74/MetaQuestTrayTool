@@ -4,13 +4,13 @@ namespace MetaQuestTrayTool.Services;
 
 public static class SystemInfoService
 {
-    public static string BuildReport()
+    public static string BuildReport(bool includeEnumHmd = true)
     {
         var app = App.Instance;
         app.Oculus.Refresh();
         var openXr = app.OpenXr.ReadActiveKind();
         var headset = app.Headset.ReadIdentity(app.Settings.Current.Headset);
-        var link = app.LinkConnection.Probe();
+        var link = app.LinkConnection.Probe(includeEnumHmd: includeEnumHmd);
         var text = new StringBuilder();
         text.AppendLine($"{AppInfo.ProductName} {AppInfo.Version}");
         text.AppendLine($"By {AppInfo.Author}");

@@ -11,7 +11,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     public InfoPage()
     {
         InitializeComponent();
-        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
         _refreshTimer.Tick += (_, _) =>
         {
             if (IsVisible && IsLoaded)
@@ -25,13 +25,21 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 
     public void Refresh()
     {
-        var openXr = App.Instance.OpenXr.ReadActiveKind();
-        OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
-        var connection = App.Instance.LinkConnection.Probe();
-        ConnectionBanner.Text = $"PCVR: {connection.Summary}";
+        // No EnumHmd on the auto-refresh path — it can interfere with Air Link connect.
+        var connection = App.Instance.LinkConnection.Probe(includeEnumHmd: false);
+        ConnectionBanner.Text = $"Link: {connection.Summary}";
         ConnectionBanner.Foreground = connection.SessionActive
             ? (System.Windows.Media.Brush)FindResource("AppAccentBrush")
             : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
+
+        var openXr = App.Instance.OpenXr.ReadActiveKind();
+        OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
+
+        var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
+        HeadsetBanner.Text = $"ADB: {headset.Summary}";
+        HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
+            ? System.Windows.Media.Brushes.OrangeRed
+            : (System.Windows.Media.Brush)FindResource("AppTextBrush");
 
         var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch(connection);
         if (string.IsNullOrWhiteSpace(steamTip))
@@ -45,12 +53,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             SteamTipBanner.Text = steamTip;
         }
 
-        var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
-        HeadsetBanner.Text = headset.Summary;
-        HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
-            ? System.Windows.Media.Brushes.OrangeRed
-            : (System.Windows.Media.Brush)FindResource("AppTextBrush");
-        ReportBox.Text = SystemInfoService.BuildReport();
+        ReportBox.Text = SystemInfoService.BuildReport(includeEnumHmd: false);
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();

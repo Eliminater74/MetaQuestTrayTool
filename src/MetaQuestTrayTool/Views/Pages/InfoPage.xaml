@@ -5,7 +5,7 @@
     <StackPanel>
       <TextBlock Text="Info" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Live status for OpenXR, Oculus service, and a connected VR headset. Phones, tablets, and emulators are ignored. ADB commands only run on your trusted VR headset."/>
+                 Text="Link status is separate from ADB. Air Link does not need USB debugging."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
         <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"/>
@@ -14,13 +14,13 @@
         <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"/>
       </StackPanel>
 
-      <TextBlock x:Name="OpenXrBanner" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,6"
+      <TextBlock x:Name="ConnectionBanner" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
-      <TextBlock x:Name="ConnectionBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,6"
+      <TextBlock x:Name="OpenXrBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
-      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,6" Visibility="Collapsed"
-                 Foreground="OrangeRed" FontWeight="SemiBold"/>
-      <TextBlock x:Name="HeadsetBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,12"/>
+      <TextBlock x:Name="HeadsetBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
+      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,12" Visibility="Collapsed"
+                 Foreground="OrangeRed"/>
 
       <Border Background="{DynamicResource AppFieldBrush}"
               BorderBrush="{DynamicResource AppBorderBrush}"
