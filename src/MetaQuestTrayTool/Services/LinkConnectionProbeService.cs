@@ -250,7 +250,7 @@ public sealed class LinkConnectionProbeService
             {
                 Kind = VrConnectionKind.MetaAirLink,
                 Summary = "Meta Air Link",
-                Detail = BuildMetaDetail(cache, usb, "DeviceCache isUsingAirLink=true"),
+                Detail = BuildMetaDetail(cache, usb, "wireless Air Link (isUsingAirLink=true)"),
                 SessionActive = sessionActive,
                 IsUsingAirLink = true,
                 HeadsetSerial = cache.SerialNumber,
@@ -268,7 +268,7 @@ public sealed class LinkConnectionProbeService
             {
                 Kind = VrConnectionKind.MetaWiredLink,
                 Summary = "Meta wired Link",
-                Detail = BuildMetaDetail(cache, usb, "DeviceCache isUsingAirLink=false"),
+                Detail = BuildMetaDetail(cache, usb, "wired Link (isUsingAirLink=false)"),
                 SessionActive = sessionActive,
                 IsUsingAirLink = false,
                 HeadsetSerial = cache.SerialNumber,
@@ -322,7 +322,9 @@ public sealed class LinkConnectionProbeService
             $"rdConnectionState={cache.RdConnectionState ?? "—"}",
             $"primary={cache.PrimaryState ?? "—"}",
             $"power={cache.PowerState ?? "—"}",
-            usb ? "USB VID present" : "no Oculus USB VID"
+            usb
+                ? "Oculus USB VID present (often charge/ADB cable — does not mean wired Link)"
+                : "no Oculus USB VID"
         };
         if (!string.IsNullOrWhiteSpace(cache.SerialNumber))
         {

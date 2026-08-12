@@ -34,4 +34,36 @@ public sealed class VrConnectionStatus
 
         return $"{Summary} ({Detail})";
     }
+
+    /// <summary>Short banner line for the Info page (user-facing).</summary>
+    public string InfoBanner
+    {
+        get
+        {
+            var serial = string.IsNullOrWhiteSpace(HeadsetSerial) ? null : HeadsetSerial;
+            return Kind switch
+            {
+                VrConnectionKind.MetaAirLink when SessionActive =>
+                    serial is null
+                        ? "Meta Air Link — connected (wireless)"
+                        : $"Meta Air Link — connected (wireless) · {serial}",
+                VrConnectionKind.MetaAirLink =>
+                    serial is null
+                        ? $"{Summary}"
+                        : $"{Summary} · {serial}",
+                VrConnectionKind.MetaWiredLink when SessionActive =>
+                    serial is null
+                        ? "Meta wired Link — connected (USB)"
+                        : $"Meta wired Link — connected (USB) · {serial}",
+                VrConnectionKind.MetaWiredLink => Summary,
+                VrConnectionKind.SteamLinkOrSteamVr when SessionActive =>
+                    "Steam Link / SteamVR — session active",
+                VrConnectionKind.VirtualDesktop when SessionActive =>
+                    "Virtual Desktop — session active",
+                VrConnectionKind.MetaLinkUnknownTransport when SessionActive =>
+                    "Meta Link — connected (transport unclear)",
+                _ => Summary
+            };
+        }
+    }
 }

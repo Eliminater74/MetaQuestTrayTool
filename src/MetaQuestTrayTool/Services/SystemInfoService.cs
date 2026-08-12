@@ -1,4 +1,5 @@
 using System.Text;
+using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
@@ -18,19 +19,37 @@ public static class SystemInfoService
         text.AppendLine($"OpenXR: {OpenXrRuntimeService.Label(openXr)}");
         text.AppendLine($"OpenXR JSON: {app.OpenXr.ReadActivePath() ?? "(none)"}");
         text.AppendLine(app.Oculus.DescribeStatus());
-        text.AppendLine($"PCVR connection: {link.Describe()}");
         text.AppendLine($"Debug Tool: {(app.DebugTool.IsAvailable ? app.DebugTool.CliPath : "not found")}");
-        text.AppendLine($"ADB: {app.Adb.AdbPath ?? "not found"}");
+        text.AppendLine($"ADB binary: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
-        text.AppendLine("Headset");
-        text.AppendLine($"  VR headset: {headset.IsVrHeadset}");
-        text.AppendLine($"  Connected: {headset.IsReady}");
-        text.AppendLine($"  Ignored (phone/tablet/emulator): {headset.IsIgnored}");
-        if (!string.IsNullOrWhiteSpace(headset.IgnoreReason))
+
+        text.AppendLine("Link session (Meta / Steam / VD)");
+        text.AppendLine($"  Status: {link.InfoBanner}");
+        text.AppendLine($"  Kind: {link.Kind}");
+        text.AppendLine($"  Session active: {link.SessionActive}");
+        text.AppendLine($"  Transport: {DescribeTransport(link)}");
+        if (!string.IsNullOrWhiteSpace(link.Detail))
         {
-            text.AppendLine($"  Why: {headset.IgnoreReason}");
+            text.AppendLine($"  Detail: {link.Detail}");
         }
+        text.AppendLine($"  DeviceCache isUsingAirLink: {FormatNullableBool(link.IsUsingAirLink)}");
+        text.AppendLine($"  DeviceCache connectionState: {link.DeviceCacheConnectionState ?? "—"}");
+        text.AppendLine($"  DeviceCache headset serial: {link.HeadsetSerial ?? "—"}");
+        text.AppendLine($"  Oculus USB VID present: {link.UsbHeadsetPresent} (cable can be charge/ADB while on Air Link)");
+        text.AppendLine($"  Meta HMD EnumHmd: {(includeEnumHmd ? link.MetaHmdReported.ToString() : "skipped (UI refresh)")}");
+        text.AppendLine($"  SteamVR running: {link.SteamVrRunning}");
+        text.AppendLine($"  Virtual Desktop running: {link.VirtualDesktopRunning}");
+
+        text.AppendLine();
+        text.AppendLine("ADB (USB / wireless debugging — optional)");
+        text.AppendLine($"  Status: {headset.DescribeAdbBanner(link)}");
+        text.AppendLine($"  VR headset on ADB: {headset.IsVrHeadset}");
+        text.AppendLine($"  ADB ready: {headset.IsReady}");
         text.AppendLine($"  ADB state: {headset.State ?? "disconnected"}");
+        if (headset.IsIgnored && !string.IsNullOrWhiteSpace(headset.IgnoreReason))
+        {
+            text.AppendLine($"  Ignored: {headset.IgnoreReason}");
+        }
         text.AppendLine($"  Model: {headset.Model ?? "—"}");
         text.AppendLine($"  Device: {headset.Device ?? "—"}");
         text.AppendLine($"  Manufacturer: {headset.Manufacturer ?? "—"}");
@@ -45,33 +64,16 @@ public static class SystemInfoService
         text.AppendLine($"  Rogue / blocked: {headset.IsRogue}");
         if (app.DebugTool.LastHeadsetSerials.Count > 0)
         {
-            text.AppendLine($"  Debug Tool serials: {string.Join(", ", app.DebugTool.LastHeadsetSerials)}");
+            text.AppendLine($"  Last Debug Tool serials: {string.Join(", ", app.DebugTool.LastHeadsetSerials)}");
         }
-
-        text.AppendLine();
-        text.AppendLine("PCVR connection probe");
-        text.AppendLine($"  Kind: {link.Kind}");
-        text.AppendLine($"  Summary: {link.Summary}");
-        if (!string.IsNullOrWhiteSpace(link.Detail))
-        {
-            text.AppendLine($"  Detail: {link.Detail}");
-        }
-        text.AppendLine($"  Session active: {link.SessionActive}");
-        text.AppendLine($"  Meta DeviceCache isUsingAirLink: {FormatNullableBool(link.IsUsingAirLink)}");
-        text.AppendLine($"  DeviceCache connectionState: {link.DeviceCacheConnectionState ?? "—"}");
-        text.AppendLine($"  DeviceCache headset serial: {link.HeadsetSerial ?? "—"}");
-        text.AppendLine($"  Oculus/Meta USB VID present: {link.UsbHeadsetPresent}");
-        text.AppendLine($"  Meta HMD (EnumHmd): {link.MetaHmdReported}");
-        text.AppendLine($"  SteamVR running: {link.SteamVrRunning}");
-        text.AppendLine($"  Virtual Desktop running: {link.VirtualDesktopRunning}");
 
         var caps = VrSessionCapabilities.From(link);
         text.AppendLine();
-        text.AppendLine("Session capabilities");
+        text.AppendLine("What this session allows");
         text.AppendLine($"  Meta Link registry: {caps.AllowsMetaLinkRegistry}");
         text.AppendLine($"  Oculus Debug Tool (SS/ASW): {caps.AllowsOculusDebugTool}");
         text.AppendLine($"  OpenXR switch: {caps.AllowsOpenXrSwitch}");
-        text.AppendLine($"  Headset ADB: {caps.AllowsHeadsetAdb}");
+        text.AppendLine($"  Headset ADB tweaks: {caps.AllowsHeadsetAdb}");
         if (!string.IsNullOrWhiteSpace(caps.Banner))
         {
             text.AppendLine($"  Note: {caps.Banner}");
@@ -80,13 +82,23 @@ public static class SystemInfoService
         var steamTip = app.SteamLinkAssist.DescribeOpenXrMismatch(link);
         if (!string.IsNullOrWhiteSpace(steamTip))
         {
-            text.AppendLine($"  Steam Link OpenXR: {steamTip}");
+            text.AppendLine($"  Steam Link tip: {steamTip}");
         }
 
         text.AppendLine($"  Prefer SteamVR during Steam Link: {app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink}");
 
         return text.ToString().TrimEnd();
     }
+
+    private static string DescribeTransport(VrConnectionStatus link) => link.Kind switch
+    {
+        VrConnectionKind.MetaAirLink => "Wireless Meta Air Link (not USB Link)",
+        VrConnectionKind.MetaWiredLink => "USB Meta Quest Link",
+        VrConnectionKind.SteamLinkOrSteamVr => "Steam Link / SteamVR stream",
+        VrConnectionKind.VirtualDesktop => "Virtual Desktop stream",
+        VrConnectionKind.MetaLinkUnknownTransport => "Meta Link (wired vs Air unclear)",
+        _ => "None / idle"
+    };
 
     private static string FormatNullableBool(bool? value) => value switch
     {

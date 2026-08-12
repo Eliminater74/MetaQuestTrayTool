@@ -27,7 +27,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     {
         // No EnumHmd on the auto-refresh path — it can interfere with Air Link connect.
         var connection = App.Instance.LinkConnection.Probe(includeEnumHmd: false);
-        ConnectionBanner.Text = $"Link: {connection.Summary}";
+        ConnectionBanner.Text = $"Link: {connection.InfoBanner}";
         ConnectionBanner.Foreground = connection.SessionActive
             ? (System.Windows.Media.Brush)FindResource("AppAccentBrush")
             : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
@@ -36,10 +36,12 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
 
         var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
-        HeadsetBanner.Text = $"ADB: {headset.Summary}";
+        HeadsetBanner.Text = $"ADB: {headset.DescribeAdbBanner(connection)}";
         HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
             ? System.Windows.Media.Brushes.OrangeRed
-            : (System.Windows.Media.Brush)FindResource("AppTextBrush");
+            : headset.IsReady
+                ? (System.Windows.Media.Brush)FindResource("AppTextBrush")
+                : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
 
         var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch(connection);
         if (string.IsNullOrWhiteSpace(steamTip))

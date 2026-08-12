@@ -5,7 +5,7 @@
     <StackPanel>
       <TextBlock Text="Info" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Link status is separate from ADB. Air Link does not need USB debugging."/>
+                 Text="Link = Meta Air/wired, Steam Link, or Virtual Desktop. ADB = USB/wireless debugging (optional; not required for Air Link)."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
         <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"/>
