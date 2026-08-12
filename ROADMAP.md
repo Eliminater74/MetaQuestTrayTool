@@ -126,7 +126,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Profile restore on game exit
 - [x] Release version sync + root LICENSE
 - [ ] README screenshots
-- [ ] Tag **v1.0.1** and publish updated Setup.exe
+- [x] Tag **v1.0.1** and publish updated Setup.exe
 
 ## Later
 

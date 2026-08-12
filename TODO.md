@@ -134,7 +134,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Hotkey/voice reliability (conflicts, import reload, phrase matching)
 - [x] Full Link fields in tray Link window
 - [x] Root LICENSE.txt
-- [ ] Tag and publish **v1.0.1** release on GitHub
+- [x] Tag and publish **v1.0.1** release on GitHub
 - [ ] README screenshots
 
 ## Housekeeping
