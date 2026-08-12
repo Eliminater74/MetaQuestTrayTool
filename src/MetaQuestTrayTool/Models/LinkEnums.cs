@@ -21,3 +21,10 @@ public enum LinkSharpeningMode
     Normal,
     Quality
 }
+
+public enum MobileAswMode
+{
+    Default,
+    Disabled,
+    Enabled
+}

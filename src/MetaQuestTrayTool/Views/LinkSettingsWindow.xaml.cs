@@ -74,17 +74,19 @@ public partial class LinkSettingsWindow : Window
         LiveStatusText.Text = "Live registry: " + App.Instance.Link.ReadCurrent().Describe();
     }
 
-    private LinkSettings ReadUi() => new()
+    private LinkSettings ReadUi()
     {
-        BitrateMbps = BitrateBox.SelectedItem is ComboBoxItem bitrateItem && bitrateItem.Tag is int bitrate
+        var settings = App.Instance.Settings.Current.LinkSettings.Clone();
+        settings.BitrateMbps = BitrateBox.SelectedItem is ComboBoxItem bitrateItem && bitrateItem.Tag is int bitrate
             ? bitrate
-            : 0,
-        EncodeResolutionWidth = EncodeWidthBox.SelectedItem is ComboBoxItem widthItem && widthItem.Tag is int width
+            : 0;
+        settings.EncodeResolutionWidth = EncodeWidthBox.SelectedItem is ComboBoxItem widthItem && widthItem.Tag is int width
             ? width
-            : 0,
-        PreferHevc = HevcBox.IsChecked == true,
-        DisableSlicedEncoding = SlicesBox.IsChecked == true
-    };
+            : 0;
+        settings.PreferHevc = HevcBox.IsChecked == true;
+        settings.DisableSlicedEncoding = SlicesBox.IsChecked == true;
+        return settings;
+    }
 
     private static void SelectByTag(System.Windows.Controls.ComboBox box, int value)
     {

@@ -132,6 +132,7 @@ See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 | [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
 | [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
 | [installer/README.md](installer/README.md) | Build the Windows Setup.exe locally |
+| [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry keys vs CLI commands (from Meta binaries) |
 
 ---
 

@@ -25,6 +25,8 @@ public sealed class LinkSettings
     public LinkSharpeningMode Sharpening { get; set; } = LinkSharpeningMode.Default;
     public bool PreferHevc { get; set; }
     public bool DisableSlicedEncoding { get; set; }
+    public int DynamicBitrateOffsetMbps { get; set; }
+    public MobileAswMode MobileAsw { get; set; } = MobileAswMode.Default;
 
     public LinkSettings Clone() => new()
     {
@@ -36,13 +38,22 @@ public sealed class LinkSettings
         DynamicBitrateMax = DynamicBitrateMax,
         Sharpening = Sharpening,
         PreferHevc = PreferHevc,
-        DisableSlicedEncoding = DisableSlicedEncoding
+        DisableSlicedEncoding = DisableSlicedEncoding,
+        DynamicBitrateOffsetMbps = DynamicBitrateOffsetMbps,
+        MobileAsw = MobileAsw
     };
 
     public string Describe()
     {
         var bitrate = BitrateMbps <= 0 ? "default" : $"{BitrateMbps} Mbps";
         var width = EncodeResolutionWidth <= 0 ? "auto" : EncodeResolutionWidth.ToString();
-        return $"Preset {PresetName}, Bitrate {bitrate}, Encode {width}, {EncodeDynamicBitrate}, Sharpen {Sharpening}";
+        var distortion = DistortionCurvature == DistortionCurvature.Default
+            ? "distortion default"
+            : $"distortion {DistortionCurvature}";
+        var dbrOffset = DynamicBitrateOffsetMbps == 0
+            ? string.Empty
+            : $", DBR offset {DynamicBitrateOffsetMbps} Mbps";
+        var mobileAsw = MobileAsw == MobileAswMode.Default ? string.Empty : $", mobile ASW {MobileAsw}";
+        return $"Preset {PresetName}, Bitrate {bitrate}, Encode {width}, {EncodeDynamicBitrate}, DBR max {(DynamicBitrateMax <= 0 ? "auto" : DynamicBitrateMax.ToString())}{dbrOffset}, {distortion}, Sharpen {Sharpening}{mobileAsw}";
     }
 }

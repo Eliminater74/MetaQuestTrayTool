@@ -33,6 +33,16 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
             });
         }
 
+        DynamicOffsetBox.Items.Add(new ComboBoxItem { Content = "0 (none)", Tag = 0 });
+        foreach (var offset in new[] { 25, 50, 75, 100, 150, 200 })
+        {
+            DynamicOffsetBox.Items.Add(new ComboBoxItem
+            {
+                Content = $"+{offset} Mbps",
+                Tag = offset
+            });
+        }
+
         foreach (EncodeDynamicBitrateMode mode in Enum.GetValues<EncodeDynamicBitrateMode>())
         {
             DynamicBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
@@ -47,6 +57,11 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         {
             DistortionBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
         }
+
+        foreach (MobileAswMode mode in Enum.GetValues<MobileAswMode>())
+        {
+            MobileAswBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
+        }
     }
 
     public void Refresh()
@@ -56,8 +71,10 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         SelectByTag(BitrateBox, link.BitrateMbps);
         SelectByTag(DynamicBox, link.EncodeDynamicBitrate);
         SelectByTag(DynamicMaxBox, link.DynamicBitrateMax);
+        SelectByTag(DynamicOffsetBox, link.DynamicBitrateOffsetMbps);
         SelectByTag(SharpenBox, link.Sharpening);
         SelectByTag(DistortionBox, link.DistortionCurvature);
+        SelectByTag(MobileAswBox, link.MobileAsw);
         HevcBox.IsChecked = link.PreferHevc;
         SlicesBox.IsChecked = link.DisableSlicedEncoding;
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
@@ -119,6 +136,11 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
             link.DynamicBitrateMax = max;
         }
 
+        if (DynamicOffsetBox.SelectedItem is ComboBoxItem { Tag: int offset })
+        {
+            link.DynamicBitrateOffsetMbps = offset;
+        }
+
         if (SharpenBox.SelectedItem is ComboBoxItem { Tag: LinkSharpeningMode sharpen })
         {
             link.Sharpening = sharpen;
@@ -127,6 +149,11 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         if (DistortionBox.SelectedItem is ComboBoxItem { Tag: DistortionCurvature distortion })
         {
             link.DistortionCurvature = distortion;
+        }
+
+        if (MobileAswBox.SelectedItem is ComboBoxItem { Tag: MobileAswMode mobileAsw })
+        {
+            link.MobileAsw = mobileAsw;
         }
 
         link.PreferHevc = HevcBox.IsChecked == true;

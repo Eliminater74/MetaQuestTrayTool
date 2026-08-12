@@ -22,6 +22,8 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Encode Resolution" Style="{StaticResource SettingLabelStyle}"/>
@@ -36,20 +38,26 @@
         <TextBlock Grid.Row="3" Text="Dynamic Bitrate Max" Style="{StaticResource SettingLabelStyle}"/>
         <ComboBox x:Name="DynamicMaxBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="4" Text="Sharpening" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="SharpenBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="4" Text="Dynamic Bitrate Offset" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="DynamicOffsetBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="5" Text="Distortion Curvature" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="DistortionBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="5" Text="Sharpening" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="SharpenBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="6" Text="Prefer HEVC" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="HevcBox" Grid.Row="6" Grid.Column="1" Content="Prefer HEVC (H.265)" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="6" Text="Distortion Curvature" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="DistortionBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="7" Text="Sliced encoding" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="SlicesBox" Grid.Row="7" Grid.Column="1" Content="Disable sliced encoding (numSlices = 1)" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="7" Text="Prefer HEVC" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="HevcBox" Grid.Row="7" Grid.Column="1" Content="Prefer HEVC (H.265)" Margin="0,0,0,10"/>
 
-        <TextBlock Grid.Row="8" Text="Apply on start" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="ApplyOnStartBox" Grid.Row="8" Grid.Column="1" Content="Re-apply when the tray tool starts" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="8" Text="Sliced encoding" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="SlicesBox" Grid.Row="8" Grid.Column="1" Content="Disable sliced encoding (NumSlices = 1)" Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="9" Text="Mobile ASW" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="MobileAswBox" Grid.Row="9" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Row="10" Text="Apply on start" Style="{StaticResource SettingLabelStyle}"/>
+        <CheckBox x:Name="ApplyOnStartBox" Grid.Row="10" Grid.Column="1" Content="Re-apply when the tray tool starts" Margin="0,0,0,10"/>
       </Grid>
 
       <TextBlock x:Name="LiveStatusText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
