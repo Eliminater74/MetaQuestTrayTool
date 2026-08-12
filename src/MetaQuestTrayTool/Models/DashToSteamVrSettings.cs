@@ -17,4 +17,10 @@ public sealed class DashToSteamVrSettings
 
     /// <summary>Also close Meta Horizon Link / Oculus client windows (not OVRService).</summary>
     public bool CloseMetaClient { get; set; }
+
+    /// <summary>
+    /// Preferred state for HKLM …\Oculus\Config\PreventDashLaunch (DWORD 1 = never launch Dash).
+    /// Does not start SteamVR by itself — use Kill Dash → SteamVR or auto-on-connect for that.
+    /// </summary>
+    public bool PreferPreventDashLaunch { get; set; }
 }

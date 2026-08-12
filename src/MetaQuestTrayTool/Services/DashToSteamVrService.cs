@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
@@ -13,9 +14,19 @@ namespace MetaQuestTrayTool.Services;
 /// <see href="https://github.com/DevOculus-Meta-Quest/OculusKiller">DevOculus-Meta-Quest/OculusKiller</see>
 /// — launches <c>vrstartup.exe</c> from <c>openvrpaths.vrpath</c> and terminates Dash;
 /// does <b>not</b> replace <c>OculusDash.exe</c> on disk.
+/// Also supports the OculusKiller registry alternative:
+/// <c>HKLM\SOFTWARE\WOW6432Node\Oculus VR, LLC\Oculus\Config\PreventDashLaunch</c> = 1.
 /// </summary>
 public sealed class DashToSteamVrService : IDisposable
 {
+    public const string PreventDashLaunchValueName = "PreventDashLaunch";
+
+    public static readonly string[] PreventDashLaunchKeyPaths =
+    [
+        @"SOFTWARE\WOW6432Node\Oculus VR, LLC\Oculus\Config",
+        @"SOFTWARE\Oculus VR, LLC\Oculus\Config"
+    ];
+
     private static readonly string[] DashProcessNames =
     [
         "OculusDash"
@@ -81,10 +92,14 @@ public sealed class DashToSteamVrService : IDisposable
 
         parts.Add(LaunchSteamVr());
 
-        if (Settings.KeepKillingDashWhileSteamVr)
+        if (Settings.KeepKillingDashWhileSteamVr && !IsPreventDashLaunchEnabled())
         {
             _dashReaper.Start();
             parts.Add("Dash reaper on while SteamVR runs.");
+        }
+        else if (IsPreventDashLaunchEnabled())
+        {
+            parts.Add("PreventDashLaunch is on — Dash should not spawn.");
         }
 
         var summary = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
@@ -106,6 +121,115 @@ public sealed class DashToSteamVrService : IDisposable
         }
 
         return $"SteamVR startup: {paths.Value.StartupPath}";
+    }
+
+    public string DescribePreventDashLaunch()
+    {
+        var live = IsPreventDashLaunchEnabled();
+        return live
+            ? "PreventDashLaunch: ON (DWORD=1) — Meta should not start Oculus Dash. Restart OVRService after changing. Does not start SteamVR by itself."
+            : "PreventDashLaunch: OFF — Meta may launch Oculus Dash on Link. Registry alternative from OculusKiller.";
+    }
+
+    public bool IsPreventDashLaunchEnabled()
+    {
+        foreach (var path in PreventDashLaunchKeyPaths)
+        {
+            try
+            {
+                using var key = Registry.LocalMachine.OpenSubKey(path, writable: false);
+                if (key?.GetValue(PreventDashLaunchValueName) is int dword && dword != 0)
+                {
+                    return true;
+                }
+
+                if (key?.GetValue(PreventDashLaunchValueName) is long qword && qword != 0)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // try next path
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Writes <c>PreventDashLaunch</c> under Oculus Config (needs Administrator).
+    /// Does not start SteamVR — call <see cref="RunNow"/> or restart OVRService separately.
+    /// </summary>
+    public string SetPreventDashLaunch(bool enabled, bool restartOvrService)
+    {
+        try
+        {
+            var wrote = false;
+            Exception? lastError = null;
+            foreach (var path in PreventDashLaunchKeyPaths)
+            {
+                try
+                {
+                    using var key = Registry.LocalMachine.CreateSubKey(path, writable: true);
+                    if (key is null)
+                    {
+                        continue;
+                    }
+
+                    if (enabled)
+                    {
+                        key.SetValue(PreventDashLaunchValueName, 1, RegistryValueKind.DWord);
+                    }
+                    else if (key.GetValue(PreventDashLaunchValueName) is not null)
+                    {
+                        key.DeleteValue(PreventDashLaunchValueName, throwOnMissingValue: false);
+                    }
+
+                    wrote = true;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                }
+            }
+
+            if (!wrote)
+            {
+                return lastError is null
+                    ? "Could not open Oculus Config registry key (run the tray elevated)."
+                    : $"Could not write PreventDashLaunch: {lastError.Message}";
+            }
+
+            Settings.PreferPreventDashLaunch = enabled;
+            _app.Settings.Save();
+
+            var message = enabled
+                ? "PreventDashLaunch set to 1 — Meta should not launch Dash."
+                : "PreventDashLaunch removed — Meta may launch Dash again.";
+
+            if (restartOvrService)
+            {
+                var restart = _app.Oculus.Restart();
+                message += " " + restart;
+            }
+            else
+            {
+                message += " Restart OVRService for full effect.";
+            }
+
+            _app.Log.Info(message);
+            return message;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return "PreventDashLaunch needs Administrator rights (enable Run as Administrator on Service & Startup).";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not write PreventDashLaunch: {ex.Message}";
+        }
     }
 
     private void PollAuto()

@@ -34,7 +34,10 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         DashOpenXrBox.IsChecked = dash.SwitchOpenXrToSteamVr;
         DashReaperBox.IsChecked = dash.KeepKillingDashWhileSteamVr;
         DashCloseClientBox.IsChecked = dash.CloseMetaClient;
+        PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
+                                   || dash.PreferPreventDashLaunch;
         DashPathText.Text = App.Instance.DashToSteamVr.DescribeSteamVrPaths();
+        PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
         ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
         UpdateServiceButtons();
         _loading = false;
@@ -104,6 +107,36 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         dash.KeepKillingDashWhileSteamVr = DashReaperBox.IsChecked == true;
         dash.CloseMetaClient = DashCloseClientBox.IsChecked == true;
         App.Instance.Settings.Save();
+    }
+
+    private void PreventDash_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        var enabled = PreventDashBox.IsChecked == true;
+        App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch = enabled;
+        App.Instance.Settings.Save();
+        // Write registry immediately (without service restart); user can click Apply for restart.
+        var summary = App.Instance.DashToSteamVr.SetPreventDashLaunch(enabled, restartOvrService: false);
+        PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch() + " " + summary;
+    }
+
+    private void ApplyPreventDash_Click(object sender, RoutedEventArgs e)
+    {
+        var enabled = PreventDashBox.IsChecked == true;
+        var summary = App.Instance.DashToSteamVr.SetPreventDashLaunch(enabled, restartOvrService: true);
+        PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
+        ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+        UpdateServiceButtons();
+        System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            summary,
+            App.AppName,
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void Persist_Changed(object sender, RoutedEventArgs e)

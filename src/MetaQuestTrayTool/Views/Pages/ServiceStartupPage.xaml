@@ -45,7 +45,16 @@
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <CheckBox x:Name="DashCloseClientBox" Content="Also close Meta Horizon Link client window"
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,12,0,8"
+                 Text="Registry alternative (OculusKiller): set PreventDashLaunch=1 so Meta never starts Dash. Does not auto-start SteamVR — use the button / hotkey / auto above for that. Needs Admin + OVRService restart."/>
+      <CheckBox x:Name="PreventDashBox" Content="PreventDashLaunch (HKLM Oculus\Config) — block Dash from starting"
+                Checked="PreventDash_Changed" Unchecked="PreventDash_Changed"/>
+      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+        <Button Content="Apply PreventDashLaunch + restart OVRService" Style="{StaticResource GhostButtonStyle}"
+                Click="ApplyPreventDash_Click"/>
+      </StackPanel>
       <TextBlock x:Name="DashPathText" Margin="0,8,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
+      <TextBlock x:Name="PreventDashStatusText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
                  Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe (or OculusClient.exe)."/>
