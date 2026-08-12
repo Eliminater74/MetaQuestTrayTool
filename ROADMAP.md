@@ -125,10 +125,9 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Service & Startup Start/Stop button state
 - [x] Profile restore on game exit
 - [x] Release version sync + root LICENSE
-- [ ] README screenshots
-- [x] Tag **v1.0.1** and publish updated Setup.exe
 - [x] In-app updates (GitHub latest release → Setup.exe → exit → install over)
-- [ ] Tag **v1.0.2** with updater included
+- [x] Tag **v1.0.2** with updater included
+- [ ] README screenshots
 
 ## Later
 
