@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.7) (latest) | [MetaQuestTrayTool-Setup-1.0.7.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.7/MetaQuestTrayTool-Setup-1.0.7.exe) |
+| [v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.8) (latest) | [MetaQuestTrayTool-Setup-1.0.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.8/MetaQuestTrayTool-Setup-1.0.8.exe) |
+| [v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.7) | [MetaQuestTrayTool-Setup-1.0.7.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.7/MetaQuestTrayTool-Setup-1.0.7.exe) |
 | [v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.6) | [MetaQuestTrayTool-Setup-1.0.6.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.6/MetaQuestTrayTool-Setup-1.0.6.exe) |
 | [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.5) | [MetaQuestTrayTool-Setup-1.0.5.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.5/MetaQuestTrayTool-Setup-1.0.5.exe) |
 | [v1.0.4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.4) | [MetaQuestTrayTool-Setup-1.0.4.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.4/MetaQuestTrayTool-Setup-1.0.4.exe) |
@@ -138,7 +139,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds Dash → SteamVR (kill Dash / PreventDashLaunch / CoreChannel), Steam Link gating fixes, and the v1.0.6 auto-connect detection stack.
+Release **[v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds hover tooltips across the UI, **Open Oculus Debug Tool GUI** (classic OTT shortcut), and kills ADB before in-app updates so Setup can replace platform-tools. Builds on v1.0.7 Dash → SteamVR / PreventDashLaunch / CoreChannel.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -173,7 +174,8 @@ Release **[v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
 - **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys
 - **Service & Startup**: Start/Stop button accent follows live `OVRService` state
-- **In-app updates**: checks GitHub latest release (`v*`) on start, on a user-chosen schedule while running, or manually; downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu)
+- **In-app updates**: checks GitHub latest release (`v*`) on start, on a user-chosen schedule while running, or manually; downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu). ADB is stopped before Setup so bundled platform-tools can be replaced
+- **Hover tooltips** on pages and settings windows (what each control does, without cluttering the layout)
 
 Not yet: Oculus Homeless, Permanent AirLink, custom voice phrases / mic picker.
 

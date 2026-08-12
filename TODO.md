@@ -155,6 +155,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] CoreChannel flip (LIVE / PublicTest / NO_UPDATES) + optional NO_UPDATES with PreventDash
 - [x] Steam Link gating when EnumHmd sees Meta auto-connect
 - [x] Tag and publish **v1.0.7**
+- [x] Kill ADB before in-app update so Setup can replace platform-tools
+- [x] Hover tooltips across remaining pages and windows
+- [x] Open Oculus Debug Tool GUI (classic OTT shortcut)
+- [x] Tag and publish **v1.0.8**
 
 ## Housekeeping
 

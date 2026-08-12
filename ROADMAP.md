@@ -139,6 +139,10 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tag **v1.0.6**
 - [x] Dash → SteamVR + PreventDashLaunch + CoreChannel
 - [x] Tag **v1.0.7**
+- [x] Kill ADB before in-app update / Setup (platform-tools replace)
+- [x] Hover tooltips across shell pages and settings windows
+- [x] Open Oculus Debug Tool GUI (tray / Service & Startup / Game Settings / Advanced / hotkey / voice)
+- [x] Tag **v1.0.8**
 
 ## Later
 
