@@ -68,6 +68,7 @@ if (-not $SkipPublish) {
         -p:PublishReadyToRun=true `
         -p:DebugType=None `
         -p:DebugSymbols=false `
+        -p:Version=$Version `
         -o $publishDir
 
     if ($LASTEXITCODE -ne 0) {
