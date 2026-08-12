@@ -40,11 +40,25 @@ public sealed class LinkConnectionProbeService
         var usb = IsOculusUsbPresent();
         var metaHmd = includeEnumHmd && MetaHmdReported();
         var cache = ReadHeadsetCache();
+        var audioLink = false;
+        try
+        {
+            audioLink = _app.Audio.IsLinkAudioSessionActive(_app.Settings.Current.Audio);
+        }
+        catch
+        {
+            // audio probe optional
+        }
 
-        var cacheConnected = cache is not null && IsConnectedState(cache.ConnectionState, cache.RdConnectionState);
-        var metaSession = cacheConnected || metaHmd;
+        // Prefer Meta DeviceCache / HMD / Link-audio over leftover SteamVR processes.
+        var metaSession = LooksLikeActiveMetaSession(cache, metaHmd, audioLink);
 
-        if (virtualDesktop && !metaSession)
+        if (metaSession)
+        {
+            return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
+        }
+
+        if (virtualDesktop)
         {
             return new VrConnectionStatus
             {
@@ -62,7 +76,7 @@ public sealed class LinkConnectionProbeService
             };
         }
 
-        if (steamVr && !metaSession)
+        if (steamVr)
         {
             return new VrConnectionStatus
             {
@@ -78,11 +92,6 @@ public sealed class LinkConnectionProbeService
                 HeadsetSerial = cache?.SerialNumber,
                 DeviceCacheConnectionState = cache?.ConnectionState
             };
-        }
-
-        if (metaSession)
-        {
-            return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
         }
 
         if (cache?.IsUsingAirLink is bool lastAir)
@@ -142,6 +151,36 @@ public sealed class LinkConnectionProbeService
 
     public VrSessionCapabilities GetCapabilities() => VrSessionCapabilities.From(Probe());
 
+    private static bool LooksLikeActiveMetaSession(HeadsetCacheEntry? cache, bool metaHmd, bool audioLink)
+    {
+        if (metaHmd || audioLink)
+        {
+            return true;
+        }
+
+        if (cache is null)
+        {
+            return false;
+        }
+
+        if (IsConnectedState(cache.ConnectionState, cache.RdConnectionState))
+        {
+            return true;
+        }
+
+        // Air Link often keeps rdConnectionState=disconnected while connectionState lags;
+        // Meta still marks the headset primary/operable/active while streaming.
+        var operable = string.Equals(cache.OperationalState, "operable", StringComparison.OrdinalIgnoreCase);
+        var powered = string.Equals(cache.PowerState, "active", StringComparison.OrdinalIgnoreCase);
+        var primary = string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase)
+                      || string.Equals(cache.PrimaryState, "alternate", StringComparison.OrdinalIgnoreCase);
+        if (operable && powered && primary)
+        {
+            return true;
+        }
+
+        return false;
+    }
     private VrConnectionStatus ClassifyMetaSession(
         HeadsetCacheEntry? cache,
         bool usb,
@@ -227,6 +266,8 @@ public sealed class LinkConnectionProbeService
             primary,
             $"connectionState={cache.ConnectionState ?? "—"}",
             $"rdConnectionState={cache.RdConnectionState ?? "—"}",
+            $"primary={cache.PrimaryState ?? "—"}",
+            $"power={cache.PowerState ?? "—"}",
             usb ? "USB VID present" : "no Oculus USB VID"
         };
         if (!string.IsNullOrWhiteSpace(cache.SerialNumber))
@@ -344,7 +385,12 @@ public sealed class LinkConnectionProbeService
                 return null;
             }
 
-            using var stream = File.OpenRead(DeviceCachePath);
+            // Share with the Meta client — exclusive OpenRead can fail while DeviceCache is updating.
+            using var stream = new FileStream(
+                DeviceCachePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete);
             using var doc = JsonDocument.Parse(stream);
             if (!doc.RootElement.TryGetProperty("devices", out var devices)
                 || devices.ValueKind != JsonValueKind.Array)
@@ -368,13 +414,16 @@ public sealed class LinkConnectionProbeService
                     RdConnectionState = GetString(device, "rdConnectionState"),
                     IsUsingAirLink = GetBool(device, "isUsingAirLink"),
                     LastSeenAt = GetInt64(device, "lastSeenAt") ?? 0,
-                    SupportsOculusLink = GetBool(device, "supportsOculusLink")
+                    SupportsOculusLink = GetBool(device, "supportsOculusLink"),
+                    PowerState = GetString(device, "powerState"),
+                    OperationalState = GetString(device, "operationalState"),
+                    PrimaryState = GetString(device, "primaryState")
                 };
 
                 if (best is null
                     || entry.LastSeenAt > best.LastSeenAt
-                    || (IsConnectedState(entry.ConnectionState, entry.RdConnectionState)
-                        && !IsConnectedState(best.ConnectionState, best.RdConnectionState)))
+                    || (LooksLikeActiveMetaSession(entry, metaHmd: false, audioLink: false)
+                        && !LooksLikeActiveMetaSession(best, metaHmd: false, audioLink: false)))
                 {
                     best = entry;
                 }
@@ -429,5 +478,8 @@ public sealed class LinkConnectionProbeService
         public bool? IsUsingAirLink { get; init; }
         public long LastSeenAt { get; init; }
         public bool? SupportsOculusLink { get; init; }
+        public string? PowerState { get; init; }
+        public string? OperationalState { get; init; }
+        public string? PrimaryState { get; init; }
     }
 }

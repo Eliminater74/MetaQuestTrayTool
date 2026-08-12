@@ -278,7 +278,15 @@ public sealed class TrayIconHost : IDisposable
         SyncAudioChecks(menu);
         SyncPowerChecks(menu);
         SyncHeadsetChecks(menu);
-        _notifyIcon.Text = $"{App.AppName}\nOVRService: {_app.Oculus.ServiceStatus}\nOpenXR: {OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
+        var pcvr = _app.LinkConnection.Probe(includeEnumHmd: false).Summary;
+        if (pcvr.Length > 28)
+        {
+            pcvr = pcvr[..25] + "…";
+        }
+
+        // NotifyIcon.Text max is 63 chars on Windows.
+        var tip = $"{App.AppName}\n{pcvr}\n{OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
+        _notifyIcon.Text = tip.Length <= 63 ? tip : tip[..63];
     }
 
     private ToolStripMenuItem BuildGameSettingsMenu()

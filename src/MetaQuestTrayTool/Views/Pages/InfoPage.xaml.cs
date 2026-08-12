@@ -1,13 +1,26 @@
 using System.Windows;
+using System.Windows.Threading;
 using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
 public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 {
+    private readonly DispatcherTimer _refreshTimer;
+
     public InfoPage()
     {
         InitializeComponent();
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _refreshTimer.Tick += (_, _) =>
+        {
+            if (IsVisible && IsLoaded)
+            {
+                Refresh();
+            }
+        };
+        Loaded += (_, _) => _refreshTimer.Start();
+        Unloaded += (_, _) => _refreshTimer.Stop();
     }
 
     public void Refresh()
@@ -16,6 +29,10 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
         var connection = App.Instance.LinkConnection.Probe();
         ConnectionBanner.Text = $"PCVR: {connection.Summary}";
+        ConnectionBanner.Foreground = connection.SessionActive
+            ? (System.Windows.Media.Brush)FindResource("AppAccentBrush")
+            : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
+
         var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch(connection);
         if (string.IsNullOrWhiteSpace(steamTip))
         {
