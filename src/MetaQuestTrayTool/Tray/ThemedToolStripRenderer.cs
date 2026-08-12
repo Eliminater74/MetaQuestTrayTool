@@ -22,6 +22,12 @@ public sealed class ThemedToolStripRenderer : ToolStripProfessionalRenderer
         e.Graphics.FillRectangle(brush, e.AffectedBounds);
     }
 
+    protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
+    {
+        using var brush = new SolidBrush(_palette.Background);
+        e.Graphics.FillRectangle(brush, e.AffectedBounds);
+    }
+
     protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
     {
         using var pen = new Pen(_palette.Border);
@@ -71,11 +77,11 @@ public sealed class ThemedToolStripRenderer : ToolStripProfessionalRenderer
         }
 
         using var border = new Pen(_palette.Accent, 1.5f);
-        using var fill = new SolidBrush(_palette.Surface);
+        using var fill = new SolidBrush(_palette.AccentDark);
         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
         e.Graphics.FillRectangle(fill, box);
         e.Graphics.DrawRectangle(border, box);
-        using var check = new Pen(_palette.Accent, 2f)
+        using var check = new Pen(_palette.Text, 2f)
         {
             StartCap = LineCap.Round,
             EndCap = LineCap.Round
@@ -90,24 +96,40 @@ public sealed class ThemedToolStripRenderer : ToolStripProfessionalRenderer
         });
     }
 
-    private sealed class ThemedColorTable(TrayMenuPalette palette) : ProfessionalColorTable
+    private sealed class ThemedColorTable : ProfessionalColorTable
     {
-        public override Color MenuBorder => palette.Border;
-        public override Color MenuItemBorder => palette.Accent;
-        public override Color MenuItemSelected => palette.Hover;
-        public override Color MenuItemSelectedGradientBegin => palette.Hover;
-        public override Color MenuItemSelectedGradientEnd => palette.Hover;
-        public override Color MenuItemPressedGradientBegin => palette.Hover;
-        public override Color MenuItemPressedGradientEnd => palette.Hover;
-        public override Color ToolStripDropDownBackground => palette.Background;
-        public override Color ImageMarginGradientBegin => palette.Background;
-        public override Color ImageMarginGradientMiddle => palette.Background;
-        public override Color ImageMarginGradientEnd => palette.Background;
-        public override Color SeparatorDark => palette.Border;
-        public override Color SeparatorLight => palette.Border;
-        public override Color OverflowButtonGradientBegin => palette.Background;
-        public override Color OverflowButtonGradientEnd => palette.Background;
-        public override Color RaftingContainerGradientBegin => palette.Background;
-        public override Color RaftingContainerGradientEnd => palette.Background;
+        private readonly TrayMenuPalette _palette;
+
+        public ThemedColorTable(TrayMenuPalette palette)
+        {
+            _palette = palette;
+            UseSystemColors = false;
+        }
+
+        public override Color MenuBorder => _palette.Border;
+        public override Color MenuItemBorder => _palette.Accent;
+        public override Color MenuItemSelected => _palette.Hover;
+        public override Color MenuItemSelectedGradientBegin => _palette.Hover;
+        public override Color MenuItemSelectedGradientEnd => _palette.Hover;
+        public override Color MenuItemPressedGradientBegin => _palette.Hover;
+        public override Color MenuItemPressedGradientEnd => _palette.Hover;
+        public override Color ToolStripDropDownBackground => _palette.Background;
+        public override Color ImageMarginGradientBegin => _palette.Background;
+        public override Color ImageMarginGradientMiddle => _palette.Background;
+        public override Color ImageMarginGradientEnd => _palette.Background;
+        public override Color ImageMarginRevealedGradientBegin => _palette.Background;
+        public override Color ImageMarginRevealedGradientMiddle => _palette.Background;
+        public override Color ImageMarginRevealedGradientEnd => _palette.Background;
+        public override Color CheckBackground => _palette.AccentDark;
+        public override Color CheckSelectedBackground => _palette.Accent;
+        public override Color CheckPressedBackground => _palette.Accent;
+        public override Color ButtonSelectedHighlight => _palette.Hover;
+        public override Color ButtonCheckedHighlight => _palette.AccentDark;
+        public override Color SeparatorDark => _palette.Border;
+        public override Color SeparatorLight => _palette.Border;
+        public override Color OverflowButtonGradientBegin => _palette.Background;
+        public override Color OverflowButtonGradientEnd => _palette.Background;
+        public override Color RaftingContainerGradientBegin => _palette.Background;
+        public override Color RaftingContainerGradientEnd => _palette.Background;
     }
 }

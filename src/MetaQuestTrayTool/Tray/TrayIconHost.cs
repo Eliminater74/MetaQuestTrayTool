@@ -98,6 +98,13 @@ public sealed class TrayIconHost : IDisposable
     {
         menu.BackColor = palette.Background;
         menu.ForeColor = palette.Text;
+        if (menu is ToolStripDropDownMenu drop)
+        {
+            drop.ShowImageMargin = false;
+            drop.ShowCheckMargin = true;
+            drop.BackColor = palette.Background;
+        }
+
         foreach (ToolStripItem item in menu.Items)
         {
             item.BackColor = palette.Background;
@@ -122,7 +129,7 @@ public sealed class TrayIconHost : IDisposable
     {
         var menu = new ContextMenuStrip
         {
-            ShowImageMargin = true,
+            ShowImageMargin = false,
             ShowCheckMargin = true
         };
 
