@@ -1,6 +1,9 @@
 <UserControl x:Class="MetaQuestTrayTool.Views.Pages.ServiceStartupPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
       <TextBlock Text="Service &amp; Startup" Style="{StaticResource PageTitleStyle}"/>
@@ -11,60 +14,89 @@
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="Once the headset is on you cannot click UAC. This tool therefore runs elevated in the tray (same idea as Oculus Tray Tool). A Windows Service cannot show a tray icon, so a logon scheduled task with highest privileges is used — one approval, then it handles everything itself."/>
       <CheckBox x:Name="StartAsAdminBox" Content="Run with Administrator rights at logon (recommended)"
+                ToolTip="Starts the tray elevated at Windows logon via a scheduled task so OpenXR, OVRService, and profiles never need a UAC click while you are in VR."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <Button Content="Restart as Administrator…" Style="{StaticResource AccentButtonStyle}" Click="RestartElevated_Click"/>
+        <Button Content="Restart as Administrator…" Style="{StaticResource AccentButtonStyle}" Click="RestartElevated_Click"
+                ToolTip="Relaunch this running instance elevated now (one UAC prompt). Prefer the logon option above for set-and-forget."/>
       </StackPanel>
       <TextBlock x:Name="ElevationStatusText" Margin="0,0,0,16" FontWeight="SemiBold" TextWrapping="Wrap"/>
 
       <TextBlock Text="Oculus Service" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <Button x:Name="StartButton" Content="Start" Style="{StaticResource GhostButtonStyle}" Click="Start_Click"/>
-        <Button x:Name="StopButton" Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"/>
-        <Button x:Name="RestartButton" Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"/>
-        <Button Content="Open Meta Horizon Link" Style="{StaticResource AccentButtonStyle}" Click="OpenMetaLink_Click"/>
-        <Button Content="Kill Dash → SteamVR" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"/>
+        <Button x:Name="StartButton" Content="Start" Style="{StaticResource GhostButtonStyle}" Click="Start_Click"
+                ToolTip="Start the Windows OVRService (Meta Quest Link runtime)."/>
+        <Button x:Name="StopButton" Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"
+                ToolTip="Stop OVRService. Active Link / Air Link sessions will drop."/>
+        <Button x:Name="RestartButton" Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"
+                ToolTip="Restart OVRService. Useful after registry changes (PreventDashLaunch, CoreChannel, Link settings)."/>
+        <Button Content="Open Meta Horizon Link" Style="{StaticResource AccentButtonStyle}" Click="OpenMetaLink_Click"
+                ToolTip="Open or focus the Meta Quest Link PC app (oculus-client). Use this to connect Air Link / Link before Dash → SteamVR."/>
+        <Button Content="Kill Dash → SteamVR" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
+                ToolTip="Kill OculusDash now, optionally switch OpenXR to SteamVR, and launch SteamVR (vrstartup.exe). Connect with Meta Link first. Hotkey: Ctrl+Num 0. Voice: kill dash."/>
       </StackPanel>
       <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,16" FontWeight="SemiBold"/>
 
-      <CheckBox x:Name="StartOnToolBox" Content="Start Oculus service when tool starts" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="StopOnExitBox" Content="Stop Oculus service when tool exits" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="RestartOnWakeBox" Content="Restart Oculus service when computer wakes up" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="LaunchHomeOnServiceBox" Content="Launch Oculus Home on service start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="LaunchHomeOnToolBox" Content="Launch Oculus Home on tool start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StartOnToolBox" Content="Start Oculus service when tool starts"
+                ToolTip="When the tray app starts, start OVRService if it is not already running."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StopOnExitBox" Content="Stop Oculus service when tool exits"
+                ToolTip="When you Exit the tray app, stop OVRService. Leave off if you want Link to keep running after closing the tray."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="RestartOnWakeBox" Content="Restart Oculus service when computer wakes up"
+                ToolTip="After sleep/hibernate, restart OVRService so Link recovers more reliably."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="LaunchHomeOnServiceBox" Content="Launch Oculus Home on service start"
+                ToolTip="Open the Meta Quest Link client when OVRService is started from this tool."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="LaunchHomeOnToolBox" Content="Launch Oculus Home on tool start"
+                ToolTip="Open the Meta Quest Link client when the tray app starts."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit"
+                ToolTip="Close Meta Quest Link / OculusDash windows when you Exit the tray (does not stop OVRService unless Stop on exit is also on)."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
       <TextBlock Text="Air Link → SteamVR (Dash killer)" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,8"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Connect with Meta Air Link / Link first, then kill Oculus Dash and launch SteamVR so SteamVR games (e.g. MSFS) run over Link. Inspired by OculusKiller — does not replace OculusDash.exe on disk. Hotkey: Ctrl+Num 0. Voice: “kill dash” / “dash to steam v r”."/>
       <CheckBox x:Name="DashAutoBox" Content="Auto: when Meta Link connects, kill Dash and start SteamVR"
+                ToolTip="Once per Meta Air Link / wired Link session, wait a few seconds then run Kill Dash → SteamVR automatically. Leave off if you only want the button / hotkey / voice."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <CheckBox x:Name="DashOpenXrBox" Content="Also switch OpenXR to SteamVR when running Dash → SteamVR"
+                ToolTip="When Dash → SteamVR runs, set HKLM OpenXR ActiveRuntime to SteamVR so OpenXR games (and many Steam titles) use SteamVR."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <CheckBox x:Name="DashReaperBox" Content="Keep killing Dash while SteamVR is running (Meta often respawns it)"
+                ToolTip="While vrserver is running, periodically kill OculusDash if Meta starts it again. Skipped automatically when PreventDashLaunch is on."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <CheckBox x:Name="DashCloseClientBox" Content="Also close Meta Horizon Link client window"
+                ToolTip="Also close the Meta Quest Link PC window when running Dash → SteamVR. Does not stop OVRService. Leave off if closing the client drops your Link session."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,12,0,8"
                  Text="Registry alternative (OculusKiller): set PreventDashLaunch=1 so Meta never starts Dash. When this is ON, the tray auto-starts SteamVR on Meta Link connect (and immediately on Apply if you are already linked). Needs Admin + OVRService restart."/>
       <CheckBox x:Name="PreventDashBox" Content="PreventDashLaunch — block Dash + auto-start SteamVR on Meta Link"
+                ToolTip="Writes HKLM …\Oculus\Config\PreventDashLaunch=1 so Meta should not launch Oculus Dash. While on, SteamVR auto-starts when Meta Link connects. Needs Administrator. Use Apply + restart OVRService for full effect."
                 Checked="PreventDash_Changed" Unchecked="PreventDash_Changed"/>
       <CheckBox x:Name="NoUpdatesWithDashBox" Content="Optional: when enabling PreventDashLaunch, also set CoreChannel to NO_UPDATES (blocks Meta updates)"
+                ToolTip="Optional precaution from OculusKiller: when you turn PreventDashLaunch on, also set CoreChannel to NO_UPDATES so Meta updates do not overwrite runtime/Dash tweaks. Your previous channel is remembered for Restore. Off by default — you stay on PublicTest/LIVE unless you opt in."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
         <Button Content="Apply PreventDashLaunch + restart OVRService (+ SteamVR if linked)" Style="{StaticResource GhostButtonStyle}"
-                Click="ApplyPreventDash_Click"/>
+                Click="ApplyPreventDash_Click"
+                ToolTip="Write PreventDashLaunch from the checkbox above, restart OVRService, and if Meta Link is already active start SteamVR now. If not linked yet, SteamVR starts on the next Meta Link connect while PreventDashLaunch stays on."/>
       </StackPanel>
 
       <TextBlock Text="Meta Quest Link channel (CoreChannel)" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Does not change your channel until you click Apply. LIVE = stable, PublicTest = PC beta (PTC), NO_UPDATES = block updates (not a beta). Your current channel stays until you apply."/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-        <ComboBox x:Name="CoreChannelBox" MinWidth="220" Padding="6"/>
+        <ComboBox x:Name="CoreChannelBox" MinWidth="220" Padding="6"
+                  ToolTip="LIVE = stable production. PublicTest = Public Test Channel (PC beta). NO_UPDATES = block Meta PC client/runtime updates (not a beta track). Selection alone does nothing until Apply channel."/>
         <Button Content="Apply channel" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
-                Click="ApplyCoreChannel_Click"/>
+                Click="ApplyCoreChannel_Click"
+                ToolTip="Write the selected CoreChannel to the registry and restart OVRService."/>
         <Button Content="Restore previous (leave NO_UPDATES)" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
-                Click="RestoreCoreChannel_Click"/>
+                Click="RestoreCoreChannel_Click"
+                ToolTip="Switch CoreChannel back to the value saved before NO_UPDATES (usually LIVE or PublicTest), then restart OVRService."/>
       </StackPanel>
       <TextBlock x:Name="DashPathText" Margin="0,8,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
       <TextBlock x:Name="PreventDashStatusText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
