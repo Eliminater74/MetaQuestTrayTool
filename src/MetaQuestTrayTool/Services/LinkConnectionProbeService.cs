@@ -55,8 +55,9 @@ public sealed class LinkConnectionProbeService
         // Healthy Meta Link wins only with a strong live signal. Meta often auto-connects when
         // the headset wakes on Wi‑Fi (DeviceCache connected/primary) without launching Link —
         // that must not hide an active Steam Link / SteamVR or Virtual Desktop session.
-        var strongMeta = LooksLikeStrongMetaSession(cache, metaHmd, audioLink);
-        var cacheMeta = LooksLikeActiveMetaSession(cache, metaHmd, audioLink);
+        // EnumHmd alone is also weak while SteamVR is up (auto-connect ghosts during Steam Link).
+        var strongMeta = LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVr);
+        var cacheMeta = LooksLikeActiveMetaSession(cache, metaHmd, audioLink, steamVr);
 
         if (strongMeta)
         {
@@ -176,34 +177,44 @@ public sealed class LinkConnectionProbeService
 
     /// <summary>
     /// Live Meta Link stream signals that should beat SteamVR/VD process detection
-    /// (e.g. Meta Link + SteamVR OpenXR). DeviceCache auto-connect alone is not enough —
-    /// Meta often marks the headset connected when it wakes on Wi‑Fi without launching Link.
+    /// (e.g. Meta Link + SteamVR OpenXR). DeviceCache auto-connect and EnumHmd alone are not
+    /// enough while SteamVR is running — Meta often reports the headset when it wakes on Wi‑Fi
+    /// without launching Link, which would otherwise unblock SS/Link applies under Steam Link.
     /// </summary>
-    private static bool LooksLikeStrongMetaSession(HeadsetCacheEntry? cache, bool metaHmd, bool audioLink)
+    private static bool LooksLikeStrongMetaSession(
+        HeadsetCacheEntry? cache,
+        bool metaHmd,
+        bool audioLink,
+        bool steamVrRunning)
     {
-        if (metaHmd || audioLink)
+        if (audioLink)
         {
             return true;
         }
 
-        if (cache is null)
+        if (cache is not null
+            && !string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase)
+            && LooksConnected(cache.RdConnectionState))
         {
-            return false;
+            return true;
         }
 
-        if (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
+        // EnumHmd without SteamVR: treat as Meta. With SteamVR: ignore — auto-connect ghosts.
+        if (metaHmd && !steamVrRunning)
         {
-            return false;
+            return true;
         }
 
-        // rdConnectionState tracks the actual remote-desktop / Link stream more reliably than
-        // connectionState, which Meta sets on headset wake / auto-connect.
-        return LooksConnected(cache.RdConnectionState);
+        return false;
     }
 
-    private static bool LooksLikeActiveMetaSession(HeadsetCacheEntry? cache, bool metaHmd, bool audioLink)
+    private static bool LooksLikeActiveMetaSession(
+        HeadsetCacheEntry? cache,
+        bool metaHmd,
+        bool audioLink,
+        bool steamVrRunning = false)
     {
-        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink))
+        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVrRunning))
         {
             return true;
         }
@@ -263,11 +274,12 @@ public sealed class LinkConnectionProbeService
         {
             Kind = air ? VrConnectionKind.MetaAirLink : VrConnectionKind.MetaWiredLink,
             Summary = air
-                ? "Meta Air Link — headset inoperable (Link stream failed)"
-                : "Meta wired Link — headset inoperable (Link stream failed)",
+                ? "Meta Air Link — auto-connect / not streaming"
+                : "Meta wired Link — auto-connect / not streaming",
             Detail =
-                $"DeviceCache connectionState={cache.ConnectionState}; operationalState=inoperable. "
-                + "Check Meta service log for pc_link_error_initialization_failed / XRStreaming.",
+                $"DeviceCache connectionState={cache.ConnectionState}; operationalState=inoperable; "
+                + "rdConnectionState={cache.RdConnectionState}. "
+                + "Normal when the headset is on Wi‑Fi without opening Link (or after a failed Link init).",
             SessionActive = false,
             IsUsingAirLink = cache.IsUsingAirLink,
             HeadsetSerial = cache.SerialNumber,

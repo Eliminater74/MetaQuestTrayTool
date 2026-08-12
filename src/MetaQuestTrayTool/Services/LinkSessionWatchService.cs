@@ -11,6 +11,7 @@ public sealed class LinkSessionWatchService : IDisposable
     private readonly App _app;
     private readonly DispatcherTimer _timer;
     private string? _lastFingerprint;
+    private VrConnectionKind? _lastActiveKind;
 
     public LinkSessionWatchService(App app)
     {
@@ -44,26 +45,57 @@ public sealed class LinkSessionWatchService : IDisposable
             }
 
             var previous = _lastFingerprint;
+            var previousActive = _lastActiveKind;
             _lastFingerprint = fingerprint;
 
             if (status.SessionActive)
             {
+                _lastActiveKind = status.Kind;
                 LogConnected(status);
+                return;
             }
-            else if (!string.IsNullOrEmpty(previous) && !previous.StartsWith("idle:", StringComparison.Ordinal))
+
+            _lastActiveKind = null;
+
+            if (!string.IsNullOrEmpty(previous) && previous.StartsWith("active:", StringComparison.Ordinal))
             {
-                _app.Log.Info($"Link session ended — {status.InfoBanner}");
+                LogSessionEnded(previousActive, status);
+                return;
             }
-            else if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink
-                     && status.Summary.Contains("inoperable", StringComparison.OrdinalIgnoreCase))
+
+            // Meta Wi‑Fi auto-connect without Link UI — informational, not an error.
+            if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink
+                && status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase))
             {
-                _app.Log.Warn($"Link session problem — {status.InfoBanner}. {status.Detail}");
+                _app.Log.Info(
+                    $"Meta DeviceCache — {status.InfoBanner}. "
+                    + "Headset is on the network without a Link stream (normal if you use Steam Link / VD).");
             }
         }
         catch (Exception ex)
         {
             _app.Log.Warn($"Link session watcher failed: {ex.Message}");
         }
+    }
+
+    private void LogSessionEnded(VrConnectionKind? previousActive, VrConnectionStatus status)
+    {
+        var ended = previousActive switch
+        {
+            VrConnectionKind.SteamLinkOrSteamVr => "Steam Link / SteamVR session ended",
+            VrConnectionKind.VirtualDesktop => "Virtual Desktop session ended",
+            VrConnectionKind.MetaAirLink => "Meta Air Link session ended",
+            VrConnectionKind.MetaWiredLink => "Meta wired Link session ended",
+            _ => "Link session ended"
+        };
+
+        if (status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase))
+        {
+            _app.Log.Info($"{ended} — Meta DeviceCache still shows auto-connect (headset on Wi‑Fi).");
+            return;
+        }
+
+        _app.Log.Info($"{ended} — {status.InfoBanner}");
     }
 
     private void LogConnected(VrConnectionStatus status)
@@ -87,7 +119,8 @@ public sealed class LinkSessionWatchService : IDisposable
     {
         if (!status.SessionActive)
         {
-            if (status.Summary.Contains("inoperable", StringComparison.OrdinalIgnoreCase))
+            if (status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase)
+                || status.Summary.Contains("inoperable", StringComparison.OrdinalIgnoreCase))
             {
                 return $"broken:{status.Kind}:{status.HeadsetSerial}:{status.DeviceCacheConnectionState}";
             }
