@@ -114,6 +114,7 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 **Log / Info / Donate**
 - Log page: clear log, color-coded ERROR / WARN / INFO
 - Info page: live OpenXR, OVRService, headset identity
+- **PCVR connection probe**: Meta Air Link vs wired (`%LocalAppData%\Oculus\DeviceCache.json` → `isUsingAirLink`), Steam Link / SteamVR, Virtual Desktop
 - Donate button (PayPal) if you want to support development
 - Root LICENSE in the repo
 
@@ -128,7 +129,6 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 - Wireless ADB pairing UI (USB ADB works)
 - Launch games directly from the library picker
 - Profile process ignore-list
-- Detect wired Link vs Air Link reliably
 - Voice polish: custom phrases, mic picker, always-on tuning
 - Separate communications (vs multimedia) audio device pickers in the UI
 - Full Dash Manager–style dash customizer (out of scope)
@@ -149,7 +149,7 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 - Wireless ADB pairing UI
 - Profile ignore-list
 - Library “launch game”
-- Better Link detection (wired vs Air Link) / DBR verification
+- Better Link detection verification / DBR verification
 - Voice polish (custom phrases, mic picker)
 - More built-in presets as people request process names
 - Next patch release with scheduled auto-update checks (already on `main`)

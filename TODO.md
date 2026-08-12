@@ -44,7 +44,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tray + dashboard UI
 - [x] Distortion curve, DBR / DBR max / DBR offset, Mobile ASW mode (ODT RemoteHeadset hive)
 - [x] Document ODT registry vs CLI ([docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md))
-- [ ] Detect wired Link vs Air Link when possible
+- [x] Detect wired Link vs Air Link when possible (DeviceCache `isUsingAirLink` + Steam/VD heuristics)
 
 ## Phase 4 — audio
 

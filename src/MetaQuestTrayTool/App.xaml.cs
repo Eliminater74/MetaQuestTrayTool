@@ -39,6 +39,7 @@ public partial class App : System.Windows.Application
     public HotKeyService HotKeys { get; }
     public VoiceCommandService Voice { get; }
     public UpdateService Updates { get; }
+    public LinkConnectionProbeService LinkConnection { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -55,6 +56,7 @@ public partial class App : System.Windows.Application
         HotKeys = new HotKeyService(this, HotKeyCommands);
         Voice = new VoiceCommandService(this, HotKeyCommands);
         Updates = new UpdateService(this);
+        LinkConnection = new LinkConnectionProbeService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)

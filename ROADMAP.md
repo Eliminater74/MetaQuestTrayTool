@@ -43,7 +43,7 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - [x] Store preferred Link settings separately from game profiles
 - [x] Optional apply on app start
 - [x] ODT registry reference ([docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md))
-- [ ] Detect wired Link vs Air Link when possible
+- [x] Detect wired Link vs Air Link when possible (Meta `DeviceCache.json` → `isUsingAirLink`; Steam Link / VD via processes)
 
 ## Next
 
@@ -138,7 +138,6 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - Wireless ADB pairing UI (USB ADB headset page is in v0.8)
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - Profile ignore-list
-- Detect wired Link vs Air Link
 - Separate communications audio device pickers in the UI
 - Launch games directly from the library picker
 

@@ -159,7 +159,7 @@ Release **[v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **Trusted headset**: first connected **VR headset** serial is remembered; a different VR serial is blocked. Phones, tablets, and Android emulators are ignored and never receive ADB commands or auto-apply
 - **Profiles**: auto-apply on game launch with tray notification; restore global when the game exits. Stored in `profiles.json` (export/import still works). Built-in global + game presets (MSFS 2024, Beat Saber, etc.)
 - **Backup**: export / import settings from Advanced
-- **Info** page: live OpenXR (Meta vs SteamVR), OVRService, and detailed headset identity
+- **Info** page: live OpenXR (Meta vs SteamVR), OVRService, PCVR connection (Meta Air Link vs wired via DeviceCache `isUsingAirLink`, Steam Link / SteamVR, Virtual Desktop), and detailed headset identity
 - **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 - **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
 - **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys

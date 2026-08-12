@@ -50,6 +50,26 @@ Link changes usually need a **Link reconnect** or **OVRService** restart.
 
 ---
 
+## Air Link vs wired (not RemoteHeadset)
+
+There is **no** `RemoteHeadset` registry value for “Air Link vs cable”. Meta stores the live/last transport flag in:
+
+**`%LocalAppData%\Oculus\DeviceCache.json`**
+
+Headset entries include:
+
+| JSON field | Meaning |
+| --- | --- |
+| `type` | `"headset"` for the HMD |
+| `isUsingAirLink` | `true` = Air Link, `false` = wired Link (Meta’s own flag) |
+| `connectionState` / `rdConnectionState` | e.g. `connected` / `disconnected` |
+| `supportsOculusLink` | headset supports Link |
+| `serialNumber` | HMD serial |
+
+The tray **Info** page probes this file, plus Oculus USB VIDs (`VID_2833` / `VID_2BEC`), `server:EnumHmd`, and SteamVR / Virtual Desktop processes for Steam Link / VD sessions.
+
+---
+
 ## Runtime commands (not RemoteHeadset)
 
 These are sent to **OVRService** via `OculusDebugToolCLI.exe` (same mechanism as the ODT GUI for PC VR tweaks):

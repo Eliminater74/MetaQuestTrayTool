@@ -14,6 +14,8 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     {
         var openXr = App.Instance.OpenXr.ReadActiveKind();
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
+        var connection = App.Instance.LinkConnection.Probe();
+        ConnectionBanner.Text = $"PCVR: {connection.Summary}";
         var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
         HeadsetBanner.Text = headset.Summary;
         HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored

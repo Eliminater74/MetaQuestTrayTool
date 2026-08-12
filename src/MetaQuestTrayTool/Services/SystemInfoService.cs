@@ -1,5 +1,4 @@
 using System.Text;
-using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
@@ -11,6 +10,7 @@ public static class SystemInfoService
         app.Oculus.Refresh();
         var openXr = app.OpenXr.ReadActiveKind();
         var headset = app.Headset.ReadIdentity(app.Settings.Current.Headset);
+        var link = app.LinkConnection.Probe();
         var text = new StringBuilder();
         text.AppendLine($"{AppInfo.ProductName} {AppInfo.Version}");
         text.AppendLine($"By {AppInfo.Author}");
@@ -18,6 +18,7 @@ public static class SystemInfoService
         text.AppendLine($"OpenXR: {OpenXrRuntimeService.Label(openXr)}");
         text.AppendLine($"OpenXR JSON: {app.OpenXr.ReadActivePath() ?? "(none)"}");
         text.AppendLine(app.Oculus.DescribeStatus());
+        text.AppendLine($"PCVR connection: {link.Describe()}");
         text.AppendLine($"Debug Tool: {(app.DebugTool.IsAvailable ? app.DebugTool.CliPath : "not found")}");
         text.AppendLine($"ADB: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
@@ -47,6 +48,30 @@ public static class SystemInfoService
             text.AppendLine($"  Debug Tool serials: {string.Join(", ", app.DebugTool.LastHeadsetSerials)}");
         }
 
+        text.AppendLine();
+        text.AppendLine("PCVR connection probe");
+        text.AppendLine($"  Kind: {link.Kind}");
+        text.AppendLine($"  Summary: {link.Summary}");
+        if (!string.IsNullOrWhiteSpace(link.Detail))
+        {
+            text.AppendLine($"  Detail: {link.Detail}");
+        }
+        text.AppendLine($"  Session active: {link.SessionActive}");
+        text.AppendLine($"  Meta DeviceCache isUsingAirLink: {FormatNullableBool(link.IsUsingAirLink)}");
+        text.AppendLine($"  DeviceCache connectionState: {link.DeviceCacheConnectionState ?? "—"}");
+        text.AppendLine($"  DeviceCache headset serial: {link.HeadsetSerial ?? "—"}");
+        text.AppendLine($"  Oculus/Meta USB VID present: {link.UsbHeadsetPresent}");
+        text.AppendLine($"  Meta HMD (EnumHmd): {link.MetaHmdReported}");
+        text.AppendLine($"  SteamVR running: {link.SteamVrRunning}");
+        text.AppendLine($"  Virtual Desktop running: {link.VirtualDesktopRunning}");
+
         return text.ToString().TrimEnd();
     }
+
+    private static string FormatNullableBool(bool? value) => value switch
+    {
+        true => "true",
+        false => "false",
+        null => "—"
+    };
 }
