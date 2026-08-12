@@ -10,6 +10,7 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 | --- | --- |
 | [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
 | [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
+| [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
 
 Update both files whenever a phase ships so they stay useful after a break.
 
