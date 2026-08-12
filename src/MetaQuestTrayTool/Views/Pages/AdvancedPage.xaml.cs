@@ -13,7 +13,7 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
     {
         var profiles = App.Instance.Settings.Current.Profiles.Count;
         StatusText.Text =
-            $"Profiles: {profiles}. Settings file: {Services.AppPaths.SettingsFile}";
+            $"Profiles: {profiles}. Settings: {Services.AppPaths.SettingsFile}  ·  Profiles file: {Services.ProfileStore.ProfilesFile}";
     }
 
     private void ResetSettings_Click(object sender, RoutedEventArgs e)

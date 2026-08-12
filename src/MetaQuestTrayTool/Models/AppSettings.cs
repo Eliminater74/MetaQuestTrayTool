@@ -12,9 +12,18 @@ public sealed class AppSettings
     /// </summary>
     public bool AutomaticElevation { get; set; } = true;
     public bool ShowNotifications { get; set; } = true;
-    public bool ApplyGameSettingsOnStart { get; set; }
+
+    /// <summary>Push global Debug Tool + Link + OpenXR when the tool starts (if no game profile is active).</summary>
+    public bool ApplyGameSettingsOnStart { get; set; } = true;
+
+    /// <summary>Watch running games and swap to a personal profile, then restore global when the game exits.</summary>
     public bool AutoApplyProfiles { get; set; } = true;
-    public bool ApplyLinkSettingsOnStart { get; set; }
+
+    /// <summary>Include Quest Link registry values in the global baseline.</summary>
+    public bool ApplyLinkSettingsOnStart { get; set; } = true;
+
+    /// <summary>Re-apply global defaults when a VR headset connects over ADB (unless a game profile is active).</summary>
+    public bool ApplyGlobalWhenHeadsetConnects { get; set; } = true;
     public TrayToolSettings Tray { get; set; } = new();
     public ServiceStartupSettings Service { get; set; } = new();
     public GameSettings DefaultGameSettings { get; set; } = new();

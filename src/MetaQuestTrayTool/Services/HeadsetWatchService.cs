@@ -73,6 +73,14 @@ public sealed class HeadsetWatchService : IDisposable
             _app.Settings.Save();
             _app.Log.Info(result);
             _appliedForSerial = true;
+
+            if (!_app.IsGameProfileActive
+                && _app.Settings.Current.ApplyGlobalWhenHeadsetConnects)
+            {
+                var global = _app.ApplyGlobalBaseline(notify: connected);
+                _app.Log.Info(global);
+            }
+
             if (connected)
             {
                 _app.TrayNotify("Headset", result);

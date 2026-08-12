@@ -31,6 +31,15 @@
                  Foreground="{DynamicResource AppMutedBrush}"
                  Text="These settings apply to every app that does not have a personal profile. Personal profiles override them while that process is running."/>
 
+      <TextBlock Text="Global preset" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <DockPanel Margin="0,0,0,8">
+        <Button DockPanel.Dock="Right" Content="Apply preset" Margin="8,0,0,0"
+                Style="{StaticResource GhostButtonStyle}" Click="ApplyPreset_Click"/>
+        <ComboBox x:Name="PresetBox"/>
+      </DockPanel>
+      <TextBlock x:Name="PresetHintText" TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}"
+                 FontSize="12" Margin="0,0,0,16"/>
+
       <TextBlock Text="Super Sampling" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16" HorizontalAlignment="Stretch"/>
 

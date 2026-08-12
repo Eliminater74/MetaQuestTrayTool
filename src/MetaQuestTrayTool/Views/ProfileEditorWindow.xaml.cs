@@ -86,6 +86,76 @@ public partial class ProfileEditorWindow : Window
         SelectNullableInt(EncodeWidthBox, profile.Link.EncodeResolutionWidth);
         SelectByTag(OpenXrBox, profile.OpenXrRuntime);
         PriorityBox.SelectedItem = Priorities.Contains(profile.CpuPriority) ? profile.CpuPriority : "Normal";
+        LoadPresets(profile.ProcessName);
+    }
+
+    private void LoadPresets(string? processName)
+    {
+        PresetBox.Items.Clear();
+        PresetBox.Items.Add(new ComboBoxItem { Content = "(none — keep current values)", Tag = null });
+        foreach (var preset in ProfilePresetCatalog.PresetsForEditor(processName))
+        {
+            PresetBox.Items.Add(new ComboBoxItem
+            {
+                Content = preset.Name,
+                Tag = preset,
+                ToolTip = preset.Description
+            });
+        }
+
+        PresetBox.SelectedIndex = 0;
+        UpdatePresetHint(null);
+    }
+
+    private void PresetBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded || PresetBox.SelectedItem is not ComboBoxItem item)
+        {
+            UpdatePresetHint(null);
+            return;
+        }
+
+        UpdatePresetHint(item.Tag as ProfilePreset);
+    }
+
+    private void ApplyPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (PresetBox.SelectedItem is not ComboBoxItem { Tag: ProfilePreset preset })
+        {
+            System.Windows.MessageBox.Show(this, "Choose a preset first.", App.AppName);
+            return;
+        }
+
+        ProfilePresetCatalog.ApplyToProfile(Profile, preset);
+        if (string.IsNullOrWhiteSpace(NameBox.Text) && preset.Kind == ProfilePresetKind.Game)
+        {
+            NameBox.Text = preset.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(ProcessBox.Text) && !string.IsNullOrWhiteSpace(preset.ProcessName))
+        {
+            ProcessBox.Text = preset.ProcessName;
+        }
+
+        FovBox.Text = Profile.Settings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        CommentsBox.Text = Profile.Comments ?? string.Empty;
+        CliCommandsBox.Text = Profile.CustomCommands.ToCliText();
+        AdbCommandsBox.Text = Profile.CustomCommands.ToAdbText();
+        SelectByTag(SuperSamplingBox, Profile.Settings.SuperSampling);
+        SelectByTag(AswBox, Profile.Settings.AswMode);
+        SelectByTag(SharpenBox, Profile.Link.Sharpening);
+        SelectNullableInt(BitrateBox, Profile.Link.BitrateMbps);
+        SelectNullableInt(EncodeWidthBox, Profile.Link.EncodeResolutionWidth);
+        SelectByTag(OpenXrBox, Profile.OpenXrRuntime);
+        PriorityBox.SelectedItem = Priorities.Contains(Profile.CpuPriority) ? Profile.CpuPriority : "Normal";
+        UpdatePresetHint(preset);
+    }
+
+    private void UpdatePresetHint(ProfilePreset? preset)
+    {
+        PresetHintText.Text = preset is null
+            ? "Pick a built-in PCVR preset (MSFS, Beat Saber, etc.) or a generic template, then Apply preset."
+            : preset.Description;
     }
 
     private void BrowseLibrary_Click(object sender, RoutedEventArgs e)
@@ -107,6 +177,22 @@ public partial class ProfileEditorWindow : Window
         if (string.IsNullOrWhiteSpace(CommentsBox.Text))
         {
             CommentsBox.Text = $"{game.PlatformLabel} library import";
+        }
+
+        LoadPresets(game.ProcessName);
+        var preset = ProfilePresetCatalog.BestGamePresetForProcess(game.ProcessName);
+        if (preset is not null)
+        {
+            foreach (ComboBoxItem item in PresetBox.Items)
+            {
+                if (item.Tag is ProfilePreset candidate && candidate.Id == preset.Id)
+                {
+                    PresetBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            UpdatePresetHint(preset);
         }
     }
 

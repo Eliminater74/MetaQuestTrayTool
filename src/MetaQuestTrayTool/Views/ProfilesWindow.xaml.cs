@@ -64,6 +64,12 @@ public partial class ProfilesWindow : Window
             Settings = App.Instance.Settings.Current.DefaultGameSettings.Clone(),
             Comments = $"{game.PlatformLabel} library import"
         };
+        var preset = ProfilePresetCatalog.BestGamePresetForProcess(game.ProcessName);
+        if (preset is not null)
+        {
+            ProfilePresetCatalog.ApplyToProfile(profile, preset);
+            profile.Comments = preset.Description;
+        }
 
         if (Edit(profile) == true)
         {
@@ -136,6 +142,10 @@ public partial class ProfilesWindow : Window
 
         var summary = App.Instance.ApplyProfile(profile);
         App.Instance.Log.Info($"Applied personal profile '{profile.Name}': {summary}");
+        if (App.Instance.Settings.Current.ShowNotifications)
+        {
+            App.Instance.TrayNotify("Profile applied", $"{profile.Name} settings are active.");
+        }
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();

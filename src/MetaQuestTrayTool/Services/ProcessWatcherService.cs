@@ -1,13 +1,12 @@
 using System.Diagnostics;
 using System.Windows.Threading;
 using MetaQuestTrayTool.Models;
-using MetaQuestTrayTool;
 
 namespace MetaQuestTrayTool.Services;
 
 /// <summary>
 /// Polls running processes and applies the matching game profile.
-/// Same idea as OTT's timer-based app watcher.
+/// When the game exits, global defaults are restored and the user is notified.
 /// </summary>
 public sealed class ProcessWatcherService : IDisposable
 {
@@ -27,6 +26,8 @@ public sealed class ProcessWatcherService : IDisposable
     }
 
     public string? ActiveProfileName => _activeProfileName;
+    public string? ActiveProcessName => _activeProcess;
+    public bool IsProfileActive => _activeProcess is not null;
 
     public void Start()
     {
@@ -46,14 +47,11 @@ public sealed class ProcessWatcherService : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        _timer.Stop();
-    }
+    public void Dispose() => _timer.Stop();
 
     private void Poll()
     {
-        if (!_app.Settings.Current.AutoApplyProfiles || _app.Profiles.All.Count == 0)
+        if (!_app.Settings.Current.AutoApplyProfiles)
         {
             return;
         }
@@ -65,14 +63,19 @@ public sealed class ProcessWatcherService : IDisposable
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            if (_activeProcess is not null && running.Contains(_activeProcess))
+            if (_activeProcess is not null)
             {
+                if (running.Contains(_activeProcess))
+                {
+                    return;
+                }
+
+                RestoreDefaults(_activeProcess);
                 return;
             }
 
-            if (_activeProcess is not null)
+            if (_app.Profiles.All.Count == 0)
             {
-                RestoreDefaults(_activeProcess);
                 return;
             }
 
@@ -101,14 +104,31 @@ public sealed class ProcessWatcherService : IDisposable
         _activeProcess = processName;
         _activeProfileName = profile.Name;
         _app.Log.Info($"Detected {processName}.exe — applied profile '{profile.Name}'. {summary}");
+        Notify(
+            "Profile applied",
+            $"{profile.Name} is now active for {processName}.exe.\nGlobal defaults will return when you close the game.");
     }
 
     private void RestoreDefaults(string processName)
     {
+        var profileName = _activeProfileName ?? "profile";
         var summary = _app.RestoreGlobalDefaults();
-        _app.Log.Info($"{processName}.exe exited — restored global defaults. {summary}");
+        _app.Log.Info($"{processName}.exe exited — restored global defaults after '{profileName}'. {summary}");
+        Notify(
+            "Global defaults restored",
+            $"{processName}.exe closed.\nRestored your global VR settings after '{profileName}'.");
         _activeProcess = null;
         _activeProfileName = null;
+    }
+
+    private void Notify(string title, string message)
+    {
+        if (!_app.Settings.Current.ShowNotifications)
+        {
+            return;
+        }
+
+        _app.TrayNotify(title, message);
     }
 
     private void TrySetPriority(string processName, string priorityName)

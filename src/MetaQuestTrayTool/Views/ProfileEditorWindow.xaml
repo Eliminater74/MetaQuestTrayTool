@@ -28,6 +28,15 @@
                    TextWrapping="Wrap"
                    Foreground="{DynamicResource AppMutedBrush}"/>
 
+      <TextBlock Text="Start from preset" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <DockPanel Margin="0,0,0,8">
+        <Button DockPanel.Dock="Right" Content="Apply preset" Margin="8,0,0,0"
+                Style="{StaticResource GhostButtonStyle}" Click="ApplyPreset_Click"/>
+        <ComboBox x:Name="PresetBox" SelectionChanged="PresetBox_SelectionChanged"/>
+      </DockPanel>
+      <TextBlock x:Name="PresetHintText" TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}"
+                 FontSize="12" Margin="0,0,0,16"/>
+
         <TextBlock Text="Name" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <TextBox x:Name="NameBox" Margin="0,0,0,16"/>
 

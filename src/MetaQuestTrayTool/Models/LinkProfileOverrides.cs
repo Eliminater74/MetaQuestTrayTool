@@ -61,4 +61,11 @@ public sealed class LinkProfileOverrides
 
         return "Link " + string.Join(", ", parts);
     }
+
+    public LinkProfileOverrides Clone() => new()
+    {
+        Sharpening = Sharpening,
+        BitrateMbps = BitrateMbps,
+        EncodeResolutionWidth = EncodeResolutionWidth
+    };
 }

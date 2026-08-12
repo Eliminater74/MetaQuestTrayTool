@@ -23,7 +23,7 @@
                Margin="0,4,0,16"
                TextWrapping="Wrap"
                Foreground="{DynamicResource AppMutedBrush}"
-               Text="Personal profiles override global defaults for one process. Add games from your Steam or Meta library, or create a custom profile manually."/>
+               Text="Personal profiles override global defaults while a game runs. When the game exits, global settings come back automatically and you get a tray notification. Profiles are stored in profiles.json. Built-in presets help you start quickly (MSFS, Beat Saber, etc.)."/>
 
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,16,0,0">
       <Button Content="Add from library"

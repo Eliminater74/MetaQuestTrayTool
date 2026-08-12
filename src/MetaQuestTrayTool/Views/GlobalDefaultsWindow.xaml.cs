@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views;
 
@@ -10,6 +11,22 @@ public partial class GlobalDefaultsWindow : Window
     public GlobalDefaultsWindow()
     {
         InitializeComponent();
+
+        foreach (var preset in ProfilePresetCatalog.GlobalPresets)
+        {
+            PresetBox.Items.Add(new ComboBoxItem
+            {
+                Content = preset.Name,
+                Tag = preset,
+                ToolTip = preset.Description
+            });
+        }
+
+        if (PresetBox.Items.Count > 0)
+        {
+            PresetBox.SelectedIndex = 0;
+            UpdatePresetHint(ProfilePresetCatalog.GlobalPresets[0]);
+        }
 
         foreach (var value in GameSettings.SuperSamplingPresets)
         {
@@ -38,6 +55,26 @@ public partial class GlobalDefaultsWindow : Window
         CliCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToCliText();
         AdbCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToAdbText();
     }
+
+    private void ApplyPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (PresetBox.SelectedItem is not ComboBoxItem { Tag: ProfilePreset preset })
+        {
+            return;
+        }
+
+        ProfilePresetCatalog.ApplyGlobalPreset(App.Instance.Settings.Current, preset);
+        SelectByTag(SuperSamplingBox, App.Instance.Settings.Current.DefaultGameSettings.SuperSampling);
+        SelectByTag(AswBox, App.Instance.Settings.Current.DefaultGameSettings.AswMode);
+        SelectByTag(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+            ? OpenXrRuntimeKind.Meta
+            : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
+        FovBox.Text = App.Instance.Settings.Current.DefaultGameSettings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        UpdatePresetHint(preset);
+    }
+
+    private void UpdatePresetHint(ProfilePreset preset) =>
+        PresetHintText.Text = preset.Description;
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {

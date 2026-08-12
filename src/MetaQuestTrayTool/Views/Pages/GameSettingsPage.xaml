@@ -5,7 +5,7 @@
     <StackPanel>
       <TextBlock Text="Game Settings" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Global defaults applied through OculusDebugToolCLI. Personal per-app profiles override these when a matching game launches."/>
+                 Text="Global defaults run whenever no personal profile is active — tool start, VR headset connect, and after a game exits. Turn on Auto-apply profiles so matching games swap in their own tweaks automatically."/>
 
       <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,6">

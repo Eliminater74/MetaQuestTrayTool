@@ -35,6 +35,10 @@ public partial class App : System.Windows.Application
     public HeadsetSettingsService Headset { get; }
     public CustomCommandService CustomCommands { get; }
 
+    public ProcessWatcherService? ProcessWatcher => _processWatcher;
+    public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
+    public string? ActiveProfileName => _processWatcher?.ActiveProfileName;
+
     public App()
     {
         InitializeComponent();
@@ -121,15 +125,9 @@ public partial class App : System.Windows.Application
             ServiceStartupPage.TryLaunchHome();
         }
 
-        if (Settings.Current.ApplyGameSettingsOnStart && DebugTool.IsAvailable)
+        if (Settings.Current.ApplyGameSettingsOnStart || Settings.Current.ApplyLinkSettingsOnStart)
         {
-            Log.Info(ApplyGlobalGameSettings());
-        }
-
-        if (Settings.Current.ApplyLinkSettingsOnStart)
-        {
-            var linkResult = Link.Apply(Settings.Current.LinkSettings);
-            Log.Info(linkResult.Summary);
+            Log.Info(ApplyGlobalBaseline());
         }
         else
         {
@@ -137,11 +135,6 @@ public partial class App : System.Windows.Application
         }
 
         Log.Info(OpenXr.Describe());
-        if (Settings.Current.OpenXr.ApplyOnStart
-            && Settings.Current.OpenXr.PreferredRuntime is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
-        {
-            Log.Info(OpenXr.Set(Settings.Current.OpenXr.PreferredRuntime));
-        }
 
         if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
         {
@@ -303,10 +296,47 @@ public partial class App : System.Windows.Application
 
     public string RestoreGlobalDefaults()
     {
-        var summary = ApplyGlobalGameSettings();
-        var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        var openXr = OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime);
-        return $"{summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}). {link.Summary} {openXr}";
+        var summary = ApplyGlobalBaseline(includeLink: true, includeOpenXrRestore: true);
+        return $"{summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}).";
+    }
+
+    public string ApplyGlobalBaseline(bool includeLink = true, bool includeOpenXrRestore = false, bool notify = false)
+    {
+        if (IsGameProfileActive)
+        {
+            return "Global baseline skipped — a personal profile is active.";
+        }
+
+        var parts = new List<string>();
+        if (DebugTool.IsAvailable && Settings.Current.ApplyGameSettingsOnStart)
+        {
+            parts.Add(ApplyGlobalGameSettings());
+        }
+
+        if (includeLink && Settings.Current.ApplyLinkSettingsOnStart)
+        {
+            var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+            parts.Add(link.Summary);
+        }
+
+        if (includeOpenXrRestore)
+        {
+            parts.Add(OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime));
+        }
+        else if (!includeOpenXrRestore
+                 && Settings.Current.OpenXr.ApplyOnStart
+                 && Settings.Current.OpenXr.PreferredRuntime is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            parts.Add(OpenXr.Set(Settings.Current.OpenXr.PreferredRuntime));
+        }
+
+        var summary = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
+        if (notify && Settings.Current.ShowNotifications && summary.Length > 0)
+        {
+            TrayNotify("Global defaults", "Applied your global VR settings.");
+        }
+
+        return summary.Length == 0 ? "Global baseline ready (nothing to push)." : summary;
     }
 
     public string ApplyGlobalGameSettings()

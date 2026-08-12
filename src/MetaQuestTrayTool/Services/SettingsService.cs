@@ -14,32 +14,48 @@ public sealed class SettingsService
         Converters = { new JsonStringEnumConverter() }
     };
 
+    private readonly ProfileStore _profileStore = new();
+
     public AppSettings Current { get; private set; } = new();
 
     public void Load()
     {
         AppPaths.EnsureAppDataDirectory();
+        List<GameProfile>? legacyProfiles = null;
 
-        if (!File.Exists(AppPaths.SettingsFile))
+        if (File.Exists(AppPaths.SettingsFile))
         {
-            Save();
-            return;
+            try
+            {
+                var json = File.ReadAllText(AppPaths.SettingsFile);
+                legacyProfiles = TryReadLegacyProfiles(json);
+                Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            }
+            catch
+            {
+                Current = new AppSettings();
+            }
         }
 
-        try
+        var storedProfiles = _profileStore.Load();
+        if (storedProfiles.Count > 0)
         {
-            var json = File.ReadAllText(AppPaths.SettingsFile);
-            Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            Current.Profiles = storedProfiles;
         }
-        catch
+        else if (legacyProfiles is { Count: > 0 })
         {
-            Current = new AppSettings();
+            Current.Profiles = legacyProfiles;
+            _profileStore.Save(Current.Profiles);
         }
+
+        EnsureGlobalDefaults();
+        Save();
     }
 
     public void Save()
     {
         AppPaths.EnsureAppDataDirectory();
+        _profileStore.Save(Current.Profiles);
         var json = JsonSerializer.Serialize(Current, JsonOptions);
         File.WriteAllText(AppPaths.SettingsFile, json);
     }
@@ -83,6 +99,32 @@ public sealed class SettingsService
 
         settings ??= JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
         Current = settings ?? throw new InvalidOperationException("The backup file could not be read.");
+        _profileStore.Save(Current.Profiles);
         Save();
+    }
+
+    private static List<GameProfile>? TryReadLegacyProfiles(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("Profiles", out var profilesElement))
+            {
+                return null;
+            }
+
+            return JsonSerializer.Deserialize<List<GameProfile>>(profilesElement.GetRawText(), JsonOptions);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private void EnsureGlobalDefaults()
+    {
+        Current.DefaultGameSettings ??= new GameSettings();
+        Current.LinkSettings ??= new LinkSettings();
+        Current.OpenXr ??= new OpenXrSettings();
     }
 }
