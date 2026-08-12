@@ -9,7 +9,7 @@ public static class HotKeyCatalog
         HotKeyAction.AswOff => "ASW Off",
         HotKeyAction.AswAuto => "ASW Auto",
         HotKeyAction.AswClock45 => "ASW 45 FPS",
-        HotKeyAction.AswCycle => "Cycle ASW (Off → Auto → 45)",
+        HotKeyAction.AswCycle => "Cycle ASW (Off → Auto → 45 → 30 → 18)",
         HotKeyAction.SuperSamplingCycle => "Cycle super sampling",
         HotKeyAction.TogglePerfHud => "Toggle Performance HUD",
         HotKeyAction.VoicePushToTalk => "Voice push-to-talk (listen once)",

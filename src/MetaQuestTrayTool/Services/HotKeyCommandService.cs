@@ -26,9 +26,31 @@ public sealed class HotKeyCommandService
             HotKeyAction.AswCycle => CycleAsw(),
             HotKeyAction.SuperSamplingCycle => CycleSuperSampling(),
             HotKeyAction.TogglePerfHud => TogglePerfHud(),
-            HotKeyAction.VoicePushToTalk => "Use voice push-to-talk from the Tray Tool page.",
+            HotKeyAction.VoicePushToTalk => ExecuteVoicePushToTalk(),
             _ => $"Unknown hotkey action: {action}"
         };
+    }
+
+    private string ExecuteVoicePushToTalk()
+    {
+        if (!_app.Settings.Current.Voice.Enabled)
+        {
+            return "Voice commands are disabled.";
+        }
+
+        _app.Voice.ListenOnce();
+        return "Voice push-to-talk listening.";
+    }
+
+    private string GuardProfileMutation(string actionLabel)
+    {
+        if (!_app.IsGameProfileActive)
+        {
+            return string.Empty;
+        }
+
+        var profile = _app.ActiveProfileName ?? "profile";
+        return $"{actionLabel} skipped — personal profile '{profile}' is active.";
     }
 
     private string ExecuteApplyGlobal()
@@ -39,6 +61,12 @@ public sealed class HotKeyCommandService
 
     private string SetAsw(AswMode mode)
     {
+        var blocked = GuardProfileMutation("ASW change");
+        if (blocked.Length > 0)
+        {
+            return blocked;
+        }
+
         var game = _app.Settings.Current.DefaultGameSettings;
         game.AswMode = mode;
         _app.Settings.Save();
@@ -47,11 +75,19 @@ public sealed class HotKeyCommandService
 
     private string CycleAsw()
     {
+        var blocked = GuardProfileMutation("ASW cycle");
+        if (blocked.Length > 0)
+        {
+            return blocked;
+        }
+
         var game = _app.Settings.Current.DefaultGameSettings;
         game.AswMode = game.AswMode switch
         {
             AswMode.Off => AswMode.Auto,
             AswMode.Auto => AswMode.Clock45,
+            AswMode.Clock45 => AswMode.Clock30,
+            AswMode.Clock30 => AswMode.Clock18,
             _ => AswMode.Off
         };
         _app.Settings.Save();
@@ -60,6 +96,12 @@ public sealed class HotKeyCommandService
 
     private string CycleSuperSampling()
     {
+        var blocked = GuardProfileMutation("Super sampling cycle");
+        if (blocked.Length > 0)
+        {
+            return blocked;
+        }
+
         var game = _app.Settings.Current.DefaultGameSettings;
         var presets = GameSettings.SuperSamplingPresets.Where(value => value > 0).ToList();
         if (presets.Count == 0)
@@ -77,6 +119,12 @@ public sealed class HotKeyCommandService
 
     private string TogglePerfHud()
     {
+        var blocked = GuardProfileMutation("Performance HUD toggle");
+        if (blocked.Length > 0)
+        {
+            return blocked;
+        }
+
         var game = _app.Settings.Current.DefaultGameSettings;
         game.VisualHud = game.VisualHud == VisualHudMode.None
             ? VisualHudMode.Performance
