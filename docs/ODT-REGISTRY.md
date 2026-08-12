@@ -78,7 +78,7 @@ When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the
 | --- | --- | --- |
 | `PreventDashLaunch` | DWORD `1` | Meta runtime should not start Oculus Dash |
 
-Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller): this blocks Dash entirely but **does not** start SteamVR. The tray’s **Service & Startup** page can write this key (needs Admin) and restart `OVRService`; use **Kill Dash → SteamVR** (or auto-on-connect) to launch SteamVR afterward.
+Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller): this blocks Dash entirely but **does not** start SteamVR by itself. The tray’s **Service & Startup** page can write this key (needs Admin) and restart `OVRService`; while PreventDashLaunch is ON, the tray **auto-starts SteamVR** when Meta Link / Air Link connects (and on Apply if already linked).
 
 ---
 

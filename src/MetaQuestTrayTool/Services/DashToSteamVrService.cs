@@ -127,8 +127,8 @@ public sealed class DashToSteamVrService : IDisposable
     {
         var live = IsPreventDashLaunchEnabled();
         return live
-            ? "PreventDashLaunch: ON (DWORD=1) — Meta should not start Oculus Dash. Restart OVRService after changing. Does not start SteamVR by itself."
-            : "PreventDashLaunch: OFF — Meta may launch Oculus Dash on Link. Registry alternative from OculusKiller.";
+            ? "PreventDashLaunch: ON — Dash blocked; SteamVR auto-starts when Meta Link connects (and on Apply if already linked)."
+            : "PreventDashLaunch: OFF — Meta may launch Oculus Dash on Link.";
     }
 
     public bool IsPreventDashLaunchEnabled()
@@ -219,6 +219,16 @@ public sealed class DashToSteamVrService : IDisposable
                 message += " Restart OVRService for full effect.";
             }
 
+            if (enabled)
+            {
+                // Registry alone never starts SteamVR — we do when Link is already up, else on next connect.
+                var steam = TryStartSteamVrAfterPreventDash("PreventDashLaunch enabled");
+                if (!string.IsNullOrWhiteSpace(steam))
+                {
+                    message += " " + steam;
+                }
+            }
+
             _app.Log.Info(message);
             return message;
         }
@@ -236,7 +246,8 @@ public sealed class DashToSteamVrService : IDisposable
     {
         try
         {
-            if (!Settings.AutoOnMetaLinkConnect)
+            // PreventDashLaunch implies auto SteamVR on Meta Link (registry alone never starts it).
+            if (!ShouldAutoStartSteamVrOnMetaLink())
             {
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
@@ -272,9 +283,12 @@ public sealed class DashToSteamVrService : IDisposable
                 return;
             }
 
-            // Give Link a moment to settle after connect before killing Dash.
+            // Give Link a moment to settle after connect before killing Dash / starting SteamVR.
             _ranThisMetaSession = true;
-            _app.Log.Info("Meta Link connected — auto Dash → SteamVR in 3s…");
+            var reason = IsPreventDashLaunchEnabled() || Settings.PreferPreventDashLaunch
+                ? "auto SteamVR (PreventDashLaunch)"
+                : "auto on Meta Link connect";
+            _app.Log.Info($"Meta Link connected — {reason} in 3s…");
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
             timer.Tick += (_, _) =>
             {
@@ -292,7 +306,7 @@ public sealed class DashToSteamVrService : IDisposable
                         return;
                     }
 
-                    RunNow("auto on Meta Link connect");
+                    RunNow(reason);
                 }
                 catch (Exception ex)
                 {
@@ -304,6 +318,34 @@ public sealed class DashToSteamVrService : IDisposable
         catch (Exception ex)
         {
             _app.Log.Warn($"Dash → SteamVR auto poll failed: {ex.Message}");
+        }
+    }
+
+    private bool ShouldAutoStartSteamVrOnMetaLink() =>
+        Settings.AutoOnMetaLinkConnect
+        || Settings.PreferPreventDashLaunch
+        || IsPreventDashLaunchEnabled();
+
+    /// <summary>If Meta Link is already active, run Dash→SteamVR now; otherwise wait for connect poll.</summary>
+    private string TryStartSteamVrAfterPreventDash(string reason)
+    {
+        try
+        {
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false);
+            var meta = status.SessionActive
+                       && status.Kind is VrConnectionKind.MetaAirLink
+                           or VrConnectionKind.MetaWiredLink
+                           or VrConnectionKind.MetaLinkUnknownTransport;
+            if (meta)
+            {
+                return RunNow(reason);
+            }
+
+            return "SteamVR will auto-start on the next Meta Link / Air Link connect.";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not auto-start SteamVR yet: {ex.Message}";
         }
     }
 

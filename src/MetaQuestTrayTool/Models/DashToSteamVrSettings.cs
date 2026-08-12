@@ -20,7 +20,7 @@ public sealed class DashToSteamVrSettings
 
     /// <summary>
     /// Preferred state for HKLM …\Oculus\Config\PreventDashLaunch (DWORD 1 = never launch Dash).
-    /// Does not start SteamVR by itself — use Kill Dash → SteamVR or auto-on-connect for that.
+    /// When enabled, the tray also auto-starts SteamVR on Meta Link connect (registry alone does not).
     /// </summary>
     public bool PreferPreventDashLaunch { get; set; }
 }

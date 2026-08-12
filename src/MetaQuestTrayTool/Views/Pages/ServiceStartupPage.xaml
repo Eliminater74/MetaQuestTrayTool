@@ -46,11 +46,11 @@
       <CheckBox x:Name="DashCloseClientBox" Content="Also close Meta Horizon Link client window"
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,12,0,8"
-                 Text="Registry alternative (OculusKiller): set PreventDashLaunch=1 so Meta never starts Dash. Does not auto-start SteamVR — use the button / hotkey / auto above for that. Needs Admin + OVRService restart."/>
-      <CheckBox x:Name="PreventDashBox" Content="PreventDashLaunch (HKLM Oculus\Config) — block Dash from starting"
+                 Text="Registry alternative (OculusKiller): set PreventDashLaunch=1 so Meta never starts Dash. When this is ON, the tray auto-starts SteamVR on Meta Link connect (and immediately on Apply if you are already linked). Needs Admin + OVRService restart."/>
+      <CheckBox x:Name="PreventDashBox" Content="PreventDashLaunch — block Dash + auto-start SteamVR on Meta Link"
                 Checked="PreventDash_Changed" Unchecked="PreventDash_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-        <Button Content="Apply PreventDashLaunch + restart OVRService" Style="{StaticResource GhostButtonStyle}"
+        <Button Content="Apply PreventDashLaunch + restart OVRService (+ SteamVR if linked)" Style="{StaticResource GhostButtonStyle}"
                 Click="ApplyPreventDash_Click"/>
       </StackPanel>
       <TextBlock x:Name="DashPathText" Margin="0,8,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
