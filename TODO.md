@@ -85,7 +85,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Wire existing services into the shell
 - [x] Tray left-click opens shell
 - [x] Hotkeys (global shortcuts + configure UI; default Ctrl+Numpad 1–8)
-- [ ] Legacy OTT extras (Homeless, voice) — voice next; HUD already in Game Settings
+- [ ] Legacy OTT extras (Homeless) — voice core added; custom phrases later
 
 ## Phase 9 — headset ADB (v0.8)
 

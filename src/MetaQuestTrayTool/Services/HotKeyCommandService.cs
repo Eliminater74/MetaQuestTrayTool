@@ -26,6 +26,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.AswCycle => CycleAsw(),
             HotKeyAction.SuperSamplingCycle => CycleSuperSampling(),
             HotKeyAction.TogglePerfHud => TogglePerfHud(),
+            HotKeyAction.VoicePushToTalk => "Use voice push-to-talk from the Tray Tool page.",
             _ => $"Unknown hotkey action: {action}"
         };
     }

@@ -74,7 +74,7 @@
         <TextBlock Grid.Row="10" Text="Voice / Homeless" Style="{StaticResource SettingLabelStyle}"/>
         <TextBlock Grid.Row="10" Grid.Column="1" Margin="0,0,0,10"
                    Foreground="{DynamicResource AppMutedBrush}"
-                   Text="Not ported — those classic OTT extras have no Debug Tool CLI command."/>
+                   Text="Voice commands live on Tray Tool. Oculus Homeless is not ported yet."/>
       </Grid>
 
       <TextBlock Text="Custom OculusDebugToolCLI commands" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>

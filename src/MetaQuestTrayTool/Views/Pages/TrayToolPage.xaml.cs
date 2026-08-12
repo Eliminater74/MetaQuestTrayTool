@@ -30,11 +30,12 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         HideAltTabBox.IsChecked = app.Tray.HideFromAltTab;
         MinimizeOnCloseBox.IsChecked = app.Tray.MinimizeOnClose;
         HotKeysBox.IsChecked = app.HotKeys.Enabled;
+        VoiceBox.IsChecked = app.Voice.Enabled;
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
         NotificationsBox.IsChecked = app.ShowNotifications;
         SelectTheme(app.Tray.Theme);
         StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
-                          + " Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
+                          + " Voice: " + App.Instance.Voice.Status;
         _loading = false;
     }
 
@@ -141,5 +142,26 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         App.Instance.Settings.Save();
         App.Instance.HotKeys.Reload();
         App.Instance.Log.Info(enabled ? "HotKeys enabled." : "HotKeys disabled.");
+    }
+
+    private void VoiceConfigure_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new VoiceCommandsWindow { Owner = Window.GetWindow(this) };
+        window.ShowDialog();
+        Refresh();
+    }
+
+    private void Voice_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        var enabled = VoiceBox.IsChecked == true;
+        App.Instance.Settings.Current.Voice.Enabled = enabled;
+        App.Instance.Settings.Save();
+        App.Instance.Voice.Reload();
+        App.Instance.Log.Info(enabled ? "Voice commands enabled." : "Voice commands disabled.");
     }
 }

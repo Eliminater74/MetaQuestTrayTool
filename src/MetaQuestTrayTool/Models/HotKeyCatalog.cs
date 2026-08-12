@@ -12,6 +12,7 @@ public static class HotKeyCatalog
         HotKeyAction.AswCycle => "Cycle ASW (Off → Auto → 45)",
         HotKeyAction.SuperSamplingCycle => "Cycle super sampling",
         HotKeyAction.TogglePerfHud => "Toggle Performance HUD",
+        HotKeyAction.VoicePushToTalk => "Voice push-to-talk (listen once)",
         _ => action.ToString()
     };
 

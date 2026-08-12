@@ -127,6 +127,7 @@ public sealed class SettingsService
         Current.LinkSettings ??= new LinkSettings();
         Current.OpenXr ??= new OpenXrSettings();
         Current.HotKeys ??= new HotKeySettings();
+        Current.Voice ??= new VoiceSettings();
         if (Current.HotKeys.Bindings.Count == 0)
         {
             Current.HotKeys.Bindings = HotKeySettings.CreateDefaultBindings();

@@ -24,6 +24,11 @@
                   Checked="HotKeys_Changed" Unchecked="HotKeys_Changed"/>
         <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="HotKeysConfigure_Click"/>
       </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <CheckBox x:Name="VoiceBox" Content="Enable voice commands" VerticalAlignment="Center"
+                  Checked="Voice_Changed" Unchecked="Voice_Changed"/>
+        <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="VoiceConfigure_Click"/>
+      </StackPanel>
       <CheckBox x:Name="UpdatesBox" Content="Check for updates on start (placeholder)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="NotificationsBox" Content="Show tray notifications" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 

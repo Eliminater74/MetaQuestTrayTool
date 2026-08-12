@@ -26,6 +26,7 @@ public sealed class AppSettings
     public bool ApplyGlobalWhenHeadsetConnects { get; set; } = true;
     public TrayToolSettings Tray { get; set; } = new();
     public HotKeySettings HotKeys { get; set; } = new();
+    public VoiceSettings Voice { get; set; } = new();
     public ServiceStartupSettings Service { get; set; } = new();
     public GameSettings DefaultGameSettings { get; set; } = new();
     public LinkSettings LinkSettings { get; set; } = new();

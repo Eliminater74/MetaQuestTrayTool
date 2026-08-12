@@ -9,5 +9,6 @@ public enum HotKeyAction
     AswClock45,
     AswCycle,
     SuperSamplingCycle,
-    TogglePerfHud
+    TogglePerfHud,
+    VoicePushToTalk
 }
