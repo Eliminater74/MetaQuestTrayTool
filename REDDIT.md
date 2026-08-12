@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.0.4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
+**Latest public installer:** [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
 
 ---
 
 ## TITLE
 
 ```
-[PC] Meta Quest Tray Tool v1.0.4 — free modern OTT-style tray app for Quest Link / SteamVR / Steam Link / VD
+[PC] Meta Quest Tray Tool v1.0.5 — free modern OTT-style tray app for Quest Link / SteamVR / Steam Link / VD
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.0.4** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.0.5** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Repo / docs / screenshots / short demo:** https://github.com/Eliminater74/MetaQuestTrayTool
@@ -48,7 +48,7 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 
 ---
 
-### What works now (v1.0.4)
+### What works now (v1.0.5)
 
 **Tray + shell**
 - Notification-area host with themed menu (Pure Black / Dark / Light)
@@ -200,5 +200,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.0.4) — global defaults + per-game auto apply/restore, Link + OpenXR switch, Air Link/wired/Steam Link/VD detection, fixed audio auto-switch, hotkeys/voice, Open Meta Horizon Link, scheduled in-app updates, Quest ADB (real headsets only). Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest
+TL;DR: free modern OTT-inspired tray app (v1.0.5) — global defaults + per-game auto apply/restore, Link + OpenXR switch, Air Link/wired/Steam Link/VD detection, fixed audio auto-switch, hotkeys/voice, Open Meta Horizon Link, scheduled in-app updates, Quest ADB (real headsets only). Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest
 ```
