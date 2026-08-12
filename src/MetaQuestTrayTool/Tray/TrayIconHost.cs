@@ -161,11 +161,11 @@ public sealed class TrayIconHost : IDisposable
         startWithWindows.CheckedChanged += (_, _) => ToggleStartWithWindows(startWithWindows.Checked);
         menu.Items.Add(startWithWindows);
 
-        var startAsAdmin = new ToolStripMenuItem("Start as Administrator")
+        var startAsAdmin = new ToolStripMenuItem("Run as Administrator (hands-free)")
         {
             Name = "StartAsAdministrator",
             CheckOnClick = true,
-            Checked = _app.Settings.Current.StartWithWindowsAsAdministrator
+            Checked = _app.Settings.Current.AutomaticElevation
         };
         startAsAdmin.CheckedChanged += (_, _) => ToggleStartAsAdministrator(startAsAdmin.Checked);
         menu.Items.Add(startAsAdmin);
@@ -216,7 +216,7 @@ public sealed class TrayIconHost : IDisposable
 
             if (FindItem(menu.Items, "StartAsAdministrator") is ToolStripMenuItem startAsAdmin)
             {
-                startAsAdmin.Checked = _app.Settings.Current.StartWithWindowsAsAdministrator;
+                startAsAdmin.Checked = _app.Settings.Current.AutomaticElevation;
             }
         }
         finally
@@ -847,7 +847,7 @@ public sealed class TrayIconHost : IDisposable
             return;
         }
 
-        var admin = enabled && _app.Settings.Current.StartWithWindowsAsAdministrator;
+        var admin = enabled && _app.Settings.Current.AutomaticElevation;
         StartupUiHelper.TryApply(_shell, enabled, admin);
         SyncStartupMenuChecks();
     }
@@ -883,7 +883,7 @@ public sealed class TrayIconHost : IDisposable
 
             if (FindItem(_menu.Items, "StartAsAdministrator") is ToolStripMenuItem startAsAdmin)
             {
-                startAsAdmin.Checked = _app.Settings.Current.StartWithWindowsAsAdministrator;
+                startAsAdmin.Checked = _app.Settings.Current.AutomaticElevation;
             }
         }
         finally

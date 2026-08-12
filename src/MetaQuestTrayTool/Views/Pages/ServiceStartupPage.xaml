@@ -9,8 +9,8 @@
 
       <TextBlock Text="This tool" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Oculus Tray Tool ran elevated so service control and HKLM writes worked. A Windows Service cannot show a tray icon (Session 0), so this uses an optional logon scheduled task with highest privileges — same admin rights, still a normal tray app."/>
-      <CheckBox x:Name="StartAsAdminBox" Content="Start this tool with Windows as Administrator"
+                 Text="Once the headset is on you cannot click UAC. This tool therefore runs elevated in the tray (same idea as Oculus Tray Tool). A Windows Service cannot show a tray icon, so a logon scheduled task with highest privileges is used — one approval, then it handles everything itself."/>
+      <CheckBox x:Name="StartAsAdminBox" Content="Run with Administrator rights at logon (recommended)"
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <Button Content="Restart as Administrator…" Style="{StaticResource AccentButtonStyle}" Click="RestartElevated_Click"/>

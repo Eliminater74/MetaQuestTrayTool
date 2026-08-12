@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using MetaQuestTrayTool.Models;
@@ -217,7 +216,8 @@ public sealed class OpenXrRuntimeService
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException)
         {
-            return ElevateRegAdd(json64, json32);
+            return "Cannot change OpenXR without Administrator rights. The tray must already be elevated "
+                   + "(automatic at logon) — Windows will not show a UAC prompt while the headset is on.";
         }
         catch (Exception ex)
         {
@@ -233,37 +233,4 @@ public sealed class OpenXrRuntimeService
         key.SetValue(ValueName, jsonPath, RegistryValueKind.String);
     }
 
-    private static string ElevateRegAdd(string json64, string? json32)
-    {
-        try
-        {
-            var command = $"reg add \"HKLM\\{RegistryPath}\" /v {ValueName} /t REG_SZ /d \"{json64}\" /f";
-            if (!string.IsNullOrWhiteSpace(json32))
-            {
-                command += $" & reg add \"HKLM\\{WowRegistryPath}\" /v {ValueName} /t REG_SZ /d \"{json32}\" /f";
-            }
-
-            using var process = Process.Start(new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/c " + command,
-                Verb = "runas",
-                UseShellExecute = true,
-                WindowStyle = ProcessWindowStyle.Hidden
-            });
-            if (process is null)
-            {
-                return "UAC elevation was cancelled.";
-            }
-
-            process.WaitForExit(20_000);
-            return process.ExitCode == 0
-                ? "Wrote HKLM OpenXR ActiveRuntime (elevated)."
-                : $"Elevated OpenXR registry write failed with exit {process.ExitCode}.";
-        }
-        catch (Exception ex)
-        {
-            return $"Administrator permission is required to change OpenXR. {ex.Message}";
-        }
-    }
 }

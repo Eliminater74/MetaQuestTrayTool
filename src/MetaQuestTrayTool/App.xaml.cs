@@ -68,15 +68,16 @@ public partial class App : System.Windows.Application
         Settings.Load();
         ThemeService.Apply(Settings.Current.Tray.Theme);
         Log.Info($"{AppName} {GetVersion()} started.");
-        var startWithWindows = Settings.Current.StartWithWindows;
-        var startAsAdmin = Settings.Current.StartWithWindowsAsAdministrator;
-        StartupRegistration.SyncFromSystem(Settings.Current);
-        if (startWithWindows != Settings.Current.StartWithWindows
-            || startAsAdmin != Settings.Current.StartWithWindowsAsAdministrator)
+
+        if (StartupRegistration.TryEnterHandsFreeMode(
+                Settings.Current,
+                message => Log.Info(message),
+                (message, ex) => Log.Error(message, ex)))
         {
-            Settings.Save();
+            return;
         }
 
+        Settings.Save();
         Log.Info(StartupRegistration.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());

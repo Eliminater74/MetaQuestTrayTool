@@ -20,8 +20,8 @@ Update both files whenever a phase ships so they stay useful after a break.
 - Detects the Oculus PC install and `OVRService` status
 - Start / stop / restart the Oculus runtime service, with optional start/stop automation
 - Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
-- Optional Start with Windows, or **Start with Windows as Administrator** (elevated logon scheduled task — one UAC to install; tray then starts with admin rights like classic OTT)
-- Optional one-shot **Restart as Administrator** from Service & Startup or the tray menu
+- **Hands-free Administrator mode** (on by default): one Windows approval, then the tray starts itself at logon already elevated so OpenXR, OVRService, and profiles apply while you are in VR — no UAC in-headset
+- Optional **Restart as Administrator** if that first approval was skipped
 - Start minimized, minimize-on-close, hide from Alt+Tab
 - **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
 - Tray **Game Settings**: Super Sampling, ASW (including 45/30/18), FOV, Adaptive GPU, mip layer flags, FOV stencil, and Visual HUD via `OculusDebugToolCLI.exe`

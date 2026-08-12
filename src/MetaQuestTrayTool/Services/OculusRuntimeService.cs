@@ -107,7 +107,8 @@ public sealed class OculusRuntimeService
         catch (InvalidOperationException ex) when (ex.InnerException is System.ComponentModel.Win32Exception win32
                                                    && win32.NativeErrorCode is 5)
         {
-            return $"Access denied while changing {ServiceName}. Start the app as Administrator to control the service.";
+            return $"Access denied while changing {ServiceName}. The tray must already be running as Administrator "
+                   + "(automatic at logon) — you cannot approve UAC with the headset on.";
         }
         catch (Exception ex)
         {

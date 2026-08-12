@@ -23,7 +23,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         var app = App.Instance.Settings.Current;
         App.Instance.StartupRegistration.SyncFromSystem(app);
         StartWithWindowsBox.IsChecked = app.StartWithWindows;
-        StartAsAdminBox.IsChecked = app.StartWithWindowsAsAdministrator;
+        StartAsAdminBox.IsChecked = app.AutomaticElevation;
         StartMinimizedBox.IsChecked = app.Tray.StartMinimized;
         AudioSwitchBox.IsChecked = app.Audio.AutoSwitchEnabled;
         HideAltTabBox.IsChecked = app.Tray.HideFromAltTab;
@@ -80,20 +80,20 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         var startWithWindows = StartWithWindowsBox.IsChecked == true;
         var startAsAdmin = StartAsAdminBox.IsChecked == true;
         if (settings.StartWithWindows != startWithWindows
-            || settings.StartWithWindowsAsAdministrator != startAsAdmin)
+            || settings.AutomaticElevation != startAsAdmin)
         {
             if (!StartupUiHelper.TryApply(Window.GetWindow(this), startWithWindows, startAsAdmin))
             {
                 _loading = true;
                 StartWithWindowsBox.IsChecked = settings.StartWithWindows;
-                StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+                StartAsAdminBox.IsChecked = settings.AutomaticElevation;
                 _loading = false;
                 return;
             }
 
             _loading = true;
             StartWithWindowsBox.IsChecked = settings.StartWithWindows;
-            StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+            StartAsAdminBox.IsChecked = settings.AutomaticElevation;
             StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
                               + " Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
             _loading = false;

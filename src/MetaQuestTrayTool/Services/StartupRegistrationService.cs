@@ -69,8 +69,71 @@ public sealed class StartupRegistrationService
     {
         var task = IsAdministratorTaskRegistered();
         var run = IsRunKeyEnabled();
-        settings.StartWithWindows = run || task;
-        settings.StartWithWindowsAsAdministrator = task;
+        if (task)
+        {
+            settings.StartWithWindows = true;
+            settings.StartWithWindowsAsAdministrator = true;
+            settings.AutomaticElevation = true;
+            return;
+        }
+
+        settings.StartWithWindowsAsAdministrator = false;
+        settings.StartWithWindows = run || settings.AutomaticElevation;
+    }
+
+    /// <summary>
+    /// If already elevated, silently install the logon task. If not, relaunch
+    /// with one UAC so the rest of this session (and every future logon) is
+    /// hands-free. Returns true when this process is shutting down for a relaunch.
+    /// </summary>
+    public bool TryEnterHandsFreeMode(Models.AppSettings settings, Action<string> log, Action<string, Exception?> logError)
+    {
+        if (!settings.AutomaticElevation)
+        {
+            return false;
+        }
+
+        if (IsProcessElevated)
+        {
+            try
+            {
+                var result = Apply(startWithWindows: true, asAdministrator: true);
+                settings.StartWithWindows = result.StartWithWindows;
+                settings.StartWithWindowsAsAdministrator = result.AsAdministrator;
+                log("Hands-free Administrator start is active. OpenXR, OVRService, and profiles will not prompt in VR.");
+            }
+            catch (Exception ex)
+            {
+                logError("Could not install the elevated logon task.", ex);
+            }
+
+            return false;
+        }
+
+        if (Debugger.IsAttached
+            || Environment.GetCommandLineArgs().Any(arg =>
+                string.Equals(arg, "--no-elevate", StringComparison.OrdinalIgnoreCase)))
+        {
+            log("Automatic elevation skipped (debugger or --no-elevate). Admin actions will fail while the headset is on.");
+            return false;
+        }
+
+        log("Requesting Administrator once so the tray can run hands-free after the headset is on.");
+        try
+        {
+            RestartElevated();
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            log("Administrator approval was cancelled. Enable it from Service & Startup before putting the headset on.");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logError("Could not restart as Administrator.", ex);
+            return false;
+        }
     }
 
     /// <summary>

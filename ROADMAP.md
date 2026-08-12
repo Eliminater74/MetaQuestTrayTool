@@ -75,13 +75,14 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - [x] Global preferred runtime + apply on start
 - [x] Per-game profile override with restore on exit
 
-### Phase 8 — elevated start (v0.7.1)
+### Phase 8 — elevated start (v0.7.1 / v0.7.2)
 
-Classic OTT ran with Administrator rights. A Windows Service cannot host a tray icon (Session 0), so this is optional and user-controlled.
+Classic OTT ran elevated so VR-time work needed no UAC. A Windows Service cannot host a tray icon (Session 0).
 
-- [x] Stay `asInvoker` by default (no UAC on every launch)
-- [x] Optional logon scheduled task with highest privileges
-- [x] One-shot Restart as Administrator from Service & Startup / tray
+- [x] Hands-free by default: one UAC, then elevated at every logon
+- [x] Logon scheduled task with highest privileges
+- [x] No mid-session UAC for OpenXR / OVRService (unreachable in headset)
+- [x] Opt out from Tray Tool / Service & Startup if you want a normal user tray
 
 ### Phase 6 — OTT-style settings shell (v0.6)
 

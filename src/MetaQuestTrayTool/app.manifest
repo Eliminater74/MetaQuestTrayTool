@@ -4,9 +4,8 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- Stay asInvoker so the tray can start without UAC. Optional
-             Administrator rights come from a logon scheduled task or a
-             one-shot "Restart as Administrator". -->
+        <!-- Stay asInvoker so first launch can UAC once, then a logon
+             scheduled task restarts the tray already elevated (hands-free). -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>

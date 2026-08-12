@@ -70,11 +70,12 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Global + personal profile OpenXR choice
 - [x] Restore previous / global runtime when the game exits
 
-## Phase 8 — elevated start (v0.7.1)
+## Phase 8 — elevated start (v0.7.1 / v0.7.2)
 
 - [x] Optional logon scheduled task with highest privileges
 - [x] One-shot Restart as Administrator
-- [x] Default remains unelevated (`asInvoker`)
+- [x] Hands-free by default: auto-relaunch elevated once, then silent at logon
+- [x] No mid-session UAC (OpenXR / service) — headset blocks those prompts
 
 ## Phase 6 — OTT-style shell (v0.6)
 

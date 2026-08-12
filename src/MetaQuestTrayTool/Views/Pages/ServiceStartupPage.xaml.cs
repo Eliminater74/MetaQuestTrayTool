@@ -20,7 +20,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         _loading = true;
         App.Instance.Oculus.Refresh();
         App.Instance.StartupRegistration.SyncFromSystem(App.Instance.Settings.Current);
-        StartAsAdminBox.IsChecked = App.Instance.Settings.Current.StartWithWindowsAsAdministrator;
+        StartAsAdminBox.IsChecked = App.Instance.Settings.Current.AutomaticElevation;
         ElevationStatusText.Text = App.Instance.StartupRegistration.DescribeStatus();
         var service = App.Instance.Settings.Current.Service;
         StartOnToolBox.IsChecked = service.StartServiceWhenToolStarts;
@@ -50,7 +50,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
 
         var settings = App.Instance.Settings.Current;
         var startAsAdmin = StartAsAdminBox.IsChecked == true;
-        if (settings.StartWithWindowsAsAdministrator != startAsAdmin)
+        if (settings.AutomaticElevation != startAsAdmin)
         {
             if (!StartupUiHelper.TryApply(
                     Window.GetWindow(this),
@@ -58,13 +58,13 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
                     asAdministrator: startAsAdmin))
             {
                 _loading = true;
-                StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+                StartAsAdminBox.IsChecked = settings.AutomaticElevation;
                 _loading = false;
                 return;
             }
 
             _loading = true;
-            StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+            StartAsAdminBox.IsChecked = settings.AutomaticElevation;
             ElevationStatusText.Text = App.Instance.StartupRegistration.DescribeStatus();
             _loading = false;
         }

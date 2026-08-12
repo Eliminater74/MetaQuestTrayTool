@@ -12,22 +12,16 @@ internal static class StartupUiHelper
             var settings = App.Instance.Settings.Current;
             settings.StartWithWindows = result.StartWithWindows;
             settings.StartWithWindowsAsAdministrator = result.AsAdministrator;
+            settings.AutomaticElevation = result.AsAdministrator;
             App.Instance.Settings.Save();
 
             App.Instance.Log.Info(result.AsAdministrator
-                ? "Enabled Start with Windows as Administrator (elevated logon task)."
+                ? "Enabled hands-free Administrator start (elevated logon task)."
                 : result.StartWithWindows
                     ? "Enabled Start with Windows (standard user)."
                     : "Disabled Start with Windows.");
 
-            if (result.RecommendRestartElevated
-                && System.Windows.MessageBox.Show(
-                    owner,
-                    "Administrator start is installed. This session is still running without elevation.\n\n"
-                    + "Restart now as Administrator? (OpenXR and OVRService will then work without extra prompts.)",
-                    App.AppName,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (result.RecommendRestartElevated)
             {
                 App.Instance.StartupRegistration.RestartElevated();
             }
