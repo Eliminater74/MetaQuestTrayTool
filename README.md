@@ -118,9 +118,11 @@ Export/import profiles and full settings from **Advanced**.
 - **Info** page: live OpenXR (Meta vs SteamVR), OVRService, and detailed headset identity
 - **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
-Not yet: voice commands, Oculus Homeless, Permanent AirLink, in-app updates.
+Not yet: Oculus Homeless, Permanent AirLink, in-app updates.
 
 **HotKeys:** Tray Tool → Enable HotKeys → Configure. Defaults use **Ctrl+Numpad 1–8** (ASW, SS cycle, apply global, restart service, perf HUD).
+
+**Voice commands (preview):** Tray Tool → Enable voice commands → Configure. Default push-to-talk **Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Uses Windows speech recognition.
 
 See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 
