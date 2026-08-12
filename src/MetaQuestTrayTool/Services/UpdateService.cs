@@ -206,6 +206,18 @@ public sealed class UpdateService
             throw new FileNotFoundException("Installer not found.", installerPath);
         }
 
+        // ADB's background server holds platform-tools\adb.exe open even with no headset —
+        // Inno then prompts to skip/retry that file on upgrade.
+        try
+        {
+            var adb = _app.Adb.KillServerForUpdate();
+            _app.Log.Info("Pre-update ADB unlock: " + adb);
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn($"Pre-update ADB unlock failed: {ex.Message}");
+        }
+
         _app.Log.Info($"Launching updater: {installerPath}");
         Process.Start(new ProcessStartInfo
         {

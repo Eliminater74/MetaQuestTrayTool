@@ -33,6 +33,52 @@ public sealed class AdbService
         AdbPath = FindAdb();
     }
 
+    /// <summary>
+    /// Stops the ADB server and force-kills leftover <c>adb.exe</c> processes so Setup can
+    /// replace <c>platform-tools</c> (the server often keeps files locked even with no headset).
+    /// </summary>
+    public string KillServerForUpdate()
+    {
+        Refresh();
+        var parts = new List<string>();
+
+        if (IsAvailable)
+        {
+            try
+            {
+                Run("kill-server");
+                parts.Add("adb kill-server ok.");
+            }
+            catch (Exception ex)
+            {
+                parts.Add($"adb kill-server: {ex.Message}");
+            }
+        }
+
+        var killed = 0;
+        foreach (var process in Process.GetProcessesByName("adb"))
+        {
+            try
+            {
+                using (process)
+                {
+                    process.Kill(entireProcessTree: true);
+                    process.WaitForExit(5000);
+                    killed++;
+                }
+            }
+            catch
+            {
+                // Access denied / already exiting
+            }
+        }
+
+        parts.Add(killed == 0
+            ? "No adb.exe processes left."
+            : $"Killed {killed} adb.exe process(es).");
+        return string.Join(" ", parts);
+    }
+
     public IReadOnlyList<AdbDevice> ListDevices()
     {
         Refresh();
