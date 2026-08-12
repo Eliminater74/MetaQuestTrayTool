@@ -10,6 +10,8 @@ namespace MetaQuestTrayTool.Views;
 public partial class VoiceCommandsWindow : Window
 {
     private readonly ObservableCollection<VoicePhraseRow> _rows = [];
+    private readonly VoiceSettings _voiceSnapshot;
+    private bool _saved;
     private bool _recordingPtt;
     private HotKeyModifiers _pttModifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift;
     private string _pttKey = "V";
@@ -17,7 +19,18 @@ public partial class VoiceCommandsWindow : Window
     public VoiceCommandsWindow()
     {
         InitializeComponent();
+        _voiceSnapshot = App.Instance.Settings.Current.Voice.Clone();
         PhrasesList.ItemsSource = _rows;
+        Closing += (_, _) =>
+        {
+            if (_saved)
+            {
+                return;
+            }
+
+            App.Instance.Settings.Current.Voice = _voiceSnapshot.Clone();
+            App.Instance.Voice.Reload();
+        };
         LoadFromSettings();
     }
 
@@ -111,8 +124,23 @@ public partial class VoiceCommandsWindow : Window
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         WriteUiToSettings(temporary: false);
+        var voice = App.Instance.Settings.Current.Voice;
+        if (voice.Enabled
+            && App.Instance.Settings.Current.HotKeys.Enabled
+            && HotKeyChordHelper.ConflictsWithHotKeys(voice, App.Instance.Settings.Current.HotKeys))
+        {
+            System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                "Push-to-talk matches an enabled hotkey. Change one shortcut before saving.",
+                App.AppName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
         App.Instance.Settings.Save();
         App.Instance.Voice.Reload();
+        _saved = true;
         StatusText.Text = App.Instance.Voice.Status;
         App.Instance.Log.Info(StatusText.Text);
     }

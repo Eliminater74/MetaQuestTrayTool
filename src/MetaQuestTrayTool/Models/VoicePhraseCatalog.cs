@@ -38,7 +38,7 @@ public static class VoicePhraseCatalog
             return false;
         }
 
-        foreach (var phrase in Phrases)
+        foreach (var phrase in Phrases.OrderByDescending(phrase => Normalize(phrase.Phrase).Length))
         {
             var candidate = Normalize(phrase.Phrase);
             if (normalized.Equals(candidate, StringComparison.Ordinal)

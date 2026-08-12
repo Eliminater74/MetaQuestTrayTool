@@ -141,6 +141,8 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         App.Instance.Settings.Current.Tray.EnableHotKeys = enabled;
         App.Instance.Settings.Save();
         App.Instance.HotKeys.Reload();
+        StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                          + " Voice: " + App.Instance.Voice.Status;
         App.Instance.Log.Info(enabled ? "HotKeys enabled." : "HotKeys disabled.");
     }
 
@@ -162,6 +164,8 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         App.Instance.Settings.Current.Voice.Enabled = enabled;
         App.Instance.Settings.Save();
         App.Instance.Voice.Reload();
+        StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                          + " Voice: " + App.Instance.Voice.Status;
         App.Instance.Log.Info(enabled ? "Voice commands enabled." : "Voice commands disabled.");
     }
 }
