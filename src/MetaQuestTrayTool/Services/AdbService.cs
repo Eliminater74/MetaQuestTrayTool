@@ -78,7 +78,7 @@ public sealed class AdbService
         Refresh();
         if (!IsAvailable)
         {
-            return "ADB was not found. Install Android Platform-Tools or SideQuest (we reuse its adb.exe).";
+            return "Bundled ADB was not found. Rebuild the app so tools/platform-tools is copied next to the exe.";
         }
 
         var quest = FindQuest();
@@ -162,6 +162,9 @@ public sealed class AdbService
 
     private static IEnumerable<string> EnumerateCandidates()
     {
+        yield return Path.Combine(AppContext.BaseDirectory, "platform-tools", "adb.exe");
+        yield return Path.Combine(AppContext.BaseDirectory, "adb.exe");
+
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var pf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         var pf86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
@@ -221,6 +224,7 @@ public sealed class AdbService
             {
                 FileName = AdbPath,
                 Arguments = arguments,
+                WorkingDirectory = Path.GetDirectoryName(AdbPath) ?? AppContext.BaseDirectory,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

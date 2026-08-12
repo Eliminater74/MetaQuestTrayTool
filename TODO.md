@@ -89,7 +89,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Phase 9 — headset ADB (v0.8)
 
-- [x] Detect adb.exe (SDK / PATH / SideQuest)
+- [x] Detect adb.exe (bundled platform-tools first, then SDK / PATH / SideQuest)
+- [x] Ship Google platform-tools ADB with the app
 - [x] CPU/GPU, texture size, refresh, FFR, chroma, capture
 - [x] Auto-apply when the Quest appears on ADB
 - [x] Paste text to headset; proximity / guardian helpers

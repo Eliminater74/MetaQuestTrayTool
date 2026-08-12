@@ -88,7 +88,7 @@ Classic OTT ran elevated so VR-time work needed no UAC. A Windows Service cannot
 
 SideQuest-style `debug.oculus.*` props. They reset on reboot, so the tray re-applies when the headset connects.
 
-- [x] Find adb.exe (platform-tools, PATH, SideQuest)
+- [x] Bundle Google platform-tools ADB (plus SDK / PATH / SideQuest fallback)
 - [x] CPU/GPU, texture size, refresh rate, FFR, chromatic aberration
 - [x] Capture size / FPS / bitrate / full-rate
 - [x] Apply on connect + tray + Headset shell page

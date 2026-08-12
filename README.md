@@ -49,7 +49,7 @@ Newer Meta runtimes sometimes reject `server:` ASW commands. The log will say so
 - [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/) with the **.NET desktop development** workload
 - .NET 8 SDK (included with a current VS Community install)
 
-No extra Visual Studio extensions are required.
+No extra Visual Studio extensions are required. **ADB is bundled** (`tools/platform-tools`, copied next to the exe) so Headset debug works in Debug/Release without Android Studio. The Quest still needs Developer Mode and a one-time USB debugging approval.
 
 ## Build
 
