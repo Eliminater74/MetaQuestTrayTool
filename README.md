@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) (latest) | [MetaQuestTrayTool-Setup-1.0.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.2/MetaQuestTrayTool-Setup-1.0.2.exe) |
+| [v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.3) (latest) | [MetaQuestTrayTool-Setup-1.0.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.3/MetaQuestTrayTool-Setup-1.0.3.exe) |
+| [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) | [MetaQuestTrayTool-Setup-1.0.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.2/MetaQuestTrayTool-Setup-1.0.2.exe) |
 | [v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.1) | [MetaQuestTrayTool-Setup-1.0.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.1/MetaQuestTrayTool-Setup-1.0.1.exe) |
 | [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) |
 
@@ -133,7 +134,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** includes in-app updates, hotkeys, voice preview, expanded Link registry writes, and profile restore fixes.
+Release **[v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** includes audio auto-switch fixes, Open Meta Horizon Link, screenshots, themed lists, clear log, color-coded logs, in-app updates, and hotkeys/voice.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)

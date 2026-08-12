@@ -138,6 +138,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] In-app update check (GitHub latest `v*` → download Setup → exit → install over)
 - [x] Tag and publish **v1.0.2** (with in-app updater)
 - [x] README screenshots + demo video
+- [x] Open Meta Horizon Link (tray / hotkey / voice)
+- [x] Audio switch: do not steal speakers when Oculus virtual audio is merely installed
+- [x] Tag and publish **v1.0.3**
 
 ## Housekeeping
 
