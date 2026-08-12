@@ -5,6 +5,7 @@
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
       <TextBlock DockPanel.Dock="Left" Text="Log Window" Style="{StaticResource PageTitleStyle}"/>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Content="Clear log" Style="{StaticResource GhostButtonStyle}" Click="Clear_Click"/>
         <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"/>
         <Button Content="Open log folder" Style="{StaticResource GhostButtonStyle}" Click="OpenFolder_Click"/>
       </StackPanel>

@@ -22,6 +22,38 @@ public sealed class LogService
         Add("ERROR", detail);
     }
 
+    /// <summary>Clears the in-memory log and truncates the on-disk log file.</summary>
+    public void Clear()
+    {
+        void Wipe()
+        {
+            lock (_sync)
+            {
+                Entries.Clear();
+            }
+
+            try
+            {
+                AppPaths.EnsureAppDataDirectory();
+                File.WriteAllText(AppPaths.LogFile, string.Empty);
+            }
+            catch
+            {
+                // Logging must never crash the tray app.
+            }
+        }
+
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            Wipe();
+        }
+        else
+        {
+            dispatcher.Invoke(Wipe);
+        }
+    }
+
     private void Add(string level, string message)
     {
         var entry = new LogEntry

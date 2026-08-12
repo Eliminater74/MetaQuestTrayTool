@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Services;
+using MetaQuestTrayTool.Views;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -26,6 +27,28 @@ public partial class LogWindowPage : System.Windows.Controls.UserControl, IShell
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();
+
+    private void Clear_Click(object sender, RoutedEventArgs e)
+    {
+        var result = System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            "Clear the activity log?\n\nThis removes on-screen entries and empties app.log on disk.",
+            App.AppName,
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        App.Instance.Log.Clear();
+        App.Instance.Log.Info("Log cleared.");
+        Refresh();
+        if (Window.GetWindow(this) is MainShellWindow shell)
+        {
+            shell.RefreshActivePage();
+        }
+    }
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
