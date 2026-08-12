@@ -133,6 +133,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 
 ## Later
 
+- Authenticode code signing for the installer / exe (SmartScreen; when budget allows)
 - Voice polish — custom phrases, mic picker, always-on tuning
 - Wireless ADB pairing UI (USB ADB headset page is in v0.8)
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)

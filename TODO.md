@@ -147,3 +147,4 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Keep README "what works now" in sync after each phase
 - [x] Bump version in Directory.Build.props when a phase ships
 - [x] Decide on a license before a public release
+- [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
