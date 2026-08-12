@@ -82,6 +82,21 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
         window.ShowDialog();
     }
 
+    private void OpenDebugTool_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.Oculus.ShowOculusDebugTool();
+        StatusText.Text = summary;
+        if (summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase))
+        {
+            App.Instance.Log.Warn(summary);
+        }
+        else
+        {
+            App.Instance.Log.Info(summary);
+        }
+    }
+
     private void Export_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Microsoft.Win32.SaveFileDialog

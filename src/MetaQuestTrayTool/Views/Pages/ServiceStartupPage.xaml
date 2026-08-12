@@ -32,6 +32,8 @@
                 ToolTip="Restart OVRService. Useful after registry changes (PreventDashLaunch, CoreChannel, Link settings)."/>
         <Button Content="Open Meta Horizon Link" Style="{StaticResource AccentButtonStyle}" Click="OpenMetaLink_Click"
                 ToolTip="Open or focus the Meta Quest Link PC app (oculus-client). Use this to connect Air Link / Link before Dash → SteamVR."/>
+        <Button Content="Open Debug Tool" Style="{StaticResource GhostButtonStyle}" Click="OpenDebugTool_Click"
+                ToolTip="Launch Meta’s Oculus Debug Tool GUI (OculusDebugTool.exe) from Support\oculus-diagnostics — same as classic OTT. Prefer Connect with Link first; close/reopen if values look stale."/>
         <Button Content="Kill Dash → SteamVR" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
                 ToolTip="Kill OculusDash now, optionally switch OpenXR to SteamVR, and launch SteamVR (vrstartup.exe). Connect with Meta Link first. Hotkey: Ctrl+Num 0. Voice: kill dash."/>
       </StackPanel>
@@ -103,7 +105,7 @@
       <TextBlock x:Name="CoreChannelStatusText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
-                 Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe (or OculusClient.exe)."/>
+                 Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe. Open Debug Tool launches Support\oculus-diagnostics\OculusDebugTool.exe from its install folder."/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

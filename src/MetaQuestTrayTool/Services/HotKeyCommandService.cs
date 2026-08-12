@@ -28,6 +28,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.TogglePerfHud => TogglePerfHud(),
             HotKeyAction.VoicePushToTalk => ExecuteVoicePushToTalk(),
             HotKeyAction.OpenMetaLink => _app.Oculus.ShowMetaHorizonLink(),
+            HotKeyAction.OpenDebugTool => _app.Oculus.ShowOculusDebugTool(),
             HotKeyAction.DashToSteamVr => _app.DashToSteamVr.RunNow("hotkey/voice"),
             _ => $"Unknown hotkey action: {action}"
         };

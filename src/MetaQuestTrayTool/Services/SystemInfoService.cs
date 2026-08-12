@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 using MetaQuestTrayTool.Models;
 
@@ -19,7 +20,8 @@ public static class SystemInfoService
         text.AppendLine($"OpenXR: {OpenXrRuntimeService.Label(openXr)}");
         text.AppendLine($"OpenXR JSON: {app.OpenXr.ReadActivePath() ?? "(none)"}");
         text.AppendLine(app.Oculus.DescribeStatus());
-        text.AppendLine($"Debug Tool: {(app.DebugTool.IsAvailable ? app.DebugTool.CliPath : "not found")}");
+        text.AppendLine($"Debug Tool CLI: {(app.DebugTool.IsAvailable ? app.DebugTool.CliPath : "not found")}");
+        text.AppendLine($"Debug Tool GUI: {(app.Oculus.DebugToolGuiPath is { } gui && File.Exists(gui) ? gui : "not found")}");
         text.AppendLine($"ADB binary: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
 

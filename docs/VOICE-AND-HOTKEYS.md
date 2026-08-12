@@ -25,6 +25,8 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 9 | Open Meta Horizon Link |
 | Ctrl+Num 0 | Kill Dash → start SteamVR |
 
+Assign **Open Oculus Debug Tool** in Configure if you want a shortcut (no default numpad binding — Num 0–9 are taken).
+
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 
 HotKeys require the tray app to be running. They work globally, including in VR.
@@ -64,6 +66,7 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | cycle supersampling / cycle super sampling | Cycle super sampling |
 | toggle H U D / performance H U D | Toggle Performance HUD |
 | open meta link / show meta link / open oculus client | Open Meta Horizon Link |
+| open debug tool / open oculus debug tool / launch debug tool | Open Oculus Debug Tool GUI |
 | kill dash / dash to steam v r / start steam v r | Kill Dash → start SteamVR |
 
 Spell out **A S W**, **H U D**, and **steam v r** — Windows recognition handles that better than “ASW” / “SteamVR” as one word.

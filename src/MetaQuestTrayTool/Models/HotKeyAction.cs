@@ -12,5 +12,6 @@ public enum HotKeyAction
     TogglePerfHud,
     VoicePushToTalk,
     OpenMetaLink,
+    OpenDebugTool,
     DashToSteamVr
 }

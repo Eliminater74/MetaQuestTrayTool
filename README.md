@@ -150,6 +150,7 @@ Release **[v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - Start minimized, minimize-on-close, hide from Alt+Tab
 - **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
 - Tray **Game Settings**: Super Sampling, ASW (including 45/30/18), FOV, Adaptive GPU, mip layer flags, FOV stencil, and Visual HUD via `OculusDebugToolCLI.exe`
+- **Open Oculus Debug Tool GUI** (`OculusDebugTool.exe`) from Service & Startup, Game Settings, Advanced, tray, hotkey/voice — same shortcut classic OTT offered
 - Startup probe of connected headset serials through `server:EnumHmd`
 - Create / edit / delete / apply **profiles** from the tray or shell
 - Personal profiles can override **Link sharpening / bitrate / encode width** (inherit keeps global Quest Link settings; restored when the game exits)

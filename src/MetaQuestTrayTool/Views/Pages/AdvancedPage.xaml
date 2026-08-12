@@ -25,6 +25,7 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Settings" Style="{StaticResource SettingLabelStyle}"/>
@@ -57,16 +58,21 @@
                 Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,10" Click="Audio_Click"
                 ToolTip="Configure VR vs desktop playback/recording device switching when Link is active."/>
 
-        <TextBlock Grid.Row="6" Text="Backup" Style="{StaticResource SettingLabelStyle}"/>
-        <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+        <TextBlock Grid.Row="6" Text="Oculus Debug Tool" Style="{StaticResource SettingLabelStyle}"/>
+        <Button Grid.Row="6" Grid.Column="1" Content="Open Debug Tool GUI" HorizontalAlignment="Left"
+                Style="{StaticResource AccentButtonStyle}" Margin="0,0,0,10" Click="OpenDebugTool_Click"
+                ToolTip="Launch Meta’s OculusDebugTool.exe from Support\oculus-diagnostics (classic OTT shortcut). Connect Link first; close/reopen if values look stale."/>
+
+        <TextBlock Grid.Row="7" Text="Backup" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
           <Button Content="Export settings…" Style="{StaticResource AccentButtonStyle}" Click="Export_Click"
                   ToolTip="Export settings (and related config) to a backup file you can restore later."/>
           <Button Content="Import settings…" Style="{StaticResource GhostButtonStyle}" Click="Import_Click"
                   ToolTip="Import a previously exported settings backup. Overwrites current tray settings."/>
         </StackPanel>
 
-        <TextBlock Grid.Row="7" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
-        <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+        <TextBlock Grid.Row="8" Text="Updates" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
           <Button Content="Check for updates…" Style="{StaticResource AccentButtonStyle}" Click="CheckUpdates_Click"
                   ToolTip="Check GitHub for a newer Setup.exe and install over this copy if available."/>
           <TextBlock VerticalAlignment="Center" Margin="12,0,0,0"

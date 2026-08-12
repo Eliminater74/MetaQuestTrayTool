@@ -121,6 +121,8 @@
                 ToolTip="Push current global defaults (ODT + custom CLI/ADB) immediately. Under Steam Link / VD some Meta ODT options may be gated."/>
         <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"
                 ToolTip="Persist these global defaults to settings without applying them yet."/>
+        <Button Content="Open Debug Tool" Style="{StaticResource GhostButtonStyle}" Click="OpenDebugTool_Click"
+                ToolTip="Launch Meta’s Oculus Debug Tool GUI (OculusDebugTool.exe). Same shortcut as classic OTT. Connect Link first; close/reopen if values look stale."/>
         <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"
                   ToolTip="When the tray starts, apply global defaults if no personal profile is active."/>
         <CheckBox x:Name="AutoApplyBox" Content="Auto-apply profiles" VerticalAlignment="Center" Margin="16,0,0,0"

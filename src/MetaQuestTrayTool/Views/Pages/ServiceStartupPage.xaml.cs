@@ -132,6 +132,21 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         }
     }
 
+    private void OpenDebugTool_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.Oculus.ShowOculusDebugTool();
+        ServiceStatusText.Text = summary;
+        if (summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase))
+        {
+            App.Instance.Log.Warn(summary);
+        }
+        else
+        {
+            App.Instance.Log.Info(summary);
+        }
+    }
+
     private void DashToSteamVr_Click(object sender, RoutedEventArgs e)
     {
         var summary = App.Instance.DashToSteamVr.RunNow("Service & Startup button");

@@ -22,6 +22,11 @@ public sealed class OculusRuntimeService
             ? null
             : Path.Combine(InstallPath, "Support", "oculus-diagnostics", "OculusDebugToolCLI.exe");
 
+    public string? DebugToolGuiPath =>
+        string.IsNullOrWhiteSpace(InstallPath)
+            ? null
+            : Path.Combine(InstallPath, "Support", "oculus-diagnostics", "OculusDebugTool.exe");
+
     public void Refresh()
     {
         InstallPath = DetectInstallPath();
@@ -104,6 +109,40 @@ public sealed class OculusRuntimeService
         }
     }
 
+    /// <summary>
+    /// Opens the official Oculus Debug Tool GUI (same as classic OTT). Must run from
+    /// Support\oculus-diagnostics so it matches the installed Meta runtime.
+    /// </summary>
+    public string ShowOculusDebugTool()
+    {
+        Refresh();
+        var guiPath = DebugToolGuiPath;
+        if (string.IsNullOrWhiteSpace(guiPath) || !File.Exists(guiPath))
+        {
+            return "Oculus Debug Tool was not found (expected Support\\oculus-diagnostics\\OculusDebugTool.exe).";
+        }
+
+        if (TryActivateExistingDebugTool(guiPath))
+        {
+            return "Brought Oculus Debug Tool to the foreground.";
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = guiPath,
+                WorkingDirectory = Path.GetDirectoryName(guiPath) ?? InstallPath ?? Environment.CurrentDirectory,
+                UseShellExecute = true
+            });
+            return $"Opened Oculus Debug Tool ({Path.GetFileName(guiPath)}).";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not open Oculus Debug Tool: {ex.Message}";
+        }
+    }
+
     public string? ResolveClientExePath()
     {
         if (string.IsNullOrWhiteSpace(InstallPath))
@@ -162,6 +201,48 @@ public sealed class OculusRuntimeService
                     if (hwnd == IntPtr.Zero)
                     {
                         return false;
+                    }
+
+                    ShowWindow(hwnd, SwRestore);
+                    SetForegroundWindow(hwnd);
+                    return true;
+                }
+            }
+            catch
+            {
+                // Ignore processes we cannot inspect.
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryActivateExistingDebugTool(string guiPath)
+    {
+        foreach (var process in Process.GetProcessesByName("OculusDebugTool"))
+        {
+            try
+            {
+                using (process)
+                {
+                    try
+                    {
+                        var path = process.MainModule?.FileName;
+                        if (path is not null
+                            && !string.Equals(path, guiPath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        // Access denied — still try to restore by process name.
+                    }
+
+                    var hwnd = process.MainWindowHandle;
+                    if (hwnd == IntPtr.Zero)
+                    {
+                        continue;
                     }
 
                     ShowWindow(hwnd, SwRestore);
