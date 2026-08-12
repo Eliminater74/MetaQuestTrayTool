@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.5) (latest) | [MetaQuestTrayTool-Setup-1.0.5.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.5/MetaQuestTrayTool-Setup-1.0.5.exe) |
+| [v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.6) (latest) | [MetaQuestTrayTool-Setup-1.0.6.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.6/MetaQuestTrayTool-Setup-1.0.6.exe) |
+| [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.5) | [MetaQuestTrayTool-Setup-1.0.5.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.5/MetaQuestTrayTool-Setup-1.0.5.exe) |
 | [v1.0.4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.4) | [MetaQuestTrayTool-Setup-1.0.4.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.4/MetaQuestTrayTool-Setup-1.0.4.exe) |
 | [v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.3) | [MetaQuestTrayTool-Setup-1.0.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.3/MetaQuestTrayTool-Setup-1.0.3.exe) |
 | [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) | [MetaQuestTrayTool-Setup-1.0.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.2/MetaQuestTrayTool-Setup-1.0.2.exe) |
@@ -136,7 +137,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds Link/ADB session connect logging, Quest Link presets, clearer Info Link vs ADB status, and the v1.0.4 session-detection / Steam Link assist stack.
+Release **[v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** prefers Steam Link / SteamVR over Meta’s Wi‑Fi auto-connect DeviceCache, plus v1.0.5 Link/ADB logging and Quest Link presets.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)

@@ -134,6 +134,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tag **v1.0.4**
 - [x] Quest Link presets + clearer Info Link/ADB + session connect/apply logging
 - [x] Tag **v1.0.5**
+- [x] Prefer SteamVR over Meta Wi‑Fi auto-connect DeviceCache
+- [x] Tag **v1.0.6**
 
 ## Later
 
