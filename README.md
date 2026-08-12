@@ -1,43 +1,94 @@
 # Meta Quest Tray Tool
 
-Windows tray utility for Meta Quest / Oculus Link, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
+[![Latest release](https://img.shields.io/github/v/release/Eliminater74/MetaQuestTrayTool?label=Release)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Eliminater74/MetaQuestTrayTool/total?label=Downloads)](https://github.com/Eliminater74/MetaQuestTrayTool/releases)
+[![Stars](https://img.shields.io/github/stars/Eliminater74/MetaQuestTrayTool?label=Stars)](https://github.com/Eliminater74/MetaQuestTrayTool/stargazers)
 
-Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
+Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
 
-## Installer (end users)
+> **Screenshots:** coming soon — the README will be updated with UI images in a later release.
 
-Build a classic OTT-style **Setup.exe** (self-contained — no separate .NET install):
+---
 
-```powershell
-winget install --id JRSoftware.InnoSetup -e   # once
-.\scripts\build-installer.ps1
-```
+## Download
 
-The installer lands in `dist\MetaQuestTrayTool-Setup-<version>.exe`. Details: [installer/README.md](installer/README.md).
+**Recommended:** install the latest Windows Setup from [GitHub Releases](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest).
 
-### GitHub Releases (automatic)
-
-Pushing a version tag builds the Setup.exe and publishes a [GitHub Release](https://github.com/Eliminater74/MetaQuestTrayTool/releases):
-
-```powershell
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-You can also run **Actions → Release → Run workflow** manually (pick the version).
-
-Every push to `main` runs CI (build + publish smoke test). Tags `v*` trigger the full installer + release.
-
-## Project docs
-
-| File | Use when you need to… |
+| Release | Installer |
 | --- | --- |
-| [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
-| [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
-| [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
-| [installer/README.md](installer/README.md) | Build the Windows Setup.exe |
+| [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) (~52 MB) |
 
-Update both files whenever a phase ships so they stay useful after a break.
+The installer is **self-contained** (includes .NET 8 — no separate runtime install). Settings are stored in `%AppData%\MetaQuestTrayTool\` and are kept if you uninstall.
+
+Badge counts above update automatically (release downloads and stars). GitHub does not expose public page-view / visitor totals on the README; repo owners can see traffic under **Insights → Traffic**.
+
+---
+
+## How to use
+
+### 1. Install and first launch
+
+1. Download and run `MetaQuestTrayTool-Setup-*.exe` from [Releases](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest).
+2. Launch **Meta Quest Tray Tool** from the Start Menu (or let it start with Windows if you enabled that during setup).
+3. The app lives in the **notification area** (system tray). If you do not see the headset icon, click the **^** overflow chevron near the clock.
+4. On first run, approve **Administrator mode** when prompted if you want OpenXR switching, OVRService control, and profile apply to work in-headset without UAC. You can also use **Restart as Administrator** from the tray menu later.
+
+### 2. Open settings
+
+- **Left-click** the tray headset icon, or
+- **Right-click** the icon → **Open Settings**
+
+The sidebar shell has pages for **Game Settings**, **Tray Tool**, **Power**, **Service & Startup**, **Log**, **Advanced**, **Quest Link**, **Headset (ADB)**, **Profiles**, and **Info**.
+
+### 3. Set your global defaults
+
+1. Open **Profiles** (or **Advanced → Global defaults**) and configure your everyday Link / OpenXR / audio / power preferences.
+2. On **Quest Link**, set bitrate, encode width, sharpening, HEVC, and related Link options.
+3. On **Game Settings** (tray menu or shell), adjust super sampling, ASW, FOV, and other PCVR tweaks.
+4. Changes save automatically to `%AppData%\MetaQuestTrayTool\`.
+
+Global defaults stay applied until a game with a personal profile launches.
+
+### 4. Per-game profiles (optional)
+
+1. Open **Profiles** → **New profile** (or pick a built-in preset such as MSFS 2024 or Beat Saber).
+2. Set the **executable name** (e.g. `FlightSimulator.exe`) and any overrides (Link, OpenXR runtime, game settings).
+3. When that game starts, the profile auto-applies and you get a tray notification.
+4. When the game exits, **global defaults are restored** automatically.
+
+Export/import profiles and full settings from **Advanced**.
+
+### 5. Quest Link / headset tweaks
+
+- **Quest Link** registry settings usually need a Link reconnect or **OVRService** restart — use **Service & Startup** or the tray menu.
+- **Headset (ADB)** tweaks (CPU/GPU, refresh rate, texture size, etc.) apply when a trusted Quest connects. Enable **Developer Mode** on the headset and approve USB debugging once. These settings do not survive a headset reboot; the tray re-applies them on connect.
+- Only **real VR headsets** are trusted. Phones, tablets, and Android emulators are ignored.
+
+### 6. Tray menu quick actions
+
+**Right-click** the tray icon for:
+
+- Game Settings (SS, ASW, FOV, …)
+- Start / stop / restart **OVRService**
+- Apply or edit **profiles**
+- **Open Settings**, **Info**, **Donate**, **Exit**
+
+### 7. Tips
+
+- **Themes:** Pure Black (default), Dark, or Light — change on the **Tray Tool** page.
+- **Start minimized** and **minimize-on-close** keep the app in the tray instead of the taskbar.
+- Newer Meta runtimes may reject some `server:` ASW commands; check **Log** if something does not apply.
+- Pixel density changes often need a **new VR session** to take effect.
+
+---
+
+## Requirements
+
+- Windows 10 / 11 (64-bit)
+- [Meta Quest PC app](https://www.meta.com/quest/setup-link/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
+- For **Headset (ADB)**: Quest **Developer Mode** + one-time USB debugging approval (ADB is bundled — no Android Studio required)
+
+---
 
 ## What works now (v1.0.0)
 
@@ -60,7 +111,6 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
-
 - **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
 - **Trusted headset**: first connected **VR headset** serial is remembered; a different VR serial is blocked. Phones, tablets, and Android emulators are ignored and never receive ADB commands or auto-apply
 - **Profiles**: auto-apply on game launch with tray notification; restore global when the game exits. Stored in `profiles.json` (export/import still works). Built-in global + game presets (MSFS 2024, Beat Saber, etc.)
@@ -72,34 +122,54 @@ Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app upd
 
 See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 
-Newer Meta runtimes sometimes reject `server:` ASW commands. The log will say so if that happens. Pixel density still needs a new VR session to take effect. Link registry changes usually need a Link reconnect or `OVRService` restart.
+---
 
-## Requirements
+## Project docs
 
-- Windows 10 / 11
-- [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/) with the **.NET desktop development** workload
-- .NET 8 SDK (included with a current VS Community install)
+| File | Use when you need to… |
+| --- | --- |
+| [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
+| [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
+| [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
+| [installer/README.md](installer/README.md) | Build the Windows Setup.exe locally |
 
-No extra Visual Studio extensions are required. **ADB is bundled** (`tools/platform-tools`, copied next to the exe) so Headset debug works in Debug/Release without Android Studio. The Quest still needs Developer Mode and a one-time USB debugging approval.
+---
 
-## Build
+## Build from source (developers)
 
-**Visual Studio**
+**Requirements:** [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/) with the **.NET desktop development** workload, or .NET 8 SDK.
 
-1. Open `MetaQuestTrayTool.sln`
-2. Configuration: `Debug` or `Release`
-3. Build → Build Solution, or press F5
+**Visual Studio:** open `MetaQuestTrayTool.sln`, choose `Debug` or `Release`, press F5.
 
-**Command line**
+**Command line:**
 
 ```powershell
-dotnet build .\MetaQuestTrayTool.sln -c Debug
+dotnet build .\MetaQuestTrayTool.sln -c Release
 dotnet run --project .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj
 ```
 
-The app can start minimized to the tray (default). Left-click the headset icon or choose **Open Settings** to open the sidebar shell. If Windows hides the icon, open the overflow chevron.
+Starting or stopping `OVRService` during development may require running as Administrator.
 
-Starting or stopping `OVRService` may require running Visual Studio / the exe as Administrator. The app itself starts unelevated so it can live in the tray without a UAC prompt.
+### Build Setup.exe locally
+
+```powershell
+winget install --id JRSoftware.InnoSetup -e   # once
+.\scripts\build-installer.ps1
+```
+
+Output: `dist\MetaQuestTrayTool-Setup-<version>.exe`. Details: [installer/README.md](installer/README.md).
+
+### GitHub Actions
+
+- Every push to `main` runs **CI** (build + publish smoke test).
+- Pushing a tag `v*` (or **Actions → Release → Run workflow**) builds Setup.exe and publishes a [GitHub Release](https://github.com/Eliminater74/MetaQuestTrayTool/releases):
+
+```powershell
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+---
 
 ## Inspired by
 
