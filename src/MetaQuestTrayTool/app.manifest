@@ -4,8 +4,9 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- Stay asInvoker so the tray app can start without a UAC prompt.
-             Service start/stop will report access denied if elevation is needed. -->
+        <!-- Stay asInvoker so the tray can start without UAC. Optional
+             Administrator rights come from a logon scheduled task or a
+             one-shot "Restart as Administrator". -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>

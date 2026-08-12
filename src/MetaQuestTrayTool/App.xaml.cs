@@ -41,7 +41,8 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
-        _singleInstanceMutex = new Mutex(true, MutexName, out var isNewInstance);
+        var restarting = e.Args.Any(arg => string.Equals(arg, "--restart", StringComparison.OrdinalIgnoreCase));
+        _singleInstanceMutex = WaitForSingleInstance(restarting, out var isNewInstance);
         if (!isNewInstance)
         {
             System.Windows.MessageBox.Show(
@@ -67,6 +68,16 @@ public partial class App : System.Windows.Application
         Settings.Load();
         ThemeService.Apply(Settings.Current.Tray.Theme);
         Log.Info($"{AppName} {GetVersion()} started.");
+        var startWithWindows = Settings.Current.StartWithWindows;
+        var startAsAdmin = Settings.Current.StartWithWindowsAsAdministrator;
+        StartupRegistration.SyncFromSystem(Settings.Current);
+        if (startWithWindows != Settings.Current.StartWithWindows
+            || startAsAdmin != Settings.Current.StartWithWindowsAsAdministrator)
+        {
+            Settings.Save();
+        }
+
+        Log.Info(StartupRegistration.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
         Log.Info(DebugTool.IsAvailable
@@ -170,6 +181,29 @@ public partial class App : System.Windows.Application
     public static string GetVersion()
     {
         return typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0";
+    }
+
+    private static Mutex WaitForSingleInstance(bool restarting, out bool isNewInstance)
+    {
+        Mutex? mutex = null;
+        isNewInstance = false;
+        var attempts = restarting ? 20 : 1;
+        for (var i = 0; i < attempts; i++)
+        {
+            mutex?.Dispose();
+            mutex = new Mutex(true, MutexName, out isNewInstance);
+            if (isNewInstance)
+            {
+                return mutex;
+            }
+
+            if (i + 1 < attempts)
+            {
+                Thread.Sleep(150);
+            }
+        }
+
+        return mutex!;
     }
 
     public string ApplyProfile(GameProfile profile)

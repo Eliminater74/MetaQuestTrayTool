@@ -7,6 +7,16 @@
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="Control OVRService and automate start/stop with the tray tool."/>
 
+      <TextBlock Text="This tool" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Oculus Tray Tool ran elevated so service control and HKLM writes worked. A Windows Service cannot show a tray icon (Session 0), so this uses an optional logon scheduled task with highest privileges — same admin rights, still a normal tray app."/>
+      <CheckBox x:Name="StartAsAdminBox" Content="Start this tool with Windows as Administrator"
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="Restart as Administrator…" Style="{StaticResource AccentButtonStyle}" Click="RestartElevated_Click"/>
+      </StackPanel>
+      <TextBlock x:Name="ElevationStatusText" Margin="0,0,0,16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+
       <TextBlock Text="Oculus Service" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <Button Content="Start" Style="{StaticResource AccentButtonStyle}" Click="Start_Click"/>

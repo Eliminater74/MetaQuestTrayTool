@@ -21,7 +21,9 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
     {
         _loading = true;
         var app = App.Instance.Settings.Current;
+        App.Instance.StartupRegistration.SyncFromSystem(app);
         StartWithWindowsBox.IsChecked = app.StartWithWindows;
+        StartAsAdminBox.IsChecked = app.StartWithWindowsAsAdministrator;
         StartMinimizedBox.IsChecked = app.Tray.StartMinimized;
         AudioSwitchBox.IsChecked = app.Audio.AutoSwitchEnabled;
         HideAltTabBox.IsChecked = app.Tray.HideFromAltTab;
@@ -30,7 +32,8 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
         NotificationsBox.IsChecked = app.ShowNotifications;
         SelectTheme(app.Tray.Theme);
-        StatusText.Text = "Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
+        StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                          + " Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
         _loading = false;
     }
 
@@ -75,25 +78,25 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
 
         var settings = App.Instance.Settings.Current;
         var startWithWindows = StartWithWindowsBox.IsChecked == true;
-        if (settings.StartWithWindows != startWithWindows)
+        var startAsAdmin = StartAsAdminBox.IsChecked == true;
+        if (settings.StartWithWindows != startWithWindows
+            || settings.StartWithWindowsAsAdministrator != startAsAdmin)
         {
-            try
+            if (!StartupUiHelper.TryApply(Window.GetWindow(this), startWithWindows, startAsAdmin))
             {
-                App.Instance.StartupRegistration.SetEnabled(startWithWindows);
-                settings.StartWithWindows = startWithWindows;
-            }
-            catch (Exception ex)
-            {
-                App.Instance.Log.Error("Could not update Start with Windows.", ex);
                 _loading = true;
                 StartWithWindowsBox.IsChecked = settings.StartWithWindows;
+                StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
                 _loading = false;
-                System.Windows.MessageBox.Show(
-                    Window.GetWindow(this),
-                    $"Could not update the Windows startup entry.\n\n{ex.Message}",
-                    App.AppName);
                 return;
             }
+
+            _loading = true;
+            StartWithWindowsBox.IsChecked = settings.StartWithWindows;
+            StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+            StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                              + " Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
+            _loading = false;
         }
 
         settings.Tray.StartMinimized = StartMinimizedBox.IsChecked == true;

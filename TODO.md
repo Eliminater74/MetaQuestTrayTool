@@ -11,6 +11,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Start / stop / restart `OVRService`
 - [x] Persist settings to `%AppData%\MetaQuestTrayTool\settings.json`
 - [x] Start with Windows (HKCU Run)
+- [x] Optional Start with Windows as Administrator (elevated logon task)
 - [x] Activity log on the dashboard and on disk
 - [x] Project README, roadmap, and this TODO
 
@@ -68,6 +69,12 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Meta vs SteamVR ActiveRuntime registry switch
 - [x] Global + personal profile OpenXR choice
 - [x] Restore previous / global runtime when the game exits
+
+## Phase 8 — elevated start (v0.7.1)
+
+- [x] Optional logon scheduled task with highest privileges
+- [x] One-shot Restart as Administrator
+- [x] Default remains unelevated (`asInvoker`)
 
 ## Phase 6 — OTT-style shell (v0.6)
 

@@ -8,6 +8,10 @@
                  Text="How the app behaves in Windows — startup, tray, audio switching, and notifications."/>
 
       <CheckBox x:Name="StartWithWindowsBox" Content="Start with Windows" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="StartAsAdminBox" Content="Start with Windows as Administrator"
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="28,0,0,12"
+                 Text="Optional. Installs a logon scheduled task with highest privileges (one UAC prompt). After that the tray starts elevated so OpenXR, OVRService, and similar admin actions do not prompt every time. A Windows Service cannot show a tray icon."/>
       <CheckBox x:Name="StartMinimizedBox" Content="Start minimized" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <CheckBox x:Name="AudioSwitchBox" Content="Use Audio Switcher" VerticalAlignment="Center" Checked="Persist_Changed" Unchecked="Persist_Changed"/>

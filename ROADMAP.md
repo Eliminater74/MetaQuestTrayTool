@@ -75,6 +75,14 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - [x] Global preferred runtime + apply on start
 - [x] Per-game profile override with restore on exit
 
+### Phase 8 — elevated start (v0.7.1)
+
+Classic OTT ran with Administrator rights. A Windows Service cannot host a tray icon (Session 0), so this is optional and user-controlled.
+
+- [x] Stay `asInvoker` by default (no UAC on every launch)
+- [x] Optional logon scheduled task with highest privileges
+- [x] One-shot Restart as Administrator from Service & Startup / tray
+
 ### Phase 6 — OTT-style settings shell (v0.6)
 
 Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Meta Link / OVRService stack.
@@ -91,7 +99,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - Hotkeys
 - Optional voice commands (low priority)
 - ADB helpers for Quest
-- Elevated helper process so the tray app itself stays unelevated
+- Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - Profile ignore-list
 - Detect wired Link vs Air Link
 - Dynamic bitrate max registry write (UI exists; needs verification)

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -18,6 +19,9 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
     {
         _loading = true;
         App.Instance.Oculus.Refresh();
+        App.Instance.StartupRegistration.SyncFromSystem(App.Instance.Settings.Current);
+        StartAsAdminBox.IsChecked = App.Instance.Settings.Current.StartWithWindowsAsAdministrator;
+        ElevationStatusText.Text = App.Instance.StartupRegistration.DescribeStatus();
         var service = App.Instance.Settings.Current.Service;
         StartOnToolBox.IsChecked = service.StartServiceWhenToolStarts;
         StopOnExitBox.IsChecked = service.StopServiceWhenToolExits;
@@ -30,6 +34,9 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         _loading = false;
     }
 
+    private void RestartElevated_Click(object sender, RoutedEventArgs e) =>
+        StartupUiHelper.TryRestartElevated(Window.GetWindow(this));
+
     private void Start_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Start);
     private void Stop_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Stop);
     private void Restart_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Restart);
@@ -41,7 +48,28 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
             return;
         }
 
-        var service = App.Instance.Settings.Current.Service;
+        var settings = App.Instance.Settings.Current;
+        var startAsAdmin = StartAsAdminBox.IsChecked == true;
+        if (settings.StartWithWindowsAsAdministrator != startAsAdmin)
+        {
+            if (!StartupUiHelper.TryApply(
+                    Window.GetWindow(this),
+                    startWithWindows: startAsAdmin || settings.StartWithWindows,
+                    asAdministrator: startAsAdmin))
+            {
+                _loading = true;
+                StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+                _loading = false;
+                return;
+            }
+
+            _loading = true;
+            StartAsAdminBox.IsChecked = settings.StartWithWindowsAsAdministrator;
+            ElevationStatusText.Text = App.Instance.StartupRegistration.DescribeStatus();
+            _loading = false;
+        }
+
+        var service = settings.Service;
         service.StartServiceWhenToolStarts = StartOnToolBox.IsChecked == true;
         service.StopServiceWhenToolExits = StopOnExitBox.IsChecked == true;
         service.RestartServiceWhenComputerWakes = RestartOnWakeBox.IsChecked == true;

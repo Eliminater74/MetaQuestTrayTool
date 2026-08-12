@@ -13,14 +13,16 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
 Update both files whenever a phase ships so they stay useful after a break.
 
-## What works now (v0.6)
+## What works now (v0.7)
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
 - Detects the Oculus PC install and `OVRService` status
 - Start / stop / restart the Oculus runtime service, with optional start/stop automation
 - Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
-- Optional Start with Windows, start minimized, minimize-on-close, hide from Alt+Tab
+- Optional Start with Windows, or **Start with Windows as Administrator** (elevated logon scheduled task — one UAC to install; tray then starts with admin rights like classic OTT)
+- Optional one-shot **Restart as Administrator** from Service & Startup or the tray menu
+- Start minimized, minimize-on-close, hide from Alt+Tab
 - **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
 - Tray **Game Settings**: Super Sampling, ASW (including 45/30/18), FOV, Adaptive GPU, mip layer flags, FOV stencil, and Visual HUD via `OculusDebugToolCLI.exe`
 - Startup probe of connected headset serials through `server:EnumHmd`

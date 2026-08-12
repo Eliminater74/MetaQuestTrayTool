@@ -12,6 +12,7 @@ public sealed class TrayIconHost : IDisposable
     private readonly App _app;
     private readonly NotifyIcon _notifyIcon;
     private ContextMenuStrip? _menu;
+    private bool _syncingStartup;
     private Icon? _icon;
     private MainShellWindow? _shell;
     private AboutWindow? _about;
@@ -160,6 +161,18 @@ public sealed class TrayIconHost : IDisposable
         startWithWindows.CheckedChanged += (_, _) => ToggleStartWithWindows(startWithWindows.Checked);
         menu.Items.Add(startWithWindows);
 
+        var startAsAdmin = new ToolStripMenuItem("Start as Administrator")
+        {
+            Name = "StartAsAdministrator",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.StartWithWindowsAsAdministrator
+        };
+        startAsAdmin.CheckedChanged += (_, _) => ToggleStartAsAdministrator(startAsAdmin.Checked);
+        menu.Items.Add(startAsAdmin);
+
+        menu.Items.Add(new ToolStripMenuItem("Restart as Administrator…", null, (_, _) =>
+            StartupUiHelper.TryRestartElevated(_shell)));
+
         var notifications = new ToolStripMenuItem("Show notifications")
         {
             Name = "ShowNotifications",
@@ -193,9 +206,22 @@ public sealed class TrayIconHost : IDisposable
             status.Text = $"Status: {_app.Oculus.ServiceStatus}";
         }
 
-        if (FindItem(menu.Items, "StartWithWindows") is ToolStripMenuItem startup)
+        _syncingStartup = true;
+        try
         {
-            startup.Checked = _app.Settings.Current.StartWithWindows;
+            if (FindItem(menu.Items, "StartWithWindows") is ToolStripMenuItem startup)
+            {
+                startup.Checked = _app.Settings.Current.StartWithWindows;
+            }
+
+            if (FindItem(menu.Items, "StartAsAdministrator") is ToolStripMenuItem startAsAdmin)
+            {
+                startAsAdmin.Checked = _app.Settings.Current.StartWithWindowsAsAdministrator;
+            }
+        }
+        finally
+        {
+            _syncingStartup = false;
         }
 
         if (FindItem(menu.Items, "ShowNotifications") is ToolStripMenuItem notifications)
@@ -816,23 +842,53 @@ public sealed class TrayIconHost : IDisposable
 
     private void ToggleStartWithWindows(bool enabled)
     {
+        if (_syncingStartup)
+        {
+            return;
+        }
+
+        var admin = enabled && _app.Settings.Current.StartWithWindowsAsAdministrator;
+        StartupUiHelper.TryApply(_shell, enabled, admin);
+        SyncStartupMenuChecks();
+    }
+
+    private void ToggleStartAsAdministrator(bool enabled)
+    {
+        if (_syncingStartup)
+        {
+            return;
+        }
+
+        StartupUiHelper.TryApply(
+            _shell,
+            startWithWindows: enabled || _app.Settings.Current.StartWithWindows,
+            asAdministrator: enabled);
+        SyncStartupMenuChecks();
+    }
+
+    private void SyncStartupMenuChecks()
+    {
+        if (_menu is null)
+        {
+            return;
+        }
+
+        _syncingStartup = true;
         try
         {
-            _app.StartupRegistration.SetEnabled(enabled);
-            _app.Settings.Current.StartWithWindows = enabled;
-            _app.Settings.Save();
-            _app.Log.Info(enabled
-                ? "Enabled Start with Windows."
-                : "Disabled Start with Windows.");
+            if (FindItem(_menu.Items, "StartWithWindows") is ToolStripMenuItem startup)
+            {
+                startup.Checked = _app.Settings.Current.StartWithWindows;
+            }
+
+            if (FindItem(_menu.Items, "StartAsAdministrator") is ToolStripMenuItem startAsAdmin)
+            {
+                startAsAdmin.Checked = _app.Settings.Current.StartWithWindowsAsAdministrator;
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            _app.Log.Error("Could not update Start with Windows.", ex);
-            System.Windows.MessageBox.Show(
-                $"Could not update the Windows startup entry.\n\n{ex.Message}",
-                App.AppName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            _syncingStartup = false;
         }
     }
 
