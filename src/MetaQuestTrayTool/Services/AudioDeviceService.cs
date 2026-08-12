@@ -19,6 +19,17 @@ public sealed class AudioDeviceService
         "galaxy xr"
     ];
 
+    /// <summary>
+    /// Meta/Oculus installs a virtual audio endpoint that stays Active even when the
+    /// headset is offline. Presence alone must never mean "Link is running".
+    /// </summary>
+    private static readonly string[] PersistentVirtualHeadsetHints =
+    [
+        "oculus virtual audio",
+        "meta virtual audio",
+        "headphones (oculus virtual audio"
+    ];
+
     public IReadOnlyList<AudioDeviceInfo> ListDevices(AudioDeviceKind kind)
     {
         using var enumerator = new MMDeviceEnumerator();
@@ -79,28 +90,65 @@ public sealed class AudioDeviceService
     public bool LooksLikeHeadset(AudioDeviceInfo device) =>
         HeadsetNameHints.Any(hint => device.Name.Contains(hint, StringComparison.OrdinalIgnoreCase));
 
+    public bool IsPersistentVirtualHeadsetDriver(AudioDeviceInfo device) =>
+        PersistentVirtualHeadsetHints.Any(hint => device.Name.Contains(hint, StringComparison.OrdinalIgnoreCase));
+
     /// <summary>
-    /// True while Air Link / USB Link audio endpoints are present.
-    /// This is more accurate than watching OVRService, which often stays running after Link ends.
+    /// True when Link / headset audio should be treated as the active session for auto-switch.
+    /// Persistent Meta/Oculus virtual drivers stay in the device list forever — those only count
+    /// when Windows is actually using them as the default multimedia output (Meta sets that when
+    /// you enter Link). Removable headset endpoints still count by presence.
     /// </summary>
     public bool IsLinkAudioSessionActive(AudioSwitchSettings settings)
     {
         var playback = ListDevices(AudioDeviceKind.Playback);
         if (!string.IsNullOrWhiteSpace(settings.VrPlaybackDeviceId))
         {
-            return playback.Any(device => device.Id.Equals(settings.VrPlaybackDeviceId, StringComparison.OrdinalIgnoreCase));
+            var configured = playback.FirstOrDefault(device =>
+                device.Id.Equals(settings.VrPlaybackDeviceId, StringComparison.OrdinalIgnoreCase));
+            if (configured is null)
+            {
+                return false;
+            }
+
+            return IsPersistentVirtualHeadsetDriver(configured)
+                ? configured.IsDefaultMultimedia
+                : true;
         }
 
-        return playback.Any(LooksLikeHeadset);
+        var headsets = playback.Where(LooksLikeHeadset).ToList();
+        if (headsets.Count == 0)
+        {
+            return false;
+        }
+
+        // Removable / non-virtual headset endpoints appearing still mean "session".
+        if (headsets.Any(device => !IsPersistentVirtualHeadsetDriver(device)))
+        {
+            return true;
+        }
+
+        // Only always-present Meta/Oculus virtual drivers: require Windows default output.
+        return headsets.Any(device => device.IsDefaultMultimedia);
+    }
+
+    public bool IsCurrentPlaybackHeadset()
+    {
+        var current = GetDefault(AudioDeviceKind.Playback);
+        return current is not null && LooksLikeHeadset(current);
     }
 
     public string DescribeLinkAudioState(AudioSwitchSettings settings)
     {
         var active = IsLinkAudioSessionActive(settings);
         var playbackDefault = GetDefault(AudioDeviceKind.Playback)?.Name ?? "none";
+        var virtualPresent = ListDevices(AudioDeviceKind.Playback).Any(IsPersistentVirtualHeadsetDriver);
+        var note = virtualPresent
+            ? " Oculus/Meta virtual audio is installed (always listed — not the same as Link being on)."
+            : string.Empty;
         return active
-            ? $"Link audio active. Default playback: {playbackDefault}"
-            : $"Link audio inactive. Default playback: {playbackDefault}";
+            ? $"Link audio active (default output is headset). Default playback: {playbackDefault}.{note}"
+            : $"Link audio inactive. Default playback: {playbackDefault}.{note}";
     }
 
     public string SetDefault(string deviceId, bool includeCommunications)

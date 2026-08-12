@@ -11,12 +11,12 @@ public partial class AudioSettingsWindow : Window
         InitializeComponent();
         TriggerBox.Items.Add(new ComboBoxItem
         {
-            Content = "Headset audio device (recommended for Air Link / USB Link)",
+            Content = "Headset is Windows default output (recommended — Oculus virtual audio stays installed even when offline)",
             Tag = AudioSwitchTrigger.LinkAudioDevice
         });
         TriggerBox.Items.Add(new ComboBoxItem
         {
-            Content = "Oculus service running (legacy)",
+            Content = "Oculus service running (legacy — often wrong after Link ends)",
             Tag = AudioSwitchTrigger.OculusService
         });
         ReloadDevices();

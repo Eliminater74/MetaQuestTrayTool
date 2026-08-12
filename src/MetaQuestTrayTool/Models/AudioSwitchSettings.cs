@@ -3,8 +3,9 @@ namespace MetaQuestTrayTool.Models;
 public enum AudioSwitchTrigger
 {
     /// <summary>
-    /// Switch when the VR headset audio endpoint becomes active (Air Link / USB Link),
-    /// and restore when that endpoint disappears.
+    /// Switch when Windows default playback becomes the VR headset (Meta does this when Link
+    /// starts). Presence of "Oculus Virtual Audio Device" alone is not enough — that endpoint
+    /// stays installed when the headset is offline.
     /// </summary>
     LinkAudioDevice = 0,
 
