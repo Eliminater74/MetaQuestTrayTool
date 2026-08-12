@@ -13,6 +13,7 @@ public static class HotKeyCatalog
         HotKeyAction.SuperSamplingCycle => "Cycle super sampling",
         HotKeyAction.TogglePerfHud => "Toggle Performance HUD",
         HotKeyAction.VoicePushToTalk => "Voice push-to-talk (listen once)",
+        HotKeyAction.OpenMetaLink => "Open Meta Horizon Link",
         _ => action.ToString()
     };
 
@@ -43,5 +44,8 @@ public static class HotKeyCatalog
         };
     }
 
-    public static IReadOnlyList<HotKeyAction> AllActions { get; } = Enum.GetValues<HotKeyAction>().ToList();
+    public static IReadOnlyList<HotKeyAction> AllActions { get; } =
+        Enum.GetValues<HotKeyAction>()
+            .Where(action => action != HotKeyAction.VoicePushToTalk)
+            .ToList();
 }

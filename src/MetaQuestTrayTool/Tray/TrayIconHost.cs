@@ -153,6 +153,12 @@ public sealed class TrayIconHost : IDisposable
         };
 
         menu.Items.Add(new ToolStripMenuItem("Open Settings", null, (_, _) => ShowShell()));
+        menu.Items.Add(new ToolStripMenuItem("Open Meta Horizon Link", null, (_, _) =>
+        {
+            var summary = _app.Oculus.ShowMetaHorizonLink();
+            _app.Log.Info(summary);
+            Notify("Meta Horizon Link", summary);
+        }));
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");

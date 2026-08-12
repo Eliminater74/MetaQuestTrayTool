@@ -132,6 +132,17 @@ public sealed class SettingsService
         {
             Current.HotKeys.Bindings = HotKeySettings.CreateDefaultBindings();
         }
+        else if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.OpenMetaLink))
+        {
+            Current.HotKeys.Bindings.Add(new HotKeyBinding
+            {
+                Id = 0,
+                Action = HotKeyAction.OpenMetaLink,
+                Modifiers = HotKeyModifiers.Control,
+                Key = "NumPad9"
+            });
+            Current.HotKeys.EnsureBindingIds();
+        }
 
         if (Current.Tray.EnableHotKeys && !Current.HotKeys.Enabled)
         {

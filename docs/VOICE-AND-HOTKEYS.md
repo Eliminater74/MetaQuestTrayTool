@@ -22,6 +22,7 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 6 | Apply global defaults |
 | Ctrl+Num 7 | Restart OVRService |
 | Ctrl+Num 8 | Toggle Performance HUD |
+| Ctrl+Num 9 | Open Meta Horizon Link |
 
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 
@@ -61,6 +62,7 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | cycle A S W | Cycle ASW |
 | cycle supersampling / cycle super sampling | Cycle super sampling |
 | toggle H U D / performance H U D | Toggle Performance HUD |
+| open meta link / show meta link / open oculus client | Open Meta Horizon Link |
 
 Spell out **A S W** and **H U D** — Windows recognition handles that better than “ASW” as one word.
 

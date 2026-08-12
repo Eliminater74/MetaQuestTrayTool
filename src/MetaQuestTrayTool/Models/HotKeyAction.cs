@@ -10,5 +10,6 @@ public enum HotKeyAction
     AswCycle,
     SuperSamplingCycle,
     TogglePerfHud,
-    VoicePushToTalk
+    VoicePushToTalk,
+    OpenMetaLink
 }

@@ -61,6 +61,20 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
     private void Stop_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Stop);
     private void Restart_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Restart);
 
+    private void OpenMetaLink_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.Oculus.ShowMetaHorizonLink();
+        if (summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase))
+        {
+            App.Instance.Log.Warn(summary);
+        }
+        else
+        {
+            App.Instance.Log.Info(summary);
+        }
+    }
+
     private void Persist_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading || !IsLoaded)
@@ -115,50 +129,53 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
 
     public static void TryLaunchHome()
     {
-        App.Instance.Oculus.Refresh();
-        var install = App.Instance.Oculus.InstallPath;
-        if (string.IsNullOrWhiteSpace(install))
+        var summary = App.Instance.Oculus.ShowMetaHorizonLink();
+        if (summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase))
         {
-            App.Instance.Log.Warn("Cannot launch Oculus Home — install path unknown.");
-            return;
+            App.Instance.Log.Warn(summary);
         }
-
-        var client = Path.Combine(install, "Support", "oculus-client", "OculusClient.exe");
-        if (!File.Exists(client))
+        else
         {
-            client = Path.Combine(install, "OculusClient.exe");
+            App.Instance.Log.Info(summary);
         }
-
-        if (!File.Exists(client))
-        {
-            App.Instance.Log.Warn("OculusClient.exe was not found.");
-            return;
-        }
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = client,
-            UseShellExecute = true
-        });
-        App.Instance.Log.Info("Launched Oculus Home / client.");
     }
 
     public static void TryCloseHome()
     {
-        foreach (var name in new[] { "OculusClient", "OculusDash", "ovrserver_x64" })
+        var clientPath = App.Instance.Oculus.ResolveClientExePath();
+        foreach (var name in new[] { "Client", "OculusClient", "OculusDash" })
         {
-            // Only close the client UI, not the runtime server.
-            if (name is "ovrserver_x64")
-            {
-                continue;
-            }
-
             foreach (var process in Process.GetProcessesByName(name))
             {
                 try
                 {
-                    process.CloseMainWindow();
-                    App.Instance.Log.Info($"Requested close for {name}.");
+                    using (process)
+                    {
+                        if (name.Equals("Client", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string? path = null;
+                            try
+                            {
+                                path = process.MainModule?.FileName;
+                            }
+                            catch
+                            {
+                                continue;
+                            }
+
+                            if (path is null
+                                || (clientPath is not null
+                                    && !string.Equals(path, clientPath, StringComparison.OrdinalIgnoreCase)
+                                    && !path.Contains("oculus-client", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                continue;
+                            }
+                        }
+
+                        process.CloseMainWindow();
+                        App.Instance.Log.Info($"Requested close for {name}.");
+                    }
                 }
                 catch
                 {

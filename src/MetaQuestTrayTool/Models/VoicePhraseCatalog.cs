@@ -26,7 +26,11 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "cycle supersampling", Action = HotKeyAction.SuperSamplingCycle },
         new VoicePhrase { Phrase = "cycle super sampling", Action = HotKeyAction.SuperSamplingCycle },
         new VoicePhrase { Phrase = "toggle H U D", Action = HotKeyAction.TogglePerfHud },
-        new VoicePhrase { Phrase = "performance H U D", Action = HotKeyAction.TogglePerfHud }
+        new VoicePhrase { Phrase = "performance H U D", Action = HotKeyAction.TogglePerfHud },
+        new VoicePhrase { Phrase = "open meta link", Action = HotKeyAction.OpenMetaLink },
+        new VoicePhrase { Phrase = "open meta horizon link", Action = HotKeyAction.OpenMetaLink },
+        new VoicePhrase { Phrase = "show meta link", Action = HotKeyAction.OpenMetaLink },
+        new VoicePhrase { Phrase = "open oculus client", Action = HotKeyAction.OpenMetaLink }
     ];
 
     public static bool TryMatch(string recognizedText, out HotKeyAction action)

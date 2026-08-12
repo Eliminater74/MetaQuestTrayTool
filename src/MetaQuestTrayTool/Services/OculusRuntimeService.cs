@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using Microsoft.Win32;
 
@@ -7,6 +9,7 @@ namespace MetaQuestTrayTool.Services;
 public sealed class OculusRuntimeService
 {
     public const string ServiceName = "OVRService";
+    private const int SwRestore = 9;
 
     public bool IsInstalled { get; private set; }
     public string? InstallPath { get; private set; }
@@ -17,7 +20,7 @@ public sealed class OculusRuntimeService
     public string? DebugToolCliPath =>
         string.IsNullOrWhiteSpace(InstallPath)
             ? null
-            : System.IO.Path.Combine(InstallPath, "Support", "oculus-diagnostics", "OculusDebugToolCLI.exe");
+            : Path.Combine(InstallPath, "Support", "oculus-diagnostics", "OculusDebugToolCLI.exe");
 
     public void Refresh()
     {
@@ -65,6 +68,114 @@ public sealed class OculusRuntimeService
         }
 
         return Start();
+    }
+
+    /// <summary>
+    /// Opens Meta Horizon Link (oculus-client). If it is already in the tray, starting
+    /// Client.exe again normally restores the full window.
+    /// </summary>
+    public string ShowMetaHorizonLink()
+    {
+        Refresh();
+        var clientPath = ResolveClientExePath();
+        if (clientPath is null)
+        {
+            return "Meta Horizon Link client was not found (expected Support\\oculus-client\\Client.exe).";
+        }
+
+        if (TryActivateExistingClient(clientPath))
+        {
+            return "Brought Meta Horizon Link to the foreground.";
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = clientPath,
+                WorkingDirectory = Path.GetDirectoryName(clientPath) ?? InstallPath ?? Environment.CurrentDirectory,
+                UseShellExecute = true
+            });
+            return $"Opened Meta Horizon Link ({Path.GetFileName(clientPath)}).";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not open Meta Horizon Link: {ex.Message}";
+        }
+    }
+
+    public string? ResolveClientExePath()
+    {
+        if (string.IsNullOrWhiteSpace(InstallPath))
+        {
+            return null;
+        }
+
+        string[] candidates =
+        [
+            Path.Combine(InstallPath, "Support", "oculus-client", "Client.exe"),
+            Path.Combine(InstallPath, "Support", "oculus-client", "OculusClient.exe"),
+            Path.Combine(InstallPath, "OculusClient.exe"),
+            Path.Combine(InstallPath, "Client.exe")
+        ];
+
+        return candidates.FirstOrDefault(File.Exists);
+    }
+
+    private static bool TryActivateExistingClient(string clientPath)
+    {
+        foreach (var process in Process.GetProcesses())
+        {
+            try
+            {
+                using (process)
+                {
+                    string? path = null;
+                    try
+                    {
+                        path = process.MainModule?.FileName;
+                    }
+                    catch
+                    {
+                        // Access denied for some processes — fall back to name check below.
+                    }
+
+                    var isExactPath = path is not null
+                                      && string.Equals(path, clientPath, StringComparison.OrdinalIgnoreCase);
+                    if (!isExactPath)
+                    {
+                        var name = process.ProcessName;
+                        if (!name.Equals("Client", StringComparison.OrdinalIgnoreCase)
+                            && !name.Equals("OculusClient", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        // "Client" is common — only trust if path matches oculus-client.
+                        if (path is null || !path.Contains("oculus-client", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+                    }
+
+                    var hwnd = process.MainWindowHandle;
+                    if (hwnd == IntPtr.Zero)
+                    {
+                        return false;
+                    }
+
+                    ShowWindow(hwnd, SwRestore);
+                    SetForegroundWindow(hwnd);
+                    return true;
+                }
+            }
+            catch
+            {
+                // Ignore processes we cannot inspect.
+            }
+        }
+
+        return false;
     }
 
     private string ChangeState(bool start)
@@ -137,4 +248,10 @@ public sealed class OculusRuntimeService
         var defaultPath = @"C:\Program Files\Oculus";
         return Directory.Exists(defaultPath) ? defaultPath : null;
     }
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
 }

@@ -22,6 +22,7 @@
         <Button x:Name="StartButton" Content="Start" Style="{StaticResource GhostButtonStyle}" Click="Start_Click"/>
         <Button x:Name="StopButton" Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"/>
         <Button x:Name="RestartButton" Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"/>
+        <Button Content="Open Meta Horizon Link" Style="{StaticResource AccentButtonStyle}" Click="OpenMetaLink_Click"/>
       </StackPanel>
       <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,16" FontWeight="SemiBold"/>
 
@@ -33,7 +34,7 @@
       <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
       <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
-                 Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Home launch uses OculusClient.exe when present."/>
+                 Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe (or OculusClient.exe)."/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

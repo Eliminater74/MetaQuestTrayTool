@@ -27,6 +27,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.SuperSamplingCycle => CycleSuperSampling(),
             HotKeyAction.TogglePerfHud => TogglePerfHud(),
             HotKeyAction.VoicePushToTalk => ExecuteVoicePushToTalk(),
+            HotKeyAction.OpenMetaLink => _app.Oculus.ShowMetaHorizonLink(),
             _ => $"Unknown hotkey action: {action}"
         };
     }
