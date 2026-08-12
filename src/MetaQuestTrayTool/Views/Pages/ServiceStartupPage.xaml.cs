@@ -29,6 +29,12 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         LaunchHomeOnServiceBox.IsChecked = service.LaunchOculusHomeOnServiceStart;
         LaunchHomeOnToolBox.IsChecked = service.LaunchOculusHomeOnToolStart;
         CloseHomeOnExitBox.IsChecked = service.CloseOculusHomeOnToolExit;
+        var dash = App.Instance.Settings.Current.DashToSteamVr;
+        DashAutoBox.IsChecked = dash.AutoOnMetaLinkConnect;
+        DashOpenXrBox.IsChecked = dash.SwitchOpenXrToSteamVr;
+        DashReaperBox.IsChecked = dash.KeepKillingDashWhileSteamVr;
+        DashCloseClientBox.IsChecked = dash.CloseMetaClient;
+        DashPathText.Text = App.Instance.DashToSteamVr.DescribeSteamVrPaths();
         ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
         UpdateServiceButtons();
         _loading = false;
@@ -72,6 +78,32 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         {
             App.Instance.Log.Info(summary);
         }
+    }
+
+    private void DashToSteamVr_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.DashToSteamVr.RunNow("Service & Startup button");
+        System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            summary,
+            App.AppName,
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+
+    private void PersistDash_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        var dash = App.Instance.Settings.Current.DashToSteamVr;
+        dash.AutoOnMetaLinkConnect = DashAutoBox.IsChecked == true;
+        dash.SwitchOpenXrToSteamVr = DashOpenXrBox.IsChecked == true;
+        dash.KeepKillingDashWhileSteamVr = DashReaperBox.IsChecked == true;
+        dash.CloseMetaClient = DashCloseClientBox.IsChecked == true;
+        App.Instance.Settings.Save();
     }
 
     private void Persist_Changed(object sender, RoutedEventArgs e)

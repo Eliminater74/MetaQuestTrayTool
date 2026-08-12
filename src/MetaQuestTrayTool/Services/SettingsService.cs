@@ -126,21 +126,37 @@ public sealed class SettingsService
         Current.DefaultGameSettings ??= new GameSettings();
         Current.LinkSettings ??= new LinkSettings();
         Current.OpenXr ??= new OpenXrSettings();
+        Current.DashToSteamVr ??= new DashToSteamVrSettings();
         Current.HotKeys ??= new HotKeySettings();
         Current.Voice ??= new VoiceSettings();
         if (Current.HotKeys.Bindings.Count == 0)
         {
             Current.HotKeys.Bindings = HotKeySettings.CreateDefaultBindings();
         }
-        else if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.OpenMetaLink))
+        else
         {
-            Current.HotKeys.Bindings.Add(new HotKeyBinding
+            if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.OpenMetaLink))
             {
-                Id = 0,
-                Action = HotKeyAction.OpenMetaLink,
-                Modifiers = HotKeyModifiers.Control,
-                Key = "NumPad9"
-            });
+                Current.HotKeys.Bindings.Add(new HotKeyBinding
+                {
+                    Id = 0,
+                    Action = HotKeyAction.OpenMetaLink,
+                    Modifiers = HotKeyModifiers.Control,
+                    Key = "NumPad9"
+                });
+            }
+
+            if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.DashToSteamVr))
+            {
+                Current.HotKeys.Bindings.Add(new HotKeyBinding
+                {
+                    Id = 0,
+                    Action = HotKeyAction.DashToSteamVr,
+                    Modifiers = HotKeyModifiers.Control,
+                    Key = "NumPad0"
+                });
+            }
+
             Current.HotKeys.EnsureBindingIds();
         }
 

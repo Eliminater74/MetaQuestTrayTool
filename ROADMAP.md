@@ -116,6 +116,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
 - [ ] Voice polish (custom phrases, always-on tuning, mic picker)
 - [ ] Oculus Homeless
+- [x] Dash → SteamVR (kill Dash + launch SteamVR over Meta Link; hotkey/voice/auto)
 
 ### Post v1.0.0 (v1.0.1)
 

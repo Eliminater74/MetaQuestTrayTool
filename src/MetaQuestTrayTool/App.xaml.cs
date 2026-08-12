@@ -21,6 +21,7 @@ public partial class App : System.Windows.Application
     private UpdateWatchService? _updateWatcher;
     private SteamLinkAssistService? _steamLinkAssist;
     private LinkSessionWatchService? _linkSessionWatcher;
+    private DashToSteamVrService? _dashToSteamVr;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -43,6 +44,7 @@ public partial class App : System.Windows.Application
     public UpdateService Updates { get; }
     public LinkConnectionProbeService LinkConnection { get; }
     public SteamLinkAssistService SteamLinkAssist { get; }
+    public DashToSteamVrService DashToSteamVr { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -61,6 +63,7 @@ public partial class App : System.Windows.Application
         Updates = new UpdateService(this);
         LinkConnection = new LinkConnectionProbeService(this);
         SteamLinkAssist = new SteamLinkAssistService(this);
+        DashToSteamVr = new DashToSteamVrService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -183,6 +186,9 @@ public partial class App : System.Windows.Application
         _linkSessionWatcher = new LinkSessionWatchService(this);
         _linkSessionWatcher.Start();
 
+        _dashToSteamVr = DashToSteamVr;
+        _dashToSteamVr.Start();
+
         if (Settings.Current.Tray.CheckForUpdatesOnStart)
         {
             _ = CheckForUpdatesOnStartAsync();
@@ -223,6 +229,7 @@ public partial class App : System.Windows.Application
             Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
         }
 
+        _dashToSteamVr?.Dispose();
         _linkSessionWatcher?.Dispose();
         _steamLinkAssist?.Dispose();
         _updateWatcher?.Dispose();

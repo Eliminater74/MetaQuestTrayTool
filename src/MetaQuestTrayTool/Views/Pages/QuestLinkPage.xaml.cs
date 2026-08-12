@@ -132,6 +132,12 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         App.Instance.Log.Info($"Quest Link preset loaded into fields: {preset.Name}.");
     }
 
+    private void DashToSteamVr_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.DashToSteamVr.RunNow("Quest Link page");
+        LiveStatusText.Text = summary;
+    }
+
     private void ApplyPresetSave_Click(object sender, RoutedEventArgs e)
     {
         if (PresetBox.SelectedItem is not ComboBoxItem { Tag: LinkPreset preset })

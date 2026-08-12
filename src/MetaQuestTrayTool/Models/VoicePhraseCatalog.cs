@@ -30,7 +30,11 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "open meta link", Action = HotKeyAction.OpenMetaLink },
         new VoicePhrase { Phrase = "open meta horizon link", Action = HotKeyAction.OpenMetaLink },
         new VoicePhrase { Phrase = "show meta link", Action = HotKeyAction.OpenMetaLink },
-        new VoicePhrase { Phrase = "open oculus client", Action = HotKeyAction.OpenMetaLink }
+        new VoicePhrase { Phrase = "open oculus client", Action = HotKeyAction.OpenMetaLink },
+        new VoicePhrase { Phrase = "kill dash", Action = HotKeyAction.DashToSteamVr },
+        new VoicePhrase { Phrase = "start steam v r", Action = HotKeyAction.DashToSteamVr },
+        new VoicePhrase { Phrase = "dash to steam v r", Action = HotKeyAction.DashToSteamVr },
+        new VoicePhrase { Phrase = "steam v r from link", Action = HotKeyAction.DashToSteamVr }
     ];
 
     public static bool TryMatch(string recognizedText, out HotKeyAction action)

@@ -159,6 +159,11 @@ public sealed class TrayIconHost : IDisposable
             _app.Log.Info(summary);
             Notify("Meta Horizon Link", summary);
         }));
+        menu.Items.Add(new ToolStripMenuItem("Kill Dash → SteamVR", null, (_, _) =>
+        {
+            var summary = _app.DashToSteamVr.RunNow("tray menu");
+            Notify("Dash → SteamVR", summary);
+        }));
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");

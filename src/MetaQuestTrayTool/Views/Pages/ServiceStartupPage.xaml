@@ -23,6 +23,7 @@
         <Button x:Name="StopButton" Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"/>
         <Button x:Name="RestartButton" Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"/>
         <Button Content="Open Meta Horizon Link" Style="{StaticResource AccentButtonStyle}" Click="OpenMetaLink_Click"/>
+        <Button Content="Kill Dash → SteamVR" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"/>
       </StackPanel>
       <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,16" FontWeight="SemiBold"/>
 
@@ -32,6 +33,19 @@
       <CheckBox x:Name="LaunchHomeOnServiceBox" Content="Launch Oculus Home on service start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="LaunchHomeOnToolBox" Content="Launch Oculus Home on tool start" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+
+      <TextBlock Text="Air Link → SteamVR (Dash killer)" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,8"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Connect with Meta Air Link / Link first, then kill Oculus Dash and launch SteamVR so SteamVR games (e.g. MSFS) run over Link. Inspired by OculusKiller — does not replace OculusDash.exe on disk. Hotkey: Ctrl+Num 0. Voice: “kill dash” / “dash to steam v r”."/>
+      <CheckBox x:Name="DashAutoBox" Content="Auto: when Meta Link connects, kill Dash and start SteamVR"
+                Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
+      <CheckBox x:Name="DashOpenXrBox" Content="Also switch OpenXR to SteamVR when running Dash → SteamVR"
+                Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
+      <CheckBox x:Name="DashReaperBox" Content="Keep killing Dash while SteamVR is running (Meta often respawns it)"
+                Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
+      <CheckBox x:Name="DashCloseClientBox" Content="Also close Meta Horizon Link client window"
+                Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
+      <TextBlock x:Name="DashPathText" Margin="0,8,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
                  Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe (or OculusClient.exe)."/>

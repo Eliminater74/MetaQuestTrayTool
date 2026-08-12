@@ -9,6 +9,13 @@
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
+      <TextBlock Text="Air Link → SteamVR" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="After Meta Link / Air Link connects, kill Oculus Dash and start SteamVR so Steam games run over Link. Options live on Service &amp; Startup."/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <Button Content="Kill Dash → SteamVR" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"/>
+      </StackPanel>
+
       <TextBlock Text="Global Link presets" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Pick a preset to fill the fields below, then Save (or Save &amp; Restart Service) to write the registry. Does not change game SS/ASW profiles."/>

@@ -22,7 +22,8 @@ public sealed class HotKeySettings
         new HotKeyBinding { Id = 6, Action = HotKeyAction.ApplyGlobal, Modifiers = HotKeyModifiers.Control, Key = "NumPad6" },
         new HotKeyBinding { Id = 7, Action = HotKeyAction.RestartOvrService, Modifiers = HotKeyModifiers.Control, Key = "NumPad7" },
         new HotKeyBinding { Id = 8, Action = HotKeyAction.TogglePerfHud, Modifiers = HotKeyModifiers.Control, Key = "NumPad8" },
-        new HotKeyBinding { Id = 9, Action = HotKeyAction.OpenMetaLink, Modifiers = HotKeyModifiers.Control, Key = "NumPad9" }
+        new HotKeyBinding { Id = 9, Action = HotKeyAction.OpenMetaLink, Modifiers = HotKeyModifiers.Control, Key = "NumPad9" },
+        new HotKeyBinding { Id = 10, Action = HotKeyAction.DashToSteamVr, Modifiers = HotKeyModifiers.Control, Key = "NumPad0" }
     ];
 
     public void EnsureBindingIds()

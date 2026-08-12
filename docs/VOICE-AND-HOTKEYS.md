@@ -23,6 +23,7 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 7 | Restart OVRService |
 | Ctrl+Num 8 | Toggle Performance HUD |
 | Ctrl+Num 9 | Open Meta Horizon Link |
+| Ctrl+Num 0 | Kill Dash → start SteamVR |
 
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 
@@ -63,8 +64,9 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | cycle supersampling / cycle super sampling | Cycle super sampling |
 | toggle H U D / performance H U D | Toggle Performance HUD |
 | open meta link / show meta link / open oculus client | Open Meta Horizon Link |
+| kill dash / dash to steam v r / start steam v r | Kill Dash → start SteamVR |
 
-Spell out **A S W** and **H U D** — Windows recognition handles that better than “ASW” as one word.
+Spell out **A S W**, **H U D**, and **steam v r** — Windows recognition handles that better than “ASW” / “SteamVR” as one word.
 
 Use **Test listen once** in Configure to try without leaving the window.
 
@@ -81,7 +83,8 @@ Use **Test listen once** in Configure to try without leaving the window.
 
 - Custom voice phrases / editable grammar
 - Microphone device picker
-- Oculus Homeless
 - Hotkey profiles per game (global only today)
+
+**Dash → SteamVR** (kill OculusDash + launch SteamVR over Air Link) is available on Service & Startup / Quest Link / tray / hotkey / voice — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller). It does not permanently replace `OculusDash.exe` (use OculusKiller / Dash Manager for that install style).
 
 See [ROADMAP.md](../ROADMAP.md).

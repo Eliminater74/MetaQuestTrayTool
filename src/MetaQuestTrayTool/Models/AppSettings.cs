@@ -31,6 +31,7 @@ public sealed class AppSettings
     public GameSettings DefaultGameSettings { get; set; } = new();
     public LinkSettings LinkSettings { get; set; } = new();
     public OpenXrSettings OpenXr { get; set; } = new();
+    public DashToSteamVrSettings DashToSteamVr { get; set; } = new();
     public AudioSwitchSettings Audio { get; set; } = new() { AutoSwitchEnabled = true };
     public PowerSettings Power { get; set; } = new();
     public HeadsetSettings Headset { get; set; } = new();

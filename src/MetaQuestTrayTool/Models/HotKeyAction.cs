@@ -11,5 +11,6 @@ public enum HotKeyAction
     SuperSamplingCycle,
     TogglePerfHud,
     VoicePushToTalk,
-    OpenMetaLink
+    OpenMetaLink,
+    DashToSteamVr
 }

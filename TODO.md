@@ -150,6 +150,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tag and publish **v1.0.5**
 - [x] Prefer SteamVR over Meta Wi‑Fi auto-connect DeviceCache
 - [x] Tag and publish **v1.0.6**
+- [x] Dash → SteamVR (kill Dash + launch SteamVR; hotkey/voice/auto)
 
 ## Housekeeping
 
