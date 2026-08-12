@@ -38,11 +38,12 @@ Tray + dashboard push pixel density and ASW through `OculusDebugToolCLI.exe`.
 Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 
 - [x] Bitrate, encode resolution width, HEVC preference, sliced-encoding off
+- [x] Distortion curve, dynamic bitrate (DBR / DBR max / offset), Mobile ASW mode
 - [x] Tray submenu + Link settings window + dashboard status
 - [x] Store preferred Link settings separately from game profiles
 - [x] Optional apply on app start
+- [x] ODT registry reference ([docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md))
 - [ ] Detect wired Link vs Air Link when possible
-- [ ] Dynamic bitrate max UI (Meta exposes related keys; needs more runtime verification)
 
 ## Next
 
@@ -113,16 +114,25 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Expanded settings model for FOV H/V, Link sharpening, power triggers
 - [x] Hotkeys configure UI + global RegisterHotKey bindings
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
-- [ ] Voice / Homeless polish (custom phrases, always-on tuning, mic picker)
+- [ ] Voice polish (custom phrases, always-on tuning, mic picker)
+- [ ] Oculus Homeless
+
+### Post v1.0.0 (on main, v1.0.1 release TBD)
+
+- [x] ODT registry map + expanded RemoteHeadset writes
+- [x] Global hotkeys (HotKeyCommandService + configure UI)
+- [x] Voice command preview (System.Speech + PTT)
+- [x] Service & Startup Start/Stop button state
+- [ ] README screenshots
+- [ ] Tag **v1.0.1** and publish updated Setup.exe
 
 ## Later
 
-- Optional voice commands — core shipped; custom phrases / mic picker later
+- Voice polish — custom phrases, mic picker, always-on tuning
 - Wireless ADB pairing UI (USB ADB headset page is in v0.8)
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - Profile ignore-list
 - Detect wired Link vs Air Link
-- Dynamic bitrate max registry write (UI exists; needs verification)
 - Separate communications audio device pickers in the UI
 - Launch games directly from the library picker
 - In-app update checks

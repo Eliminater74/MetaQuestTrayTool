@@ -69,8 +69,13 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 - Settings export/import backup from Advanced
 
 **Quest Link / Air Link**
-- Bitrate, encode width, HEVC, sliced encoding, sharpening (`HKCU\Software\Oculus\RemoteHeadset`)
+- Bitrate, encode width, HEVC, sliced encoding, sharpening, distortion curve, DBR / DBR offset, Mobile ASW (`HKCU\Software\Oculus\RemoteHeadset`)
 - Per-profile Link overrides (inherit = keep global)
+
+**HotKeys + voice (preview)**
+- Global hotkeys (default Ctrl+Numpad 1–8): ASW, SS cycle, apply global, restart OVRService, perf HUD
+- Voice commands via Windows speech — push-to-talk (Ctrl+Shift+V default), optional always-on
+- See repo `docs/VOICE-AND-HOTKEYS.md` for the full list
 
 **OpenXR**
 - Switch ActiveRuntime between **Meta / Oculus** and **SteamVR** (global + per-profile)
@@ -98,8 +103,6 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 ### What does **not** work yet / known limits
 
 **Not implemented (planned or undecided)**
-- Hotkeys
-- Voice commands
 - Oculus Homeless / some classic OTT extras
 - Permanent AirLink
 - Wireless ADB pairing UI (USB ADB works)

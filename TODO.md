@@ -42,6 +42,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Link settings model (bitrate, encode resolution, dynamic bitrate)
 - [x] Apply / read Link-related settings
 - [x] Tray + dashboard UI
+- [x] Distortion curve, DBR / DBR max / DBR offset, Mobile ASW mode (ODT RemoteHeadset hive)
+- [x] Document ODT registry vs CLI ([docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md))
+- [ ] Detect wired Link vs Air Link when possible
 
 ## Phase 4 — audio
 
@@ -85,7 +88,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Wire existing services into the shell
 - [x] Tray left-click opens shell
 - [x] Hotkeys (global shortcuts + configure UI; default Ctrl+Numpad 1–8)
-- [ ] Legacy OTT extras (Homeless) — voice core added; custom phrases later
+- [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
+- [x] Service & Startup: Start/Stop accent follows live OVRService state
+- [ ] Legacy OTT extras (Homeless)
+- [ ] Voice polish (custom phrases, mic picker, always-on tuning)
 
 ## Phase 9 — headset ADB (v0.8)
 
@@ -116,6 +122,15 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Info page (OpenXR live, OVRService, headset identity)
 - [x] Visible Donate (sidebar, About, tray)
 - [x] Paste live donate URL into AppInfo.DonateUrl
+
+## Post v1.0.0 (main — pending v1.0.1 tag)
+
+- [x] ODT registry reference doc + full RemoteHeadset writes (distortion, DBR, Mobile ASW)
+- [x] Global hotkeys + HotKeysWindow configure UI
+- [x] Voice command core + VoiceCommandsWindow (preview)
+- [x] Service page Start/Stop button highlighting fix
+- [ ] Tag and publish **v1.0.1** release on GitHub
+- [ ] README screenshots
 
 ## Housekeeping
 

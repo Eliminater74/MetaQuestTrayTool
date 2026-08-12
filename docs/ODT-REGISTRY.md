@@ -115,3 +115,5 @@ Strings were harvested from:
 - `TEMP/oculus-diagnostics/OculusDebugToolCLI.exe` (CLI — `service` / `server:` commands)
 
 Implementation: `LinkSettingsService.cs`, `OculusDebugToolService.cs`.
+
+See also: [docs/README.md](README.md) · [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md)

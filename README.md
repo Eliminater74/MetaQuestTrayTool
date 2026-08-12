@@ -73,10 +73,20 @@ Export/import profiles and full settings from **Advanced**.
 - Apply or edit **profiles**
 - **Open Settings**, **Info**, **Donate**, **Exit**
 
-### 7. Tips
+### 7. HotKeys and voice (optional)
+
+On **Tray Tool**:
+
+- **HotKeys** — Enable → Configure. Global shortcuts (default **Ctrl+Numpad 1–8**) for ASW, super sampling, apply global, restart OVRService, Performance HUD. Works while the tray app is running, including in VR.
+- **Voice commands (preview)** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Uses Windows speech recognition.
+
+Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md).
+
+### 8. Tips
 
 - **Themes:** Pure Black (default), Dark, or Light — change on the **Tray Tool** page.
 - **Start minimized** and **minimize-on-close** keep the app in the tray instead of the taskbar.
+- **Service & Startup** highlights **Start** or **Stop** based on whether `OVRService` is running.
 - Newer Meta runtimes may reject some `server:` ASW commands; check **Log** if something does not apply.
 - Pixel density changes often need a **new VR session** to take effect.
 
@@ -90,7 +100,9 @@ Export/import profiles and full settings from **Advanced**.
 
 ---
 
-## What works now (v1.0.0)
+## What works now
+
+Release **[v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0)** is on GitHub. **main** adds hotkeys, voice preview, expanded Link registry writes, and service-page UI fixes (tag **v1.0.1** when those ship in a release).
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -107,7 +119,7 @@ Export/import profiles and full settings from **Advanced**.
 - Personal profiles can override **Link sharpening / bitrate / encode width** (inherit keeps global Quest Link settings; restored when the game exits)
 - **OpenXR runtime switch**: Meta / Oculus vs SteamVR via `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` — global preferred + per-game profile override (may prompt for Administrator)
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
-- **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening via `HKCU\Software\Oculus\RemoteHeadset`
+- **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening, distortion curve, dynamic bitrate (DBR / DBR max / offset), Mobile ASW mode via `HKCU\Software\Oculus\RemoteHeadset` — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
 - **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
@@ -117,14 +129,13 @@ Export/import profiles and full settings from **Advanced**.
 - **Backup**: export / import settings from Advanced
 - **Info** page: live OpenXR (Meta vs SteamVR), OVRService, and detailed headset identity
 - **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
+- **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
+- **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys
+- **Service & Startup**: Start/Stop button accent follows live `OVRService` state
 
-Not yet: Oculus Homeless, Permanent AirLink, in-app updates.
+Not yet: Oculus Homeless, Permanent AirLink, in-app updates, custom voice phrases / mic picker.
 
-**HotKeys:** Tray Tool → Enable HotKeys → Configure. Defaults use **Ctrl+Numpad 1–8** (ASW, SS cycle, apply global, restart service, perf HUD).
-
-**Voice commands (preview):** Tray Tool → Enable voice commands → Configure. Default push-to-talk **Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Uses Windows speech recognition.
-
-See [ROADMAP.md](ROADMAP.md) for remaining polish items.
+See [ROADMAP.md](ROADMAP.md) and [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) for details.
 
 ---
 
@@ -132,11 +143,13 @@ See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 
 | File | Use when you need to… |
 | --- | --- |
+| [docs/README.md](docs/README.md) | Index of all documentation |
+| [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry keys vs CLI commands (from Meta binaries) |
+| [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) | Hotkey shortcuts and voice phrase reference |
 | [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
 | [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
 | [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
 | [installer/README.md](installer/README.md) | Build the Windows Setup.exe locally |
-| [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry keys vs CLI commands (from Meta binaries) |
 
 ---
 
