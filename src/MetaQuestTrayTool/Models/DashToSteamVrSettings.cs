@@ -23,4 +23,13 @@ public sealed class DashToSteamVrSettings
     /// When enabled, the tray also auto-starts SteamVR on Meta Link connect (registry alone does not).
     /// </summary>
     public bool PreferPreventDashLaunch { get; set; }
+
+    /// <summary>
+    /// Optional: when enabling PreventDashLaunch, also set CoreChannel to NO_UPDATES
+    /// (OculusKiller precaution so Meta does not overwrite Dash/runtime tweaks). Off by default.
+    /// </summary>
+    public bool AlsoSetNoUpdatesWithPreventDash { get; set; }
+
+    /// <summary>Last CoreChannel before we switched to NO_UPDATES (so Stable / PublicTest can be restored).</summary>
+    public string? CoreChannelBeforeNoUpdates { get; set; }
 }

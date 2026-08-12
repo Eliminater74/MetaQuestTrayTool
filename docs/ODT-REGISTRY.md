@@ -77,8 +77,9 @@ When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the
 | Value | Type | Meaning |
 | --- | --- | --- |
 | `PreventDashLaunch` | DWORD `1` | Meta runtime should not start Oculus Dash |
+| `CoreChannel` | string | `LIVE` (stable), `PublicTest` (PC PTC/beta), or `NO_UPDATES` (block updates; not a beta) |
 
-Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller): this blocks Dash entirely but **does not** start SteamVR by itself. The tray’s **Service & Startup** page can write this key (needs Admin) and restart `OVRService`; while PreventDashLaunch is ON, the tray **auto-starts SteamVR** when Meta Link / Air Link connects (and on Apply if already linked).
+Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller): PreventDashLaunch blocks Dash entirely but **does not** start SteamVR by itself. The tray’s **Service & Startup** page can write these keys (needs Admin), restart `OVRService`, and while PreventDashLaunch is ON **auto-starts SteamVR** when Meta Link / Air Link connects. Setting `CoreChannel` is optional and never changes until you Apply; enabling PreventDashLaunch can optionally offer `NO_UPDATES` as a precaution.
 
 ---
 

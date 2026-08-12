@@ -36,11 +36,60 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         DashCloseClientBox.IsChecked = dash.CloseMetaClient;
         PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
                                    || dash.PreferPreventDashLaunch;
+        NoUpdatesWithDashBox.IsChecked = dash.AlsoSetNoUpdatesWithPreventDash;
+        LoadCoreChannelBox();
         DashPathText.Text = App.Instance.DashToSteamVr.DescribeSteamVrPaths();
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
+        CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
         ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
         UpdateServiceButtons();
         _loading = false;
+    }
+
+    private void LoadCoreChannelBox()
+    {
+        CoreChannelBox.Items.Clear();
+        var live = App.Instance.DashToSteamVr.ReadCoreChannel();
+        foreach (var channel in DashToSteamVrService.KnownCoreChannels)
+        {
+            CoreChannelBox.Items.Add(new ComboBoxItem
+            {
+                Content = channel switch
+                {
+                    "LIVE" => "LIVE — Stable",
+                    "PublicTest" => "PublicTest — Public Test Channel (beta)",
+                    "NO_UPDATES" => "NO_UPDATES — Block Meta updates",
+                    _ => channel
+                },
+                Tag = channel
+            });
+        }
+
+        if (!string.IsNullOrWhiteSpace(live)
+            && DashToSteamVrService.KnownCoreChannels.All(c =>
+                !string.Equals(c, live, StringComparison.OrdinalIgnoreCase)))
+        {
+            CoreChannelBox.Items.Add(new ComboBoxItem
+            {
+                Content = $"{live} — current (custom)",
+                Tag = live
+            });
+        }
+
+        for (var i = 0; i < CoreChannelBox.Items.Count; i++)
+        {
+            if (CoreChannelBox.Items[i] is ComboBoxItem { Tag: string tag }
+                && string.Equals(tag, live, StringComparison.OrdinalIgnoreCase))
+            {
+                CoreChannelBox.SelectedIndex = i;
+                return;
+            }
+        }
+
+        if (CoreChannelBox.Items.Count > 0)
+        {
+            CoreChannelBox.SelectedIndex = 0;
+        }
     }
 
     private void UpdateServiceButtons()
@@ -106,6 +155,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         dash.SwitchOpenXrToSteamVr = DashOpenXrBox.IsChecked == true;
         dash.KeepKillingDashWhileSteamVr = DashReaperBox.IsChecked == true;
         dash.CloseMetaClient = DashCloseClientBox.IsChecked == true;
+        dash.AlsoSetNoUpdatesWithPreventDash = NoUpdatesWithDashBox.IsChecked == true;
         App.Instance.Settings.Save();
     }
 
@@ -117,11 +167,37 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         }
 
         var enabled = PreventDashBox.IsChecked == true;
+        if (enabled
+            && NoUpdatesWithDashBox.IsChecked != true
+            && !string.Equals(
+                App.Instance.DashToSteamVr.ReadCoreChannel(),
+                "NO_UPDATES",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            var ask = System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                "Also set CoreChannel to NO_UPDATES while PreventDashLaunch is on?\n\n"
+                + "Optional precaution (from OculusKiller): Meta won’t push PC client/runtime updates that can undo Dash tweaks.\n"
+                + "Your current channel is remembered so you can restore Stable / PublicTest later.\n\n"
+                + "Yes = set NO_UPDATES now\nNo = keep your current channel ("
+                + (App.Instance.DashToSteamVr.ReadCoreChannel() ?? "unknown") + ")",
+                App.AppName,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (ask == MessageBoxResult.Yes)
+            {
+                NoUpdatesWithDashBox.IsChecked = true;
+                App.Instance.Settings.Current.DashToSteamVr.AlsoSetNoUpdatesWithPreventDash = true;
+            }
+        }
+
         App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch = enabled;
         App.Instance.Settings.Save();
         // Write registry immediately (without service restart); user can click Apply for restart.
         var summary = App.Instance.DashToSteamVr.SetPreventDashLaunch(enabled, restartOvrService: false);
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch() + " " + summary;
+        CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
+        LoadCoreChannelBox();
     }
 
     private void ApplyPreventDash_Click(object sender, RoutedEventArgs e)
@@ -129,6 +205,43 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         var enabled = PreventDashBox.IsChecked == true;
         var summary = App.Instance.DashToSteamVr.SetPreventDashLaunch(enabled, restartOvrService: true);
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
+        CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
+        LoadCoreChannelBox();
+        ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+        UpdateServiceButtons();
+        System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            summary,
+            App.AppName,
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+
+    private void ApplyCoreChannel_Click(object sender, RoutedEventArgs e)
+    {
+        if (CoreChannelBox.SelectedItem is not ComboBoxItem { Tag: string channel })
+        {
+            return;
+        }
+
+        var summary = App.Instance.DashToSteamVr.SetCoreChannel(channel, restartOvrService: true);
+        CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
+        LoadCoreChannelBox();
+        ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+        UpdateServiceButtons();
+        System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            summary,
+            App.AppName,
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+
+    private void RestoreCoreChannel_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.DashToSteamVr.RestoreCoreChannelBeforeNoUpdates(restartOvrService: true);
+        CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
+        LoadCoreChannelBox();
         ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
         UpdateServiceButtons();
         System.Windows.MessageBox.Show(

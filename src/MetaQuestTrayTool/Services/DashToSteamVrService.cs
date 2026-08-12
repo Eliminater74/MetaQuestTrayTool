@@ -20,11 +20,20 @@ namespace MetaQuestTrayTool.Services;
 public sealed class DashToSteamVrService : IDisposable
 {
     public const string PreventDashLaunchValueName = "PreventDashLaunch";
+    public const string CoreChannelValueName = "CoreChannel";
 
     public static readonly string[] PreventDashLaunchKeyPaths =
     [
         @"SOFTWARE\WOW6432Node\Oculus VR, LLC\Oculus\Config",
         @"SOFTWARE\Oculus VR, LLC\Oculus\Config"
+    ];
+
+    /// <summary>Known Meta Quest Link PC client channels (CoreChannel).</summary>
+    public static readonly string[] KnownCoreChannels =
+    [
+        "LIVE",
+        "PublicTest",
+        "NO_UPDATES"
     ];
 
     private static readonly string[] DashProcessNames =
@@ -131,6 +140,126 @@ public sealed class DashToSteamVrService : IDisposable
             : "PreventDashLaunch: OFF — Meta may launch Oculus Dash on Link.";
     }
 
+    public string DescribeCoreChannel()
+    {
+        var channel = ReadCoreChannel() ?? "(not set)";
+        var label = DescribeCoreChannelLabel(channel);
+        return $"CoreChannel: {channel} — {label}";
+    }
+
+    public static string DescribeCoreChannelLabel(string? channel) => channel switch
+    {
+        "LIVE" => "Stable / production Meta Quest Link builds",
+        "PublicTest" => "Public Test Channel (PC beta / PTC)",
+        "NO_UPDATES" => "Block Meta PC client/runtime updates (OculusKiller precaution — not a beta track)",
+        _ => "Unknown / custom channel string"
+    };
+
+    public string? ReadCoreChannel()
+    {
+        foreach (var path in PreventDashLaunchKeyPaths)
+        {
+            try
+            {
+                using var key = Registry.LocalMachine.OpenSubKey(path, writable: false);
+                if (key?.GetValue(CoreChannelValueName) is string channel
+                    && !string.IsNullOrWhiteSpace(channel))
+                {
+                    return channel.Trim();
+                }
+            }
+            catch
+            {
+                // try next
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Writes CoreChannel (LIVE / PublicTest / NO_UPDATES). Needs Administrator.</summary>
+    public string SetCoreChannel(string channel, bool restartOvrService)
+    {
+        if (string.IsNullOrWhiteSpace(channel))
+        {
+            return "CoreChannel value is empty.";
+        }
+
+        channel = channel.Trim();
+        try
+        {
+            var previous = ReadCoreChannel();
+            if (string.Equals(channel, "NO_UPDATES", StringComparison.OrdinalIgnoreCase)
+                && previous is not null
+                && !string.Equals(previous, "NO_UPDATES", StringComparison.OrdinalIgnoreCase))
+            {
+                Settings.CoreChannelBeforeNoUpdates = previous;
+                _app.Settings.Save();
+            }
+
+            var wrote = false;
+            Exception? lastError = null;
+            foreach (var path in PreventDashLaunchKeyPaths)
+            {
+                try
+                {
+                    using var key = Registry.LocalMachine.CreateSubKey(path, writable: true);
+                    if (key is null)
+                    {
+                        continue;
+                    }
+
+                    key.SetValue(CoreChannelValueName, channel, RegistryValueKind.String);
+                    wrote = true;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                }
+            }
+
+            if (!wrote)
+            {
+                return lastError is null
+                    ? "Could not open Oculus Config registry key (run the tray elevated)."
+                    : $"Could not write CoreChannel: {lastError.Message}";
+            }
+
+            var message = $"CoreChannel set to {channel} ({DescribeCoreChannelLabel(channel)}).";
+            if (restartOvrService)
+            {
+                message += " " + _app.Oculus.Restart();
+            }
+            else
+            {
+                message += " Restart OVRService (or re-open Meta Link) for full effect.";
+            }
+
+            _app.Log.Info(message);
+            return message;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return "CoreChannel needs Administrator rights (enable Run as Administrator on Service & Startup).";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not write CoreChannel: {ex.Message}";
+        }
+    }
+
+    public string RestoreCoreChannelBeforeNoUpdates(bool restartOvrService)
+    {
+        var previous = Settings.CoreChannelBeforeNoUpdates;
+        if (string.IsNullOrWhiteSpace(previous))
+        {
+            previous = "LIVE";
+        }
+
+        return SetCoreChannel(previous, restartOvrService);
+    }
+
     public bool IsPreventDashLaunchEnabled()
     {
         foreach (var path in PreventDashLaunchKeyPaths)
@@ -226,6 +355,12 @@ public sealed class DashToSteamVrService : IDisposable
                 if (!string.IsNullOrWhiteSpace(steam))
                 {
                     message += " " + steam;
+                }
+
+                if (Settings.AlsoSetNoUpdatesWithPreventDash)
+                {
+                    var channel = SetCoreChannel("NO_UPDATES", restartOvrService: false);
+                    message += " " + channel;
                 }
             }
 

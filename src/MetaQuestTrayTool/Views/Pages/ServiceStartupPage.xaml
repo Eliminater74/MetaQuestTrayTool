@@ -49,12 +49,26 @@
                  Text="Registry alternative (OculusKiller): set PreventDashLaunch=1 so Meta never starts Dash. When this is ON, the tray auto-starts SteamVR on Meta Link connect (and immediately on Apply if you are already linked). Needs Admin + OVRService restart."/>
       <CheckBox x:Name="PreventDashBox" Content="PreventDashLaunch — block Dash + auto-start SteamVR on Meta Link"
                 Checked="PreventDash_Changed" Unchecked="PreventDash_Changed"/>
+      <CheckBox x:Name="NoUpdatesWithDashBox" Content="Optional: when enabling PreventDashLaunch, also set CoreChannel to NO_UPDATES (blocks Meta updates)"
+                Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
         <Button Content="Apply PreventDashLaunch + restart OVRService (+ SteamVR if linked)" Style="{StaticResource GhostButtonStyle}"
                 Click="ApplyPreventDash_Click"/>
       </StackPanel>
+
+      <TextBlock Text="Meta Quest Link channel (CoreChannel)" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Does not change your channel until you click Apply. LIVE = stable, PublicTest = PC beta (PTC), NO_UPDATES = block updates (not a beta). Your current channel stays until you apply."/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+        <ComboBox x:Name="CoreChannelBox" MinWidth="220" Padding="6"/>
+        <Button Content="Apply channel" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
+                Click="ApplyCoreChannel_Click"/>
+        <Button Content="Restore previous (leave NO_UPDATES)" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
+                Click="RestoreCoreChannel_Click"/>
+      </StackPanel>
       <TextBlock x:Name="DashPathText" Margin="0,8,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
       <TextBlock x:Name="PreventDashStatusText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
+      <TextBlock x:Name="CoreChannelStatusText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
                  Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe (or OculusClient.exe)."/>
