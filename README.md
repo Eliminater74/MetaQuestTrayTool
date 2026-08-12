@@ -4,6 +4,17 @@ Windows tray utility for Meta Quest / Oculus Link, by **Eliminater74**. This is 
 
 Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 
+## Installer (end users)
+
+Build a classic OTT-style **Setup.exe** (self-contained — no separate .NET install):
+
+```powershell
+winget install --id JRSoftware.InnoSetup -e   # once
+.\scripts\build-installer.ps1
+```
+
+The installer lands in `dist\MetaQuestTrayTool-Setup-<version>.exe`. Details: [installer/README.md](installer/README.md).
+
 ## Project docs
 
 | File | Use when you need to… |
@@ -11,6 +22,7 @@ Open `MetaQuestTrayTool.sln` in Visual Studio Community and press F5.
 | [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
 | [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
 | [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |
+| [installer/README.md](installer/README.md) | Build the Windows Setup.exe |
 
 Update both files whenever a phase ships so they stay useful after a break.
 

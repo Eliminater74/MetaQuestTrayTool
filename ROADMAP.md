@@ -101,6 +101,7 @@ SideQuest-style `debug.oculus.*` props. They reset on reboot, so the tray re-app
 - [x] Settings export / import
 - [x] Trusted headset serial (block rogue ADB devices)
 - [x] Info page + visible Donate (PayPal)
+- [x] Inno Setup OTT-style Setup.exe (self-contained win-x64)
 
 ### Phase 6 — OTT-style settings shell (v0.6)
 

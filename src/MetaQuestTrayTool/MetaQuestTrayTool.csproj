@@ -14,6 +14,10 @@
     <Description>Windows tray utility for Meta Quest / Oculus Link and VR runtime settings.</Description>
     <ApplicationTitle>$(Product)</ApplicationTitle>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <!-- Publish defaults used by scripts/build-installer.ps1 -->
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''"></RuntimeIdentifier>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

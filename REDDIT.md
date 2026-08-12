@@ -145,7 +145,9 @@ Feedback and bug reports welcome — especially “profile didn’t apply for ga
 
 ### How to get it
 
-Repo / build instructions are in the project README (open `MetaQuestTrayTool.sln` → F5, or `dotnet build`).
+**Installer (recommended):** run `MetaQuestTrayTool-Setup-<version>.exe` — installs like classic OTT (Program Files, Start Menu, Uninstall). Self-contained (includes .NET).
+
+**From source:** repo README — open `MetaQuestTrayTool.sln` → F5, or `dotnet build` / `.\scripts\build-installer.ps1`.
 
 Settings live under:  
 `%AppData%\MetaQuestTrayTool\`

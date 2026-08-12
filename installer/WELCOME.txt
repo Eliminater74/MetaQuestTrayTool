@@ -1,0 +1,18 @@
+Welcome to Meta Quest Tray Tool Setup
+
+This installs a Windows tray utility for Meta Quest Link / Air Link and SteamVR OpenXR.
+
+Inspired by ApollyonVR's classic Oculus Tray Tool (OTT).
+
+What you get:
+- Global VR defaults + per-game profiles (auto-apply / restore)
+- Quest Link bitrate & sharpening, OpenXR Meta vs SteamVR switch
+- Audio / power helpers and SideQuest-style Quest ADB tweaks
+- Bundled ADB — no Android Studio required
+
+Requirements:
+- Windows 10 or 11 (64-bit)
+- Meta Quest PC software and/or SteamVR for the features you use
+
+This installer is self-contained (includes the .NET 8 runtime).
+Your settings stay in %AppData%\MetaQuestTrayTool and are kept if you uninstall.
