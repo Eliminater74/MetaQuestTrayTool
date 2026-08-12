@@ -19,6 +19,7 @@ public partial class App : System.Windows.Application
     private PowerWatchService? _powerWatcher;
     private HeadsetWatchService? _headsetWatcher;
     private UpdateWatchService? _updateWatcher;
+    private SteamLinkAssistService? _steamLinkAssist;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -40,6 +41,7 @@ public partial class App : System.Windows.Application
     public VoiceCommandService Voice { get; }
     public UpdateService Updates { get; }
     public LinkConnectionProbeService LinkConnection { get; }
+    public SteamLinkAssistService SteamLinkAssist { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -57,6 +59,7 @@ public partial class App : System.Windows.Application
         Voice = new VoiceCommandService(this, HotKeyCommands);
         Updates = new UpdateService(this);
         LinkConnection = new LinkConnectionProbeService(this);
+        SteamLinkAssist = new SteamLinkAssistService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -173,6 +176,9 @@ public partial class App : System.Windows.Application
         _updateWatcher = new UpdateWatchService(this);
         _updateWatcher.Start();
 
+        _steamLinkAssist = SteamLinkAssist;
+        _steamLinkAssist.Start();
+
         if (Settings.Current.Tray.CheckForUpdatesOnStart)
         {
             _ = CheckForUpdatesOnStartAsync();
@@ -213,6 +219,7 @@ public partial class App : System.Windows.Application
             Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
         }
 
+        _steamLinkAssist?.Dispose();
         _updateWatcher?.Dispose();
         _headsetWatcher?.Dispose();
         _powerWatcher?.Dispose();

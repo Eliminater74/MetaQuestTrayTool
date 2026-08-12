@@ -61,6 +61,8 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         OpenXrBox.SelectionChanged += (_, _) => PersistOpenXr();
         OpenXrOnStartBox.Checked += (_, _) => PersistOpenXr();
         OpenXrOnStartBox.Unchecked += (_, _) => PersistOpenXr();
+        SteamLinkOpenXrBox.Checked += (_, _) => PersistOpenXr();
+        SteamLinkOpenXrBox.Unchecked += (_, _) => PersistOpenXr();
         ApplyOnStartBox.Checked += (_, _) => PersistFlags();
         ApplyOnStartBox.Unchecked += (_, _) => PersistFlags();
         AutoApplyBox.Checked += (_, _) => PersistFlags();
@@ -87,8 +89,14 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
             ? OpenXrRuntimeKind.Meta
             : settings.OpenXr.PreferredRuntime);
         OpenXrOnStartBox.IsChecked = settings.OpenXr.ApplyOnStart;
+        SteamLinkOpenXrBox.IsChecked = settings.OpenXr.PreferSteamVrDuringSteamLink;
         OpenXrStatusText.Text = App.Instance.OpenXr.Describe()
             + "  Writes HKLM\\SOFTWARE\\Khronos\\OpenXR\\1\\ActiveRuntime (may prompt for Administrator).";
+        var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch();
+        if (!string.IsNullOrWhiteSpace(steamTip))
+        {
+            OpenXrStatusText.Text += "  " + steamTip;
+        }
         CliCommandsBox.Text = settings.CustomCommands.ToCliText();
         AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
         ApplySessionCapabilities();
@@ -223,6 +231,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         }
 
         settings.ApplyOnStart = OpenXrOnStartBox.IsChecked == true;
+        settings.PreferSteamVrDuringSteamLink = SteamLinkOpenXrBox.IsChecked == true;
         App.Instance.Settings.Save();
     }
 

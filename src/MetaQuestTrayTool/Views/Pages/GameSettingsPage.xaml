@@ -14,7 +14,9 @@
         <ComboBox x:Name="OpenXrBox" MaxWidth="280" MinWidth="220" Padding="6"/>
         <Button Content="Switch now" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0" Click="SwitchOpenXr_Click"/>
       </StackPanel>
-      <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,16"/>
+      <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,6"/>
+      <CheckBox x:Name="SteamLinkOpenXrBox" Content="When Steam Link / SteamVR is active, switch OpenXR to SteamVR"
+                Margin="0,0,0,16"/>
       <TextBlock x:Name="OpenXrStatusText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Text="Profiles" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>

@@ -18,6 +18,8 @@
                  Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="ConnectionBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,6"
                  Foreground="{DynamicResource AppAccentBrush}"/>
+      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,6" Visibility="Collapsed"
+                 Foreground="OrangeRed" FontWeight="SemiBold"/>
       <TextBlock x:Name="HeadsetBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,12"/>
 
       <Border Background="{DynamicResource AppFieldBrush}"

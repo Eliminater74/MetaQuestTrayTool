@@ -77,6 +77,14 @@ public static class SystemInfoService
             text.AppendLine($"  Note: {caps.Banner}");
         }
 
+        var steamTip = app.SteamLinkAssist.DescribeOpenXrMismatch(link);
+        if (!string.IsNullOrWhiteSpace(steamTip))
+        {
+            text.AppendLine($"  Steam Link OpenXR: {steamTip}");
+        }
+
+        text.AppendLine($"  Prefer SteamVR during Steam Link: {app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink}");
+
         return text.ToString().TrimEnd();
     }
 

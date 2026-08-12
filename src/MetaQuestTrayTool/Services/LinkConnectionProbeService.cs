@@ -31,14 +31,14 @@ public sealed class LinkConnectionProbeService
         _app = app;
     }
 
-    public VrConnectionStatus Probe()
+    public VrConnectionStatus Probe(bool includeEnumHmd = true)
     {
         var steamVr = IsProcessRunning("vrserver") || IsProcessRunning("vrmonitor");
         var virtualDesktop = IsProcessRunning("VirtualDesktop.Streamer")
                              || IsProcessRunning("VirtualDesktop.Server")
                              || IsProcessRunning("VirtualDesktop.Service");
         var usb = IsOculusUsbPresent();
-        var metaHmd = MetaHmdReported();
+        var metaHmd = includeEnumHmd && MetaHmdReported();
         var cache = ReadHeadsetCache();
 
         var cacheConnected = cache is not null && IsConnectedState(cache.ConnectionState, cache.RdConnectionState);

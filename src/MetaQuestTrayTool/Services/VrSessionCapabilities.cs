@@ -49,9 +49,19 @@ public sealed class VrSessionCapabilities
             };
         }
 
-        var label = status.Kind == VrConnectionKind.VirtualDesktop
-            ? "Virtual Desktop"
-            : "Steam Link / SteamVR";
+        if (status.Kind == VrConnectionKind.VirtualDesktop)
+        {
+            return new VrSessionCapabilities
+            {
+                Kind = status.Kind,
+                SessionActive = true,
+                AllowsMetaLinkRegistry = false,
+                AllowsOculusDebugTool = false,
+                Banner =
+                    "Virtual Desktop session detected — Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) are disabled. "
+                    + "Headset ADB, OpenXR, power, and audio still work. Change bitrate/codec in Virtual Desktop's own settings."
+            };
+        }
 
         return new VrSessionCapabilities
         {
@@ -60,9 +70,9 @@ public sealed class VrSessionCapabilities
             AllowsMetaLinkRegistry = false,
             AllowsOculusDebugTool = false,
             Banner =
-                $"{label} session detected — Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) are disabled. "
-                + "Headset ADB, OpenXR, power, and audio still work. Change bitrate/codec in "
-                + $"{label}'s own settings."
+                "Steam Link / SteamVR session detected — Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) are disabled. "
+                + "Use Steam Link (in-headset) and SteamVR Video settings for bitrate and resolution. "
+                + "OpenXR should be SteamVR for OpenXR games. Headset ADB, power, and audio still work."
         };
     }
 }

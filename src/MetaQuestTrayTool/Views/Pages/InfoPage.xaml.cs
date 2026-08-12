@@ -16,6 +16,18 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
         var connection = App.Instance.LinkConnection.Probe();
         ConnectionBanner.Text = $"PCVR: {connection.Summary}";
+        var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch(connection);
+        if (string.IsNullOrWhiteSpace(steamTip))
+        {
+            SteamTipBanner.Visibility = Visibility.Collapsed;
+            SteamTipBanner.Text = string.Empty;
+        }
+        else
+        {
+            SteamTipBanner.Visibility = Visibility.Visible;
+            SteamTipBanner.Text = steamTip;
+        }
+
         var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
         HeadsetBanner.Text = headset.Summary;
         HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
