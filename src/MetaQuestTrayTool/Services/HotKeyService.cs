@@ -37,6 +37,11 @@ public sealed class HotKeyService : IDisposable
         settings.EnsureBindingIds();
         EnsureWindow();
 
+        if (HotKeyChordHelper.ConflictsWithHotKeys(_app.Settings.Current.Voice, settings))
+        {
+            _app.Log.Warn("Hotkeys may conflict with voice push-to-talk shortcut — change one of them in Configure.");
+        }
+
         foreach (var binding in settings.Bindings)
         {
             TryRegister(binding);

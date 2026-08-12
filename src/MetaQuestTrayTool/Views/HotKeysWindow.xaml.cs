@@ -207,6 +207,34 @@ public partial class HotKeysWindow : Window
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {
+        var bindings = _rows.Select(row => row.ToBinding()).ToList();
+        if (HotKeyChordHelper.TryFindDuplicate(bindings, out var duplicate))
+        {
+            System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                $"Duplicate shortcut: {duplicate!.DescribeChord()}. Each binding needs a unique key combo.",
+                App.AppName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        if (EnabledBox.IsChecked == true
+            && HotKeyChordHelper.ConflictsWithHotKeys(App.Instance.Settings.Current.Voice, new HotKeySettings
+            {
+                Enabled = true,
+                Bindings = bindings
+            }))
+        {
+            System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                "One of these shortcuts matches the voice push-to-talk chord. Change it before saving.",
+                App.AppName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
         var settings = App.Instance.Settings.Current;
         settings.HotKeys.Enabled = EnabledBox.IsChecked == true;
         settings.Tray.EnableHotKeys = settings.HotKeys.Enabled;

@@ -30,6 +30,8 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
         }
 
         App.Instance.Settings.ResetKeepingProfiles();
+        App.Instance.HotKeys.Reload();
+        App.Instance.Voice.Reload();
         App.Instance.Log.Info("Reset settings to defaults (profiles preserved).");
         Refresh();
         System.Windows.MessageBox.Show(Window.GetWindow(this), "Settings reset. Profiles were kept.", App.AppName);
@@ -131,9 +133,11 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
         try
         {
             App.Instance.Settings.Import(dialog.FileName);
+            App.Instance.HotKeys.Reload();
+            App.Instance.Voice.Reload();
             App.Instance.Log.Info("Imported settings from " + dialog.FileName);
             Refresh();
-            StatusText.Text = "Imported. Restart the tool if a page still shows old values.";
+            StatusText.Text = "Imported. Hotkeys and voice were reloaded.";
         }
         catch (Exception ex)
         {

@@ -26,10 +26,26 @@ public sealed class HotKeySettings
 
     public void EnsureBindingIds()
     {
-        var nextId = Bindings.Count == 0 ? 1 : Bindings.Max(binding => binding.Id) + 1;
-        foreach (var binding in Bindings.Where(binding => binding.Id <= 0))
+        var used = new HashSet<int>();
+        var nextId = 1;
+        foreach (var binding in Bindings)
         {
-            binding.Id = nextId++;
+            if (binding.Id <= 0 || used.Contains(binding.Id))
+            {
+                while (used.Contains(nextId))
+                {
+                    nextId++;
+                }
+
+                binding.Id = nextId;
+                used.Add(nextId);
+                nextId++;
+            }
+            else
+            {
+                used.Add(binding.Id);
+                nextId = Math.Max(nextId, binding.Id + 1);
+            }
         }
     }
 }

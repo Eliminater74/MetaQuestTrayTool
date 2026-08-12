@@ -49,6 +49,13 @@ public sealed class VoiceCommandService : IDisposable
             return;
         }
 
+        if (HotKeyChordHelper.ConflictsWithHotKeys(voice, _app.Settings.Current.HotKeys))
+        {
+            Status = $"Voice push-to-talk conflicts with a hotkey ({DescribePushToTalk(voice)}). Change one shortcut.";
+            _app.Log.Warn(Status);
+            return;
+        }
+
         try
         {
             _engine = new SpeechRecognitionEngine(CultureInfo.CurrentCulture);
@@ -73,6 +80,7 @@ public sealed class VoiceCommandService : IDisposable
         {
             try
             {
+                _synthesizer?.Dispose();
                 _synthesizer = new SpeechSynthesizer();
                 _synthesizer.SetOutputToDefaultAudioDevice();
                 _synthesizer.Rate = 1;
@@ -81,6 +89,11 @@ public sealed class VoiceCommandService : IDisposable
             {
                 _app.Log.Warn($"Voice feedback unavailable: {ex.Message}");
             }
+        }
+        else
+        {
+            _synthesizer?.Dispose();
+            _synthesizer = null;
         }
 
         if (voice.PushToTalkOnly)
@@ -228,6 +241,7 @@ public sealed class VoiceCommandService : IDisposable
 
         try
         {
+            _engine.RecognizeAsyncCancel();
             if (_isListeningContinuous)
             {
                 _engine.RecognizeAsyncStop();
