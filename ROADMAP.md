@@ -111,13 +111,12 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tray opens the shell instead of the old dashboard
 - [x] Service automation (start/stop with tool, wake restart, optional Home launch)
 - [x] Expanded settings model for FOV H/V, Link sharpening, power triggers
-- [ ] Hotkeys configure UI
+- [x] Hotkeys configure UI + global RegisterHotKey bindings
 - [ ] Voice / Homeless / Visual HUD (legacy OTT features — evaluate if still useful)
 
 ## Later
 
-- Hotkeys
-- Optional voice commands (low priority)
+- Optional voice commands (low priority; HotKeyCommandService is ready as router)
 - Wireless ADB pairing UI (USB ADB headset page is in v0.8)
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - Profile ignore-list

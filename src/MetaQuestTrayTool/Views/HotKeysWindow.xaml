@@ -1,0 +1,88 @@
+<Window x:Class="MetaQuestTrayTool.Views.HotKeysWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HotKeys"
+        Height="560"
+        Width="760"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Foreground="{DynamicResource AppTextBrush}"
+        PreviewKeyDown="Window_PreviewKeyDown">
+  <DockPanel Margin="20">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button Content="Restore defaults" Style="{StaticResource GhostButtonStyle}" Click="RestoreDefaults_Click"/>
+      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
+      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"/>
+    </StackPanel>
+
+    <StackPanel>
+      <TextBlock Text="HotKeys"
+                 FontSize="22"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource AppAccentBrush}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Global shortcuts work while this app runs in the tray — including in VR. Numpad combos avoid many game conflicts. Restart is not required after saving."/>
+      <TextBlock x:Name="StatusText"
+                 Margin="0,6,0,12"
+                 TextWrapping="Wrap"
+                 Foreground="{DynamicResource AppMutedBrush}"/>
+
+      <CheckBox x:Name="EnabledBox"
+                Margin="0,0,0,12"
+                Content="Enable HotKeys"
+                Checked="Enabled_Changed"
+                Unchecked="Enabled_Changed"/>
+
+      <Grid Margin="0,0,0,8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="220"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="Action" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="1" Text="Shortcut" FontWeight="SemiBold"/>
+        <TextBlock Grid.Column="2" Text="" Width="72"/>
+      </Grid>
+
+      <ListView x:Name="BindingsList"
+                MinHeight="280"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                SelectionChanged="BindingsList_SelectionChanged">
+        <ListView.View>
+          <GridView>
+            <GridViewColumn Header="Action" Width="320" DisplayMemberBinding="{Binding ActionLabel}"/>
+            <GridViewColumn Header="Shortcut" Width="220" DisplayMemberBinding="{Binding ChordLabel}"/>
+          </GridView>
+        </ListView.View>
+      </ListView>
+
+      <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+        <Button Content="Add binding" Style="{StaticResource GhostButtonStyle}" Click="AddBinding_Click"/>
+        <Button x:Name="RemoveButton" Content="Remove" Style="{StaticResource GhostButtonStyle}" Click="RemoveBinding_Click" IsEnabled="False"/>
+      </StackPanel>
+
+      <Border x:Name="RecordPanel"
+              Margin="0,16,0,0"
+              Padding="12"
+              BorderBrush="{DynamicResource AppBorderBrush}"
+              BorderThickness="1"
+              Visibility="Collapsed">
+        <StackPanel>
+          <TextBlock Text="Edit binding" Style="{StaticResource SettingLabelStyle}"/>
+          <TextBlock Text="Action" Foreground="{DynamicResource AppMutedBrush}" Margin="0,0,0,4"/>
+          <ComboBox x:Name="ActionBox" Margin="0,0,0,12" Padding="6" SelectionChanged="ActionBox_SelectionChanged"/>
+          <TextBlock Text="Shortcut" Foreground="{DynamicResource AppMutedBrush}" Margin="0,0,0,4"/>
+          <TextBlock x:Name="RecordHintText"
+                     Foreground="{DynamicResource AppMutedBrush}"
+                     TextWrapping="Wrap"
+                     Text="Press the key combination you want to use. Esc cancels."/>
+          <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <Button x:Name="RecordButton" Content="Record…" Style="{StaticResource AccentButtonStyle}" Click="Record_Click"/>
+            <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="CancelRecord_Click"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </DockPanel>
+</Window>

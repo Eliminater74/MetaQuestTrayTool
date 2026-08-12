@@ -126,5 +126,19 @@ public sealed class SettingsService
         Current.DefaultGameSettings ??= new GameSettings();
         Current.LinkSettings ??= new LinkSettings();
         Current.OpenXr ??= new OpenXrSettings();
+        Current.HotKeys ??= new HotKeySettings();
+        if (Current.HotKeys.Bindings.Count == 0)
+        {
+            Current.HotKeys.Bindings = HotKeySettings.CreateDefaultBindings();
+        }
+
+        if (Current.Tray.EnableHotKeys && !Current.HotKeys.Enabled)
+        {
+            Current.HotKeys.Enabled = true;
+        }
+        else if (Current.HotKeys.Enabled)
+        {
+            Current.Tray.EnableHotKeys = true;
+        }
     }
 }

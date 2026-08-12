@@ -34,6 +34,8 @@ public partial class App : System.Windows.Application
     public AdbService Adb { get; } = new();
     public HeadsetSettingsService Headset { get; }
     public CustomCommandService CustomCommands { get; }
+    public HotKeyCommandService HotKeyCommands { get; }
+    public HotKeyService HotKeys { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -46,6 +48,8 @@ public partial class App : System.Windows.Application
         Profiles = new ProfileService(Settings);
         Headset = new HeadsetSettingsService(Adb);
         CustomCommands = new CustomCommandService(DebugTool, Adb);
+        HotKeyCommands = new HotKeyCommandService(this);
+        HotKeys = new HotKeyService(this, HotKeyCommands);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -155,6 +159,8 @@ public partial class App : System.Windows.Application
 
         _headsetWatcher = new HeadsetWatchService(this);
         _headsetWatcher.Start();
+
+        HotKeys.Reload();
     }
 
     public void TrayNotify(string title, string message) => _tray?.Notify(title, message);
@@ -182,6 +188,7 @@ public partial class App : System.Windows.Application
         _powerWatcher?.Dispose();
         _audioWatcher?.Dispose();
         _processWatcher?.Dispose();
+        HotKeys.Dispose();
         _tray?.Dispose();
         Settings.Save();
         try

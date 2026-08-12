@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Services;
+using MetaQuestTrayTool.Views;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -28,7 +29,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         AudioSwitchBox.IsChecked = app.Audio.AutoSwitchEnabled;
         HideAltTabBox.IsChecked = app.Tray.HideFromAltTab;
         MinimizeOnCloseBox.IsChecked = app.Tray.MinimizeOnClose;
-        HotKeysBox.IsChecked = app.Tray.EnableHotKeys;
+        HotKeysBox.IsChecked = app.HotKeys.Enabled;
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
         NotificationsBox.IsChecked = app.ShowNotifications;
         SelectTheme(app.Tray.Theme);
@@ -118,5 +119,27 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         var window = new AudioSettingsWindow { Owner = Window.GetWindow(this) };
         window.ShowDialog();
         Refresh();
+    }
+
+    private void HotKeysConfigure_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new HotKeysWindow { Owner = Window.GetWindow(this) };
+        window.ShowDialog();
+        Refresh();
+    }
+
+    private void HotKeys_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        var enabled = HotKeysBox.IsChecked == true;
+        App.Instance.Settings.Current.HotKeys.Enabled = enabled;
+        App.Instance.Settings.Current.Tray.EnableHotKeys = enabled;
+        App.Instance.Settings.Save();
+        App.Instance.HotKeys.Reload();
+        App.Instance.Log.Info(enabled ? "HotKeys enabled." : "HotKeys disabled.");
     }
 }
