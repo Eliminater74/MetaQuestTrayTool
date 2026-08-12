@@ -87,20 +87,25 @@ public sealed class TrayIconHost : IDisposable
 
         var palette = ThemeService.MenuPalette();
         var renderer = new ThemedToolStripRenderer(palette);
+        // Assign Renderer only. Setting RenderMode to Professional afterwards
+        // replaces this with the stock renderer and the left gutter goes white.
         ToolStripManager.Renderer = renderer;
-        ToolStripManager.RenderMode = ToolStripManagerRenderMode.Professional;
         _menu.Renderer = renderer;
-        _menu.RenderMode = ToolStripRenderMode.Professional;
-        PaintMenu(_menu, palette);
+        PaintMenu(_menu, palette, renderer);
     }
 
-    private static void PaintMenu(ToolStrip menu, TrayMenuPalette palette)
+    private static void PaintMenu(ToolStrip menu, TrayMenuPalette palette, ToolStripRenderer? renderer)
     {
+        if (renderer is not null)
+        {
+            menu.Renderer = renderer;
+        }
+
         menu.BackColor = palette.Background;
         menu.ForeColor = palette.Text;
         if (menu is ToolStripDropDownMenu drop)
         {
-            drop.ShowImageMargin = false;
+            drop.ShowImageMargin = true;
             drop.ShowCheckMargin = true;
             drop.BackColor = palette.Background;
         }
@@ -111,8 +116,7 @@ public sealed class TrayIconHost : IDisposable
             item.ForeColor = item.Enabled ? palette.Text : palette.Muted;
             if (item is ToolStripMenuItem menuItem && menuItem.HasDropDownItems)
             {
-                menuItem.DropDown.Renderer = menu.Renderer;
-                PaintMenu(menuItem.DropDown, palette);
+                PaintMenu(menuItem.DropDown, palette, renderer ?? menu.Renderer);
             }
         }
     }
@@ -129,14 +133,14 @@ public sealed class TrayIconHost : IDisposable
     {
         var menu = new ContextMenuStrip
         {
-            ShowImageMargin = false,
+            ShowImageMargin = true,
             ShowCheckMargin = true
         };
 
         menu.Opening += (_, _) =>
         {
             RefreshDynamicItems(menu);
-            PaintMenu(menu, ThemeService.MenuPalette());
+            PaintMenu(menu, ThemeService.MenuPalette(), menu.Renderer);
         };
 
         menu.Items.Add(new ToolStripMenuItem("Open Settings", null, (_, _) => ShowShell()));

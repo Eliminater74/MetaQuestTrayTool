@@ -24,8 +24,14 @@ public sealed class ThemedToolStripRenderer : ToolStripProfessionalRenderer
 
     protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
     {
+        var bounds = e.AffectedBounds;
+        if (e.ToolStrip is not null)
+        {
+            bounds = new Rectangle(0, 0, Math.Max(bounds.Width, 28), e.ToolStrip.Height);
+        }
+
         using var brush = new SolidBrush(_palette.Background);
-        e.Graphics.FillRectangle(brush, e.AffectedBounds);
+        e.Graphics.FillRectangle(brush, bounds);
     }
 
     protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
@@ -39,7 +45,7 @@ public sealed class ThemedToolStripRenderer : ToolStripProfessionalRenderer
 
     protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
     {
-        var bounds = new Rectangle(Point.Empty, e.Item.Size);
+        var bounds = new Rectangle(0, 0, e.Item.Bounds.Right, e.Item.Height);
         var selected = e.Item.Selected && e.Item.Enabled;
         using var brush = new SolidBrush(selected ? _palette.Hover : _palette.Background);
         e.Graphics.FillRectangle(brush, bounds);
