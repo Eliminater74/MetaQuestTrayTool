@@ -19,9 +19,9 @@
 
       <TextBlock Text="Oculus Service" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <Button Content="Start" Style="{StaticResource AccentButtonStyle}" Click="Start_Click"/>
-        <Button Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"/>
-        <Button Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"/>
+        <Button x:Name="StartButton" Content="Start" Style="{StaticResource GhostButtonStyle}" Click="Start_Click"/>
+        <Button x:Name="StopButton" Content="Stop" Style="{StaticResource GhostButtonStyle}" Click="Stop_Click"/>
+        <Button x:Name="RestartButton" Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"/>
       </StackPanel>
       <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,16" FontWeight="SemiBold"/>
 

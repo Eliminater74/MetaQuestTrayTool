@@ -30,8 +30,28 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         LaunchHomeOnServiceBox.IsChecked = service.LaunchOculusHomeOnServiceStart;
         LaunchHomeOnToolBox.IsChecked = service.LaunchOculusHomeOnToolStart;
         CloseHomeOnExitBox.IsChecked = service.CloseOculusHomeOnToolExit;
-        ServiceStatusText.Text = $"{Services.OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+        ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+        UpdateServiceButtons();
         _loading = false;
+    }
+
+    private void UpdateServiceButtons()
+    {
+        var oculus = App.Instance.Oculus;
+        var running = oculus.IsServiceRunning;
+        var exists = oculus.ServiceExists;
+
+        StartButton.IsEnabled = exists && !running;
+        StopButton.IsEnabled = exists && running;
+        RestartButton.IsEnabled = exists;
+
+        StartButton.Style = running || !exists
+            ? (Style)FindResource("GhostButtonStyle")
+            : (Style)FindResource("AccentButtonStyle");
+        StopButton.Style = running
+            ? (Style)FindResource("AccentButtonStyle")
+            : (Style)FindResource("GhostButtonStyle");
+        RestartButton.Style = (Style)FindResource("GhostButtonStyle");
     }
 
     private void RestartElevated_Click(object sender, RoutedEventArgs e) =>
