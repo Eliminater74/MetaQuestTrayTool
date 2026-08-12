@@ -104,6 +104,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Built-in global presets (Balanced, Performance, Quality, Sim, Competitive)
 - [x] Built-in PCVR game presets (MSFS 2024, Beat Saber, HL:Alyx, DCS, etc.)
 - [x] OTT-style Windows Setup.exe (Inno Setup + self-contained publish)
+- [x] GitHub Actions CI + Release (tag v* → Setup.exe on Releases)
 
 ## v1.0.0
 

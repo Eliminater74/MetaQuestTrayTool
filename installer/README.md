@@ -53,6 +53,20 @@ dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
   .\installer\MetaQuestTrayTool.iss
 ```
 
+## GitHub Actions
+
+| Workflow | Trigger | Result |
+| --- | --- | --- |
+| **CI** (`.github/workflows/ci.yml`) | Push/PR to `main`, manual | Build + publish smoke test |
+| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (e.g. `v1.0.0`), manual | Setup.exe + GitHub Release |
+
+Tag a release:
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## Files
 
 | File | Purpose |

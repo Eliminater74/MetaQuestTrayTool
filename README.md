@@ -15,6 +15,19 @@ winget install --id JRSoftware.InnoSetup -e   # once
 
 The installer lands in `dist\MetaQuestTrayTool-Setup-<version>.exe`. Details: [installer/README.md](installer/README.md).
 
+### GitHub Releases (automatic)
+
+Pushing a version tag builds the Setup.exe and publishes a [GitHub Release](https://github.com/Eliminater74/MetaQuestTrayTool/releases):
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+You can also run **Actions → Release → Run workflow** manually (pick the version).
+
+Every push to `main` runs CI (build + publish smoke test). Tags `v*` trigger the full installer + release.
+
 ## Project docs
 
 | File | Use when you need to… |

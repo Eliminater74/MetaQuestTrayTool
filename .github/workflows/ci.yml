@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore MetaQuestTrayTool.sln
+        shell: pwsh
+
+      - name: Build
+        run: dotnet build MetaQuestTrayTool.sln -c Release --no-restore
+        shell: pwsh
+
+      - name: Publish self-contained (smoke test)
+        run: >
+          dotnet publish src/MetaQuestTrayTool/MetaQuestTrayTool.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishReadyToRun=true
+          -p:DebugType=None -p:DebugSymbols=false
+          -o publish/ci-smoke
+        shell: pwsh
+
+      - name: Verify publish output
+        run: |
+          if (-not (Test-Path publish/ci-smoke/MetaQuestTrayTool.exe)) { throw "Missing exe" }
+          if (-not (Test-Path publish/ci-smoke/platform-tools/adb.exe)) { throw "Missing adb" }
+        shell: pwsh
