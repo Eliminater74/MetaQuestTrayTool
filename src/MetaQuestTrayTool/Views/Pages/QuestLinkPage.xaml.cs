@@ -160,7 +160,6 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         WriteToSettings();
         App.Instance.Settings.Save();
         var summary = App.Instance.ApplyMetaLinkSettings(App.Instance.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        App.Instance.Log.Info(summary);
 
         if (restart && App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
         {

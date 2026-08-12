@@ -43,6 +43,11 @@ public sealed class HeadsetWatchService : IDisposable
             var serial = quest?.IsReady == true ? quest.Serial : null;
             if (serial is null)
             {
+                if (_lastSerial is not null)
+                {
+                    _app.Log.Info($"ADB headset disconnected — was {_lastSerial}.");
+                }
+
                 _lastSerial = null;
                 _appliedForSerial = false;
                 var ignored = _app.Adb.DescribeIgnoredDevices();
@@ -59,6 +64,12 @@ public sealed class HeadsetWatchService : IDisposable
 
             var connected = !string.Equals(_lastSerial, serial, StringComparison.OrdinalIgnoreCase);
             _lastSerial = serial;
+            if (connected)
+            {
+                var label = string.IsNullOrWhiteSpace(quest?.Model) ? serial : $"{quest!.Model} ({serial})";
+                _app.Log.Info($"ADB headset connected — {label}.");
+            }
+
             if (!connected && _appliedForSerial)
             {
                 return;
@@ -66,19 +77,24 @@ public sealed class HeadsetWatchService : IDisposable
 
             if (!_app.Settings.Current.Headset.ApplyWhenHeadsetConnects)
             {
+                if (connected)
+                {
+                    _app.Log.Info("ADB headset connect — auto-apply is off (enable under Headset settings).");
+                }
+
                 return;
             }
 
             var result = _app.Headset.Apply(_app.Settings.Current.Headset);
             _app.Settings.Save();
-            _app.Log.Info(result);
+            _app.Log.Info($"Applied headset ADB settings — {result}");
             _appliedForSerial = true;
 
             if (!_app.IsGameProfileActive
                 && _app.Settings.Current.ApplyGlobalWhenHeadsetConnects)
             {
                 var global = _app.ApplyGlobalBaseline(notify: connected);
-                _app.Log.Info(global);
+                _app.Log.Info($"Applied global baseline on ADB connect — {global}");
             }
 
             if (connected)

@@ -634,20 +634,6 @@ public sealed class TrayIconHost : IDisposable
     {
         _app.Settings.Save();
         var summary = _app.ApplyMetaLinkSettings(_app.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        if (summary.Contains("skipped", StringComparison.OrdinalIgnoreCase))
-        {
-            _app.Log.Info(summary);
-        }
-        else if (summary.Contains("failed", StringComparison.OrdinalIgnoreCase)
-                 || summary.Contains("error", StringComparison.OrdinalIgnoreCase))
-        {
-            _app.Log.Error(summary);
-        }
-        else
-        {
-            _app.Log.Info(summary);
-        }
-
         Notify("Quest Link", summary);
         _shell?.RefreshActivePage();
     }

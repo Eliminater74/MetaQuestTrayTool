@@ -20,6 +20,7 @@ public partial class App : System.Windows.Application
     private HeadsetWatchService? _headsetWatcher;
     private UpdateWatchService? _updateWatcher;
     private SteamLinkAssistService? _steamLinkAssist;
+    private LinkSessionWatchService? _linkSessionWatcher;
 
     public static App Instance => (App)Current;
     public SettingsService Settings { get; } = new();
@@ -179,6 +180,9 @@ public partial class App : System.Windows.Application
         _steamLinkAssist = SteamLinkAssist;
         _steamLinkAssist.Start();
 
+        _linkSessionWatcher = new LinkSessionWatchService(this);
+        _linkSessionWatcher.Start();
+
         if (Settings.Current.Tray.CheckForUpdatesOnStart)
         {
             _ = CheckForUpdatesOnStartAsync();
@@ -219,6 +223,7 @@ public partial class App : System.Windows.Application
             Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
         }
 
+        _linkSessionWatcher?.Dispose();
         _steamLinkAssist?.Dispose();
         _updateWatcher?.Dispose();
         _headsetWatcher?.Dispose();
@@ -502,11 +507,20 @@ public partial class App : System.Windows.Application
         var caps = LinkConnection.GetCapabilities();
         if (!caps.AllowsMetaLinkRegistry)
         {
-            Log.Info(caps.MetaLinkSkipMessage);
+            Log.Info($"Skipped Meta Link apply — {caps.MetaLinkSkipMessage}");
             return caps.MetaLinkSkipMessage;
         }
 
         var result = Link.Apply(settings, deleteUnsetOverrides);
+        if (result.Succeeded)
+        {
+            Log.Info($"Applied Meta Link settings — {result.Summary}");
+        }
+        else
+        {
+            Log.Error($"Meta Link apply failed — {result.Summary}");
+        }
+
         return result.Summary;
     }
 
