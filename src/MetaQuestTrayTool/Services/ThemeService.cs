@@ -27,6 +27,9 @@ public static class ThemeService
         Set("AppNavSelectedBrush", palette.NavSelected);
         Set("AppGhostButtonBrush", palette.Ghost);
         Set("AppGhostButtonHoverBrush", palette.GhostHover);
+        Set("AppLogErrorBrush", palette.LogError);
+        Set("AppLogWarnBrush", palette.LogWarn);
+        Set("AppLogInfoBrush", palette.LogInfo);
         Changed?.Invoke(null, theme);
     }
 
@@ -75,7 +78,10 @@ public static class ThemeService
             Hover: Color.FromRgb(0xD9, 0xE1, 0xEC),
             NavSelected: Color.FromRgb(0xCC, 0xD8, 0xE6),
             Ghost: Color.FromRgb(0xD0, 0xD8, 0xE4),
-            GhostHover: Color.FromRgb(0xBE, 0xC8, 0xD6)),
+            GhostHover: Color.FromRgb(0xBE, 0xC8, 0xD6),
+            LogError: Color.FromRgb(0xC6, 0x28, 0x28),
+            LogWarn: Color.FromRgb(0xB2, 0x86, 0x00),
+            LogInfo: Color.FromRgb(0x1B, 0x24, 0x33)),
         AppTheme.Dark => new ThemePalette(
             Background: Color.FromRgb(0x0B, 0x12, 0x20),
             Surface: Color.FromRgb(0x15, 0x1D, 0x2E),
@@ -90,7 +96,10 @@ public static class ThemeService
             Hover: Color.FromRgb(0x1C, 0x27, 0x3C),
             NavSelected: Color.FromRgb(0x24, 0x30, 0x49),
             Ghost: Color.FromRgb(0x24, 0x30, 0x49),
-            GhostHover: Color.FromRgb(0x31, 0x40, 0x5F)),
+            GhostHover: Color.FromRgb(0x31, 0x40, 0x5F),
+            LogError: Color.FromRgb(0xFF, 0x6B, 0x6B),
+            LogWarn: Color.FromRgb(0xFF, 0xC1, 0x07),
+            LogInfo: Color.FromRgb(0xE8, 0xEE, 0xF8)),
         _ => new ThemePalette(
             Background: Color.FromRgb(0x00, 0x00, 0x00),
             Surface: Color.FromRgb(0x0A, 0x0A, 0x0A),
@@ -105,7 +114,10 @@ public static class ThemeService
             Hover: Color.FromRgb(0x1A, 0x1A, 0x1A),
             NavSelected: Color.FromRgb(0x22, 0x22, 0x22),
             Ghost: Color.FromRgb(0x1C, 0x1C, 0x1C),
-            GhostHover: Color.FromRgb(0x2C, 0x2C, 0x2C))
+            GhostHover: Color.FromRgb(0x2C, 0x2C, 0x2C),
+            LogError: Color.FromRgb(0xFF, 0x6B, 0x6B),
+            LogWarn: Color.FromRgb(0xFF, 0xC1, 0x07),
+            LogInfo: Color.FromRgb(0xF5, 0xF5, 0xF5))
     };
 
     private readonly record struct ThemePalette(
@@ -122,5 +134,8 @@ public static class ThemeService
         Color Hover,
         Color NavSelected,
         Color Ghost,
-        Color GhostHover);
+        Color GhostHover,
+        Color LogError,
+        Color LogWarn,
+        Color LogInfo);
 }

@@ -11,7 +11,7 @@
       </StackPanel>
     </DockPanel>
     <TextBlock DockPanel.Dock="Top" Style="{StaticResource PageHintStyle}"
-               Text="Startup checks, service actions, profile applies, Link writes, and audio/power events."/>
+               Text="Startup checks, service actions, profile applies, Link writes, and audio/power events. Errors are red, warnings yellow."/>
     <Border Background="{DynamicResource AppFieldBrush}"
             BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="1"
@@ -20,8 +20,52 @@
       <ListBox x:Name="LogList"
                Background="Transparent"
                BorderThickness="0"
-               Foreground="{DynamicResource AppTextBrush}"
-               ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox.ItemContainerStyle>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="2,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                  <Border x:Name="Bd" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter/>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                      <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                    </Trigger>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </ListBox.ItemContainerStyle>
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" FontFamily="Consolas">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Foreground" Value="{DynamicResource AppLogInfoBrush}"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding Level}" Value="ERROR">
+                      <Setter Property="Foreground" Value="{DynamicResource AppLogErrorBrush}"/>
+                      <Setter Property="FontWeight" Value="SemiBold"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Level}" Value="WARN">
+                      <Setter Property="Foreground" Value="{DynamicResource AppLogWarnBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </Border>
   </DockPanel>
 </UserControl>

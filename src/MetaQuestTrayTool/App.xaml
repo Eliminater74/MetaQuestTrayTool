@@ -17,6 +17,9 @@
     <SolidColorBrush x:Key="AppNavSelectedBrush" Color="#222222"/>
     <SolidColorBrush x:Key="AppGhostButtonBrush" Color="#1C1C1C"/>
     <SolidColorBrush x:Key="AppGhostButtonHoverBrush" Color="#2C2C2C"/>
+    <SolidColorBrush x:Key="AppLogErrorBrush" Color="#FF6B6B"/>
+    <SolidColorBrush x:Key="AppLogWarnBrush" Color="#FFC107"/>
+    <SolidColorBrush x:Key="AppLogInfoBrush" Color="#F5F5F5"/>
 
     <Style TargetType="Window">
       <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}"/>
