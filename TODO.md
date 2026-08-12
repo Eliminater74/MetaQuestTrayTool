@@ -104,8 +104,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Settings export / import backup
 - [x] Trusted headset serial + rogue-device block
 - [x] Info page (OpenXR live, OVRService, headset identity)
-- [x] Visible Donate (sidebar, About, tray) — URL pending
-- [ ] Paste live donate URL into AppInfo.DonateUrl
+- [x] Visible Donate (sidebar, About, tray)
+- [x] Paste live donate URL into AppInfo.DonateUrl
 
 ## Housekeeping
 

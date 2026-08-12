@@ -5,7 +5,7 @@ namespace MetaQuestTrayTool;
 /// <summary>
 /// Display name, version, and donate URL.
 /// Version and product name come from Directory.Build.props (change them there).
-/// Paste the live donate URL into <see cref="DonateUrl"/> when you have it.
+/// Donate URL is the live PayPal page.
 /// </summary>
 public static class AppInfo
 {
@@ -18,8 +18,9 @@ public static class AppInfo
     public static string Version =>
         typeof(AppInfo).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
 
-    /// <summary>PayPal / donation page URL. Paste the live link here when you have it.</summary>
-    public const string DonateUrl = "";
+    /// <summary>Live PayPal donate page.</summary>
+    public const string DonateUrl =
+        "https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD";
 
     /// <summary>PayPal “Why are you asking for money?” box (127 char max). Display name: Eliminater74.</summary>
     public const string DonateBlurb =

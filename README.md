@@ -40,9 +40,9 @@ Update both files whenever a phase ships so they stay useful after a break.
 - **Custom commands**: extra OculusDebugToolCLI + ADB lines on global defaults and personal profiles
 - **Backup**: export / import settings from Advanced
 - **Info** page: live OpenXR (Meta vs SteamVR), OVRService, and detailed headset identity
-- **Donate** button (sidebar, About, tray) — paste the live URL into `AppInfo.DonateUrl` when you have it
+- **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
-Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates, donate URL.
+Not yet: hotkeys, voice commands, Oculus Homeless, Permanent AirLink, in-app updates.
 
 See [ROADMAP.md](ROADMAP.md) for remaining polish items.
 

@@ -100,7 +100,7 @@ SideQuest-style `debug.oculus.*` props. They reset on reboot, so the tray re-app
 - [x] Custom CLI + ADB commands on global + personal profiles
 - [x] Settings export / import
 - [x] Trusted headset serial (block rogue ADB devices)
-- [x] Info page + visible Donate (URL still pending)
+- [x] Info page + visible Donate (PayPal)
 
 ### Phase 6 — OTT-style settings shell (v0.6)
 
