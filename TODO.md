@@ -129,6 +129,11 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Global hotkeys + HotKeysWindow configure UI
 - [x] Voice command core + VoiceCommandsWindow (preview)
 - [x] Service page Start/Stop button highlighting fix
+- [x] Profile restore on game exit
+- [x] Release version sync (exe matches installer)
+- [x] Hotkey/voice reliability (conflicts, import reload, phrase matching)
+- [x] Full Link fields in tray Link window
+- [x] Root LICENSE.txt
 - [ ] Tag and publish **v1.0.1** release on GitHub
 - [ ] README screenshots
 
@@ -136,4 +141,4 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [x] Keep README "what works now" in sync after each phase
 - [x] Bump version in Directory.Build.props when a phase ships
-- [ ] Decide on a license before a public release
+- [x] Decide on a license before a public release

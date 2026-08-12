@@ -117,12 +117,14 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [ ] Voice polish (custom phrases, always-on tuning, mic picker)
 - [ ] Oculus Homeless
 
-### Post v1.0.0 (on main, v1.0.1 release TBD)
+### Post v1.0.0 (v1.0.1)
 
 - [x] ODT registry map + expanded RemoteHeadset writes
 - [x] Global hotkeys (HotKeyCommandService + configure UI)
 - [x] Voice command preview (System.Speech + PTT)
 - [x] Service & Startup Start/Stop button state
+- [x] Profile restore on game exit
+- [x] Release version sync + root LICENSE
 - [ ] README screenshots
 - [ ] Tag **v1.0.1** and publish updated Setup.exe
 

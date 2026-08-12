@@ -16,6 +16,7 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 
 | Release | Installer |
 | --- | --- |
+| [v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.1) | MetaQuestTrayTool-Setup-1.0.1.exe (latest — hotkeys, voice preview, Link registry) |
 | [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) (~52 MB) |
 
 The installer is **self-contained** (includes .NET 8 — no separate runtime install). Settings are stored in `%AppData%\MetaQuestTrayTool\` and are kept if you uninstall.
@@ -102,7 +103,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0)** is on GitHub. **main** adds hotkeys, voice preview, expanded Link registry writes, and service-page UI fixes (tag **v1.0.1** when those ship in a release).
+Release **[v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** includes hotkeys, voice preview, expanded Link registry writes, profile restore fixes, and service-page UI improvements.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)

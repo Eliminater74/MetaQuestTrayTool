@@ -17,7 +17,7 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 1 | ASW Off |
 | Ctrl+Num 2 | ASW Auto |
 | Ctrl+Num 3 | ASW 45 FPS |
-| Ctrl+Num 4 | Cycle ASW (Off → Auto → 45) |
+| Ctrl+Num 4 | Cycle ASW (Off → Auto → 45 → 30 → 18) |
 | Ctrl+Num 5 | Cycle super sampling |
 | Ctrl+Num 6 | Apply global defaults |
 | Ctrl+Num 7 | Restart OVRService |
