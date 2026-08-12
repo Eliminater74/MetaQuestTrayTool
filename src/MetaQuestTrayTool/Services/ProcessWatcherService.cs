@@ -112,13 +112,13 @@ public sealed class ProcessWatcherService : IDisposable
     private void RestoreDefaults(string processName)
     {
         var profileName = _activeProfileName ?? "profile";
+        _activeProcess = null;
+        _activeProfileName = null;
         var summary = _app.RestoreGlobalDefaults();
         _app.Log.Info($"{processName}.exe exited — restored global defaults after '{profileName}'. {summary}");
         Notify(
             "Global defaults restored",
             $"{processName}.exe closed.\nRestored your global VR settings after '{profileName}'.");
-        _activeProcess = null;
-        _activeProfileName = null;
     }
 
     private void Notify(string title, string message)

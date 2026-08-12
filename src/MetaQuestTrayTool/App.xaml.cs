@@ -307,8 +307,24 @@ public partial class App : System.Windows.Application
 
     public string RestoreGlobalDefaults()
     {
-        var summary = ApplyGlobalBaseline(includeLink: true, includeOpenXrRestore: true);
-        return $"{summary} Restored global Link settings ({Settings.Current.LinkSettings.Describe()}).";
+        var parts = new List<string>();
+        if (DebugTool.IsAvailable)
+        {
+            parts.Add(ApplyGlobalGameSettings());
+        }
+
+        var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+        parts.Add(link.Summary);
+
+        parts.Add(OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime));
+
+        var summary = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
+        if (summary.Length == 0)
+        {
+            return "Global defaults restored.";
+        }
+
+        return $"{summary} Link: {Settings.Current.LinkSettings.Describe()}.";
     }
 
     public string ApplyGlobalBaseline(bool includeLink = true, bool includeOpenXrRestore = false, bool notify = false)
