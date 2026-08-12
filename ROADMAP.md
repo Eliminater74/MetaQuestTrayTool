@@ -130,6 +130,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] README screenshots + demo video
 - [x] Open Meta Horizon Link + audio auto-switch fix
 - [x] Tag **v1.0.3**
+- [x] Periodic update checks + PCVR session detect (Air/wired/Steam/VD) + Steam Link OpenXR assist
+- [x] Tag **v1.0.4**
 
 ## Later
 

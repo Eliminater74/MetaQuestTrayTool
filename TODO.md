@@ -141,6 +141,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Open Meta Horizon Link (tray / hotkey / voice)
 - [x] Audio switch: do not steal speakers when Oculus virtual audio is merely installed
 - [x] Tag and publish **v1.0.3**
+- [x] Configurable periodic update checks
+- [x] Detect Meta Air Link vs wired + Steam Link / Virtual Desktop sessions
+- [x] Gate Meta Link/ODT under VD / Steam Link; Steam Link OpenXR assist + restore
+- [x] Tag and publish **v1.0.4**
 
 ## Housekeeping
 
