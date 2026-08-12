@@ -12,17 +12,19 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 
 ## Download
 
-**Recommended:** install the latest Windows Setup from [GitHub Releases](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest).
+**[Download latest Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** — open the newest release and click the `.exe` asset.
+
+Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) | MetaQuestTrayTool-Setup-1.0.2.exe (latest — in-app updater) |
+| [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) (latest) | [MetaQuestTrayTool-Setup-1.0.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.2/MetaQuestTrayTool-Setup-1.0.2.exe) |
 | [v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.1) | [MetaQuestTrayTool-Setup-1.0.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.1/MetaQuestTrayTool-Setup-1.0.1.exe) |
-| [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) (~52 MB) |
+| [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) |
 
 The installer is **self-contained** (includes .NET 8 — no separate runtime install). Settings are stored in `%AppData%\MetaQuestTrayTool\` and are kept if you uninstall.
 
-Badge counts above update automatically (release downloads and stars). GitHub does not expose public page-view / visitor totals on the README; repo owners can see traffic under **Insights → Traffic**.
+The **Downloads** badge uses GitHub’s public asset `download_count`. It only counts clicks on the release **`.exe` asset** (not “Source code” zips). Downloads by the repo owner often stay at **0**; other users’ downloads usually show up after a short delay (shields.io also caches).
 
 ---
 
