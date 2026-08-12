@@ -5,6 +5,7 @@ namespace MetaQuestTrayTool.Services;
 
 /// <summary>
 /// Steam Link / SteamVR session helper: clearer guidance and optional OpenXR → SteamVR nudge.
+/// Restores the user's preferred OpenXR runtime when the Steam Link session ends.
 /// Does not edit steamvr.vrsettings or Steam Link bitrate (leave those to Valve's UI).
 /// </summary>
 public sealed class SteamLinkAssistService : IDisposable
@@ -14,6 +15,8 @@ public sealed class SteamLinkAssistService : IDisposable
     private bool _wasSteamSession;
     private bool _nudgeDoneThisSession;
     private bool _mismatchLoggedThisSession;
+    private bool _switchedOpenXrForSession;
+    private OpenXrRuntimeKind? _openXrBeforeSwitch;
 
     public SteamLinkAssistService(App app)
     {
@@ -63,6 +66,11 @@ public sealed class SteamLinkAssistService : IDisposable
             var steam = IsSteamLinkSession(status);
             if (!steam)
             {
+                if (_wasSteamSession)
+                {
+                    RestorePreferredOpenXrAfterSteamLink();
+                }
+
                 _wasSteamSession = false;
                 _nudgeDoneThisSession = false;
                 _mismatchLoggedThisSession = false;
@@ -74,6 +82,8 @@ public sealed class SteamLinkAssistService : IDisposable
                 _wasSteamSession = true;
                 _nudgeDoneThisSession = false;
                 _mismatchLoggedThisSession = false;
+                _switchedOpenXrForSession = false;
+                _openXrBeforeSwitch = null;
                 _app.Log.Info(
                     "Steam Link / SteamVR session detected — Meta Link registry and ODT are gated. "
                     + "Use Steam Link / SteamVR Video settings for bitrate and resolution. ADB + OpenXR still apply.");
@@ -104,6 +114,8 @@ public sealed class SteamLinkAssistService : IDisposable
             }
 
             _nudgeDoneThisSession = true;
+            _openXrBeforeSwitch = openXr;
+            _switchedOpenXrForSession = true;
             var result = _app.OpenXr.Set(OpenXrRuntimeKind.SteamVr);
             _app.Log.Info("Steam Link assist: " + result);
             if (_app.Settings.Current.ShowNotifications)
@@ -114,6 +126,51 @@ public sealed class SteamLinkAssistService : IDisposable
         catch (Exception ex)
         {
             _app.Log.Warn($"Steam Link assist failed: {ex.Message}");
+        }
+    }
+
+    private void RestorePreferredOpenXrAfterSteamLink()
+    {
+        if (!_switchedOpenXrForSession)
+        {
+            _switchedOpenXrForSession = false;
+            _openXrBeforeSwitch = null;
+            return;
+        }
+
+        _switchedOpenXrForSession = false;
+        var preferred = _app.Settings.Current.OpenXr.PreferredRuntime;
+        OpenXrRuntimeKind restoreTo;
+        if (preferred is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            restoreTo = preferred;
+        }
+        else if (_openXrBeforeSwitch is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
+        {
+            restoreTo = _openXrBeforeSwitch.Value;
+        }
+        else
+        {
+            _openXrBeforeSwitch = null;
+            _app.Log.Info("Steam Link ended — OpenXR left on SteamVR (no preferred default to restore).");
+            return;
+        }
+
+        _openXrBeforeSwitch = null;
+        var current = _app.OpenXr.ReadActiveKind();
+        if (current == restoreTo)
+        {
+            _app.Log.Info($"Steam Link ended — OpenXR already {OpenXrRuntimeService.Label(restoreTo)}.");
+            return;
+        }
+
+        var result = _app.OpenXr.Set(restoreTo);
+        _app.Log.Info("Steam Link ended — restored OpenXR default: " + result);
+        if (_app.Settings.Current.ShowNotifications)
+        {
+            _app.TrayNotify(
+                "Steam Link",
+                $"Restored OpenXR to {OpenXrRuntimeService.Label(restoreTo)}.");
         }
     }
 

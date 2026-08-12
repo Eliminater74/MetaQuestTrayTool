@@ -15,7 +15,7 @@
         <Button Content="Switch now" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0" Click="SwitchOpenXr_Click"/>
       </StackPanel>
       <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,6"/>
-      <CheckBox x:Name="SteamLinkOpenXrBox" Content="When Steam Link / SteamVR is active, switch OpenXR to SteamVR"
+      <CheckBox x:Name="SteamLinkOpenXrBox" Content="When Steam Link / SteamVR is active, switch OpenXR to SteamVR (restore preferred on exit)"
                 Margin="0,0,0,16"/>
       <TextBlock x:Name="OpenXrStatusText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 

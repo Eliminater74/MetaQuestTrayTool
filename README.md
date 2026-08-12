@@ -161,7 +161,7 @@ Release **[v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **Backup**: export / import settings from Advanced
 - **Info** page: live OpenXR (Meta vs SteamVR), OVRService, PCVR connection (Meta Air Link vs wired via DeviceCache `isUsingAirLink`, Steam Link / SteamVR, Virtual Desktop), and detailed headset identity
 - **Virtual Desktop / Steam Link awareness**: when those sessions are active, Meta Link registry + Oculus Debug Tool (SS/ASW) are auto-skipped and UI controls disabled; headset ADB, OpenXR, power, and audio still apply
-- **Steam Link assist**: warns (and optionally auto-switches) if OpenXR is not SteamVR during a Steam Link / SteamVR session; bitrate/resolution stay in Steam Link + SteamVR Video settings
+- **Steam Link assist**: warns (and optionally auto-switches) if OpenXR is not SteamVR during a Steam Link / SteamVR session, then restores your preferred OpenXR runtime when Steam Link ends; bitrate/resolution stay in Steam Link + SteamVR Video settings
 - **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 - **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
 - **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys
