@@ -1,14 +1,31 @@
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
 public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShellPage
 {
+    private bool _loading;
+
     public QuestLinkPage()
     {
         InitializeComponent();
+
+        foreach (var preset in LinkPresetCatalog.All)
+        {
+            PresetBox.Items.Add(new ComboBoxItem
+            {
+                Content = preset.Name,
+                Tag = preset
+            });
+        }
+
+        if (PresetBox.Items.Count > 0)
+        {
+            PresetBox.SelectedIndex = 0;
+        }
 
         foreach (var width in LinkSettings.EncodeWidthPresets)
         {
@@ -66,32 +83,67 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
 
     public void Refresh()
     {
+        _loading = true;
         var link = App.Instance.Settings.Current.LinkSettings;
-        SelectByTag(EncodeWidthBox, link.EncodeResolutionWidth);
-        SelectByTag(BitrateBox, link.BitrateMbps);
-        SelectByTag(DynamicBox, link.EncodeDynamicBitrate);
-        SelectByTag(DynamicMaxBox, link.DynamicBitrateMax);
-        SelectByTag(DynamicOffsetBox, link.DynamicBitrateOffsetMbps);
-        SelectByTag(SharpenBox, link.Sharpening);
-        SelectByTag(DistortionBox, link.DistortionCurvature);
-        SelectByTag(MobileAswBox, link.MobileAsw);
-        HevcBox.IsChecked = link.PreferHevc;
-        SlicesBox.IsChecked = link.DisableSlicedEncoding;
+        SelectMatchingPreset(link);
+        LoadFieldsFrom(link);
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
         LiveStatusText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
 
         var caps = App.Instance.LinkConnection.GetCapabilities();
         MetaLinkPanel.IsEnabled = caps.AllowsMetaLinkRegistry;
+        PresetBox.IsEnabled = caps.AllowsMetaLinkRegistry;
         if (string.IsNullOrWhiteSpace(caps.Banner) || caps.AllowsMetaLinkRegistry)
         {
-            SessionBanner.Visibility = System.Windows.Visibility.Collapsed;
+            SessionBanner.Visibility = Visibility.Collapsed;
             SessionBanner.Text = string.Empty;
         }
         else
         {
-            SessionBanner.Visibility = System.Windows.Visibility.Visible;
+            SessionBanner.Visibility = Visibility.Visible;
             SessionBanner.Text = caps.Banner;
         }
+
+        _loading = false;
+        UpdatePresetHint();
+    }
+
+    private void PresetBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        UpdatePresetHint();
+    }
+
+    private void ApplyPresetFields_Click(object sender, RoutedEventArgs e)
+    {
+        if (PresetBox.SelectedItem is not ComboBoxItem { Tag: LinkPreset preset })
+        {
+            return;
+        }
+
+        _loading = true;
+        LoadFieldsFrom(preset.Settings);
+        _loading = false;
+        LiveStatusText.Text = $"Loaded preset “{preset.Name}” into fields — click Save to write the registry.";
+        App.Instance.Log.Info($"Quest Link preset loaded into fields: {preset.Name}.");
+    }
+
+    private void ApplyPresetSave_Click(object sender, RoutedEventArgs e)
+    {
+        if (PresetBox.SelectedItem is not ComboBoxItem { Tag: LinkPreset preset })
+        {
+            return;
+        }
+
+        _loading = true;
+        LoadFieldsFrom(preset.Settings);
+        _loading = false;
+        Apply(restart: false);
+        LiveStatusText.Text = $"Applied preset “{preset.Name}”. " + LiveStatusText.Text;
     }
 
     private void Save_Click(object sender, RoutedEventArgs e) => Apply(restart: false);
@@ -120,6 +172,20 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         {
             LiveStatusText.Text = summary;
         }
+    }
+
+    private void LoadFieldsFrom(LinkSettings link)
+    {
+        SelectByTag(EncodeWidthBox, link.EncodeResolutionWidth);
+        SelectByTag(BitrateBox, link.BitrateMbps);
+        SelectByTag(DynamicBox, link.EncodeDynamicBitrate);
+        SelectByTag(DynamicMaxBox, link.DynamicBitrateMax);
+        SelectByTag(DynamicOffsetBox, link.DynamicBitrateOffsetMbps);
+        SelectByTag(SharpenBox, link.Sharpening);
+        SelectByTag(DistortionBox, link.DistortionCurvature);
+        SelectByTag(MobileAswBox, link.MobileAsw);
+        HevcBox.IsChecked = link.PreferHevc;
+        SlicesBox.IsChecked = link.DisableSlicedEncoding;
     }
 
     private void WriteToSettings()
@@ -167,7 +233,43 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
 
         link.PreferHevc = HevcBox.IsChecked == true;
         link.DisableSlicedEncoding = SlicesBox.IsChecked == true;
+        if (PresetBox.SelectedItem is ComboBoxItem { Tag: LinkPreset preset })
+        {
+            link.PresetName = preset.Name;
+        }
+        else
+        {
+            link.PresetName = "Custom";
+        }
+
         App.Instance.Settings.Current.ApplyLinkSettingsOnStart = ApplyOnStartBox.IsChecked == true;
+    }
+
+    private void SelectMatchingPreset(LinkSettings link)
+    {
+        foreach (ComboBoxItem item in PresetBox.Items)
+        {
+            if (item.Tag is LinkPreset preset
+                && string.Equals(preset.Name, link.PresetName, StringComparison.OrdinalIgnoreCase))
+            {
+                PresetBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        // Leave current selection; fields still load from settings.
+    }
+
+    private void UpdatePresetHint()
+    {
+        if (PresetBox.SelectedItem is ComboBoxItem { Tag: LinkPreset preset })
+        {
+            PresetHintText.Text = preset.Description;
+        }
+        else
+        {
+            PresetHintText.Text = string.Empty;
+        }
     }
 
     private static void SelectByTag(System.Windows.Controls.ComboBox box, object tag)

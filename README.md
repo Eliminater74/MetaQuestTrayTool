@@ -153,6 +153,7 @@ Release **[v1.0.4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **OpenXR runtime switch**: Meta / Oculus vs SteamVR via `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` — global preferred + per-game profile override (may prompt for Administrator)
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
 - **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening, distortion curve, dynamic bitrate (DBR / DBR max / offset), Mobile ASW mode via `HKCU\Software\Oculus\RemoteHeadset` — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
+- **Quest Link presets**: Balanced / Performance / Quality / Air Link HEVC / Wired H.264 / Sim on the Quest Link page (fill fields or apply & save)
 - **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**

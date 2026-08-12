@@ -9,6 +9,19 @@
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
+      <TextBlock Text="Global Link presets" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Pick a preset to fill the fields below, then Save (or Save &amp; Restart Service) to write the registry. Does not change game SS/ASW profiles."/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <ComboBox x:Name="PresetBox" MinWidth="220" MaxWidth="320" Padding="6"
+                  SelectionChanged="PresetBox_SelectionChanged"/>
+        <Button Content="Apply to fields" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
+                Click="ApplyPresetFields_Click"/>
+        <Button Content="Apply &amp; save" Style="{StaticResource AccentButtonStyle}" Margin="8,0,0,0"
+                Click="ApplyPresetSave_Click"/>
+      </StackPanel>
+      <TextBlock x:Name="PresetHintText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
+
       <StackPanel x:Name="MetaLinkPanel">
       <Grid>
         <Grid.ColumnDefinitions>
