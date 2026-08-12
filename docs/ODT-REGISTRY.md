@@ -68,6 +68,8 @@ Headset entries include:
 
 The tray **Info** page probes this file, plus Oculus USB VIDs (`VID_2833` / `VID_2BEC`), `server:EnumHmd`, and SteamVR / Virtual Desktop processes for Steam Link / VD sessions.
 
+When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the tray automatically **skips** Meta Link registry writes and OculusDebugToolCLI (SS / ASW / FOV). Headset ADB, OpenXR, power, and audio still run — bitrate/codec for those streamers belongs in their own apps.
+
 ---
 
 ## Runtime commands (not RemoteHeadset)

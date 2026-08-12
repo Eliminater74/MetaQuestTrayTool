@@ -68,6 +68,12 @@ public sealed class HotKeyCommandService
             return blocked;
         }
 
+        var sessionBlock = GuardMetaOdt("ASW change");
+        if (sessionBlock.Length > 0)
+        {
+            return sessionBlock;
+        }
+
         var game = _app.Settings.Current.DefaultGameSettings;
         game.AswMode = mode;
         _app.Settings.Save();
@@ -80,6 +86,12 @@ public sealed class HotKeyCommandService
         if (blocked.Length > 0)
         {
             return blocked;
+        }
+
+        var sessionBlock = GuardMetaOdt("ASW cycle");
+        if (sessionBlock.Length > 0)
+        {
+            return sessionBlock;
         }
 
         var game = _app.Settings.Current.DefaultGameSettings;
@@ -101,6 +113,12 @@ public sealed class HotKeyCommandService
         if (blocked.Length > 0)
         {
             return blocked;
+        }
+
+        var sessionBlock = GuardMetaOdt("Super sampling cycle");
+        if (sessionBlock.Length > 0)
+        {
+            return sessionBlock;
         }
 
         var game = _app.Settings.Current.DefaultGameSettings;
@@ -126,6 +144,12 @@ public sealed class HotKeyCommandService
             return blocked;
         }
 
+        var sessionBlock = GuardMetaOdt("Performance HUD toggle");
+        if (sessionBlock.Length > 0)
+        {
+            return sessionBlock;
+        }
+
         var game = _app.Settings.Current.DefaultGameSettings;
         game.VisualHud = game.VisualHud == VisualHudMode.None
             ? VisualHudMode.Performance
@@ -136,8 +160,25 @@ public sealed class HotKeyCommandService
             : "Perf HUD on");
     }
 
+    private string GuardMetaOdt(string actionLabel)
+    {
+        var caps = _app.LinkConnection.GetCapabilities();
+        if (caps.AllowsOculusDebugTool)
+        {
+            return string.Empty;
+        }
+
+        return $"{actionLabel} skipped — {caps.OdtSkipMessage}";
+    }
+
     private string ApplyGameSettings(string title)
     {
+        var caps = _app.LinkConnection.GetCapabilities();
+        if (!caps.AllowsOculusDebugTool)
+        {
+            return caps.OdtSkipMessage;
+        }
+
         if (!_app.DebugTool.IsAvailable)
         {
             return "OculusDebugToolCLI not found.";

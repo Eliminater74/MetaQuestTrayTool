@@ -387,6 +387,15 @@ public sealed class TrayIconHost : IDisposable
     private void ApplyGameSettings()
     {
         _app.Settings.Save();
+        var caps = _app.LinkConnection.GetCapabilities();
+        if (!caps.AllowsOculusDebugTool)
+        {
+            _app.Log.Info(caps.OdtSkipMessage);
+            Notify("Game Settings", caps.OdtSkipMessage);
+            _shell?.RefreshActivePage();
+            return;
+        }
+
         var result = _app.DebugTool.Apply(_app.Settings.Current.DefaultGameSettings);
 
         if (!result.CliFound || !result.Started)
@@ -616,17 +625,22 @@ public sealed class TrayIconHost : IDisposable
     private void ApplyLinkSettings()
     {
         _app.Settings.Save();
-        var result = _app.Link.Apply(_app.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        if (result.Succeeded)
+        var summary = _app.ApplyMetaLinkSettings(_app.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+        if (summary.Contains("skipped", StringComparison.OrdinalIgnoreCase))
         {
-            _app.Log.Info(result.Summary);
+            _app.Log.Info(summary);
+        }
+        else if (summary.Contains("failed", StringComparison.OrdinalIgnoreCase)
+                 || summary.Contains("error", StringComparison.OrdinalIgnoreCase))
+        {
+            _app.Log.Error(summary);
         }
         else
         {
-            _app.Log.Error(result.Summary);
+            _app.Log.Info(summary);
         }
 
-        Notify("Quest Link", result.Summary);
+        Notify("Quest Link", summary);
         _shell?.RefreshActivePage();
     }
 

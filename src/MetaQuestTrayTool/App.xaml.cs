@@ -297,8 +297,20 @@ public partial class App : System.Windows.Application
 
     public string ApplyProfile(GameProfile profile)
     {
-        var result = DebugTool.Apply(profile.Settings, profile.CustomCommands.CliCommands);
-        var summary = result.Summary;
+        var caps = LinkConnection.GetCapabilities();
+        var parts = new List<string>();
+
+        if (caps.AllowsOculusDebugTool)
+        {
+            var result = DebugTool.Apply(profile.Settings, profile.CustomCommands.CliCommands);
+            parts.Add(result.Summary);
+        }
+        else
+        {
+            parts.Add(caps.OdtSkipMessage);
+            Log.Info(caps.OdtSkipMessage);
+        }
+
         if (profile.CustomCommands.AdbCommands.Count > 0)
         {
             try
@@ -306,42 +318,73 @@ public partial class App : System.Windows.Application
                 var quest = Headset.ReadIdentity(Settings.Current.Headset);
                 if (quest.IsVrHeadset && quest.IsReady && !quest.IsRogue && !string.IsNullOrWhiteSpace(quest.AdbSerial))
                 {
-                    summary += " " + CustomCommands.ApplyAdb(profile.CustomCommands.AdbCommands, quest.AdbSerial);
+                    parts.Add(CustomCommands.ApplyAdb(profile.CustomCommands.AdbCommands, quest.AdbSerial));
                 }
             }
             catch (Exception ex)
             {
-                summary += " Custom ADB skipped: " + ex.Message;
+                parts.Add("Custom ADB skipped: " + ex.Message);
             }
         }
+
         if (profile.Link.HasAny)
         {
-            var merged = profile.Link.Overlay(Settings.Current.LinkSettings);
-            var link = Link.Apply(merged, deleteUnsetOverrides: true);
-            summary += " " + (link.Succeeded
-                ? profile.Link.Describe() + " (reconnect Link if the stream does not change)."
-                : link.Summary);
+            if (caps.AllowsMetaLinkRegistry)
+            {
+                var merged = profile.Link.Overlay(Settings.Current.LinkSettings);
+                var link = Link.Apply(merged, deleteUnsetOverrides: true);
+                parts.Add(link.Succeeded
+                    ? profile.Link.Describe() + " (reconnect Link if the stream does not change)."
+                    : link.Summary);
+            }
+            else
+            {
+                parts.Add(caps.MetaLinkSkipMessage);
+                Log.Info(caps.MetaLinkSkipMessage);
+            }
         }
 
         if (profile.OpenXrRuntime is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
         {
             OpenXr.CaptureBeforeProfile();
-            summary += " " + OpenXr.Set(profile.OpenXrRuntime);
+            parts.Add(OpenXr.Set(profile.OpenXrRuntime));
         }
 
-        return summary;
+        return string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
     }
 
     public string RestoreGlobalDefaults()
     {
+        var caps = LinkConnection.GetCapabilities();
         var parts = new List<string>();
-        if (DebugTool.IsAvailable)
+
+        if (caps.AllowsOculusDebugTool && DebugTool.IsAvailable)
         {
-            parts.Add(ApplyGlobalGameSettings());
+            parts.Add(ApplyGlobalGameSettings(includeOdt: true));
+        }
+        else
+        {
+            if (!caps.AllowsOculusDebugTool)
+            {
+                parts.Add(caps.OdtSkipMessage);
+            }
+
+            var adb = TryApplyCustomAdb(Settings.Current.CustomCommands.AdbCommands);
+            if (!string.IsNullOrWhiteSpace(adb))
+            {
+                parts.Add(adb);
+            }
         }
 
-        var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        parts.Add(link.Summary);
+        if (caps.AllowsMetaLinkRegistry)
+        {
+            var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+            parts.Add(link.Summary);
+        }
+        else
+        {
+            parts.Add(caps.MetaLinkSkipMessage);
+        }
 
         parts.Add(OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime));
 
@@ -351,7 +394,12 @@ public partial class App : System.Windows.Application
             return "Global defaults restored.";
         }
 
-        return $"{summary} Link: {Settings.Current.LinkSettings.Describe()}.";
+        if (caps.AllowsMetaLinkRegistry)
+        {
+            return $"{summary} Link: {Settings.Current.LinkSettings.Describe()}.";
+        }
+
+        return summary;
     }
 
     public string ApplyGlobalBaseline(bool includeLink = true, bool includeOpenXrRestore = false, bool notify = false)
@@ -361,16 +409,36 @@ public partial class App : System.Windows.Application
             return "Global baseline skipped — a personal profile is active.";
         }
 
+        var caps = LinkConnection.GetCapabilities();
         var parts = new List<string>();
-        if (DebugTool.IsAvailable && Settings.Current.ApplyGameSettingsOnStart)
+        if (Settings.Current.ApplyGameSettingsOnStart)
         {
-            parts.Add(ApplyGlobalGameSettings());
+            if (caps.AllowsOculusDebugTool && DebugTool.IsAvailable)
+            {
+                parts.Add(ApplyGlobalGameSettings(includeOdt: true));
+            }
+            else if (!caps.AllowsOculusDebugTool)
+            {
+                parts.Add(caps.OdtSkipMessage);
+                var adb = TryApplyCustomAdb(Settings.Current.CustomCommands.AdbCommands);
+                if (!string.IsNullOrWhiteSpace(adb))
+                {
+                    parts.Add(adb);
+                }
+            }
         }
 
         if (includeLink && Settings.Current.ApplyLinkSettingsOnStart)
         {
-            var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-            parts.Add(link.Summary);
+            if (caps.AllowsMetaLinkRegistry)
+            {
+                var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+                parts.Add(link.Summary);
+            }
+            else
+            {
+                parts.Add(caps.MetaLinkSkipMessage);
+            }
         }
 
         if (includeOpenXrRestore)
@@ -393,17 +461,46 @@ public partial class App : System.Windows.Application
         return summary.Length == 0 ? "Global baseline ready (nothing to push)." : summary;
     }
 
-    public string ApplyGlobalGameSettings()
+    public string ApplyGlobalGameSettings(bool includeOdt = true)
     {
+        var caps = LinkConnection.GetCapabilities();
         var extras = Settings.Current.CustomCommands;
-        var result = DebugTool.Apply(Settings.Current.DefaultGameSettings, extras.CliCommands);
-        var summary = result.Summary;
-        if (extras.AdbCommands.Count > 0)
+        var parts = new List<string>();
+
+        if (includeOdt)
         {
-            summary += " " + TryApplyCustomAdb(extras.AdbCommands);
+            if (!caps.AllowsOculusDebugTool)
+            {
+                parts.Add(caps.OdtSkipMessage);
+                Log.Info(caps.OdtSkipMessage);
+            }
+            else
+            {
+                var result = DebugTool.Apply(Settings.Current.DefaultGameSettings, extras.CliCommands);
+                parts.Add(result.Summary);
+            }
         }
 
-        return summary.Trim();
+        if (extras.AdbCommands.Count > 0)
+        {
+            parts.Add(TryApplyCustomAdb(extras.AdbCommands));
+        }
+
+        return string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
+    }
+
+    /// <summary>Applies Meta Link registry only when the current session uses Meta's pipeline.</summary>
+    public string ApplyMetaLinkSettings(LinkSettings settings, bool deleteUnsetOverrides = true)
+    {
+        var caps = LinkConnection.GetCapabilities();
+        if (!caps.AllowsMetaLinkRegistry)
+        {
+            Log.Info(caps.MetaLinkSkipMessage);
+            return caps.MetaLinkSkipMessage;
+        }
+
+        var result = Link.Apply(settings, deleteUnsetOverrides);
+        return result.Summary;
     }
 
     private string TryApplyCustomAdb(IReadOnlyList<string> commands)

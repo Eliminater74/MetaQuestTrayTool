@@ -96,23 +96,18 @@ public partial class LinkSettingsWindow : Window
         App.Instance.Settings.Current.ApplyLinkSettingsOnStart = ApplyOnStartBox.IsChecked == true;
         App.Instance.Settings.Save();
 
-        var result = App.Instance.Link.Apply(settings, deleteUnsetOverrides: true);
-        if (result.Succeeded)
-        {
-            App.Instance.Log.Info(result.Summary);
-        }
-        else
-        {
-            App.Instance.Log.Error(result.Summary);
-        }
+        var summary = App.Instance.ApplyMetaLinkSettings(settings, deleteUnsetOverrides: true);
+        App.Instance.Log.Info(summary);
 
-        if (restartService)
+        if (restartService && App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
         {
             var serviceResult = App.Instance.Oculus.Restart();
             App.Instance.Log.Info(serviceResult);
+            LiveStatusText.Text = summary + " " + serviceResult;
+            return;
         }
 
-        LiveStatusText.Text = "Live registry: " + App.Instance.Link.ReadCurrent().Describe();
+        LiveStatusText.Text = summary;
     }
 
     private LinkSettings ReadUi()

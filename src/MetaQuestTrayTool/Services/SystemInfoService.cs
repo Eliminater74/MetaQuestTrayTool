@@ -65,6 +65,18 @@ public static class SystemInfoService
         text.AppendLine($"  SteamVR running: {link.SteamVrRunning}");
         text.AppendLine($"  Virtual Desktop running: {link.VirtualDesktopRunning}");
 
+        var caps = VrSessionCapabilities.From(link);
+        text.AppendLine();
+        text.AppendLine("Session capabilities");
+        text.AppendLine($"  Meta Link registry: {caps.AllowsMetaLinkRegistry}");
+        text.AppendLine($"  Oculus Debug Tool (SS/ASW): {caps.AllowsOculusDebugTool}");
+        text.AppendLine($"  OpenXR switch: {caps.AllowsOpenXrSwitch}");
+        text.AppendLine($"  Headset ADB: {caps.AllowsHeadsetAdb}");
+        if (!string.IsNullOrWhiteSpace(caps.Banner))
+        {
+            text.AppendLine($"  Note: {caps.Banner}");
+        }
+
         return text.ToString().TrimEnd();
     }
 

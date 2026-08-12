@@ -6,7 +6,10 @@
       <TextBlock Text="Quest Link" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="These settings are for Quest when using Link / Air Link. Higher encode values need more GPU and PC encode headroom. Written to HKCU\Software\Oculus\RemoteHeadset."/>
+      <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
+                 Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
+      <StackPanel x:Name="MetaLinkPanel">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="220"/>
@@ -63,10 +66,13 @@
       <TextBlock x:Name="LiveStatusText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <StackPanel Orientation="Horizontal">
-        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
-        <Button Content="Save &amp; Restart Service" Style="{StaticResource GhostButtonStyle}" Click="SaveRestart_Click"/>
-        <Button Content="Read live registry" Style="{StaticResource GhostButtonStyle}" Click="ReadLive_Click"/>
+        <Button x:Name="SaveButton" Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"/>
+        <Button x:Name="SaveRestartButton" Content="Save &amp; Restart Service" Style="{StaticResource GhostButtonStyle}" Click="SaveRestart_Click"/>
       </StackPanel>
+      </StackPanel>
+
+      <Button Content="Read live registry" Style="{StaticResource GhostButtonStyle}" Margin="0,8,0,0"
+              HorizontalAlignment="Left" Click="ReadLive_Click"/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

@@ -91,7 +91,30 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
             + "  Writes HKLM\\SOFTWARE\\Khronos\\OpenXR\\1\\ActiveRuntime (may prompt for Administrator).";
         CliCommandsBox.Text = settings.CustomCommands.ToCliText();
         AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
+        ApplySessionCapabilities();
         StatusText.Text = BuildStatus();
+    }
+
+    private void ApplySessionCapabilities()
+    {
+        var caps = App.Instance.LinkConnection.GetCapabilities();
+        MetaOdtPanel.IsEnabled = caps.AllowsOculusDebugTool;
+        CliCommandsLabel.IsEnabled = caps.AllowsOculusDebugTool;
+        CliCommandsHint.IsEnabled = caps.AllowsOculusDebugTool;
+        CliCommandsBox.IsEnabled = caps.AllowsOculusDebugTool;
+        // Apply now still runs ADB when ODT is gated.
+        ApplyNowButton.IsEnabled = true;
+
+        if (string.IsNullOrWhiteSpace(caps.Banner) || !caps.RestrictsMetaPipeline)
+        {
+            SessionBanner.Visibility = Visibility.Collapsed;
+            SessionBanner.Text = string.Empty;
+        }
+        else
+        {
+            SessionBanner.Visibility = Visibility.Visible;
+            SessionBanner.Text = caps.Banner;
+        }
     }
 
     private void Profiles_Click(object sender, RoutedEventArgs e)

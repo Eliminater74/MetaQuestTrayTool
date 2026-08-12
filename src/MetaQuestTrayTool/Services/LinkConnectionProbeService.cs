@@ -140,6 +140,8 @@ public sealed class LinkConnectionProbeService
         };
     }
 
+    public VrSessionCapabilities GetCapabilities() => VrSessionCapabilities.From(Probe());
+
     private VrConnectionStatus ClassifyMetaSession(
         HeadsetCacheEntry? cache,
         bool usb,

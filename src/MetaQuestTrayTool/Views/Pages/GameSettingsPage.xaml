@@ -6,6 +6,8 @@
       <TextBlock Text="Game Settings" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="Global defaults run whenever no personal profile is active — tool start, VR headset connect, and after a game exits. Turn on Auto-apply profiles so matching games swap in their own tweaks automatically."/>
+      <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
+                 Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
       <TextBlock Text="OpenXR runtime" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
@@ -15,7 +17,13 @@
       <CheckBox x:Name="OpenXrOnStartBox" Content="Apply preferred OpenXR runtime when the tool starts" Margin="0,0,0,16"/>
       <TextBlock x:Name="OpenXrStatusText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
-      <Grid>
+      <TextBlock Text="Profiles" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+        <Button Content="View &amp; Edit" Style="{StaticResource AccentButtonStyle}" Click="Profiles_Click"/>
+        <Button Content="Global defaults" Style="{StaticResource GhostButtonStyle}" Click="GlobalDefaults_Click"/>
+      </StackPanel>
+
+      <Grid x:Name="MetaOdtPanel">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="220"/>
           <ColumnDefinition Width="*"/>
@@ -31,54 +39,47 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Profiles" Style="{StaticResource SettingLabelStyle}"/>
-        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
-          <Button Content="View &amp; Edit" Style="{StaticResource AccentButtonStyle}" Click="Profiles_Click"/>
-          <Button Content="Global defaults" Style="{StaticResource GhostButtonStyle}" Click="GlobalDefaults_Click"/>
-        </StackPanel>
+        <TextBlock Grid.Row="0" Text="Default Super Sampling" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="SuperSamplingBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="1" Text="Default Super Sampling" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="SuperSamplingBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="1" Text="Default ASW Mode" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="AswBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="2" Text="Default ASW Mode" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="AswBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="2" Text="Adaptive GPU Scaling" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="AdaptiveGpuBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="3" Text="Adaptive GPU Scaling" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="AdaptiveGpuBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
-
-        <TextBlock Grid.Row="4" Text="FoV Multiplier (H / V)" Style="{StaticResource SettingLabelStyle}"/>
-        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+        <TextBlock Grid.Row="3" Text="FoV Multiplier (H / V)" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
           <TextBox x:Name="FovHBox" Width="80" Padding="6" Margin="0,0,8,0"/>
           <TextBox x:Name="FovVBox" Width="80" Padding="6" Margin="0,0,8,0"/>
           <Button Content="Save" Style="{StaticResource GhostButtonStyle}" Click="SaveFov_Click"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="5" Text="OVR Server Priority" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="PriorityBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="4" Text="OVR Server Priority" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="PriorityBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="6" Text="Force MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="ForceMipBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="5" Text="Force MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="ForceMipBox" Grid.Row="5" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="7" Text="Offset MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="OffsetMipBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="6" Text="Offset MipMap On Layers" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="OffsetMipBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="8" Text="Use FOV Stencil" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="FovStencilBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="7" Text="Use FOV Stencil" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="FovStencilBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="9" Text="Visual HUD" Style="{StaticResource SettingLabelStyle}"/>
-        <ComboBox x:Name="HudBox" Grid.Row="9" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="8" Text="Visual HUD" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="HudBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"/>
 
-        <TextBlock Grid.Row="10" Text="Voice / Homeless" Style="{StaticResource SettingLabelStyle}"/>
-        <TextBlock Grid.Row="10" Grid.Column="1" Margin="0,0,0,10"
+        <TextBlock Grid.Row="9" Text="Voice / Homeless" Style="{StaticResource SettingLabelStyle}"/>
+        <TextBlock Grid.Row="9" Grid.Column="1" Margin="0,0,0,10"
                    Foreground="{DynamicResource AppMutedBrush}"
                    Text="Voice commands live on Tray Tool. Oculus Homeless is not ported yet."/>
       </Grid>
 
-      <TextBlock Text="Custom OculusDebugToolCLI commands" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
-      <TextBlock Style="{StaticResource PageHintStyle}"
+      <TextBlock x:Name="CliCommandsLabel" Text="Custom OculusDebugToolCLI commands" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <TextBlock x:Name="CliCommandsHint" Style="{StaticResource PageHintStyle}"
                  Text="One command per line. Applied with global defaults (Apply now, tool start, and after a personal profile ends)."/>
       <TextBox x:Name="CliCommandsBox" Margin="0,0,0,12" MinHeight="72" AcceptsReturn="True"
                TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
@@ -92,7 +93,7 @@
                  LostFocus="CustomCommands_LostFocus"/>
 
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-        <Button Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
+        <Button x:Name="ApplyNowButton" Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"/>
         <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"/>
         <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"/>
         <CheckBox x:Name="AutoApplyBox" Content="Auto-apply profiles" VerticalAlignment="Center" Margin="16,0,0,0"/>

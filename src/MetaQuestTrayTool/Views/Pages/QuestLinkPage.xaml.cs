@@ -79,6 +79,19 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         SlicesBox.IsChecked = link.DisableSlicedEncoding;
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
         LiveStatusText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
+
+        var caps = App.Instance.LinkConnection.GetCapabilities();
+        MetaLinkPanel.IsEnabled = caps.AllowsMetaLinkRegistry;
+        if (string.IsNullOrWhiteSpace(caps.Banner) || caps.AllowsMetaLinkRegistry)
+        {
+            SessionBanner.Visibility = System.Windows.Visibility.Collapsed;
+            SessionBanner.Text = string.Empty;
+        }
+        else
+        {
+            SessionBanner.Visibility = System.Windows.Visibility.Visible;
+            SessionBanner.Text = caps.Banner;
+        }
     }
 
     private void Save_Click(object sender, RoutedEventArgs e) => Apply(restart: false);
@@ -94,23 +107,19 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
     {
         WriteToSettings();
         App.Instance.Settings.Save();
-        var result = App.Instance.Link.Apply(App.Instance.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-        if (result.Succeeded)
-        {
-            App.Instance.Log.Info(result.Summary);
-        }
-        else
-        {
-            App.Instance.Log.Error(result.Summary);
-        }
+        var summary = App.Instance.ApplyMetaLinkSettings(App.Instance.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+        App.Instance.Log.Info(summary);
 
-        if (restart)
+        if (restart && App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
         {
             var serviceResult = App.Instance.Oculus.Restart();
             App.Instance.Log.Info(serviceResult);
+            LiveStatusText.Text = summary + " " + serviceResult;
         }
-
-        LiveStatusText.Text = result.Summary;
+        else
+        {
+            LiveStatusText.Text = summary;
+        }
     }
 
     private void WriteToSettings()
