@@ -51,9 +51,9 @@ public sealed class TrayIconHost : IDisposable
         if (_app.Settings.Current.ShowNotifications)
         {
             _notifyIcon.ShowBalloonTip(
-                2500,
+                4000,
                 App.AppName,
-                "Running in the notification area. Right-click the tray icon for actions.",
+                "Running in the notification area. Right-click the headset icon to open settings or Exit.",
                 ToolTipIcon.Info);
         }
     }
@@ -66,6 +66,15 @@ public sealed class TrayIconHost : IDisposable
         }
 
         _notifyIcon.ShowBalloonTip(2500, title, message, ToolTipIcon.Info);
+    }
+
+    public void NotifyStillRunning()
+    {
+        _notifyIcon.ShowBalloonTip(
+            4000,
+            App.AppName,
+            "Still running in the notification area. Right-click the headset icon to open settings or Exit.",
+            ToolTipIcon.Info);
     }
 
     public void Dispose()

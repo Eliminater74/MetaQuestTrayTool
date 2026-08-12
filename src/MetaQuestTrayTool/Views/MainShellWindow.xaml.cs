@@ -122,6 +122,7 @@ public partial class MainShellWindow : Window
         {
             e.Cancel = true;
             Hide();
+            App.Instance.NotifyStillRunningInTray();
             return;
         }
 
@@ -136,6 +137,7 @@ public partial class MainShellWindow : Window
         {
             e.Cancel = true;
             Hide();
+            App.Instance.NotifyStillRunningInTray();
         }
         else
         {

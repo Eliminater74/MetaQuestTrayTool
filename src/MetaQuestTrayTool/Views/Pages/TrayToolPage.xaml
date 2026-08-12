@@ -18,7 +18,7 @@
         <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" Click="AudioConfigure_Click"/>
       </StackPanel>
       <CheckBox x:Name="HideAltTabBox" Content="Hide from Alt+Tab" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="MinimizeOnCloseBox" Content="Minimize Tool on X" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="MinimizeOnCloseBox" Content="Close window to tray (stay running)" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <CheckBox x:Name="HotKeysBox" Content="Enable HotKeys" VerticalAlignment="Center" IsEnabled="False"/>
         <Button Content="Configure" Style="{StaticResource GhostButtonStyle}" Margin="12,0,0,0" IsEnabled="False"/>

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Services;
 using MetaQuestTrayTool.Tray;
@@ -9,7 +10,7 @@ namespace MetaQuestTrayTool;
 public partial class App : System.Windows.Application
 {
     public const string AppName = "Meta Quest Tray Tool";
-    private const string MutexName = @"Local\MetaQuestTrayTool.SingleInstance";
+    private const string MutexName = @"Global\MetaQuestTrayTool.SingleInstance";
 
     private Mutex? _singleInstanceMutex;
     private TrayIconHost? _tray;
@@ -46,11 +47,10 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
 
         var restarting = e.Args.Any(arg => string.Equals(arg, "--restart", StringComparison.OrdinalIgnoreCase));
-        _singleInstanceMutex = WaitForSingleInstance(restarting, out var isNewInstance);
-        if (!isNewInstance)
+        if (!TryTakeSingleInstance(restarting, out _singleInstanceMutex))
         {
             System.Windows.MessageBox.Show(
-                $"{AppName} is already running.\nCheck the notification area (system tray).",
+                $"{AppName} is already running in the notification area (system tray).\n\nRight-click the headset icon to open settings or Exit.",
                 AppName,
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
@@ -163,6 +163,8 @@ public partial class App : System.Windows.Application
 
     public void TrayNotify(string title, string message) => _tray?.Notify(title, message);
 
+    public void NotifyStillRunningInTray() => _tray?.NotifyStillRunning();
+
     protected override void OnExit(ExitEventArgs e)
     {
         if (Settings.Current.Service.CloseOculusHomeOnToolExit)
@@ -186,7 +188,15 @@ public partial class App : System.Windows.Application
         _processWatcher?.Dispose();
         _tray?.Dispose();
         Settings.Save();
-        _singleInstanceMutex?.ReleaseMutex();
+        try
+        {
+            _singleInstanceMutex?.ReleaseMutex();
+        }
+        catch (ApplicationException)
+        {
+            // not owned
+        }
+
         _singleInstanceMutex?.Dispose();
         base.OnExit(e);
     }
@@ -196,18 +206,37 @@ public partial class App : System.Windows.Application
         return typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0";
     }
 
-    private static Mutex WaitForSingleInstance(bool restarting, out bool isNewInstance)
+    private static bool TryTakeSingleInstance(bool restarting, out Mutex? mutex)
     {
-        Mutex? mutex = null;
-        isNewInstance = false;
+        mutex = null;
+        if (restarting)
+        {
+            WaitForOtherInstances(TimeSpan.FromSeconds(4));
+        }
+        else if (FindOtherInstance() is not null)
+        {
+            return false;
+        }
+
         var attempts = restarting ? 20 : 1;
         for (var i = 0; i < attempts; i++)
         {
-            mutex?.Dispose();
-            mutex = new Mutex(true, MutexName, out isNewInstance);
-            if (isNewInstance)
+            try
             {
-                return mutex;
+                mutex?.Dispose();
+                mutex = new Mutex(true, MutexName, out var created);
+                if (created)
+                {
+                    return true;
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                mutex = null;
+                if (!restarting)
+                {
+                    return false;
+                }
             }
 
             if (i + 1 < attempts)
@@ -216,7 +245,23 @@ public partial class App : System.Windows.Application
             }
         }
 
-        return mutex!;
+        return restarting && FindOtherInstance() is null;
+    }
+
+    private static Process? FindOtherInstance()
+    {
+        var current = Process.GetCurrentProcess();
+        return Process.GetProcessesByName(current.ProcessName)
+            .FirstOrDefault(process => process.Id != current.Id);
+    }
+
+    private static void WaitForOtherInstances(TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline && FindOtherInstance() is not null)
+        {
+            Thread.Sleep(100);
+        }
     }
 
     public string ApplyProfile(GameProfile profile)
