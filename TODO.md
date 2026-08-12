@@ -151,6 +151,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Prefer SteamVR over Meta Wi‑Fi auto-connect DeviceCache
 - [x] Tag and publish **v1.0.6**
 - [x] Dash → SteamVR (kill Dash + launch SteamVR; hotkey/voice/auto)
+- [x] PreventDashLaunch registry + auto-start SteamVR when enabled
+- [x] CoreChannel flip (LIVE / PublicTest / NO_UPDATES) + optional NO_UPDATES with PreventDash
+- [x] Steam Link gating when EnumHmd sees Meta auto-connect
+- [x] Tag and publish **v1.0.7**
 
 ## Housekeeping
 

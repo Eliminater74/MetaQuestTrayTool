@@ -85,6 +85,6 @@ Use **Test listen once** in Configure to try without leaving the window.
 - Microphone device picker
 - Hotkey profiles per game (global only today)
 
-**Dash → SteamVR** (kill OculusDash + launch SteamVR over Air Link) is available on Service & Startup / Quest Link / tray / hotkey / voice — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller). It does not permanently replace `OculusDash.exe` (use OculusKiller / Dash Manager for that install style).
+**Dash → SteamVR** (kill OculusDash + launch SteamVR over Air Link) is available on Service & Startup / Quest Link / tray / hotkey / voice — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller). Optional **PreventDashLaunch** and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) live on Service & Startup. It does not permanently replace `OculusDash.exe` (use OculusKiller / Dash Manager for that install style).
 
 See [ROADMAP.md](../ROADMAP.md).

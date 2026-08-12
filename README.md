@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.6) (latest) | [MetaQuestTrayTool-Setup-1.0.6.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.6/MetaQuestTrayTool-Setup-1.0.6.exe) |
+| [v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.7) (latest) | [MetaQuestTrayTool-Setup-1.0.7.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.7/MetaQuestTrayTool-Setup-1.0.7.exe) |
+| [v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.6) | [MetaQuestTrayTool-Setup-1.0.6.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.6/MetaQuestTrayTool-Setup-1.0.6.exe) |
 | [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.5) | [MetaQuestTrayTool-Setup-1.0.5.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.5/MetaQuestTrayTool-Setup-1.0.5.exe) |
 | [v1.0.4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.4) | [MetaQuestTrayTool-Setup-1.0.4.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.4/MetaQuestTrayTool-Setup-1.0.4.exe) |
 | [v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.3) | [MetaQuestTrayTool-Setup-1.0.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.3/MetaQuestTrayTool-Setup-1.0.3.exe) |
@@ -137,7 +138,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** prefers Steam Link / SteamVR over Meta’s Wi‑Fi auto-connect DeviceCache, plus v1.0.5 Link/ADB logging and Quest Link presets.
+Release **[v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds Dash → SteamVR (kill Dash / PreventDashLaunch / CoreChannel), Steam Link gating fixes, and the v1.0.6 auto-connect detection stack.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -153,7 +154,7 @@ Release **[v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - Create / edit / delete / apply **profiles** from the tray or shell
 - Personal profiles can override **Link sharpening / bitrate / encode width** (inherit keeps global Quest Link settings; restored when the game exits)
 - **OpenXR runtime switch**: Meta / Oculus vs SteamVR via `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` — global preferred + per-game profile override (may prompt for Administrator)
-- **Dash → SteamVR**: after Meta Air Link / Link connects, kill Oculus Dash and launch SteamVR (button / tray / Ctrl+Num 0 / voice “kill dash”) so SteamVR games run over Link — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller); optional auto-on-connect and **PreventDashLaunch** registry toggle on Service & Startup
+- **Dash → SteamVR**: after Meta Air Link / Link connects, kill Oculus Dash and launch SteamVR (button / tray / Ctrl+Num 0 / voice “kill dash”) so SteamVR games run over Link — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller); optional auto-on-connect, **PreventDashLaunch**, and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
 - **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening, distortion curve, dynamic bitrate (DBR / DBR max / offset), Mobile ASW mode via `HKCU\Software\Oculus\RemoteHeadset` — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
 - **Quest Link presets**: Balanced / Performance / Quality / Air Link HEVC / Wired H.264 / Sim on the Quest Link page (fill fields or apply & save)

@@ -116,7 +116,7 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
 - [ ] Voice polish (custom phrases, always-on tuning, mic picker)
 - [ ] Oculus Homeless
-- [x] Dash → SteamVR (kill Dash + launch SteamVR over Meta Link; hotkey/voice/auto)
+- [x] Dash → SteamVR (kill Dash + launch SteamVR; PreventDashLaunch; CoreChannel LIVE/PublicTest/NO_UPDATES; hotkey/voice/auto)
 
 ### Post v1.0.0 (v1.0.1)
 
@@ -137,6 +137,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tag **v1.0.5**
 - [x] Prefer SteamVR over Meta Wi‑Fi auto-connect DeviceCache
 - [x] Tag **v1.0.6**
+- [x] Dash → SteamVR + PreventDashLaunch + CoreChannel
+- [x] Tag **v1.0.7**
 
 ## Later
 
