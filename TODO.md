@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -211,6 +211,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Fix Game Settings OpenXR checkboxes wiped on Refresh
 - [x] Bump version to **1.0.14**
 - [x] Tag and publish **v1.0.14**
+- [x] Audio switcher: leave boot audio alone; switch only on PCVR start/end
+- [x] Bump version to **1.0.15**
+- [x] Tag and publish **v1.0.15**
 
 ### Housekeeping (ongoing)
 

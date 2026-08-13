@@ -46,7 +46,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.14) (latest) | [MetaQuestTrayTool-Setup-1.0.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.14/MetaQuestTrayTool-Setup-1.0.14.exe) |
+| [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.15) (latest) | [MetaQuestTrayTool-Setup-1.0.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.15/MetaQuestTrayTool-Setup-1.0.15.exe) |
+| [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.14) | [MetaQuestTrayTool-Setup-1.0.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.14/MetaQuestTrayTool-Setup-1.0.14.exe) |
 | [v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.13) | [MetaQuestTrayTool-Setup-1.0.13.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.13/MetaQuestTrayTool-Setup-1.0.13.exe) |
 | [v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.12) | [MetaQuestTrayTool-Setup-1.0.12.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.12/MetaQuestTrayTool-Setup-1.0.12.exe) |
 | [v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.11) | [MetaQuestTrayTool-Setup-1.0.11.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.11/MetaQuestTrayTool-Setup-1.0.11.exe) |
@@ -150,7 +151,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Fixes: taller main shell so sidebar **Info** is not clipped; Game Settings OpenXR checkboxes now persist across Refresh. v1.0.13 removed obsolete Oculus Home and added on-demand **SteamVR Home**.
+Release **[v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Audio switcher leaves boot/desktop devices alone until a PCVR session starts, then restores fallback when it ends. v1.0.14 fixed shell height (Info visible) and OpenXR checkbox persist.
 
 ### Shell & tray
 
