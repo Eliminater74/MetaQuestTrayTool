@@ -162,6 +162,34 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         });
     }
 
+    private void WirelessPair_Click(object sender, RoutedEventArgs e)
+    {
+        Persist_Changed(this, new RoutedEventArgs());
+        Run(() =>
+        {
+            var host = (WirelessHostBox.Text ?? string.Empty).Trim();
+            if (host.Length == 0)
+            {
+                throw new InvalidOperationException("Enter the headset LAN IP first.");
+            }
+
+            if (!int.TryParse(PairingPortBox.Text?.Trim(), System.Globalization.NumberStyles.Integer,
+                    System.Globalization.CultureInfo.InvariantCulture, out var pairingPort)
+                || pairingPort is < 1 or > 65535)
+            {
+                throw new InvalidOperationException(
+                    "Enter the pairing port from Wireless debugging → Pair device with pairing code.");
+            }
+
+            var code = (PairingCodeBox.Text ?? string.Empty).Trim();
+            var summary = App.Instance.Adb.PairWireless(host, pairingPort, code);
+            App.Instance.Settings.Current.Headset.WirelessHost = host;
+            App.Instance.Settings.Save();
+            PairingCodeBox.Text = string.Empty;
+            return summary;
+        });
+    }
+
     private void WirelessDisconnect_Click(object sender, RoutedEventArgs e)
     {
         Persist_Changed(this, new RoutedEventArgs());

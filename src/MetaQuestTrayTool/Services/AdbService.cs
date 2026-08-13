@@ -203,12 +203,56 @@ public sealed class AdbService
             throw new InvalidOperationException(
                 $"Could not connect to {endpoint}. {TrimAdbNoise(output)} "
                 + "Same Wi‑Fi as the PC? For classic mode: plug USB → Enable tcpip → unplug → Connect. "
-                + "Or use the port from Quest Settings → Developer → Wireless debugging.");
+                + "Or Pair with the Wireless debugging code, then Connect with the connect port.");
         }
 
         return output.Contains("already connected", StringComparison.OrdinalIgnoreCase)
             ? $"Already connected to {endpoint}."
             : $"Connected to {endpoint}. {TrimAdbNoise(output)}".Trim();
+    }
+
+    /// <summary>
+    /// Quest Wireless debugging: <c>adb pair host:pairingPort code</c>.
+    /// Pairing port + 6-digit code come from Pair device with pairing code; then use Connect with the connect port.
+    /// </summary>
+    public string PairWireless(string host, int pairingPort, string pairingCode)
+    {
+        host = (host ?? string.Empty).Trim();
+        pairingCode = (pairingCode ?? string.Empty).Trim().Replace(" ", "", StringComparison.Ordinal);
+        if (host.Length == 0)
+        {
+            throw new InvalidOperationException("Enter the headset LAN IP first.");
+        }
+
+        if (pairingPort is < 1 or > 65535)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pairingPort), "Pairing port must be 1–65535.");
+        }
+
+        if (pairingCode.Length is < 5 or > 8 || !pairingCode.All(char.IsDigit))
+        {
+            throw new InvalidOperationException("Enter the 6-digit pairing code from Wireless debugging → Pair device.");
+        }
+
+        var endpoint = FormatEndpoint(host, pairingPort);
+        // adb pair IP:PORT CODE — code is a separate argv, not part of the endpoint.
+        var output = Run($"pair {endpoint} {pairingCode}");
+        InvalidateDeviceCache();
+
+        if (output.Contains("failed", StringComparison.OrdinalIgnoreCase)
+            || output.Contains("error", StringComparison.OrdinalIgnoreCase)
+            || output.Contains("incorrect", StringComparison.OrdinalIgnoreCase)
+            || output.Contains("refused", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Pairing failed for {endpoint}. {TrimAdbNoise(output)} "
+                + "Open Pair device with pairing code again (port/code expire quickly), then retry.");
+        }
+
+        var trimmed = TrimAdbNoise(output);
+        return string.IsNullOrWhiteSpace(trimmed)
+            ? $"Paired with {endpoint}. Now Connect using the Wireless debugging connect port (not the pairing port)."
+            : $"Paired with {endpoint}. {trimmed} — next: Connect with the connect port shown under Wireless debugging.";
     }
 
     public string DisconnectWireless(string? host = null, int? port = null)

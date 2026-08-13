@@ -19,7 +19,7 @@
 
       <TextBlock Text="Wireless ADB" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Same Wi‑Fi as the PC. Classic path: plug USB once → Enable tcpip → unplug → Connect. Or paste the IP/port from Quest Settings → Developer → Wireless debugging."/>
+                 Text="Same Wi‑Fi as the PC. Classic: USB → Enable tcpip → unplug → Connect. Or Quest Settings → Developer → Wireless debugging: Pair with code once, then Connect with the connect port."/>
       <Grid Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="200"/>
@@ -28,19 +28,31 @@
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="Host (LAN IP)" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <TextBox x:Name="WirelessHostBox" Grid.Row="0" Grid.Column="1" MaxWidth="280" HorizontalAlignment="Left"
                  Padding="6" Margin="0,0,0,8" LostFocus="Persist_Changed"
                  ToolTip="Headset Wi‑Fi IPv4, e.g. 192.168.1.40. Do not use Air Link alone — wireless ADB is separate."/>
-        <TextBlock Grid.Row="1" Text="Port" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBlock Grid.Row="1" Text="Connect port" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <TextBox x:Name="WirelessPortBox" Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left"
                  Padding="6" Margin="0,0,0,8" LostFocus="Persist_Changed"
-                 ToolTip="5555 after Enable tcpip. Wireless debugging uses the connect port shown in the headset (not always 5555)."/>
+                 ToolTip="5555 after Enable tcpip. Wireless debugging uses the connect port on the main Wireless debugging screen (not the pairing port)."/>
+        <TextBlock Grid.Row="2" Text="Pairing port" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="PairingPortBox" Grid.Row="2" Grid.Column="1" Width="100" HorizontalAlignment="Left"
+                 Padding="6" Margin="0,0,0,8"
+                 ToolTip="From Wireless debugging → Pair device with pairing code. Expires quickly; only needed for Pair."/>
+        <TextBlock Grid.Row="3" Text="Pairing code" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="PairingCodeBox" Grid.Row="3" Grid.Column="1" Width="120" HorizontalAlignment="Left"
+                 Padding="6" Margin="0,0,0,8" MaxLength="8"
+                 ToolTip="6-digit code shown with the pairing port. Not saved — enter fresh each pair."/>
       </Grid>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="Pair" Style="{StaticResource AccentButtonStyle}" Click="WirelessPair_Click"
+                ToolTip="adb pair host:pairingPort code. Do this once (or after forgetting the device), then Connect with the connect port."/>
         <Button Content="Connect" Style="{StaticResource AccentButtonStyle}" Click="WirelessConnect_Click"
-                ToolTip="adb connect host:port. Remembered for next time. Trust still uses the hardware serial from getprop."/>
+                ToolTip="adb connect host:connectPort. Remembered for next time. Trust still uses the hardware serial from getprop."/>
         <Button Content="Disconnect" Style="{StaticResource GhostButtonStyle}" Click="WirelessDisconnect_Click"
                 ToolTip="adb disconnect for this host:port (leaves USB devices alone when possible)."/>
         <Button Content="Enable tcpip (USB)" Style="{StaticResource GhostButtonStyle}" Click="WirelessTcpip_Click"
