@@ -137,13 +137,6 @@ public static class VrToolCatalog
             Summary = "Official Meta tool for Device Manager, casting, and developer workflows.",
             Url = "https://developers.meta.com/horizon/downloads/package/oculus-developer-hub/"
         },
-        new VrToolLink
-        {
-            Name = "Quest Games Optimizer",
-            Category = "Quest & sideloading",
-            Summary = "Community tool to tune per-game resolution / refresh on standalone Quest titles.",
-            Url = "https://sidequestvr.com/app/21783/quest-games-optimizer"
-        },
 
         // Tracking & calibration
         new VrToolLink
