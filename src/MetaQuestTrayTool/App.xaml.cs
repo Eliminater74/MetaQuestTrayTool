@@ -51,6 +51,7 @@ public partial class App : System.Windows.Application
     public GameLaunchService GameLaunch { get; }
     public OverlayCloseService OverlayClose { get; }
     public SteamVrInstallService SteamVrInstall { get; } = new();
+    public StatusDashboardService StatusDashboard { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -75,6 +76,7 @@ public partial class App : System.Windows.Application
         SessionRecover = new SessionRecoverService(this);
         GameLaunch = new GameLaunchService(this);
         OverlayClose = new OverlayCloseService(this);
+        StatusDashboard = new StatusDashboardService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)

@@ -60,6 +60,9 @@
                      FontWeight="SemiBold"
                      Foreground="{DynamicResource AppAccentBrush}"/>
 
+          <RadioButton x:Name="NavStatus" Content="Status" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Status"
+                       ToolTip="Live PCVR status board — SteamVR, OpenXR, Link, service, profiles, and more. Opens first."/>
           <RadioButton x:Name="NavGame" Content="Game Settings" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"
                        ToolTip="OpenXR runtime, global ODT defaults (SS/ASW/FOV), and personal profiles."/>
@@ -84,12 +87,12 @@
           <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"
                        ToolTip="ADB tweaks for your trusted Quest. Props do not survive reboot — apply on connect."/>
-          <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"
-                       ToolTip="Live Link, OpenXR, and headset diagnostics report."/>
           <RadioButton x:Name="NavVrTools" Content="VR Tools" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="VrTools"
                        ToolTip="Curated links to Revive, Advanced Settings, overlays, wireless PCVR, and more."/>
+          <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"
+                       ToolTip="Full diagnostics report, PCVR Ready checklist, and copy/export helpers."/>
         </StackPanel>
       </DockPanel>
     </Border>

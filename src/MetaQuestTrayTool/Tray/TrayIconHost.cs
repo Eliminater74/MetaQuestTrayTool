@@ -1148,6 +1148,7 @@ public sealed class TrayIconHost : IDisposable
         _shell.Show();
         _shell.Activate();
         _shell.WindowState = WindowState.Normal;
+        _shell.ShowPage("Status");
         _shell.RefreshActivePage();
     }
 

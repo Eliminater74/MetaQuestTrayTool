@@ -7,6 +7,7 @@ namespace MetaQuestTrayTool.Views;
 
 public partial class MainShellWindow : Window
 {
+    private readonly StatusPage _statusPage = new();
     private readonly GameSettingsPage _gamePage = new();
     private readonly TrayToolPage _trayPage = new();
     private readonly PowerOptionsPage _powerPage = new();
@@ -25,13 +26,14 @@ public partial class MainShellWindow : Window
         AuthorText.Text = $"By {AppInfo.Author}";
         VersionText.Text = $"v{App.GetVersion()}";
         ApplyAltTabPreference();
-        NavGame.IsChecked = true;
+        NavStatus.IsChecked = true;
     }
 
     public void ShowPage(string tag)
     {
         var nav = tag switch
         {
+            "Status" => NavStatus,
             "Tray" => NavTray,
             "Power" => NavPower,
             "Service" => NavService,
@@ -41,7 +43,8 @@ public partial class MainShellWindow : Window
             "Headset" => NavHeadset,
             "Info" => NavInfo,
             "VrTools" => NavVrTools,
-            _ => NavGame
+            "Game" => NavGame,
+            _ => NavStatus
         };
         nav.IsChecked = true;
         Activate();
@@ -73,6 +76,7 @@ public partial class MainShellWindow : Window
 
         System.Windows.Controls.UserControl page = tag switch
         {
+            "Status" => _statusPage,
             "Tray" => _trayPage,
             "Power" => _powerPage,
             "Service" => _servicePage,
@@ -82,11 +86,13 @@ public partial class MainShellWindow : Window
             "Headset" => _headsetPage,
             "Info" => _infoPage,
             "VrTools" => _vrToolsPage,
-            _ => _gamePage
+            "Game" => _gamePage,
+            _ => _statusPage
         };
 
         PageHeaderText.Text = tag switch
         {
+            "Status" => "Status",
             "Tray" => "Tray Tool",
             "Power" => "Power Options",
             "Service" => "Service & Startup",
@@ -96,7 +102,8 @@ public partial class MainShellWindow : Window
             "Headset" => "Headset",
             "Info" => "Info",
             "VrTools" => "VR Tools",
-            _ => "Game Settings"
+            "Game" => "Game Settings",
+            _ => "Status"
         };
 
         // Paint the page first, then refresh off the click handler so sidebar feels instant.

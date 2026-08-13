@@ -1,0 +1,111 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.StatusPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
+  <UserControl.Resources>
+    <Style x:Key="StatusChipActionStyle" TargetType="Button" BasedOn="{StaticResource GhostButtonStyle}">
+      <Setter Property="Padding" Value="10,4"/>
+      <Setter Property="Margin" Value="0,8,0,0"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="MinWidth" Value="72"/>
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <DockPanel Margin="0,0,0,12">
+        <Button DockPanel.Dock="Right" Content="Refresh" Style="{StaticResource GhostButtonStyle}"
+                Click="Refresh_Click" Margin="0"
+                ToolTip="Re-read SteamVR, OpenXR, Link, OVRService, ADB, and other live status."/>
+        <StackPanel>
+          <TextBlock Text="Status" Style="{StaticResource PageTitleStyle}" Margin="0,0,0,4"/>
+          <TextBlock Style="{StaticResource PageHintStyle}" Margin="0"
+                     Text="Live PCVR snapshot. Glowing tiles are active; dim tiles are idle or off. Info (bottom of the sidebar) still has the full diagnostics report."/>
+        </StackPanel>
+      </DockPanel>
+
+      <Border Background="{DynamicResource AppFieldBrush}"
+              BorderBrush="{DynamicResource AppAccentBrush}"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="14,12"
+              Margin="0,0,0,16">
+        <StackPanel>
+          <TextBlock x:Name="HeadlineText" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap"
+                     Foreground="{DynamicResource AppAccentBrush}"/>
+          <TextBlock x:Name="SubheadText" Margin="0,4,0,0" TextWrapping="Wrap"
+                     Foreground="{DynamicResource AppMutedBrush}"/>
+        </StackPanel>
+      </Border>
+
+      <ItemsControl x:Name="ChipsList">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border x:Name="ChipBorder" Width="220" MinHeight="118" Margin="0,0,12,12" Padding="14,12"
+                    CornerRadius="12"
+                    BorderThickness="1.5"
+                    Opacity="{Binding TileOpacity}"
+                    Background="{Binding TileBackground}"
+                    BorderBrush="{Binding AccentBrush}"
+                    ToolTip="{Binding Detail}">
+              <DockPanel>
+                <Button DockPanel.Dock="Bottom"
+                        Content="{Binding ActionLabel}"
+                        Style="{StaticResource StatusChipActionStyle}"
+                        Visibility="{Binding ActionVisibility}"
+                        Tag="{Binding ActionId}"
+                        Click="ChipAction_Click"
+                        HorizontalAlignment="Left"/>
+                <StackPanel>
+                  <DockPanel>
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding KindLabel}"
+                               FontSize="10" FontWeight="Bold"
+                               Foreground="{Binding AccentBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AppMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                  </DockPanel>
+                  <TextBlock Text="{Binding Value}" FontSize="18" FontWeight="Bold" Margin="0,8,0,0"
+                             TextWrapping="Wrap" Foreground="{Binding AccentBrush}"/>
+                  <TextBlock Text="{Binding Detail}" FontSize="11" Margin="0,6,0,0"
+                             TextWrapping="Wrap" MaxHeight="36" TextTrimming="CharacterEllipsis"
+                             Foreground="{DynamicResource AppMutedBrush}"/>
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <DataTemplate.Triggers>
+              <DataTrigger Binding="{Binding Kind}" Value="On">
+                <Setter TargetName="ChipBorder" Property="Effect">
+                  <Setter.Value>
+                    <DropShadowEffect Color="#3DDCFF" BlurRadius="18" ShadowDepth="0" Opacity="0.85" Direction="270"/>
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+              <DataTrigger Binding="{Binding Kind}" Value="Warn">
+                <Setter TargetName="ChipBorder" Property="Effect">
+                  <Setter.Value>
+                    <DropShadowEffect Color="#FFB020" BlurRadius="16" ShadowDepth="0" Opacity="0.8" Direction="270"/>
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+              <DataTrigger Binding="{Binding Kind}" Value="Fail">
+                <Setter TargetName="ChipBorder" Property="Effect">
+                  <Setter.Value>
+                    <DropShadowEffect Color="#FF5C6C" BlurRadius="16" ShadowDepth="0" Opacity="0.75" Direction="270"/>
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+            </DataTemplate.Triggers>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
