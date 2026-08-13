@@ -27,6 +27,10 @@ public sealed class AdbService
     private IReadOnlyList<AdbDevice>? _cachedDevices;
     private DateTime _cachedDevicesUtc = DateTime.MinValue;
     private static readonly TimeSpan DevicesCache = TimeSpan.FromSeconds(5);
+    private HeadsetRuntimeStatus? _cachedRuntime;
+    private string? _cachedRuntimeSerial;
+    private DateTime _cachedRuntimeUtc = DateTime.MinValue;
+    private static readonly TimeSpan RuntimeCache = TimeSpan.FromSeconds(20);
 
     public void Refresh()
     {
@@ -152,6 +156,9 @@ public sealed class AdbService
         {
             _cachedDevices = null;
             _cachedDevicesUtc = DateTime.MinValue;
+            _cachedRuntime = null;
+            _cachedRuntimeSerial = null;
+            _cachedRuntimeUtc = DateTime.MinValue;
         }
     }
 
@@ -444,7 +451,140 @@ public sealed class AdbService
             IsReady = headset.IsReady,
             IsVrHeadset = true,
             IsTrusted = trusted,
-            IsRogue = rogue
+            IsRogue = rogue,
+            Runtime = headset.IsReady ? ReadRuntimeStatus(headset.Serial) : null
+        };
+    }
+
+    /// <summary>Battery / charge / Wi‑Fi via dumpsys (cached ~20s).</summary>
+    public HeadsetRuntimeStatus ReadRuntimeStatus(string serial, bool force = false)
+    {
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            return new HeadsetRuntimeStatus { Available = false, Error = "no serial" };
+        }
+
+        lock (_cacheLock)
+        {
+            if (!force
+                && _cachedRuntime is not null
+                && string.Equals(_cachedRuntimeSerial, serial, StringComparison.OrdinalIgnoreCase)
+                && DateTime.UtcNow - _cachedRuntimeUtc < RuntimeCache)
+            {
+                return _cachedRuntime;
+            }
+        }
+
+        HeadsetRuntimeStatus status;
+        try
+        {
+            var battery = Shell(serial, "dumpsys battery");
+            var wifi = Shell(serial, "dumpsys wifi");
+            status = ParseRuntimeStatus(battery, wifi);
+        }
+        catch (Exception ex)
+        {
+            status = new HeadsetRuntimeStatus { Available = false, Error = ex.Message };
+        }
+
+        lock (_cacheLock)
+        {
+            _cachedRuntime = status;
+            _cachedRuntimeSerial = serial;
+            _cachedRuntimeUtc = DateTime.UtcNow;
+        }
+
+        return status;
+    }
+
+    private static HeadsetRuntimeStatus ParseRuntimeStatus(string batteryDump, string wifiDump)
+    {
+        int? level = null;
+        bool? charging = null;
+        string? chargeStatus = null;
+
+        foreach (var raw in batteryDump.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = raw.Trim();
+            if (line.StartsWith("level:", StringComparison.OrdinalIgnoreCase)
+                && int.TryParse(line["level:".Length..].Trim(), out var pct))
+            {
+                level = Math.Clamp(pct, 0, 100);
+            }
+            else if (line.StartsWith("status:", StringComparison.OrdinalIgnoreCase))
+            {
+                var code = line["status:".Length..].Trim();
+                // Android BatteryManager: 2=charging, 3=discharging, 5=full, 4=not charging
+                chargeStatus = code switch
+                {
+                    "2" => "Charging",
+                    "3" => "Discharging",
+                    "4" => "Not charging",
+                    "5" => "Full",
+                    _ => code
+                };
+                charging = code is "2" or "5";
+            }
+            else if (line.StartsWith("AC powered:", StringComparison.OrdinalIgnoreCase)
+                     || line.StartsWith("USB powered:", StringComparison.OrdinalIgnoreCase)
+                     || line.StartsWith("Wireless powered:", StringComparison.OrdinalIgnoreCase))
+            {
+                if (line.EndsWith("true", StringComparison.OrdinalIgnoreCase))
+                {
+                    charging = true;
+                }
+            }
+        }
+
+        string? ssid = null;
+        int? rssi = null;
+        foreach (var raw in wifiDump.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+        {
+            var line = raw.Trim();
+            if (ssid is null
+                && (line.Contains("SSID:", StringComparison.OrdinalIgnoreCase)
+                    || line.Contains("ssid:", StringComparison.OrdinalIgnoreCase)))
+            {
+                var idx = line.IndexOf("SSID:", StringComparison.OrdinalIgnoreCase);
+                if (idx < 0)
+                {
+                    idx = line.IndexOf("ssid:", StringComparison.OrdinalIgnoreCase);
+                }
+
+                if (idx >= 0)
+                {
+                    var value = line[(idx + 5)..].Trim().Trim(',', ' ', '"');
+                    if (!string.IsNullOrWhiteSpace(value)
+                        && !value.Equals("<unknown ssid>", StringComparison.OrdinalIgnoreCase)
+                        && !value.Equals("0x", StringComparison.OrdinalIgnoreCase)
+                        && !value.Equals("null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ssid = value;
+                    }
+                }
+            }
+
+            if (rssi is null && line.Contains("RSSI:", StringComparison.OrdinalIgnoreCase))
+            {
+                var idx = line.IndexOf("RSSI:", StringComparison.OrdinalIgnoreCase);
+                var token = line[(idx + 5)..].Trim().Split(' ', ',', ';')[0];
+                if (int.TryParse(token, out var r))
+                {
+                    rssi = r;
+                }
+            }
+        }
+
+        var available = level is not null || ssid is not null || rssi is not null;
+        return new HeadsetRuntimeStatus
+        {
+            Available = available,
+            BatteryPercent = level,
+            IsCharging = charging,
+            ChargeStatus = chargeStatus,
+            WifiSsid = ssid,
+            WifiRssi = rssi,
+            Error = available ? null : "battery/Wi‑Fi dumpsys returned no fields"
         };
     }
 

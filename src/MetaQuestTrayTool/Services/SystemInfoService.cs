@@ -101,6 +101,30 @@ public static class SystemInfoService
         text.AppendLine($"  Trust required: {app.Settings.Current.Headset.RequireTrustedHeadset}");
         text.AppendLine($"  This device trusted: {headset.IsTrusted}");
         text.AppendLine($"  Rogue / blocked: {headset.IsRogue}");
+        if (headset.Runtime is { } runtime)
+        {
+            text.AppendLine($"  Battery / Wi‑Fi: {runtime.Summary}");
+            if (runtime.BatteryPercent is int pct)
+            {
+                text.AppendLine($"  Battery percent: {pct}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(runtime.ChargeStatus))
+            {
+                text.AppendLine($"  Charge status: {runtime.ChargeStatus}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(runtime.WifiSsid))
+            {
+                text.AppendLine($"  Wi‑Fi SSID: {runtime.WifiSsid}");
+            }
+
+            if (runtime.WifiRssi is int rssi)
+            {
+                text.AppendLine($"  Wi‑Fi RSSI: {rssi} dBm");
+            }
+        }
+
         if (app.DebugTool.LastHeadsetSerials.Count > 0)
         {
             text.AppendLine($"  Last Debug Tool serials: {string.Join(", ", app.DebugTool.LastHeadsetSerials)}");

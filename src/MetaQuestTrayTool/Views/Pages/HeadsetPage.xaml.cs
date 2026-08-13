@@ -237,6 +237,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         var identity = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
         TrustText.Text = identity.Summary;
         StatusText.Text = App.Instance.Adb.DescribeStatus();
+        RuntimeText.Text = identity.IsReady && identity.IsVrHeadset
+            ? "Battery / Wi‑Fi: " + (identity.Runtime?.Summary ?? "reading…")
+            : "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
     }
 
     private void Run(Func<string> action)

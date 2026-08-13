@@ -10,7 +10,9 @@
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="SideQuest-style tweaks over ADB for VR headsets only (Quest 2/3/3S/Pro, Samsung Galaxy XR, HTC Vive standalone, Pico, Steam Frame). Phones, tablets, and emulators are ignored and never receive commands. Meta does not keep these after a reboot — leave apply-on-connect on so the tray pushes them again in VR."/>
 
-      <TextBlock x:Name="StatusText" Margin="0,0,0,12" FontWeight="SemiBold" TextWrapping="Wrap"/>
+      <TextBlock x:Name="StatusText" Margin="0,0,0,4" FontWeight="SemiBold" TextWrapping="Wrap"/>
+      <TextBlock x:Name="RuntimeText" Margin="0,0,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
+                 ToolTip="Battery and Wi‑Fi from ADB dumpsys when the headset is connected for debugging."/>
       <CheckBox x:Name="ApplyOnConnectBox" Content="Apply these settings automatically when the headset connects"
                 Checked="Persist_Changed" Unchecked="Persist_Changed"
                 ToolTip="Push these ADB props when your trusted headset connects. Meta clears most props on reboot, so leave this on."/>

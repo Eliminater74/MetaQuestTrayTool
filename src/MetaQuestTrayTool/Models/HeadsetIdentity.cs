@@ -17,6 +17,7 @@ public sealed class HeadsetIdentity
     public string? IgnoreReason { get; init; }
     public bool IsTrusted { get; init; }
     public bool IsRogue { get; init; }
+    public HeadsetRuntimeStatus? Runtime { get; init; }
 
     public string Summary
     {
@@ -35,7 +36,8 @@ public sealed class HeadsetIdentity
             var name = Model ?? Device ?? "Headset";
             var serial = Serial ?? AdbSerial ?? "?";
             var trust = IsRogue ? "BLOCKED (not the trusted headset)" : IsTrusted ? "trusted" : "not yet trusted";
-            return $"{name}  ·  {serial}  ·  {trust}";
+            var runtime = Runtime is { Available: true } ? $"  ·  {Runtime.Summary}" : "";
+            return $"{name}  ·  {serial}  ·  {trust}{runtime}";
         }
     }
 
@@ -52,7 +54,8 @@ public sealed class HeadsetIdentity
             var name = Model ?? Device ?? "Headset";
             var serial = Serial ?? AdbSerial ?? "?";
             var trust = IsRogue ? "BLOCKED" : IsTrusted ? "trusted" : "not trusted yet";
-            return $"{name} · {serial} · {trust} · ADB {State ?? "device"}";
+            var runtime = Runtime is { Available: true } ? $" · {Runtime.Summary}" : "";
+            return $"{name} · {serial} · {trust} · ADB {State ?? "device"}{runtime}";
         }
 
         if (link?.SessionActive == true
