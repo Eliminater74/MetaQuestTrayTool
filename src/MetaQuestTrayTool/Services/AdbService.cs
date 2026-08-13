@@ -23,6 +23,10 @@ public sealed class AdbService
 
     public bool IsAvailable => !string.IsNullOrWhiteSpace(AdbPath) && File.Exists(AdbPath);
 
+    private IReadOnlyList<AdbDevice>? _cachedDevices;
+    private DateTime _cachedDevicesUtc = DateTime.MinValue;
+    private static readonly TimeSpan DevicesCache = TimeSpan.FromSeconds(2);
+
     public void Refresh()
     {
         if (!string.IsNullOrWhiteSpace(AdbPath) && File.Exists(AdbPath))
@@ -76,15 +80,26 @@ public sealed class AdbService
         parts.Add(killed == 0
             ? "No adb.exe processes left."
             : $"Killed {killed} adb.exe process(es).");
+        _cachedDevices = null;
+        _cachedDevicesUtc = DateTime.MinValue;
         return string.Join(" ", parts);
     }
 
-    public IReadOnlyList<AdbDevice> ListDevices()
+    public IReadOnlyList<AdbDevice> ListDevices(bool force = false)
     {
+        if (!force
+            && _cachedDevices is not null
+            && DateTime.UtcNow - _cachedDevicesUtc < DevicesCache)
+        {
+            return _cachedDevices;
+        }
+
         Refresh();
         if (!IsAvailable)
         {
-            return [];
+            _cachedDevices = [];
+            _cachedDevicesUtc = DateTime.UtcNow;
+            return _cachedDevices;
         }
 
         var output = Run("devices -l");
@@ -115,6 +130,8 @@ public sealed class AdbService
             });
         }
 
+        _cachedDevices = devices;
+        _cachedDevicesUtc = DateTime.UtcNow;
         return devices;
     }
 

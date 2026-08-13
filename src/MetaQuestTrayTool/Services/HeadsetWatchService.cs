@@ -17,7 +17,7 @@ public sealed class HeadsetWatchService : IDisposable
     public HeadsetWatchService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(6) };
         _timer.Tick += (_, _) => Poll();
     }
 

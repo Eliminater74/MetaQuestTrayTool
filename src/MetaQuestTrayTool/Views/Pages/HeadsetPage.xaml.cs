@@ -82,8 +82,14 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         FullRateBox.IsChecked = headset.FullRateCapture;
         RequireTrustBox.IsChecked = headset.RequireTrustedHeadset;
         CustomAdbBox.Text = string.Join(Environment.NewLine, headset.CustomAdbCommands);
-        UpdateTrustBanner();
         _loading = false;
+
+        // ADB identity is slow — don't block the first paint of this page.
+        StatusText.Text = "Checking ADB…";
+        TrustText.Text = "…";
+        Dispatcher.BeginInvoke(
+            System.Windows.Threading.DispatcherPriority.Background,
+            UpdateTrustBanner);
     }
 
     private void ComboPersist_Changed(object sender, SelectionChangedEventArgs e) => Persist_Changed(sender, e);

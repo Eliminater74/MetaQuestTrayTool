@@ -95,13 +95,16 @@ public partial class MainShellWindow : Window
             _ => "Game Settings"
         };
 
+        // Paint the page first, then refresh off the click handler so sidebar feels instant.
+        // Some Refresh() paths hit ADB / Link probe / ServiceController on the UI thread.
         PageHost.Content = page;
+        UpdateLogNavLabel();
         if (page is IShellPage shellPage)
         {
-            shellPage.Refresh();
+            Dispatcher.BeginInvoke(
+                System.Windows.Threading.DispatcherPriority.Background,
+                shellPage.Refresh);
         }
-
-        UpdateLogNavLabel();
     }
 
     private void UpdateLogNavLabel()

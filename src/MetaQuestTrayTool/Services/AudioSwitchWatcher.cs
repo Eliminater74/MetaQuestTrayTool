@@ -23,7 +23,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(2)
+            Interval = TimeSpan.FromSeconds(3)
         };
         _timer.Tick += (_, _) => Poll();
     }

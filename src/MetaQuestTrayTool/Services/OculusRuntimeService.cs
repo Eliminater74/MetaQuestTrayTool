@@ -16,6 +16,8 @@ public sealed class OculusRuntimeService
     public string ServiceStatus { get; private set; } = "Unknown";
     public bool ServiceExists { get; private set; }
     public bool IsServiceRunning => ServiceStatus.Equals("Running", StringComparison.OrdinalIgnoreCase);
+    private DateTime _lastServiceRefreshUtc = DateTime.MinValue;
+    private static readonly TimeSpan ServiceStatusCache = TimeSpan.FromSeconds(1.5);
 
     public string? DebugToolCliPath =>
         string.IsNullOrWhiteSpace(InstallPath)
@@ -27,10 +29,22 @@ public sealed class OculusRuntimeService
             ? null
             : Path.Combine(InstallPath, "Support", "oculus-diagnostics", "OculusDebugTool.exe");
 
-    public void Refresh()
+    public void Refresh(bool force = false)
     {
-        InstallPath = DetectInstallPath();
-        IsInstalled = !string.IsNullOrWhiteSpace(InstallPath) && Directory.Exists(InstallPath);
+        if (string.IsNullOrWhiteSpace(InstallPath) || force)
+        {
+            InstallPath = DetectInstallPath();
+            IsInstalled = !string.IsNullOrWhiteSpace(InstallPath) && Directory.Exists(InstallPath);
+        }
+        else
+        {
+            IsInstalled = Directory.Exists(InstallPath);
+        }
+
+        if (!force && DateTime.UtcNow - _lastServiceRefreshUtc < ServiceStatusCache)
+        {
+            return;
+        }
 
         try
         {
@@ -44,6 +58,8 @@ public sealed class OculusRuntimeService
             ServiceExists = false;
             ServiceStatus = "Not found";
         }
+
+        _lastServiceRefreshUtc = DateTime.UtcNow;
     }
 
     public string DescribeStatus()
@@ -293,7 +309,7 @@ public sealed class OculusRuntimeService
                 controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
             }
 
-            Refresh();
+            Refresh(force: true);
             return $"{ServiceName} is now {ServiceStatus}.";
         }
         catch (InvalidOperationException ex) when (ex.InnerException is System.ComponentModel.Win32Exception win32

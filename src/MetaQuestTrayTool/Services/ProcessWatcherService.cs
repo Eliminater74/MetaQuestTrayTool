@@ -20,7 +20,7 @@ public sealed class ProcessWatcherService : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(2)
+            Interval = TimeSpan.FromSeconds(3)
         };
         _timer.Tick += (_, _) => Poll();
     }
@@ -58,14 +58,11 @@ public sealed class ProcessWatcherService : IDisposable
 
         try
         {
-            var running = Process.GetProcesses()
-                .Select(process => process.ProcessName)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
+            // Only probe named profile processes — never Process.GetProcesses() (hundreds of
+            // processes × every 2s on the UI thread was burning ~5% CPU on busy PCs).
             if (_activeProcess is not null)
             {
-                if (running.Contains(_activeProcess))
+                if (IsProcessRunning(_activeProcess))
                 {
                     return;
                 }
@@ -82,7 +79,7 @@ public sealed class ProcessWatcherService : IDisposable
             foreach (var profile in _app.Profiles.All)
             {
                 var processName = ProfileService.NormalizeProcessName(profile.ProcessName);
-                if (processName.Length == 0 || !running.Contains(processName))
+                if (processName.Length == 0 || !IsProcessRunning(processName))
                 {
                     continue;
                 }
@@ -94,6 +91,18 @@ public sealed class ProcessWatcherService : IDisposable
         catch (Exception ex)
         {
             _app.Log.Error("Profile watcher failed while scanning processes.", ex);
+        }
+    }
+
+    private static bool IsProcessRunning(string processName)
+    {
+        try
+        {
+            return Process.GetProcessesByName(processName).Length > 0;
+        }
+        catch
+        {
+            return false;
         }
     }
 

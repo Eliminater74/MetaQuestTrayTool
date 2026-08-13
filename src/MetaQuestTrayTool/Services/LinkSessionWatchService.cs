@@ -16,7 +16,7 @@ public sealed class LinkSessionWatchService : IDisposable
     public LinkSessionWatchService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _timer.Tick += (_, _) => Poll();
     }
 

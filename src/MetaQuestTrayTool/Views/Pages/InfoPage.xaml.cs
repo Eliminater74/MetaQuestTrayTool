@@ -7,16 +7,18 @@ namespace MetaQuestTrayTool.Views.Pages;
 public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 {
     private readonly DispatcherTimer _refreshTimer;
+    private bool _fullReportLoaded;
 
     public InfoPage()
     {
         InitializeComponent();
-        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+        // Light banner refresh only — full SystemInfo report is expensive (ADB + probes).
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
         _refreshTimer.Tick += (_, _) =>
         {
             if (IsVisible && IsLoaded)
             {
-                Refresh();
+                RefreshBanners();
             }
         };
         Loaded += (_, _) => _refreshTimer.Start();
@@ -24,6 +26,22 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     }
 
     public void Refresh()
+    {
+        RefreshBanners();
+        ReportBox.Text = "Building report…";
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
+        {
+            if (!IsLoaded)
+            {
+                return;
+            }
+
+            ReportBox.Text = SystemInfoService.BuildReport(includeEnumHmd: false);
+            _fullReportLoaded = true;
+        });
+    }
+
+    private void RefreshBanners()
     {
         // No EnumHmd on the auto-refresh path — it can interfere with Air Link connect.
         var connection = App.Instance.LinkConnection.Probe(includeEnumHmd: false);
@@ -55,7 +73,10 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             SteamTipBanner.Text = steamTip;
         }
 
-        ReportBox.Text = SystemInfoService.BuildReport(includeEnumHmd: false);
+        if (!_fullReportLoaded && string.IsNullOrWhiteSpace(ReportBox.Text))
+        {
+            ReportBox.Text = "Click Refresh for the full report.";
+        }
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();

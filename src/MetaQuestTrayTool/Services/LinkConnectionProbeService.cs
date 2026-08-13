@@ -25,6 +25,10 @@ public sealed class LinkConnectionProbeService
     ];
 
     private readonly App _app;
+    private VrConnectionStatus? _cachedProbe;
+    private bool _cachedIncludeEnumHmd;
+    private long _cachedProbeTicks;
+    private static readonly long ProbeCacheTicks = TimeSpan.FromMilliseconds(750).Ticks;
 
     public LinkConnectionProbeService(App app)
     {
@@ -32,6 +36,23 @@ public sealed class LinkConnectionProbeService
     }
 
     public VrConnectionStatus Probe(bool includeEnumHmd = true)
+    {
+        var now = DateTime.UtcNow.Ticks;
+        if (_cachedProbe is not null
+            && _cachedIncludeEnumHmd == includeEnumHmd
+            && now - _cachedProbeTicks < ProbeCacheTicks)
+        {
+            return _cachedProbe;
+        }
+
+        var status = ProbeCore(includeEnumHmd);
+        _cachedProbe = status;
+        _cachedIncludeEnumHmd = includeEnumHmd;
+        _cachedProbeTicks = now;
+        return status;
+    }
+
+    private VrConnectionStatus ProbeCore(bool includeEnumHmd)
     {
         // Quest Steam Link runs full SteamVR (vrserver). vrmonitor alone can be a leftover UI.
         var steamVr = IsProcessRunning("vrserver")
