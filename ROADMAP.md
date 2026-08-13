@@ -31,7 +31,7 @@ Tray + dashboard push pixel density and ASW through `OculusDebugToolCLI.exe`.
 - [x] Restore defaults when the game exits
 - [x] CPU priority for the detected process
 - [x] Optional Link overrides on personal profiles (sharpening, bitrate, encode width; inherit = keep global)
-- [ ] Ignore-list for noisy processes
+- [x] Ignore-list for noisy processes
 
 ### Phase 3 — Quest Link / Air Link
 
@@ -54,7 +54,7 @@ Writes Meta's own Link registry hive (`HKCU\Software\Oculus\RemoteHeadset`).
 - [x] Restore fallback devices when Link audio disappears
 - [x] Tray + audio settings window
 - [x] Trigger modes: Link audio device (default) or Oculus service
-- [ ] Optional separate communications device pickers in the UI
+- [x] Optional separate communications device pickers in the UI
 
 ### Phase 2 / library polish
 
@@ -150,16 +150,15 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tag **v1.0.10**
 - [x] Thread-safe Link/audio/ADB probe caches (tray menu race fix)
 - [x] Tag **v1.0.11**
+- [x] Steam-first PCVR polish: Ready checklist, battery/Wi‑Fi, session recover, library launch, profile ignore, last-good, comms audio, overlay close, Perf HUD cycle
+- [x] Wireless ADB pairing-code UI
 
 ## Later
 
 - Authenticode code signing for the installer / exe (SmartScreen; when budget allows)
-- Voice polish — custom phrases, mic picker, always-on tuning
-- Wireless debugging **pairing-code** UI (connect + tcpip + auto-reconnect are in)
+- Voice polish — custom phrases, mic picker, always-on confidence tuning
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
-- Profile ignore-list
-- Separate communications audio device pickers in the UI
-- Launch games directly from the library picker
+- Oculus Homeless (largely covered by Dash → SteamVR / PreventDashLaunch)
 
 ## Non-goals for now
 

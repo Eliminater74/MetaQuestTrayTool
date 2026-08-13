@@ -166,6 +166,19 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tag and publish **v1.0.10**
 - [x] Thread-safe Link/audio/ADB caches (fix concurrent Dictionary crash)
 - [x] Tag and publish **v1.0.11**
+- [x] PCVR Ready checklist (Steam-biased)
+- [x] Headset battery / charge / Wi‑Fi via ADB
+- [x] Recover PCVR after Link drop
+- [x] Library / profile Launch (steam://run)
+- [x] Profile ignore list
+- [x] Tray now-playing + Switch OpenXR → SteamVR + SteamVR Video hints
+- [x] Save last-good to active profile
+- [x] Separate communications audio device pickers
+- [x] Auto-close overlays on Link connect
+- [x] Perf HUD tray cycle
+- [x] Wireless ADB pairing-code UI
+- [ ] Voice polish (custom phrases, mic picker, always-on confidence)
+- [ ] Tag and publish **v1.0.12**
 
 ## Housekeeping
 
