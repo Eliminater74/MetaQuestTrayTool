@@ -49,6 +49,10 @@
               Style="{StaticResource GhostButtonStyle}"
               Click="Delete_Click"
               ToolTip="Delete the selected profile from profiles.json."/>
+      <Button Content="Launch"
+              Style="{StaticResource GhostButtonStyle}"
+              Click="Launch_Click"
+              ToolTip="Apply this profile and launch the Steam/Meta title (steam://run when AppId is set)."/>
       <Button Content="Apply"
               Style="{StaticResource GhostButtonStyle}"
               Click="Apply_Click"

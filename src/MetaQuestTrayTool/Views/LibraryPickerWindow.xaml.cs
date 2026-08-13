@@ -84,8 +84,31 @@ public partial class LibraryPickerWindow : Window
     private void Refresh_Click(object sender, RoutedEventArgs e) => Reload();
 
     private void Add_Click(object sender, RoutedEventArgs e) => AcceptSelection();
-    private void GameList_MouseDoubleClick(object sender, MouseButtonEventArgs e) => AcceptSelection();
+    private void GameList_MouseDoubleClick(object sender, MouseButtonEventArgs e) => Launch_Click(sender, e);
     private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
+    private void Launch_Click(object sender, RoutedEventArgs e)
+    {
+        if (GameList.SelectedItem is not LibraryGame game)
+        {
+            System.Windows.MessageBox.Show(this, "Select a game first.", App.AppName);
+            return;
+        }
+
+        try
+        {
+            var summary = App.Instance.GameLaunch.LaunchLibraryGame(game);
+            App.Instance.Log.Info(summary);
+            SelectedGame = game;
+            System.Windows.MessageBox.Show(this, summary, App.AppName);
+            DialogResult = true;
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            System.Windows.MessageBox.Show(this, ex.Message, App.AppName);
+        }
+    }
 
     private void AcceptSelection()
     {

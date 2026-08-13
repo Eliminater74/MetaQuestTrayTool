@@ -11,6 +11,8 @@ public sealed class GameProfile
     public ProfileScope Scope { get; set; } = ProfileScope.Personal;
     public string? AppId { get; set; }
     public string? InstallPath { get; set; }
+    /// <summary>Relative exe name under <see cref="InstallPath"/> (Meta / local launch).</summary>
+    public string? LaunchFile { get; set; }
     public GameSettings Settings { get; set; } = new();
 
     private LinkProfileOverrides _link = new();

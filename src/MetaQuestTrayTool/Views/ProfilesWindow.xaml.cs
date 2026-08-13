@@ -61,6 +61,7 @@ public partial class ProfilesWindow : Window
             Scope = ProfileScope.Personal,
             AppId = game.AppId,
             InstallPath = game.InstallPath,
+            LaunchFile = game.LaunchFile,
             Settings = App.Instance.Settings.Current.DefaultGameSettings.Clone(),
             Comments = $"{game.PlatformLabel} library import"
         };
@@ -145,6 +146,27 @@ public partial class ProfilesWindow : Window
         if (App.Instance.Settings.Current.ShowNotifications)
         {
             App.Instance.TrayNotify("Profile applied", $"{profile.Name} settings are active.");
+        }
+    }
+
+    private void Launch_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedProfile() is not { } profile)
+        {
+            return;
+        }
+
+        try
+        {
+            var summary = App.Instance.GameLaunch.LaunchProfile(profile);
+            App.Instance.Log.Info(summary);
+            System.Windows.MessageBox.Show(this, summary, App.AppName);
+            Reload();
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            System.Windows.MessageBox.Show(this, ex.Message, App.AppName);
         }
     }
 

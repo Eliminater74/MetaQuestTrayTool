@@ -48,6 +48,7 @@ public partial class App : System.Windows.Application
     public GpuDetectionService Gpu { get; } = new();
     public PcvrReadyService PcvrReady { get; }
     public SessionRecoverService SessionRecover { get; }
+    public GameLaunchService GameLaunch { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -69,6 +70,7 @@ public partial class App : System.Windows.Application
         DashToSteamVr = new DashToSteamVrService(this);
         PcvrReady = new PcvrReadyService(this);
         SessionRecover = new SessionRecoverService(this);
+        GameLaunch = new GameLaunchService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)
