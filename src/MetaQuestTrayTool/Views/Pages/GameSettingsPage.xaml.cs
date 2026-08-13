@@ -8,6 +8,8 @@ namespace MetaQuestTrayTool.Views.Pages;
 
 public partial class GameSettingsPage : System.Windows.Controls.UserControl, IShellPage
 {
+    private bool _loading;
+
     public GameSettingsPage()
     {
         InitializeComponent();
@@ -66,50 +68,60 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         SteamLinkOpenXrBox.Unchecked += (_, _) => PersistOpenXr();
         ApplyOnStartBox.Checked += (_, _) => PersistFlags();
         ApplyOnStartBox.Unchecked += (_, _) => PersistFlags();
+        AutoApplyBox.Checked += (_, _) => PersistFlags();
+        AutoApplyBox.Unchecked += (_, _) => PersistFlags();
         FovHBox.LostFocus += (_, _) => PersistIfReady();
         FovVBox.LostFocus += (_, _) => PersistIfReady();
     }
 
     public void Refresh()
     {
-        var settings = App.Instance.Settings.Current;
-        var game = settings.DefaultGameSettings;
-        SelectByTag(SuperSamplingBox, game.SuperSampling);
-        SelectByTag(AswBox, game.AswMode);
-        SelectByTag(AdaptiveGpuBox, game.AdaptiveGpuScaling);
-        SelectByTag(PriorityBox, game.OvrServerPriority);
-        SelectByTag(ForceMipBox, game.ForceMipMapOnLayers);
-        SelectByTag(OffsetMipBox, Math.Abs(game.OffsetMipMapOnLayers) > 0.001 ? 1.0 : 0.0);
-        SelectByTag(FovStencilBox, game.UseFovStencil);
-        SelectByTag(HudBox, game.VisualHud);
-        FovHBox.Text = game.FovMultiplierHorizontal.ToString("0.00", CultureInfo.InvariantCulture);
-        FovVBox.Text = game.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
-        ApplyOnStartBox.IsChecked = settings.ApplyGameSettingsOnStart;
-        AutoApplyBox.IsChecked = settings.AutoApplyProfiles;
-        SelectByTag(OpenXrBox, settings.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
-            ? OpenXrRuntimeKind.Meta
-            : settings.OpenXr.PreferredRuntime);
-        OpenXrOnStartBox.IsChecked = settings.OpenXr.ApplyOnStart;
-        SteamLinkOpenXrBox.IsChecked = settings.OpenXr.PreferSteamVrDuringSteamLink;
-        OpenXrStatusText.Text = App.Instance.OpenXr.Describe()
-            + "  Writes HKLM\\SOFTWARE\\Khronos\\OpenXR\\1\\ActiveRuntime (may prompt for Administrator).";
-        var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch();
-        if (!string.IsNullOrWhiteSpace(steamTip))
+        _loading = true;
+        try
         {
-            OpenXrStatusText.Text += "  " + steamTip;
+            var settings = App.Instance.Settings.Current;
+            var game = settings.DefaultGameSettings;
+            SelectByTag(SuperSamplingBox, game.SuperSampling);
+            SelectByTag(AswBox, game.AswMode);
+            SelectByTag(AdaptiveGpuBox, game.AdaptiveGpuScaling);
+            SelectByTag(PriorityBox, game.OvrServerPriority);
+            SelectByTag(ForceMipBox, game.ForceMipMapOnLayers);
+            SelectByTag(OffsetMipBox, Math.Abs(game.OffsetMipMapOnLayers) > 0.001 ? 1.0 : 0.0);
+            SelectByTag(FovStencilBox, game.UseFovStencil);
+            SelectByTag(HudBox, game.VisualHud);
+            FovHBox.Text = game.FovMultiplierHorizontal.ToString("0.00", CultureInfo.InvariantCulture);
+            FovVBox.Text = game.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
+            ApplyOnStartBox.IsChecked = settings.ApplyGameSettingsOnStart;
+            AutoApplyBox.IsChecked = settings.AutoApplyProfiles;
+            SelectByTag(OpenXrBox, settings.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+                ? OpenXrRuntimeKind.Meta
+                : settings.OpenXr.PreferredRuntime);
+            OpenXrOnStartBox.IsChecked = settings.OpenXr.ApplyOnStart;
+            SteamLinkOpenXrBox.IsChecked = settings.OpenXr.PreferSteamVrDuringSteamLink;
+            OpenXrStatusText.Text = App.Instance.OpenXr.Describe()
+                + "  Writes HKLM\\SOFTWARE\\Khronos\\OpenXR\\1\\ActiveRuntime (may prompt for Administrator).";
+            var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch();
+            if (!string.IsNullOrWhiteSpace(steamTip))
+            {
+                OpenXrStatusText.Text += "  " + steamTip;
+            }
+            CliCommandsBox.Text = settings.CustomCommands.ToCliText();
+            AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
+            IgnoreListBox.Text = string.Join(Environment.NewLine, settings.ProfileIgnoreProcesses ?? []);
+            CloseOverlaysBox.IsChecked = settings.CloseOverlaysOnLinkConnect;
+            OverlayListBox.Text = string.Join(Environment.NewLine, settings.OverlayCloseProcesses ?? []);
+            ApplySessionCapabilities();
+            var active = App.Instance.ActiveProfile;
+            SaveLastGoodButton.IsEnabled = active is not null;
+            SaveLastGoodButton.Content = active is null
+                ? "Save to active profile"
+                : $"Save to “{active.Name}”";
+            StatusText.Text = BuildStatus();
         }
-        CliCommandsBox.Text = settings.CustomCommands.ToCliText();
-        AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
-        IgnoreListBox.Text = string.Join(Environment.NewLine, settings.ProfileIgnoreProcesses ?? []);
-        CloseOverlaysBox.IsChecked = settings.CloseOverlaysOnLinkConnect;
-        OverlayListBox.Text = string.Join(Environment.NewLine, settings.OverlayCloseProcesses ?? []);
-        ApplySessionCapabilities();
-        var active = App.Instance.ActiveProfile;
-        SaveLastGoodButton.IsEnabled = active is not null;
-        SaveLastGoodButton.Content = active is null
-            ? "Save to active profile"
-            : $"Save to “{active.Name}”";
-        StatusText.Text = BuildStatus();
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private void ApplySessionCapabilities()
@@ -193,7 +205,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void CustomCommands_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
@@ -206,7 +218,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void IgnoreList_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
@@ -230,7 +242,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void OverlaySettings_Changed(object sender, RoutedEventArgs e)
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
@@ -242,7 +254,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void OverlayList_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
@@ -269,7 +281,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void PersistIfReady()
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
@@ -311,7 +323,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void PersistOpenXr()
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
@@ -330,7 +342,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
     private void PersistFlags()
     {
-        if (!IsLoaded)
+        if (_loading || !IsLoaded)
         {
             return;
         }
