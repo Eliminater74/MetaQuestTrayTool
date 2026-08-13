@@ -70,6 +70,7 @@ public sealed class PcvrReadyService
         {
             CheckOvrService(),
             CheckOpenXrPreferred(),
+            CheckSteamVrInstalled(),
             CheckSteamVrOpenXrAvailable(),
             CheckSteamLinkOpenXrAssist(),
             CheckPowerPlan(),
@@ -86,7 +87,8 @@ public sealed class PcvrReadyService
     {
         "ovrservice" => FixOvrService(),
         "openxr" => FixOpenXrPreferred(),
-        "steamvr-openxr" => "Install SteamVR from Steam, then re-check. SteamVR ships the OpenXR runtime JSON.",
+        "steamvr-install" => _app.SteamVrInstall.OpenInstallPage(),
+        "steamvr-openxr" => FixSteamVrOpenXr(),
         "steam-link-assist" => FixSteamLinkAssist(),
         "power" => FixPower(),
         "audio" => "Open Tray Tool → Audio switching and pick VR + fallback devices (or Capture fallback).",
@@ -157,6 +159,21 @@ public sealed class PcvrReadyService
             PcvrReadyLevel.Fail, "Apply preferred", canFix: true);
     }
 
+    private PcvrReadyItem CheckSteamVrInstalled()
+    {
+        var info = _app.SteamVrInstall.Probe();
+        if (!info.IsInstalled)
+        {
+            return Item("steamvr-install", "SteamVR installed",
+                "SteamVR is not installed. Most Steam PCVR games need it.",
+                PcvrReadyLevel.Fail, "Install SteamVR", canFix: true);
+        }
+
+        var level = info.Channel == SteamVrChannel.Beta ? PcvrReadyLevel.Warn : PcvrReadyLevel.Ok;
+        var title = info.Channel == SteamVrChannel.Beta ? "SteamVR (Beta)" : "SteamVR installed";
+        return Item("steamvr-install", title, info.Detail, level);
+    }
+
     private PcvrReadyItem CheckSteamVrOpenXrAvailable()
     {
         if (_app.OpenXr.IsAvailable(OpenXrRuntimeKind.SteamVr))
@@ -165,13 +182,22 @@ public sealed class PcvrReadyService
                 "SteamVR OpenXR runtime JSON found.", PcvrReadyLevel.Ok);
         }
 
+        var install = _app.SteamVrInstall.Probe();
+        if (!install.IsInstalled)
+        {
+            return Item("steamvr-openxr", "SteamVR OpenXR",
+                "SteamVR not installed — OpenXR JSON unavailable.",
+                PcvrReadyLevel.Fail, "Install SteamVR", canFix: true);
+        }
+
         return Item("steamvr-openxr", "SteamVR OpenXR",
-            "SteamVR OpenXR runtime not found — install SteamVR for Steam PCVR games.",
-            PcvrReadyLevel.Fail);
+            "SteamVR is installed but steamxr_win64.json was not found — repair SteamVR in Steam.",
+            PcvrReadyLevel.Fail, "Open SteamVR page", canFix: true);
     }
 
-    private PcvrReadyItem CheckSteamLinkOpenXrAssist()
-    {
+    private string FixSteamVrOpenXr() => _app.SteamVrInstall.OpenInstallPage();
+
+    private PcvrReadyItem CheckSteamLinkOpenXrAssist()    {
         var on = _app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink;
         if (on)
         {

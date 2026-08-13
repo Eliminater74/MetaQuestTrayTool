@@ -68,6 +68,12 @@
 
       <TextBlock x:Name="ConnectionBanner" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
+      <TextBlock x:Name="SteamVrBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
+                 Foreground="{DynamicResource AppAccentBrush}"/>
+      <Button x:Name="InstallSteamVrButton" Content="Install SteamVR in Steam…" Style="{StaticResource AccentButtonStyle}"
+              Margin="0,0,0,8" HorizontalAlignment="Left" Visibility="Collapsed"
+              Click="InstallSteamVr_Click"
+              ToolTip="Opens Steam to install SteamVR (app 250820). Required for most Steam PCVR games."/>
       <TextBlock x:Name="GpuBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="OpenXrBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"

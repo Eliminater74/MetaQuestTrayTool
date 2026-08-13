@@ -25,6 +25,23 @@ public static class SystemInfoService
         text.AppendLine($"ADB binary: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
 
+        var steamVr = app.SteamVrInstall.Probe(force: true);
+        text.AppendLine("SteamVR");
+        text.AppendLine($"  Installed: {steamVr.IsInstalled}");
+        text.AppendLine($"  Channel: {steamVr.ChannelLabel}");
+        text.AppendLine($"  Version: {steamVr.Version ?? "—"}");
+        text.AppendLine($"  Steam build id: {steamVr.BuildId ?? "—"}");
+        text.AppendLine($"  Beta key: {steamVr.BetaKey ?? "(none — stable)"}");
+        text.AppendLine($"  Install path: {steamVr.InstallPath ?? "—"}");
+        text.AppendLine($"  Manifest: {steamVr.ManifestPath ?? "—"}");
+        text.AppendLine($"  Running: {steamVr.IsRunning}");
+        if (!steamVr.IsInstalled)
+        {
+            text.AppendLine($"  Install: {SteamVrInstallService.SteamInstallUri} or {SteamVrInstallService.StoreUrl}");
+        }
+
+        text.AppendLine();
+
         var ready = app.PcvrReady.Evaluate();
         text.AppendLine("PCVR Ready");
         text.AppendLine($"  {ready.Summary}");

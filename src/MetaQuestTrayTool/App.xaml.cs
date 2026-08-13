@@ -50,6 +50,7 @@ public partial class App : System.Windows.Application
     public SessionRecoverService SessionRecover { get; }
     public GameLaunchService GameLaunch { get; }
     public OverlayCloseService OverlayClose { get; }
+    public SteamVrInstallService SteamVrInstall { get; } = new();
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;

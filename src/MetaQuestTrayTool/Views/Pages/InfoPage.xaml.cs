@@ -71,6 +71,15 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             ? (MediaBrush)FindResource("AppAccentBrush")
             : (MediaBrush)FindResource("AppMutedBrush");
 
+        var steamVr = App.Instance.SteamVrInstall.Probe();
+        SteamVrBanner.Text = steamVr.Banner;
+        SteamVrBanner.Foreground = !steamVr.IsInstalled
+            ? System.Windows.Media.Brushes.OrangeRed
+            : steamVr.Channel == SteamVrChannel.Beta
+                ? System.Windows.Media.Brushes.Orange
+                : (MediaBrush)FindResource("AppAccentBrush");
+        InstallSteamVrButton.Visibility = steamVr.IsInstalled ? Visibility.Collapsed : Visibility.Visible;
+
         var gpu = App.Instance.Gpu.GetRecommendation();
         GpuBanner.Text = gpu is null
             ? "GPU: not detected"
@@ -158,6 +167,14 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         var summary = App.Instance.PcvrReady.Fix(id);
         App.Instance.Log.Info($"PCVR Ready fix [{id}]: {summary}");
         RefreshReadyChecklist();
+        System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
+    }
+
+    private void InstallSteamVr_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.SteamVrInstall.OpenInstallPage();
+        App.Instance.Log.Info(summary);
+        RefreshBanners(includeAdb: false);
         System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
     }
 
