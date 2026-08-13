@@ -16,6 +16,7 @@ public static class HotKeyCatalog
         HotKeyAction.OpenMetaLink => "Open Meta Horizon Link",
         HotKeyAction.OpenDebugTool => "Open Oculus Debug Tool",
         HotKeyAction.DashToSteamVr => "Kill Dash → start SteamVR",
+        HotKeyAction.OpenSteamVrHome => "Open SteamVR Home",
         _ => action.ToString()
     };
 

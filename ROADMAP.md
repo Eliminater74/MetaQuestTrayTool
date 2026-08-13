@@ -110,12 +110,12 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 
 - [x] Sidebar: Game Settings, Tray Tool, Power Options, Service & Startup, Log, Advanced, Quest Link
 - [x] Tray opens the shell instead of the old dashboard
-- [x] Service automation (start/stop with tool, wake restart, optional Home launch)
+- [x] Service automation (start/stop with tool, wake restart)
 - [x] Expanded settings model for FOV H/V, Link sharpening, power triggers
 - [x] Hotkeys configure UI + global RegisterHotKey bindings
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
 - [x] Voice polish (custom phrases, always-on confidence, mic picker)
-- [ ] Oculus Homeless (largely covered by Dash → SteamVR / PreventDashLaunch)
+- [x] Removed obsolete Oculus Home / Homeless; optional SteamVR Home (steamtours)
 - [x] Dash → SteamVR (kill Dash + launch SteamVR; PreventDashLaunch; CoreChannel LIVE/PublicTest/NO_UPDATES; hotkey/voice/auto)
 
 ### Post v1.0.0 (v1.0.1)
@@ -159,10 +159,10 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 
 - Authenticode code signing for the installer / exe (SmartScreen; when budget allows)
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
-- Oculus Homeless (largely covered by Dash → SteamVR / PreventDashLaunch)
 
 ## Non-goals for now
 
+- Reviving Meta Oculus Home / Homeless (removed by Meta; use Dash → SteamVR + optional SteamVR Home)
 - Replicating every OTT advanced/obscure tweak
 - Shipping a full dash customizer (that belongs in Dash Manager)
 - macOS / Linux

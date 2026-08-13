@@ -48,17 +48,16 @@
       <CheckBox x:Name="RestartOnWakeBox" Content="Restart Oculus service when computer wakes up"
                 ToolTip="After sleep/hibernate, restart OVRService so Link recovers more reliably."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="LaunchHomeOnServiceBox" Content="Launch Oculus Home on service start"
-                ToolTip="Open the Meta Quest Link client when OVRService is started from this tool."
-                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="LaunchHomeOnToolBox" Content="Launch Oculus Home on tool start"
-                ToolTip="Open the Meta Quest Link client when the tray app starts."
-                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="CloseHomeOnExitBox" Content="Close Oculus Home on tool exit"
-                ToolTip="Close Meta Quest Link / OculusDash windows when you Exit the tray (does not stop OVRService unless Stop on exit is also on)."
-                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
-      <TextBlock Text="Air Link → SteamVR (Dash killer)" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,8"/>
+      <TextBlock Text="SteamVR Home" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,8"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Meta’s old Oculus Home is gone. SteamVR Home (steamtours) is optional — open it when you want the SteamVR environment. SteamVR should be running first."/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="Open SteamVR Home" Style="{StaticResource AccentButtonStyle}" Click="OpenSteamVrHome_Click"
+                ToolTip="Launch SteamVR Home (steamtours.exe). Starts SteamVR first if it is not running."/>
+      </StackPanel>
+
+      <TextBlock Text="Air Link → SteamVR (Dash killer)" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Connect with Meta Air Link / Link first, then kill Oculus Dash and launch SteamVR so SteamVR games (e.g. MSFS) run over Link. Inspired by OculusKiller — does not replace OculusDash.exe on disk. Hotkey: Ctrl+Num 0. Voice: “kill dash” / “dash to steam v r”."/>
       <CheckBox x:Name="DashAutoBox" Content="Auto: when Meta Link connects, kill Dash and start SteamVR"
@@ -105,7 +104,7 @@
       <TextBlock x:Name="CoreChannelStatusText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
-                 Text="Classic OTT options like CPU ID spoof and Home-to-tray are not ported. Open Meta Horizon Link uses Support\oculus-client\Client.exe. Open Debug Tool launches Support\oculus-diagnostics\OculusDebugTool.exe from its install folder."/>
+                 Text="Open Meta Horizon Link uses Support\oculus-client\Client.exe. Open Debug Tool launches Support\oculus-diagnostics\OculusDebugTool.exe from its install folder."/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

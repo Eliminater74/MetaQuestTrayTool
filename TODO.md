@@ -90,7 +90,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Hotkeys (global shortcuts + configure UI; default Ctrl+Numpad 1–8)
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
 - [x] Service & Startup: Start/Stop accent follows live OVRService state
-- [ ] Legacy OTT extras (Homeless — largely covered by Dash → SteamVR)
+- [x] Removed obsolete Oculus Home / Homeless UI (Meta removed Home years ago)
+- [x] Optional SteamVR Home (steamtours) — Service & Startup / tray / hotkey / voice
 - [x] Voice polish (custom phrases, mic picker, always-on confidence)
 
 ## Phase 9 — headset ADB (v0.8)

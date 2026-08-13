@@ -13,5 +13,6 @@ public enum HotKeyAction
     VoicePushToTalk,
     OpenMetaLink,
     OpenDebugTool,
-    DashToSteamVr
+    DashToSteamVr,
+    OpenSteamVrHome
 }

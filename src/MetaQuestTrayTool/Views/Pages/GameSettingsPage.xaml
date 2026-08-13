@@ -49,7 +49,6 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Default Super Sampling" Style="{StaticResource SettingLabelStyle}"/>
@@ -91,11 +90,6 @@
         <TextBlock Grid.Row="8" Text="Visual HUD" Style="{StaticResource SettingLabelStyle}"/>
         <ComboBox x:Name="HudBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
                   ToolTip="ODT performance HUD overlay (FPS, latency, etc.). Leave off for normal play."/>
-
-        <TextBlock Grid.Row="9" Text="Voice / Homeless" Style="{StaticResource SettingLabelStyle}"/>
-        <TextBlock Grid.Row="9" Grid.Column="1" Margin="0,0,0,10"
-                   Foreground="{DynamicResource AppMutedBrush}"
-                   Text="Voice commands live on Tray Tool. Oculus Homeless is not ported yet."/>
       </Grid>
 
       <TextBlock Text="Close overlays on Link connect" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>

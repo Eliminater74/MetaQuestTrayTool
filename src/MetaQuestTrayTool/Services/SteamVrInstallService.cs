@@ -70,6 +70,68 @@ public sealed class SteamVrInstallService
         }
     }
 
+    /// <summary>
+    /// Launch SteamVR Home (steamtours.exe). Meta's old Oculus Home is gone; this is the SteamVR environment.
+    /// Starts SteamVR via steam://run/250820 first if it is not already running.
+    /// </summary>
+    public string OpenSteamVrHome()
+    {
+        var info = Probe(force: true);
+        if (!info.IsInstalled || string.IsNullOrWhiteSpace(info.InstallPath))
+        {
+            return "SteamVR is not installed. Use Install SteamVR from Status / Info, then try again.";
+        }
+
+        var tours = Path.Combine(
+            info.InstallPath,
+            "tools",
+            "steamvr_environments",
+            "game",
+            "bin",
+            "win64",
+            "steamtours.exe");
+
+        if (!File.Exists(tours))
+        {
+            return "SteamVR Home (steamtours.exe) was not found under this SteamVR install. "
+                   + "SteamVR Home may be disabled or removed — check SteamVR Settings → Startup / Desktop.";
+        }
+
+        if (!info.IsRunning)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "steam://run/250820",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return $"Could not start SteamVR before Home: {ex.Message}";
+            }
+
+            // Give vrserver a moment before Home attaches.
+            Thread.Sleep(2500);
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = tours,
+                WorkingDirectory = Path.GetDirectoryName(tours)!,
+                UseShellExecute = true
+            });
+            return "Launched SteamVR Home (steamtours). Put the headset on if it does not appear.";
+        }
+        catch (Exception ex)
+        {
+            return $"Could not launch SteamVR Home: {ex.Message}";
+        }
+    }
+
     private SteamVrInstallInfo ProbeCore()
     {
         var steamRoot = DetectSteamRoot();

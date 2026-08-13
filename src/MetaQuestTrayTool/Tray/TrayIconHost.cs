@@ -170,6 +170,12 @@ public sealed class TrayIconHost : IDisposable
             var summary = _app.DashToSteamVr.RunNow("tray menu");
             Notify("Dash → SteamVR", summary);
         }));
+        menu.Items.Add(new ToolStripMenuItem("Open SteamVR Home", null, (_, _) =>
+        {
+            var summary = _app.SteamVrInstall.OpenSteamVrHome();
+            _app.Log.Info(summary);
+            Notify("SteamVR Home", summary.Length > 120 ? summary[..117] + "…" : summary);
+        }));
         menu.Items.Add(new ToolStripMenuItem("Recover PCVR (after Link drop)", null, (_, _) =>
         {
             var summary = _app.SessionRecover.Recover("tray menu");
@@ -454,7 +460,6 @@ public sealed class TrayIconHost : IDisposable
         gameSettings.DropDownItems.Add(ssMenu);
         gameSettings.DropDownItems.Add(aswMenu);
         gameSettings.DropDownItems.Add(hudMenu);
-        gameSettings.DropDownItems.Add(PlaceholderItem("CPU Priority"));
         gameSettings.DropDownItems.Add(new ToolStripSeparator());
         gameSettings.DropDownItems.Add(new ToolStripMenuItem("Apply now", null, (_, _) => ApplyGameSettings()));
         gameSettings.DropDownItems.Add(applyOnStart);
@@ -1162,14 +1167,6 @@ public sealed class TrayIconHost : IDisposable
 
         _about.Show();
         _about.Activate();
-    }
-
-    private static ToolStripMenuItem PlaceholderItem(string text)
-    {
-        return new ToolStripMenuItem($"{text}  (coming next)")
-        {
-            Enabled = false
-        };
     }
 
     private static ToolStripItem? FindItem(ToolStripItemCollection items, string name)

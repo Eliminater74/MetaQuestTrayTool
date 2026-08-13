@@ -146,15 +146,6 @@ public partial class App : System.Windows.Application
         if (Settings.Current.Service.StartServiceWhenToolStarts)
         {
             Log.Info(Oculus.Start());
-            if (Settings.Current.Service.LaunchOculusHomeOnServiceStart)
-            {
-                ServiceStartupPage.TryLaunchHome();
-            }
-        }
-
-        if (Settings.Current.Service.LaunchOculusHomeOnToolStart)
-        {
-            ServiceStartupPage.TryLaunchHome();
         }
 
         if (Settings.Current.ApplyGameSettingsOnStart || Settings.Current.ApplyLinkSettingsOnStart)
@@ -228,11 +219,6 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        if (Settings.Current.Service.CloseOculusHomeOnToolExit)
-        {
-            ServiceStartupPage.TryCloseHome();
-        }
-
         if (Settings.Current.Service.StopServiceWhenToolExits)
         {
             Log.Info(Oculus.Stop());

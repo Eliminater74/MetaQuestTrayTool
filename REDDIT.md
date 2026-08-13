@@ -128,14 +128,14 @@ You can also push SideQuest-style **ADB headset** tweaks when a real Quest conne
 
 **Not implemented yet**
 - Authenticode / code-signed Setup.exe (SmartScreen may warn until budget allows a cert)
-- Oculus Homeless / some classic OTT extras
-- Permanent AirLink
-- Wireless ADB pairing UI (USB ADB works)
-- Launch games directly from the library picker
-- Profile process ignore-list
-- Voice polish: custom phrases, mic picker, always-on tuning
-- Separate communications (vs multimedia) audio device pickers in the UI
+- Permanent AirLink (Meta-side; out of scope)
 - Full Dash Manager–style dash customizer (out of scope)
+
+**Dropped / obsolete (not coming back)**
+- Oculus Home / Homeless — Meta removed Home years ago; use **Dash → SteamVR** and optional **SteamVR Home** (steamtours) instead
+
+**Shipped since earlier drafts of this post**
+- Wireless ADB pairing UI, library launch, profile ignore-list, voice polish, comms audio pickers, SteamVR Home open action
 
 **Runtime caveats (Meta / Windows)**
 - Newer Meta runtimes sometimes **reject** `server:` ASW CLI commands — the log will say so

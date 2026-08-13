@@ -162,6 +162,7 @@ Release **[v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - **Profile ignore list** + **save last-good** into the active profile (tray / Game Settings / mid-session SS·ASW·HUD)
 - **OpenXR runtime switch**: Meta / Oculus vs SteamVR via `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` — global preferred + per-game profile override (may prompt for Administrator)
 - **Dash → SteamVR**: after Meta Air Link / Link connects, kill Oculus Dash and launch SteamVR (button / tray / Ctrl+Num 0 / voice “kill dash”) so SteamVR games run over Link — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller); optional auto-on-connect, **PreventDashLaunch**, and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
+- **SteamVR Home**: on-demand open of SteamVR Home (`steamtours.exe`) from Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
 - **PCVR Ready** checklist on Info (Steam-biased), headset **battery / Wi‑Fi**, and **Recover PCVR** after a Link drop
 - **Library / profile Launch** (`steam://run/{appId}`)
@@ -187,7 +188,7 @@ Release **[v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - **Hover tooltips** on pages and settings windows (what each control does, without cluttering the layout)
 - **Low idle CPU / snappy sidebar**: caches for Link probe, audio devices, USB, ADB, and OVRService; slower background polls; Link/Steam/Headset/profile watchers run off the UI thread; page content paints before heavy Refresh
 
-Not yet: Oculus Homeless, Permanent AirLink, custom voice phrases / mic picker.
+Not yet: Permanent AirLink (Meta-side; out of scope). Oculus Home / Homeless are obsolete (Meta removed Home) — use **Dash → SteamVR** and optional **SteamVR Home** instead.
 
 See [ROADMAP.md](ROADMAP.md) and [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) for details.
 

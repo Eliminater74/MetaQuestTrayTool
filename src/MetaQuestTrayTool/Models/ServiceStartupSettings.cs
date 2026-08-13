@@ -6,7 +6,4 @@ public sealed class ServiceStartupSettings
     public bool StartServiceWhenToolStarts { get; set; } = true;
     public bool StopServiceWhenToolExits { get; set; }
     public bool RestartServiceWhenComputerWakes { get; set; } = true;
-    public bool LaunchOculusHomeOnServiceStart { get; set; }
-    public bool LaunchOculusHomeOnToolStart { get; set; }
-    public bool CloseOculusHomeOnToolExit { get; set; }
 }

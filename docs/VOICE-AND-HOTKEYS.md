@@ -84,6 +84,7 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | open meta link / show meta link / open oculus client | Open Meta Horizon Link |
 | open debug tool / open oculus debug tool / launch debug tool | Open Oculus Debug Tool GUI |
 | kill dash / dash to steam v r / start steam v r | Kill Dash → start SteamVR |
+| open steam v r home / steam v r home / launch steam v r home | Open SteamVR Home (steamtours) |
 
 Custom phrases can be added in Configure (phrase → tray action).
 
@@ -104,5 +105,7 @@ Use **Test listen once** in Configure to try without leaving the window.
 - Hotkey profiles per game (global only today)
 
 **Dash → SteamVR** (kill OculusDash + launch SteamVR over Air Link) is available on Service & Startup / Quest Link / tray / hotkey / voice — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller). Optional **PreventDashLaunch** and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) live on Service & Startup. It does not permanently replace `OculusDash.exe` (use OculusKiller / Dash Manager for that install style).
+
+**SteamVR Home** is on-demand (Service & Startup / tray / hotkey / voice) — Meta’s old Oculus Home is gone.
 
 See [ROADMAP.md](../ROADMAP.md).

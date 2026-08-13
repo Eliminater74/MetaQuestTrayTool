@@ -37,7 +37,10 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "kill dash", Action = HotKeyAction.DashToSteamVr },
         new VoicePhrase { Phrase = "start steam v r", Action = HotKeyAction.DashToSteamVr },
         new VoicePhrase { Phrase = "dash to steam v r", Action = HotKeyAction.DashToSteamVr },
-        new VoicePhrase { Phrase = "steam v r from link", Action = HotKeyAction.DashToSteamVr }
+        new VoicePhrase { Phrase = "steam v r from link", Action = HotKeyAction.DashToSteamVr },
+        new VoicePhrase { Phrase = "open steam v r home", Action = HotKeyAction.OpenSteamVrHome },
+        new VoicePhrase { Phrase = "steam v r home", Action = HotKeyAction.OpenSteamVrHome },
+        new VoicePhrase { Phrase = "launch steam v r home", Action = HotKeyAction.OpenSteamVrHome }
     ];
 
     public static bool TryMatch(string recognizedText, out HotKeyAction action) =>

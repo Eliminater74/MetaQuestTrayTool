@@ -25,9 +25,6 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         StopOnExitBox.IsChecked = service.StopServiceWhenToolExits;
         RestartOnWakeBox.IsChecked = service.RestartServiceWhenComputerWakes
                                      || App.Instance.Settings.Current.Power.RestartServiceAfterSleep;
-        LaunchHomeOnServiceBox.IsChecked = service.LaunchOculusHomeOnServiceStart;
-        LaunchHomeOnToolBox.IsChecked = service.LaunchOculusHomeOnToolStart;
-        CloseHomeOnExitBox.IsChecked = service.CloseOculusHomeOnToolExit;
         var dash = App.Instance.Settings.Current.DashToSteamVr;
         DashAutoBox.IsChecked = dash.AutoOnMetaLinkConnect;
         DashOpenXrBox.IsChecked = dash.SwitchOpenXrToSteamVr;
@@ -298,81 +295,26 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         service.StartServiceWhenToolStarts = StartOnToolBox.IsChecked == true;
         service.StopServiceWhenToolExits = StopOnExitBox.IsChecked == true;
         service.RestartServiceWhenComputerWakes = RestartOnWakeBox.IsChecked == true;
-        service.LaunchOculusHomeOnServiceStart = LaunchHomeOnServiceBox.IsChecked == true;
-        service.LaunchOculusHomeOnToolStart = LaunchHomeOnToolBox.IsChecked == true;
-        service.CloseOculusHomeOnToolExit = CloseHomeOnExitBox.IsChecked == true;
         App.Instance.Settings.Current.Power.RestartServiceAfterSleep = service.RestartServiceWhenComputerWakes;
         App.Instance.Settings.Save();
+    }
+
+    private void OpenSteamVrHome_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.SteamVrInstall.OpenSteamVrHome();
+        App.Instance.Log.Info(summary);
+        System.Windows.MessageBox.Show(
+            Window.GetWindow(this),
+            summary,
+            App.AppName,
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void Run(Func<string> action)
     {
         var result = action();
         App.Instance.Log.Info(result);
-        if (App.Instance.Settings.Current.Service.LaunchOculusHomeOnServiceStart
-            && action == App.Instance.Oculus.Start)
-        {
-            TryLaunchHome();
-        }
-
         Refresh();
-    }
-
-    public static void TryLaunchHome()
-    {
-        var summary = App.Instance.Oculus.ShowMetaHorizonLink();
-        if (summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
-            || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase))
-        {
-            App.Instance.Log.Warn(summary);
-        }
-        else
-        {
-            App.Instance.Log.Info(summary);
-        }
-    }
-
-    public static void TryCloseHome()
-    {
-        var clientPath = App.Instance.Oculus.ResolveClientExePath();
-        foreach (var name in new[] { "Client", "OculusClient", "OculusDash" })
-        {
-            foreach (var process in Process.GetProcessesByName(name))
-            {
-                try
-                {
-                    using (process)
-                    {
-                        if (name.Equals("Client", StringComparison.OrdinalIgnoreCase))
-                        {
-                            string? path = null;
-                            try
-                            {
-                                path = process.MainModule?.FileName;
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-
-                            if (path is null
-                                || (clientPath is not null
-                                    && !string.Equals(path, clientPath, StringComparison.OrdinalIgnoreCase)
-                                    && !path.Contains("oculus-client", StringComparison.OrdinalIgnoreCase)))
-                            {
-                                continue;
-                            }
-                        }
-
-                        process.CloseMainWindow();
-                        App.Instance.Log.Info($"Requested close for {name}.");
-                    }
-                }
-                catch
-                {
-                    // ignore
-                }
-            }
-        }
     }
 }
