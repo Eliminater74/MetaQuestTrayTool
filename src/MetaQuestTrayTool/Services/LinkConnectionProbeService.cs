@@ -154,15 +154,19 @@ public sealed class LinkConnectionProbeService
             return brokenMeta;
         }
 
+        // Meta leaves isUsingAirLink sticky after you quit Link / power off the headset.
+        // Never present that as a live session — Kind=Idle with an optional "last used" note.
         if (cache?.IsUsingAirLink is bool lastAir)
         {
+            var last = lastAir ? "Air Link" : "wired Link";
             return new VrConnectionStatus
             {
-                Kind = lastAir ? VrConnectionKind.MetaAirLink : VrConnectionKind.MetaWiredLink,
-                Summary = lastAir
-                    ? "Meta Air Link (last known)"
-                    : "Meta wired Link (last known)",
-                Detail = $"DeviceCache isUsingAirLink={lastAir}; no active Meta HMD session",
+                Kind = VrConnectionKind.Idle,
+                Summary = "Not connected",
+                Detail =
+                    $"No active Meta / Steam / VD session. DeviceCache still remembers last transport as {last}"
+                    + (string.IsNullOrWhiteSpace(cache.SerialNumber) ? "" : $" ({cache.SerialNumber})")
+                    + $"; connectionState={cache.ConnectionState ?? "—"}.",
                 SessionActive = false,
                 IsUsingAirLink = lastAir,
                 HeadsetSerial = cache.SerialNumber,
@@ -314,7 +318,7 @@ public sealed class LinkConnectionProbeService
                 : "Meta wired Link — auto-connect / not streaming",
             Detail =
                 $"DeviceCache connectionState={cache.ConnectionState}; operationalState=inoperable; "
-                + "rdConnectionState={cache.RdConnectionState}. "
+                + $"rdConnectionState={cache.RdConnectionState}. "
                 + "Normal when the headset is on Wi‑Fi without opening Link (or after a failed Link init).",
             SessionActive = false,
             IsUsingAirLink = cache.IsUsingAirLink,
