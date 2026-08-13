@@ -42,7 +42,7 @@ public partial class HotKeysWindow : Window
         }
 
         StatusText.Text = hotKeys.Enabled
-            ? $"{_rows.Count} binding(s). Defaults use Ctrl + Numpad 1–8."
+            ? $"{_rows.Count} binding(s). Defaults use Ctrl + Numpad 0–9."
             : "HotKeys are off. Enable them to register shortcuts globally.";
     }
 

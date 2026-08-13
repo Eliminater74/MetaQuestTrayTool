@@ -2,7 +2,26 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-## v0.1 — tray host
+**Current public release:** [v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+
+---
+
+## Remaining / later
+
+- [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
+- [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
+- [ ] Hotkey profiles per game (global only today)
+- [ ] More built-in presets as people request process names
+
+**Not doing (non-goals):** Permanent AirLink; Dash Manager–style dash replace; revive Oculus Home / Homeless; macOS / Linux. See [ROADMAP.md](ROADMAP.md).
+
+**Docs sync:** [README.md](README.md) · [REDDIT.md](REDDIT.md) · [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
+
+---
+
+## Shipped checklist (history)
+
+### v0.1 — tray host
 
 - [x] WPF .NET 8 solution that opens in Visual Studio Community
 - [x] Tray icon and right-click menu
@@ -15,7 +34,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Activity log on the dashboard and on disk
 - [x] Project README, roadmap, and this TODO
 
-## Phase 1 — game settings (Debug Tool CLI)
+### Phase 1 — game settings (Debug Tool CLI)
 
 - [x] `OculusDebugToolService` that writes a command file and runs `OculusDebugToolCLI.exe -f`
 - [x] Super Sampling options on the tray menu
@@ -27,7 +46,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Wire Adaptive GPU, mip layer flags, FOV stencil, Visual HUD, ASW 30/18
 - [x] Probe headset serials via `server:EnumHmd`
 
-## Phase 2 — profiles
+### Phase 2 — profiles
 
 - [x] Profile model + JSON store
 - [x] Profile editor window
@@ -37,7 +56,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] CPU priority for the detected process
 - [x] Optional Link overrides on personal profiles (sharpening, bitrate, encode width)
 
-## Phase 3 — Quest Link / Air Link
+### Phase 3 — Quest Link / Air Link
 
 - [x] Link settings model (bitrate, encode resolution, dynamic bitrate)
 - [x] Apply / read Link-related settings
@@ -46,7 +65,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Document ODT registry vs CLI ([docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md))
 - [x] Detect wired Link vs Air Link when possible (DeviceCache `isUsingAirLink` + Steam/VD heuristics)
 
-## Phase 4 — audio
+### Phase 4 — audio
 
 - [x] Enumerate playback and recording devices
 - [x] Switch defaults when Oculus / Link becomes active
@@ -54,7 +73,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tray / dashboard UI for VR and fallback devices
 - [x] Link-audio trigger (restore when headset endpoint disappears, not only when OVRService stops)
 
-## Library / profiles polish
+### Library / profiles polish
 
 - [x] Scan Steam installed games
 - [x] Scan Meta / Oculus installed apps
@@ -62,39 +81,39 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Global defaults editor separate from personal profiles
 - [x] Steam + Meta cover art in the library picker and profiles list
 
-## Phase 5 — power / USB
+### Phase 5 — power / USB
 
 - [x] Power plan switch while VR is running
 - [x] USB selective suspend option
 - [x] Restart `OVRService` after sleep
 
-## Phase 7 — OpenXR switch (v0.7)
+### Phase 7 — OpenXR switch (v0.7)
 
 - [x] Meta vs SteamVR ActiveRuntime registry switch
 - [x] Global + personal profile OpenXR choice
 - [x] Restore previous / global runtime when the game exits
 
-## Phase 8 — elevated start (v0.7.1 / v0.7.2)
+### Phase 8 — elevated start (v0.7.1 / v0.7.2)
 
 - [x] Optional logon scheduled task with highest privileges
 - [x] One-shot Restart as Administrator
 - [x] Hands-free by default: auto-relaunch elevated once, then silent at logon
 - [x] No mid-session UAC (OpenXR / service) — headset blocks those prompts
 
-## Phase 6 — OTT-style shell (v0.6)
+### Phase 6 — OTT-style shell (v0.6)
 
 - [x] Sidebar MainShell with OTT tab layout
 - [x] Game / Tray / Power / Service / Log / Advanced / Quest Link pages
 - [x] Wire existing services into the shell
 - [x] Tray left-click opens shell
-- [x] Hotkeys (global shortcuts + configure UI; default Ctrl+Numpad 1–8)
+- [x] Hotkeys (global shortcuts + configure UI; default Ctrl+Numpad 0–9)
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
 - [x] Service & Startup: Start/Stop accent follows live OVRService state
 - [x] Removed obsolete Oculus Home / Homeless UI (Meta removed Home years ago)
 - [x] Optional SteamVR Home (steamtours) — Service & Startup / tray / hotkey / voice
 - [x] Voice polish (custom phrases, mic picker, always-on confidence)
 
-## Phase 9 — headset ADB (v0.8)
+### Phase 9 — headset ADB (v0.8)
 
 - [x] Detect adb.exe (bundled platform-tools first, then SDK / PATH / SideQuest)
 - [x] Ship Google platform-tools ADB with the app
@@ -103,7 +122,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Paste text to headset; proximity / guardian helpers
 - [x] Wireless ADB connect UI (host/port, tcpip helper, auto-reconnect)
 
-## v1.1 — profiles, presets, global baseline
+### v1.1 — profiles, presets, global baseline
 
 - [x] Tray notifications when a profile applies and when global restores after exit
 - [x] Global baseline on tool start, VR headset connect, and after profile exit
@@ -113,7 +132,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] OTT-style Windows Setup.exe (Inno Setup + self-contained publish)
 - [x] GitHub Actions CI + Release (tag v* → Setup.exe on Releases)
 
-## v1.0.0
+### v1.0.0
 
 - [x] Single version + product name in Directory.Build.props
 - [x] Author credit: Eliminater74
@@ -124,18 +143,18 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Visible Donate (sidebar, About, tray)
 - [x] Paste live donate URL into AppInfo.DonateUrl
 
-## Post v1.0.0 (main — pending v1.0.1 tag)
+### Post v1.0.0 releases
 
 - [x] ODT registry reference doc + full RemoteHeadset writes (distortion, DBR, Mobile ASW)
 - [x] Global hotkeys + HotKeysWindow configure UI
-- [x] Voice command core + VoiceCommandsWindow (preview)
+- [x] Voice command core + VoiceCommandsWindow
 - [x] Service page Start/Stop button highlighting fix
 - [x] Profile restore on game exit
 - [x] Release version sync (exe matches installer)
 - [x] Hotkey/voice reliability (conflicts, import reload, phrase matching)
 - [x] Full Link fields in tray Link window
 - [x] Root LICENSE.txt
-- [x] Tag and publish **v1.0.1** release on GitHub
+- [x] Tag and publish **v1.0.1**
 - [x] In-app update check (GitHub latest `v*` → download Setup → exit → install over)
 - [x] Tag and publish **v1.0.2** (with in-app updater)
 - [x] README screenshots + demo video
@@ -179,16 +198,18 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Perf HUD tray cycle
 - [x] Wireless ADB pairing-code UI
 - [x] Voice polish (custom phrases, mic picker, always-on confidence)
-- [x] Bump version to **1.0.12**
+- [x] Status page as default opening view (live chips)
+- [x] SteamVR install / version / Stable vs Beta detect
 - [x] VR Tools page + tray menu (curated third-party links)
+- [x] Bump version to **1.0.12**
 - [x] Tag and publish **v1.0.12**
 - [x] Remove Oculus Home / Homeless leftovers; add SteamVR Home open action
 - [x] Bump version to **1.0.13**
 - [x] Tag and publish **v1.0.13**
+- [x] Refresh README / REDDIT / ROADMAP / TODO for v1.0.13 accuracy
 
-## Housekeeping
+### Housekeeping (ongoing)
 
 - [x] Keep README "what works now" in sync after each phase
 - [x] Bump version in Directory.Build.props when a phase ships
 - [x] Decide on a license before a public release
-- [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)

@@ -3,12 +3,14 @@
 | Document | Description |
 | --- | --- |
 | [ODT-REGISTRY.md](ODT-REGISTRY.md) | Oculus Debug Tool registry keys vs CLI commands (from Meta binaries) |
-| [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases |
+| [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
-| [../README.md](../README.md) | User guide, download, build instructions |
-| [../ROADMAP.md](../ROADMAP.md) | Planned phases and priorities |
-| [../TODO.md](../TODO.md) | Checkbox tracker (done vs next) |
-| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft |
+| [../README.md](../README.md) | User guide, download, feature inventory (v1.0.13) |
+| [../ROADMAP.md](../ROADMAP.md) | Current product summary, done phases, later / non-goals |
+| [../TODO.md](../TODO.md) | Remaining work + shipped checklist |
+| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.0.13) |
 | [../installer/README.md](../installer/README.md) | Build the Windows Setup.exe |
 
 Settings and profiles live in `%AppData%\MetaQuestTrayTool\` (`settings.json`, `profiles.json`, activity log).
+
+**Mid-session note:** an elevated tray cannot be clicked from SteamVR — use HotKeys, voice, and automation. See [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md).

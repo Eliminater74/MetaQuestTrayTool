@@ -1,6 +1,6 @@
 # HotKeys and voice commands
 
-Both routes call the same **`HotKeyCommandService`** actions (Debug Tool, Link, OVRService).
+Both routes call the same **`HotKeyCommandService`** actions (ASW, SS, Link, OVRService, Dash → SteamVR, SteamVR Home, Debug Tool, …).
 
 Enable on **Tray Tool** in the sidebar shell. Settings persist in `settings.json`.
 
@@ -37,7 +37,7 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 9 | Open Meta Horizon Link |
 | Ctrl+Num 0 | Kill Dash → start SteamVR |
 
-Assign **Open Oculus Debug Tool** in Configure if you want a shortcut (no default numpad binding — Num 0–9 are taken).
+Assign **Open Oculus Debug Tool** or **Open SteamVR Home** in Configure if you want a shortcut (no default numpad binding — Num 0–9 are taken).
 
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 

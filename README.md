@@ -32,6 +32,8 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 | Info | ![Info](docs/media/11-info.png) |
 | About | ![About](docs/media/12-about.png) |
 
+_Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages not captured yet).
+
 </details>
 
 ---
@@ -79,7 +81,7 @@ The **Downloads** badge uses GitHub’s public asset `download_count`. It only c
 - **Left-click** the tray headset icon, or
 - **Right-click** the icon → **Open Settings**
 
-The sidebar shell has pages for **Game Settings**, **Tray Tool**, **Power**, **Service & Startup**, **Log**, **Advanced**, **Quest Link**, **Headset (ADB)**, **Profiles**, and **Info**.
+The sidebar shell opens on **Status** by default, then: **Game Settings**, **Tray Tool**, **Power Options**, **Service & Startup**, **Log Window**, **Advanced**, **Quest Link**, **Headset**, **VR Tools**, and **Info**. **Profiles**, HotKeys, Voice, Audio, and Global defaults open as separate windows from those pages or the tray.
 
 ### 3. Set your global defaults
 
@@ -94,43 +96,46 @@ Global defaults stay applied until a game with a personal profile launches.
 
 1. Open **Profiles** → **New profile** (or pick a built-in preset such as MSFS 2024 or Beat Saber).
 2. Set the **executable name** (e.g. `FlightSimulator.exe`) and any overrides (Link, OpenXR runtime, game settings).
-3. When that game starts, the profile auto-applies and you get a tray notification.
-4. When the game exits, **global defaults are restored** automatically.
+3. Optionally **Launch** from the library / profile (`steam://run/{appId}`), or use the **ignore list** so noisy helper processes do not steal the profile.
+4. When that game starts, the profile auto-applies and you get a tray notification.
+5. When the game exits, **global defaults are restored** automatically. Mid-session you can **save last-good** SS/ASW/HUD into the active profile.
 
 Export/import profiles and full settings from **Advanced**.
 
 ### 5. Quest Link / headset tweaks
 
 - **Quest Link** registry settings usually need a Link reconnect or **OVRService** restart — use **Service & Startup** or the tray menu.
-- **Headset (ADB)** tweaks (CPU/GPU, refresh rate, texture size, etc.) apply when a trusted Quest connects. Enable **Developer Mode** on the headset and approve USB debugging once. These settings do not survive a headset reboot; the tray re-applies them on connect.
+- **Headset** (ADB) tweaks (CPU/GPU, refresh rate, texture size, etc.) apply when a trusted Quest connects. Enable **Developer Mode** on the headset and approve USB debugging once, **or** use **Wireless ADB** (Enable tcpip once, or Wireless debugging **Pair** + Connect). These settings do not survive a headset reboot; the tray re-applies them on connect.
 - Only **real VR headsets** are trusted. Phones, tablets, and Android emulators are ignored.
+- **Status** / **Info** show PCVR Ready, battery / Wi‑Fi (via ADB), and session type (Air Link vs wired, Steam Link / SteamVR, Virtual Desktop).
 
 ### 6. Tray menu quick actions
 
 **Right-click** the tray icon for:
 
-- Game Settings (SS, ASW, FOV, …)
-- Start / stop / restart **OVRService**
-- Apply or edit **profiles**
-- **Open Settings**, **Info**, **Donate**, **Exit**
+- Open Settings, Meta Horizon Link, Oculus Debug Tool
+- Kill Dash → SteamVR, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
+- Game Settings (SS, ASW, FOV, …), Profiles, Quest Link, OpenXR, Audio, Power, Headset
+- Start / stop / restart **OVRService**, Check for updates, VR Tools, Donate, Exit
 
 ### 7. HotKeys and voice (optional)
 
 On **Tray Tool**:
 
-- **HotKeys** — Enable → Configure. Global shortcuts (default **Ctrl+Numpad 1–8**) for ASW, super sampling, apply global, restart OVRService, Performance HUD. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
-- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
+- **HotKeys** — Enable → Configure. Defaults **Ctrl+Numpad 0–9** (ASW, SS cycle, apply global, restart OVRService, Perf HUD, open Meta Link, Dash → SteamVR). Assign **Open Debug Tool** / **Open SteamVR Home** if you want them. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
+- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off”, “kill dash”, or “open steam v r home”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
 
 Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md).
 
 ### 8. Tips
 
 - **Themes:** Pure Black (default), Dark, or Light — change on the **Tray Tool** page.
-- **Updates:** Tray Tool → Check for updates on start (on by default), **Also check while running** (default weekly: daily / 3 days / week / 2 weeks / month / off), or **Check now** / tray menu **Check for updates…**. Confirms, downloads the latest Setup.exe from GitHub, exits the app, then installs over the current location.
+- **Updates:** Tray Tool → Check for updates on start (on by default), **Also check while running** (default weekly: daily / 3 days / week / 2 weeks / month / off), or **Check now** / tray menu **Check for updates…**. Confirms, downloads the latest Setup.exe from GitHub, exits the app, then installs over the current location (ADB is stopped first so bundled platform-tools can be replaced).
 - **Start minimized** and **minimize-on-close** keep the app in the tray instead of the taskbar.
 - **Service & Startup** highlights **Start** or **Stop** based on whether `OVRService` is running.
 - Newer Meta runtimes may reject some `server:` ASW commands; check **Log** if something does not apply.
 - Pixel density changes often need a **new VR session** to take effect.
+- Meta’s old **Oculus Home** is gone — use **Dash → SteamVR** and optional **SteamVR Home** instead.
 
 ---
 
@@ -144,54 +149,81 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** removes obsolete Oculus Home / Homeless leftovers and adds on-demand **SteamVR Home** (Service & Startup / tray / hotkey / voice).
+Release **[v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Highlights since v1.0.12: remove obsolete **Oculus Home / Homeless**; on-demand **SteamVR Home**. Earlier 1.0.x also shipped Status board, SteamVR install/version/beta detect, VR Tools, wireless ADB Pair, voice polish, and Steam-first PCVR helpers.
 
-- Runs in the notification area with a right-click popup menu
-- Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
-- Detects the Oculus PC install and `OVRService` status
-- Start / stop / restart the Oculus runtime service, with optional start/stop automation
-- Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
-- **Hands-free Administrator mode** (on by default): one Windows approval, then the tray starts itself at logon already elevated so OpenXR, OVRService, and profiles apply while you are in VR — no UAC in-headset. **SteamVR cannot click that elevated tray** (Air Link → SteamVR included); use HotKeys, voice, and automation mid-session.
-- Optional **Restart as Administrator** if that first approval was skipped
-- Start minimized, minimize-on-close, hide from Alt+Tab
-- **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
-- Tray **Game Settings**: Super Sampling, ASW (including 45/30/18), FOV, Adaptive GPU, mip layer flags, FOV stencil, and Visual HUD via `OculusDebugToolCLI.exe` — plus tray **Cycle Perf HUD**
-- **Open Oculus Debug Tool GUI** (`OculusDebugTool.exe`) from Service & Startup, Game Settings, Advanced, tray, hotkey/voice — same shortcut classic OTT offered
-- Startup probe of connected headset serials through `server:EnumHmd`
-- Create / edit / delete / apply **profiles** from the tray or shell
-- Personal profiles can override **Link sharpening / bitrate / encode width** (inherit keeps global Quest Link settings; restored when the game exits)
-- **Profile ignore list** + **save last-good** into the active profile (tray / Game Settings / mid-session SS·ASW·HUD)
-- **OpenXR runtime switch**: Meta / Oculus vs SteamVR via `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` — global preferred + per-game profile override (may prompt for Administrator)
-- **Dash → SteamVR**: after Meta Air Link / Link connects, kill Oculus Dash and launch SteamVR (button / tray / Ctrl+Num 0 / voice “kill dash”) so SteamVR games run over Link — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller); optional auto-on-connect, **PreventDashLaunch**, and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
-- **SteamVR Home**: on-demand open of SteamVR Home (`steamtours.exe`) from Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
-- Auto-apply a profile when the matching process starts, then restore defaults when it exits
-- **PCVR Ready** checklist on Info (Steam-biased), headset **battery / Wi‑Fi**, and **Recover PCVR** after a Link drop
-- **Library / profile Launch** (`steam://run/{appId}`)
-- **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening, distortion curve, dynamic bitrate (DBR / DBR max / offset), Mobile ASW mode via `HKCU\Software\Oculus\RemoteHeadset` — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
-- **Quest Link presets**: Balanced / Performance / Quality / Air Link HEVC / Wired H.264 / Sim on the Quest Link page (fill fields or apply & save)
-- **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops — including separate **communications** playback/recording pickers
+### Shell & tray
+
+- Notification-area host with themed menu (**Pure Black** / Dark / Light)
+- OTT-style sidebar: **Status** (default), Game Settings, Tray Tool, Power Options, Service & Startup, Log Window, Advanced, Quest Link, Headset, **VR Tools**, Info — plus Donate / About
+- Hover tooltips; close-to-tray; start minimized; hide from Alt+Tab; single-instance
+- **Hands-free Administrator mode** (on by default): one Windows approval, then elevated at logon so OpenXR / OVRService / profiles never need UAC in-headset. **SteamVR cannot click that elevated tray** (Air Link → SteamVR included) — use HotKeys, voice, and automation mid-session
+- Settings in `%AppData%\MetaQuestTrayTool\settings.json` (profiles in `profiles.json`)
+
+### Status & SteamVR awareness
+
+- Live **Status** chips: PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR armed, GPU, audio
+- **SteamVR install detect** (path, file version, Stable vs Beta) with Install SteamVR action
+- **PCVR Ready** checklist on Info (Steam-biased) with fix actions
+- **Recover PCVR** after a Link / Steam / VD drop (tray + Info)
+- Session probe: Meta Air Link vs wired (`DeviceCache` `isUsingAirLink`), Steam Link / SteamVR, Virtual Desktop
+
+### Game settings & profiles
+
+- ODT via `OculusDebugToolCLI`: Super Sampling, ASW (Auto / Off / 45 / 30 / 18), FOV H/V, Adaptive GPU, mip flags, FOV stencil, Visual HUD, OVR priority — plus tray **Cycle Perf HUD**
+- **Open Oculus Debug Tool GUI** (`OculusDebugTool.exe`) from shell / tray / hotkey / voice
+- Personal profiles: auto-apply on process start → restore global on exit; Steam/Meta library picker + cover art; **Launch** (`steam://run`); ignore list; **save last-good**; Link + OpenXR overrides; custom CLI / ADB lines; built-in global + game presets (MSFS 2024, Beat Saber, etc.)
 - Optional **close overlays on Link connect** (Afterburner / RTSS / CAM / iCUE-style list)
-- **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
-- **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
-- **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
-- **Wireless ADB**: LAN IP, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB once, optional auto-reconnect
-- **Trusted headset**: first connected **VR headset** serial is remembered; a different VR serial is blocked. Phones, tablets, and Android emulators are ignored and never receive ADB commands or auto-apply
-- **Profiles**: auto-apply on game launch with tray notification; restore global when the game exits. Stored in `profiles.json` (export/import still works). Built-in global + game presets (MSFS 2024, Beat Saber, etc.)
-- **Backup**: export / import settings from Advanced
-- **Info** page: live OpenXR (Meta vs SteamVR), OVRService, PCVR connection (Meta Air Link vs wired via DeviceCache `isUsingAirLink`, Steam Link / SteamVR, Virtual Desktop), and detailed headset identity
-- **Virtual Desktop / Steam Link awareness**: when those sessions are active, Meta Link registry + Oculus Debug Tool (SS/ASW) are auto-skipped and UI controls disabled; headset ADB, OpenXR, power, and audio still apply
-- **Steam Link assist**: warns (and optionally auto-switches) if OpenXR is not SteamVR during a Steam Link / SteamVR session, then restores your preferred OpenXR runtime when Steam Link ends; bitrate/resolution stay in Steam Link + SteamVR Video settings
-- **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
-- **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
-- **Voice commands**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), preferred mic, min confidence, custom phrases; same actions as hotkeys
-- **Service & Startup**: Start/Stop button accent follows live `OVRService` state
-- **In-app updates**: checks GitHub latest release (`v*`) on start, on a user-chosen schedule while running, or manually; downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu). ADB is stopped before Setup so bundled platform-tools can be replaced
-- **Hover tooltips** on pages and settings windows (what each control does, without cluttering the layout)
-- **Low idle CPU / snappy sidebar**: caches for Link probe, audio devices, USB, ADB, and OVRService; slower background polls; Link/Steam/Headset/profile watchers run off the UI thread; page content paints before heavy Refresh
 
-Not yet: Permanent AirLink (Meta-side; out of scope). Oculus Home / Homeless are obsolete (Meta removed Home) — use **Dash → SteamVR** and optional **SteamVR Home** instead.
+### Quest Link / Dash → SteamVR
 
-See [ROADMAP.md](ROADMAP.md) and [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) for details.
+- Link registry (`RemoteHeadset`): bitrate, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
+- **Dash → SteamVR**: kill Oculus Dash + launch SteamVR over Meta Link (tray / Ctrl+Num 0 / voice “kill dash”); optional auto-on-connect, keep-killing Dash, close Meta client
+- **PreventDashLaunch** + **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
+- **SteamVR Home** (`steamtours.exe`) on demand — Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
+- **Open Meta Horizon Link** from tray / hotkey / voice
+
+### OpenXR / audio / power
+
+- Switch ActiveRuntime Meta vs SteamVR (global + per-profile); apply preferred on start
+- **Steam Link assist**: force SteamVR OpenXR while Steam Link / SteamVR is active, restore preferred when it ends
+- Under Steam Link / VD, Meta Link registry + ODT are gated; ADB / OpenXR / power / audio still apply
+- Audio auto-switch when Link audio is active (does not steal speakers just because Meta virtual audio is installed); separate **communications** playback/recording pickers
+- Power plan auto-switch, USB selective suspend off, restart `OVRService` after sleep
+
+### Headset (ADB)
+
+- Bundled Google platform-tools; CPU/GPU, texture size, refresh, FFR, chroma, capture; paste text / proximity / guardian helpers
+- Auto-apply on connect (props reset on Quest reboot)
+- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect
+- Trusted VR headset serial only — phones / tablets / emulators ignored
+- Battery / charge / Wi‑Fi status via ADB dumpsys
+
+### HotKeys, voice, updates, tools
+
+- HotKeys: default **Ctrl+Numpad 0–9**; configure UI; assign Debug Tool / SteamVR Home
+- Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
+- In-app updates from GitHub `v*` (on start, schedule, or Check now); ADB stopped before Setup
+- **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
+- Backup export/import from Advanced; Donate (PayPal); low idle CPU / snappy sidebar (probe caches, background watchers)
+
+### Out of scope / not planned
+
+- **Permanent AirLink** (Meta-side)
+- Full Dash Manager–style dash customizer / permanently replacing `OculusDash.exe`
+- Reviving **Oculus Home / Homeless** (use Dash → SteamVR + optional SteamVR Home)
+- Authenticode code-signed Setup.exe (SmartScreen may warn until budget allows)
+- macOS / Linux; hotkey profiles per game (global only today)
+
+### Runtime caveats
+
+- Newer Meta runtimes may reject `server:` ASW CLI — check **Log**
+- Pixel density / SS often needs a **new VR session**
+- Link registry changes usually need a **Link reconnect** or `OVRService` restart
+- ADB `debug.oculus.*` props **reset on Quest reboot** — leave apply-on-connect on
+- Wireless ADB is **not** Air Link — separate Developer Mode / pair flow
+- Dash → SteamVR does **not** replace `OculusDash.exe` on disk
+
+See [ROADMAP.md](ROADMAP.md) and [TODO.md](TODO.md) for history and remaining housekeeping.
 
 ---
 
