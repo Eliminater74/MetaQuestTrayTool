@@ -154,6 +154,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Wireless ADB pairing-code UI
 - [x] Voice polish — custom phrases, mic picker, always-on confidence
 - [x] Version **1.0.12**
+- [x] Remove Oculus Home leftovers; optional SteamVR Home
+- [x] Version **1.0.13**
 
 ## Later
 

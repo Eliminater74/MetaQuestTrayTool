@@ -182,6 +182,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Bump version to **1.0.12**
 - [x] VR Tools page + tray menu (curated third-party links)
 - [x] Tag and publish **v1.0.12**
+- [x] Remove Oculus Home / Homeless leftovers; add SteamVR Home open action
+- [x] Bump version to **1.0.13**
+- [x] Tag and publish **v1.0.13**
 
 ## Housekeeping
 

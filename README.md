@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.12) (latest) | [MetaQuestTrayTool-Setup-1.0.12.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.12/MetaQuestTrayTool-Setup-1.0.12.exe) |
+| [v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.13) (latest) | [MetaQuestTrayTool-Setup-1.0.13.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.13/MetaQuestTrayTool-Setup-1.0.13.exe) |
+| [v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.12) | [MetaQuestTrayTool-Setup-1.0.12.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.12/MetaQuestTrayTool-Setup-1.0.12.exe) |
 | [v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.11) | [MetaQuestTrayTool-Setup-1.0.11.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.11/MetaQuestTrayTool-Setup-1.0.11.exe) |
 | [v1.0.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.10) | [MetaQuestTrayTool-Setup-1.0.10.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.10/MetaQuestTrayTool-Setup-1.0.10.exe) |
 | [v1.0.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.9) | [MetaQuestTrayTool-Setup-1.0.9.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.9/MetaQuestTrayTool-Setup-1.0.9.exe) |
@@ -143,7 +144,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds a Status board (default open), SteamVR install/version/beta detect, VR Tools links, wireless ADB Pair, voice polish, and Steam-first PCVR features.
+Release **[v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** removes obsolete Oculus Home / Homeless leftovers and adds on-demand **SteamVR Home** (Service & Startup / tray / hotkey / voice).
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
