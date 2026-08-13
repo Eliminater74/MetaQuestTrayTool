@@ -30,6 +30,9 @@ public static class ThemeService
         Set("AppLogErrorBrush", palette.LogError);
         Set("AppLogWarnBrush", palette.LogWarn);
         Set("AppLogInfoBrush", palette.LogInfo);
+        Set("AppTooltipBackgroundBrush", palette.TooltipBackground);
+        Set("AppTooltipForegroundBrush", palette.TooltipForeground);
+        Set("AppTooltipBorderBrush", palette.TooltipBorder);
         Changed?.Invoke(null, theme);
     }
 
@@ -81,7 +84,10 @@ public static class ThemeService
             GhostHover: Color.FromRgb(0xBE, 0xC8, 0xD6),
             LogError: Color.FromRgb(0xC6, 0x28, 0x28),
             LogWarn: Color.FromRgb(0xB2, 0x86, 0x00),
-            LogInfo: Color.FromRgb(0x1B, 0x24, 0x33)),
+            LogInfo: Color.FromRgb(0x1B, 0x24, 0x33),
+            TooltipBackground: Color.FromRgb(0xD6, 0xEE, 0xF8),
+            TooltipForeground: Color.FromRgb(0x0A, 0x3D, 0x52),
+            TooltipBorder: Color.FromRgb(0x0A, 0x8F, 0xA0)),
         AppTheme.Dark => new ThemePalette(
             Background: Color.FromRgb(0x0B, 0x12, 0x20),
             Surface: Color.FromRgb(0x15, 0x1D, 0x2E),
@@ -99,7 +105,10 @@ public static class ThemeService
             GhostHover: Color.FromRgb(0x31, 0x40, 0x5F),
             LogError: Color.FromRgb(0xFF, 0x6B, 0x6B),
             LogWarn: Color.FromRgb(0xFF, 0xC1, 0x07),
-            LogInfo: Color.FromRgb(0xE8, 0xEE, 0xF8)),
+            LogInfo: Color.FromRgb(0xE8, 0xEE, 0xF8),
+            TooltipBackground: Color.FromRgb(0x12, 0x2A, 0x40),
+            TooltipForeground: Color.FromRgb(0xD4, 0xF5, 0xFF),
+            TooltipBorder: Color.FromRgb(0x3D, 0xDC, 0xFF)),
         _ => new ThemePalette(
             Background: Color.FromRgb(0x00, 0x00, 0x00),
             Surface: Color.FromRgb(0x0A, 0x0A, 0x0A),
@@ -117,7 +126,10 @@ public static class ThemeService
             GhostHover: Color.FromRgb(0x2C, 0x2C, 0x2C),
             LogError: Color.FromRgb(0xFF, 0x6B, 0x6B),
             LogWarn: Color.FromRgb(0xFF, 0xC1, 0x07),
-            LogInfo: Color.FromRgb(0xF5, 0xF5, 0xF5))
+            LogInfo: Color.FromRgb(0xF5, 0xF5, 0xF5),
+            TooltipBackground: Color.FromRgb(0x0B, 0x28, 0x38),
+            TooltipForeground: Color.FromRgb(0xD4, 0xF5, 0xFF),
+            TooltipBorder: Color.FromRgb(0x3D, 0xDC, 0xFF))
     };
 
     private readonly record struct ThemePalette(
@@ -137,5 +149,8 @@ public static class ThemeService
         Color GhostHover,
         Color LogError,
         Color LogWarn,
-        Color LogInfo);
+        Color LogInfo,
+        Color TooltipBackground,
+        Color TooltipForeground,
+        Color TooltipBorder);
 }

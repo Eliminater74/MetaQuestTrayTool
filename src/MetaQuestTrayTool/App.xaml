@@ -20,6 +20,9 @@
     <SolidColorBrush x:Key="AppLogErrorBrush" Color="#FF6B6B"/>
     <SolidColorBrush x:Key="AppLogWarnBrush" Color="#FFC107"/>
     <SolidColorBrush x:Key="AppLogInfoBrush" Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="AppTooltipBackgroundBrush" Color="#0B2838"/>
+    <SolidColorBrush x:Key="AppTooltipForegroundBrush" Color="#D4F5FF"/>
+    <SolidColorBrush x:Key="AppTooltipBorderBrush" Color="#3DDCFF"/>
 
     <Style TargetType="Window">
       <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}"/>
@@ -259,15 +262,33 @@
       <Setter Property="Margin" Value="0,0,0,16"/>
     </Style>
 
-    <!-- Readable wrapped hover hints (use ToolTip="…" or a nested ToolTip). -->
+    <!-- Readable wrapped hover hints — high-contrast blue panel so tips stand out from page text. -->
     <Style TargetType="ToolTip">
-      <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
-      <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="Padding" Value="10,8"/>
-      <Setter Property="MaxWidth" Value="380"/>
+      <Setter Property="Background" Value="{DynamicResource AppTooltipBackgroundBrush}"/>
+      <Setter Property="Foreground" Value="{DynamicResource AppTooltipForegroundBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource AppTooltipBorderBrush}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+      <Setter Property="Padding" Value="12,10"/>
+      <Setter Property="MaxWidth" Value="400"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="HasDropShadow" Value="True"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ToolTip">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="8"
+                    Padding="{TemplateBinding Padding}"
+                    SnapsToDevicePixels="True">
+              <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}"
+                                TextElement.FontWeight="{TemplateBinding FontWeight}"
+                                TextElement.FontSize="{TemplateBinding FontSize}"/>
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
     </Style>
 
     <Style TargetType="CheckBox">
