@@ -94,6 +94,30 @@ public sealed class HeadsetSettings
     public bool RequireTrustedHeadset { get; set; } = true;
     public string? TrustedSerial { get; set; }
     public string? TrustedModel { get; set; }
+
+    /// <summary>Last wireless ADB host (LAN IPv4). Empty = not configured.</summary>
+    public string? WirelessHost { get; set; }
+
+    /// <summary>Wireless ADB port. Classic tcpip mode is 5555; Wireless debugging uses a dynamic port.</summary>
+    public int WirelessPort { get; set; } = 5555;
+
+    /// <summary>When no USB headset is present, periodically try <c>adb connect</c> to the saved host:port.</summary>
+    public bool WirelessAutoReconnect { get; set; }
+
+    public string? WirelessEndpoint
+    {
+        get
+        {
+            var host = (WirelessHost ?? string.Empty).Trim();
+            if (host.Length == 0 || WirelessPort is < 1 or > 65535)
+            {
+                return null;
+            }
+
+            return $"{host}:{WirelessPort}";
+        }
+    }
+
     private List<string> _customAdbCommands = [];
     public List<string> CustomAdbCommands
     {

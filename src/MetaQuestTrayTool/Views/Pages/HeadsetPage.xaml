@@ -15,7 +15,40 @@
                 Checked="Persist_Changed" Unchecked="Persist_Changed"
                 ToolTip="Push these ADB props when your trusted headset connects. Meta clears most props on reboot, so leave this on."/>
 
-      <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,8"/>
+      <TextBlock Text="Wireless ADB" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Same Wi‑Fi as the PC. Classic path: plug USB once → Enable tcpip → unplug → Connect. Or paste the IP/port from Quest Settings → Developer → Wireless debugging."/>
+      <Grid Margin="0,0,0,8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="200"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Host (LAN IP)" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="WirelessHostBox" Grid.Row="0" Grid.Column="1" MaxWidth="280" HorizontalAlignment="Left"
+                 Padding="6" Margin="0,0,0,8" LostFocus="Persist_Changed"
+                 ToolTip="Headset Wi‑Fi IPv4, e.g. 192.168.1.40. Do not use Air Link alone — wireless ADB is separate."/>
+        <TextBlock Grid.Row="1" Text="Port" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="WirelessPortBox" Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left"
+                 Padding="6" Margin="0,0,0,8" LostFocus="Persist_Changed"
+                 ToolTip="5555 after Enable tcpip. Wireless debugging uses the connect port shown in the headset (not always 5555)."/>
+      </Grid>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="Connect" Style="{StaticResource AccentButtonStyle}" Click="WirelessConnect_Click"
+                ToolTip="adb connect host:port. Remembered for next time. Trust still uses the hardware serial from getprop."/>
+        <Button Content="Disconnect" Style="{StaticResource GhostButtonStyle}" Click="WirelessDisconnect_Click"
+                ToolTip="adb disconnect for this host:port (leaves USB devices alone when possible)."/>
+        <Button Content="Enable tcpip (USB)" Style="{StaticResource GhostButtonStyle}" Click="WirelessTcpip_Click"
+                ToolTip="Requires USB once: adb tcpip PORT, then unplug and Connect. Fills IP when the headset reports one."/>
+      </StackPanel>
+      <CheckBox x:Name="WirelessAutoBox" Content="Auto-reconnect wireless ADB when no headset is listed"
+                Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
+                ToolTip="Every ~30s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off."/>
+
+      <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="200"/>

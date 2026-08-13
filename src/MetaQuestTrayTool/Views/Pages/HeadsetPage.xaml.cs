@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -82,6 +83,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         FullRateBox.IsChecked = headset.FullRateCapture;
         RequireTrustBox.IsChecked = headset.RequireTrustedHeadset;
         CustomAdbBox.Text = string.Join(Environment.NewLine, headset.CustomAdbCommands);
+        WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
+        WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        WirelessAutoBox.IsChecked = headset.WirelessAutoReconnect;
         _loading = false;
 
         // ADB identity is slow — don't block the first paint of this page.
@@ -115,7 +119,76 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.FullRateCapture = FullRateBox.IsChecked == true;
         headset.RequireTrustedHeadset = RequireTrustBox.IsChecked == true;
         headset.CustomAdbCommands = CustomCommandSet.ParseLines(CustomAdbBox.Text);
+        headset.WirelessHost = string.IsNullOrWhiteSpace(WirelessHostBox.Text) ? null : WirelessHostBox.Text.Trim();
+        if (int.TryParse(WirelessPortBox.Text?.Trim(), System.Globalization.NumberStyles.Integer,
+                System.Globalization.CultureInfo.InvariantCulture, out var port)
+            && port is >= 1 and <= 65535)
+        {
+            headset.WirelessPort = port;
+        }
+        else
+        {
+            WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        headset.WirelessAutoReconnect = WirelessAutoBox.IsChecked == true;
         App.Instance.Settings.Save();
+    }
+
+    private void WirelessConnect_Click(object sender, RoutedEventArgs e)
+    {
+        Persist_Changed(this, new RoutedEventArgs());
+        Run(() =>
+        {
+            var headset = App.Instance.Settings.Current.Headset;
+            var host = (WirelessHostBox.Text ?? string.Empty).Trim();
+            if (host.Length == 0)
+            {
+                throw new InvalidOperationException("Enter the headset LAN IP first.");
+            }
+
+            var port = headset.WirelessPort;
+            var endpoint = AdbService.FormatEndpoint(host, port);
+            var parts = endpoint.Split(':');
+            headset.WirelessHost = parts[0];
+            if (parts.Length > 1 && int.TryParse(parts[1], out var parsedPort))
+            {
+                headset.WirelessPort = parsedPort;
+            }
+
+            WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
+            WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return App.Instance.Adb.ConnectWireless(headset.WirelessHost!, headset.WirelessPort);
+        });
+    }
+
+    private void WirelessDisconnect_Click(object sender, RoutedEventArgs e)
+    {
+        Persist_Changed(this, new RoutedEventArgs());
+        Run(() =>
+        {
+            var headset = App.Instance.Settings.Current.Headset;
+            return string.IsNullOrWhiteSpace(headset.WirelessHost)
+                ? App.Instance.Adb.DisconnectWireless()
+                : App.Instance.Adb.DisconnectWireless(headset.WirelessHost, headset.WirelessPort);
+        });
+    }
+
+    private void WirelessTcpip_Click(object sender, RoutedEventArgs e)
+    {
+        Persist_Changed(this, new RoutedEventArgs());
+        Run(() =>
+        {
+            var headset = App.Instance.Settings.Current.Headset;
+            var summary = App.Instance.Adb.EnableTcpipMode(headset.WirelessPort, out var suggested);
+            if (!string.IsNullOrWhiteSpace(suggested))
+            {
+                headset.WirelessHost = suggested;
+                WirelessHostBox.Text = suggested;
+            }
+
+            return summary;
+        });
     }
 
     private void Apply_Click(object sender, RoutedEventArgs e) =>

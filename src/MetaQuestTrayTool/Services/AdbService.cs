@@ -135,6 +135,182 @@ public sealed class AdbService
         return devices;
     }
 
+    public void InvalidateDeviceCache()
+    {
+        _cachedDevices = null;
+        _cachedDevicesUtc = DateTime.MinValue;
+    }
+
+    public static bool LooksLikeWirelessSerial(string? serial) =>
+        !string.IsNullOrWhiteSpace(serial) && serial.Contains(':', StringComparison.Ordinal);
+
+    public static string FormatEndpoint(string host, int port)
+    {
+        host = host.Trim();
+        if (host.Length == 0)
+        {
+            throw new ArgumentException("Enter the headset LAN IP (e.g. 192.168.1.40).", nameof(host));
+        }
+
+        if (port is < 1 or > 65535)
+        {
+            throw new ArgumentOutOfRangeException(nameof(port), "Port must be 1–65535 (classic tcpip uses 5555).");
+        }
+
+        // Strip accidental :port from the host field.
+        var colon = host.IndexOf(':');
+        if (colon > 0 && host.IndexOf(':') == host.LastIndexOf(':')
+            && int.TryParse(host[(colon + 1)..], out var embeddedPort))
+        {
+            host = host[..colon];
+            port = embeddedPort;
+        }
+
+        return $"{host}:{port}";
+    }
+
+    /// <summary>Connect over Wi‑Fi (<c>adb connect host:port</c>). Works after tcpip mode or Wireless debugging.</summary>
+    public string ConnectWireless(string host, int port)
+    {
+        var endpoint = FormatEndpoint(host, port);
+        var output = Run($"connect {endpoint}");
+        InvalidateDeviceCache();
+        if (output.Contains("cannot connect", StringComparison.OrdinalIgnoreCase)
+            || output.Contains("failed to connect", StringComparison.OrdinalIgnoreCase)
+            || output.Contains("Connection refused", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Could not connect to {endpoint}. {TrimAdbNoise(output)} "
+                + "Same Wi‑Fi as the PC? For classic mode: plug USB → Enable tcpip → unplug → Connect. "
+                + "Or use the port from Quest Settings → Developer → Wireless debugging.");
+        }
+
+        return output.Contains("already connected", StringComparison.OrdinalIgnoreCase)
+            ? $"Already connected to {endpoint}."
+            : $"Connected to {endpoint}. {TrimAdbNoise(output)}".Trim();
+    }
+
+    public string DisconnectWireless(string? host = null, int? port = null)
+    {
+        string output;
+        if (!string.IsNullOrWhiteSpace(host) && port is int p)
+        {
+            var endpoint = FormatEndpoint(host, p);
+            output = Run($"disconnect {endpoint}");
+            InvalidateDeviceCache();
+            return $"Disconnected {endpoint}. {TrimAdbNoise(output)}".Trim();
+        }
+
+        output = Run("disconnect");
+        InvalidateDeviceCache();
+        return $"Disconnected wireless ADB sessions. {TrimAdbNoise(output)}".Trim();
+    }
+
+    /// <summary>
+    /// USB once: put the headset into classic wireless mode (<c>adb tcpip PORT</c>).
+    /// Prefers a USB serial (no host:port) when both USB and wireless are listed.
+    /// </summary>
+    public string EnableTcpipMode(int port, out string? suggestedHost)
+    {
+        suggestedHost = null;
+        if (port is < 1 or > 65535)
+        {
+            throw new ArgumentOutOfRangeException(nameof(port), "Port must be 1–65535.");
+        }
+
+        var usb = FindUsbHeadset()
+                  ?? throw new InvalidOperationException(
+                      "Plug the Quest in over USB (Developer Mode + authorize) before enabling tcpip.");
+
+        Run($"-s {usb.Serial} tcpip {port}");
+        suggestedHost = TryReadLanIp(usb.Serial);
+        InvalidateDeviceCache();
+
+        return suggestedHost is null
+            ? $"TCP/IP mode on port {port} for {usb.Serial}. Unplug USB, enter the headset Wi‑Fi IP, then Connect."
+            : $"TCP/IP mode on port {port} for {usb.Serial}. Suggested IP {suggestedHost} — unplug USB, then Connect.";
+    }
+
+    /// <summary>Quiet reconnect for the watcher — no throw; empty string if skipped or already online.</summary>
+    public string TryAutoReconnect(HeadsetSettings settings)
+    {
+        if (!settings.WirelessAutoReconnect)
+        {
+            return string.Empty;
+        }
+
+        var endpoint = settings.WirelessEndpoint;
+        if (endpoint is null)
+        {
+            return string.Empty;
+        }
+
+        if (FindQuest()?.IsReady == true)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var host = settings.WirelessHost!.Trim();
+            var summary = ConnectWireless(host, settings.WirelessPort);
+            return summary;
+        }
+        catch (Exception ex)
+        {
+            return $"Wireless auto-reconnect: {ex.Message}";
+        }
+    }
+
+    public AdbDevice? FindUsbHeadset()
+    {
+        var devices = ListDevices(force: true);
+        return devices.FirstOrDefault(device => !LooksLikeWirelessSerial(device.Serial) && Classify(device).IsVr && device.IsReady)
+               ?? devices.FirstOrDefault(device => !LooksLikeWirelessSerial(device.Serial) && device.NeedsAuthorization
+                                                 && !VrHeadsetClassifier.IsObviousEmulator(device));
+    }
+
+    public string? TryReadLanIp(string serial)
+    {
+        try
+        {
+            foreach (var prop in new[] { "dhcp.wlan0.ipaddress", "dhcp.eth0.ipaddress" })
+            {
+                var value = GetProp(serial, prop);
+                if (LooksLikeIpv4(value))
+                {
+                    return value;
+                }
+            }
+
+            var route = Shell(serial, "ip -f inet addr show wlan0").Trim();
+            var match = System.Text.RegularExpressions.Regex.Match(route, @"inet\s+(\d+\.\d+\.\d+\.\d+)");
+            if (match.Success && LooksLikeIpv4(match.Groups[1].Value))
+            {
+                return match.Groups[1].Value;
+            }
+        }
+        catch
+        {
+            // optional hint only
+        }
+
+        return null;
+    }
+
+    private static bool LooksLikeIpv4(string? value) =>
+        !string.IsNullOrWhiteSpace(value)
+        && System.Net.IPAddress.TryParse(value, out var ip)
+        && ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork;
+
+    private static string TrimAdbNoise(string text)
+    {
+        var line = text.Replace('\r', '\n')
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .LastOrDefault() ?? text.Trim();
+        return line.Length > 160 ? line[..160] + "…" : line;
+    }
+
     public AdbDevice? FindQuest()
     {
         var devices = ListDevices();
@@ -170,8 +346,9 @@ public sealed class AdbService
         if (quest is null)
         {
             var ignored = DescribeIgnoredDevices();
+            var wirelessHint = " Or use Wireless ADB on the Headset page.";
             return ignored is null
-                ? $"ADB ready. No VR headset connected. Plug in a {VrHeadsetClassifier.AllowedHeadsetList} with Developer Mode."
+                ? $"ADB ready. No VR headset connected. Plug in a {VrHeadsetClassifier.AllowedHeadsetList} with Developer Mode.{wirelessHint}"
                 : $"No VR headset. {ignored}";
         }
 
@@ -186,7 +363,8 @@ public sealed class AdbService
         }
 
         var model = quest.Model ?? GetProp(quest.Serial, "ro.product.model") ?? "VR headset";
-        return $"VR headset connected: {model} ({quest.Serial}).";
+        var transport = LooksLikeWirelessSerial(quest.Serial) ? "wireless" : "USB";
+        return $"VR headset connected ({transport}): {model} ({quest.Serial}).";
     }
 
     public HeadsetIdentity ReadIdentity(string? trustedSerial)

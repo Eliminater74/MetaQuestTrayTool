@@ -13,6 +13,8 @@ public sealed class HeadsetWatchService : IDisposable
     private string? _lastSerial;
     private bool _appliedForSerial;
     private string? _lastIgnoredMessage;
+    private DateTime _lastWirelessAttemptUtc = DateTime.MinValue;
+    private static readonly TimeSpan WirelessRetryInterval = TimeSpan.FromSeconds(30);
 
     public HeadsetWatchService(App app)
     {
@@ -39,6 +41,8 @@ public sealed class HeadsetWatchService : IDisposable
     {
         try
         {
+            MaybeAutoReconnectWireless();
+
             var quest = _app.Adb.FindQuest();
             var serial = quest?.IsReady == true ? quest.Serial : null;
             if (serial is null)
@@ -66,8 +70,9 @@ public sealed class HeadsetWatchService : IDisposable
             _lastSerial = serial;
             if (connected)
             {
+                var transport = AdbService.LooksLikeWirelessSerial(serial) ? "wireless" : "USB";
                 var label = string.IsNullOrWhiteSpace(quest?.Model) ? serial : $"{quest!.Model} ({serial})";
-                _app.Log.Info($"ADB headset connected — {label}.");
+                _app.Log.Info($"ADB headset connected ({transport}) — {label}.");
             }
 
             if (!connected && _appliedForSerial)
@@ -105,6 +110,44 @@ public sealed class HeadsetWatchService : IDisposable
         catch (Exception ex)
         {
             _app.Log.Warn($"Headset ADB: {ex.Message}");
+        }
+    }
+
+    private void MaybeAutoReconnectWireless()
+    {
+        var settings = _app.Settings.Current.Headset;
+        if (!settings.WirelessAutoReconnect || settings.WirelessEndpoint is null)
+        {
+            return;
+        }
+
+        if (DateTime.UtcNow - _lastWirelessAttemptUtc < WirelessRetryInterval)
+        {
+            return;
+        }
+
+        // Skip if any ready VR headset is already listed (USB or wireless).
+        if (_app.Adb.FindQuest()?.IsReady == true)
+        {
+            return;
+        }
+
+        _lastWirelessAttemptUtc = DateTime.UtcNow;
+        var summary = _app.Adb.TryAutoReconnect(settings);
+        if (string.IsNullOrWhiteSpace(summary))
+        {
+            return;
+        }
+
+        if (summary.Contains("Connected", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("Already connected", StringComparison.OrdinalIgnoreCase))
+        {
+            _app.Log.Info(summary);
+        }
+        else if (summary.Contains("auto-reconnect", StringComparison.OrdinalIgnoreCase))
+        {
+            // Soft fail — don't spam WARN every 30s while headset is off.
+            _app.Log.Info(summary);
         }
     }
 }

@@ -134,7 +134,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 - Windows 10 / 11 (64-bit)
 - [Meta Quest PC app](https://www.meta.com/quest/setup-link/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
-- For **Headset (ADB)**: Quest **Developer Mode** + one-time USB debugging approval (ADB is bundled — no Android Studio required)
+- For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once or use Developer → Wireless debugging). ADB is bundled — no Android Studio required
 
 ---
 
@@ -165,6 +165,7 @@ Release **[v1.0.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
 - **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
+- **Wireless ADB**: save LAN IP/port, Connect / Disconnect, Enable tcpip over USB once, optional auto-reconnect when no headset is listed
 - **Trusted headset**: first connected **VR headset** serial is remembered; a different VR serial is blocked. Phones, tablets, and Android emulators are ignored and never receive ADB commands or auto-apply
 - **Profiles**: auto-apply on game launch with tray notification; restore global when the game exits. Stored in `profiles.json` (export/import still works). Built-in global + game presets (MSFS 2024, Beat Saber, etc.)
 - **Backup**: export / import settings from Advanced

@@ -100,7 +100,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] CPU/GPU, texture size, refresh, FFR, chroma, capture
 - [x] Auto-apply when the Quest appears on ADB
 - [x] Paste text to headset; proximity / guardian helpers
-- [ ] Wireless ADB pairing UI
+- [x] Wireless ADB connect UI (host/port, tcpip helper, auto-reconnect)
 
 ## v1.1 — profiles, presets, global baseline
 
