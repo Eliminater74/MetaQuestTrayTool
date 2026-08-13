@@ -170,6 +170,11 @@ public sealed class TrayIconHost : IDisposable
             var summary = _app.DashToSteamVr.RunNow("tray menu");
             Notify("Dash → SteamVR", summary);
         }));
+        menu.Items.Add(new ToolStripMenuItem("Recover PCVR (after Link drop)", null, (_, _) =>
+        {
+            var summary = _app.SessionRecover.Recover("tray menu");
+            Notify("PCVR recover", summary.Length > 120 ? summary[..117] + "…" : summary);
+        }));
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");

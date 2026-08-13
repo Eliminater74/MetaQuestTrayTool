@@ -75,7 +75,11 @@ public sealed class LinkSessionWatchService : IDisposable
         if (status.SessionActive)
         {
             _lastActiveKind = status.Kind;
-            _app.Dispatcher.BeginInvoke(() => LogConnected(status));
+            _app.Dispatcher.BeginInvoke(() =>
+            {
+                _app.SessionRecover.NotifySessionStarted();
+                LogConnected(status);
+            });
             return;
         }
 
@@ -111,10 +115,12 @@ public sealed class LinkSessionWatchService : IDisposable
         if (status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase))
         {
             _app.Log.Info($"{ended} — Meta DeviceCache still shows auto-connect (headset on Wi‑Fi).");
+            _app.SessionRecover.NotifySessionEnded(previousActive, ended);
             return;
         }
 
         _app.Log.Info($"{ended} — {status.InfoBanner}");
+        _app.SessionRecover.NotifySessionEnded(previousActive, ended);
     }
 
     private void LogConnected(VrConnectionStatus status)

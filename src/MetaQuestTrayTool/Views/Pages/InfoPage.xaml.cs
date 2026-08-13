@@ -104,6 +104,17 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             SteamTipBanner.Text = steamTip;
         }
 
+        if (App.Instance.SessionRecover.ShouldSuggestRecover(connection))
+        {
+            RecoverBanner.Visibility = Visibility.Visible;
+            RecoverBannerText.Text = App.Instance.SessionRecover.DescribeSuggestion();
+        }
+        else
+        {
+            RecoverBanner.Visibility = Visibility.Collapsed;
+            RecoverBannerText.Text = string.Empty;
+        }
+
         if (!_fullReportLoaded && string.IsNullOrWhiteSpace(ReportBox.Text))
         {
             ReportBox.Text = "Click Refresh for the full report.";
@@ -163,6 +174,13 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     private void ApplyGpu_Click(object sender, RoutedEventArgs e)
     {
         var summary = App.Instance.ApplyGpuRecommendedPresets();
+        Refresh();
+        System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
+    }
+
+    private void RecoverSession_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.SessionRecover.Recover("Info page");
         Refresh();
         System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
     }

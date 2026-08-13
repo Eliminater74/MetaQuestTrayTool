@@ -75,10 +75,23 @@
       <TextBlock x:Name="HeadsetBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
       <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,8" Visibility="Collapsed"
                  Foreground="OrangeRed"/>
+      <Border x:Name="RecoverBanner" Background="{DynamicResource AppFieldBrush}"
+              BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1"
+              CornerRadius="6" Padding="10,8" Margin="0,0,0,12" Visibility="Collapsed">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Content="Recover PCVR" Style="{StaticResource AccentButtonStyle}"
+                  Margin="8,0,0,0" Click="RecoverSession_Click"
+                  ToolTip="Restart OVRService and re-apply Link, global game settings, and audio after a Link drop."/>
+          <TextBlock x:Name="RecoverBannerText" TextWrapping="Wrap" VerticalAlignment="Center"
+                     Foreground="{DynamicResource AppTextBrush}"/>
+        </DockPanel>
+      </Border>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
         <Button Content="Apply GPU recommended presets" Style="{StaticResource AccentButtonStyle}" Click="ApplyGpu_Click"
                 ToolTip="Detect your GPU tier and apply matching Quest Link + global SS/ASW defaults. Does not change NVIDIA Control Panel / driver registry."/>
+        <Button Content="Recover PCVR" Style="{StaticResource GhostButtonStyle}" Click="RecoverSession_Click"
+                ToolTip="Restart OVRService and re-apply Link / globals / audio. Use after an unexpected Link drop."/>
       </StackPanel>
 
       <Border Background="{DynamicResource AppFieldBrush}"

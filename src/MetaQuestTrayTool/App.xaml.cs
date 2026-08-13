@@ -47,6 +47,7 @@ public partial class App : System.Windows.Application
     public DashToSteamVrService DashToSteamVr { get; }
     public GpuDetectionService Gpu { get; } = new();
     public PcvrReadyService PcvrReady { get; }
+    public SessionRecoverService SessionRecover { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -67,6 +68,7 @@ public partial class App : System.Windows.Application
         SteamLinkAssist = new SteamLinkAssistService(this);
         DashToSteamVr = new DashToSteamVrService(this);
         PcvrReady = new PcvrReadyService(this);
+        SessionRecover = new SessionRecoverService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)
