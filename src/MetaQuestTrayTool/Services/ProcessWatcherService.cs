@@ -130,9 +130,27 @@ public sealed class ProcessWatcherService : IDisposable
                 continue;
             }
 
+            if (IsIgnored(processName))
+            {
+                continue;
+            }
+
             _app.Dispatcher.Invoke(() => ApplyProfile(profile, processName));
             return;
         }
+    }
+
+    private bool IsIgnored(string processName)
+    {
+        var ignored = _app.Settings.Current.ProfileIgnoreProcesses;
+        if (ignored is null || ignored.Count == 0)
+        {
+            return false;
+        }
+
+        var normalized = ProfileService.NormalizeProcessName(processName);
+        return ignored.Any(entry =>
+            string.Equals(ProfileService.NormalizeProcessName(entry), normalized, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsProcessRunning(string processName)

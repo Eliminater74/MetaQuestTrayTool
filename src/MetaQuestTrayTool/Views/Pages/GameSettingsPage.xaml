@@ -98,6 +98,14 @@
                    Text="Voice commands live on Tray Tool. Oculus Homeless is not ported yet."/>
       </Grid>
 
+      <TextBlock Text="Profile ignore list" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="One process name per line (no .exe). Auto-apply will never activate a profile for these — Discord, browsers, Steam helpers, etc."/>
+      <TextBox x:Name="IgnoreListBox" Margin="0,0,0,12" MinHeight="72" AcceptsReturn="True"
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+               LostFocus="IgnoreList_LostFocus"
+               ToolTip="Process names that must never steal the active personal profile. One per line."/>
+
       <TextBlock x:Name="CliCommandsLabel" Text="Custom OculusDebugToolCLI commands" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
       <TextBlock x:Name="CliCommandsHint" Style="{StaticResource PageHintStyle}"
                  Text="One command per line. Applied with global defaults (Apply now, tool start, and after a personal profile ends)."/>

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -99,6 +100,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         }
         CliCommandsBox.Text = settings.CustomCommands.ToCliText();
         AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
+        IgnoreListBox.Text = string.Join(Environment.NewLine, settings.ProfileIgnoreProcesses ?? []);
         ApplySessionCapabilities();
         StatusText.Text = BuildStatus();
     }
@@ -179,6 +181,30 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         commands.SetCliFromText(CliCommandsBox.Text);
         commands.SetAdbFromText(AdbCommandsBox.Text);
         App.Instance.Settings.Save();
+    }
+
+    private void IgnoreList_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        PersistIgnoreList();
+    }
+
+    private void PersistIgnoreList()
+    {
+        var lines = (IgnoreListBox.Text ?? string.Empty)
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(ProfileService.NormalizeProcessName)
+            .Where(line => line.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(line => line, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        App.Instance.Settings.Current.ProfileIgnoreProcesses = lines;
+        App.Instance.Settings.Save();
+        App.Instance.Log.Info($"Profile ignore list saved ({lines.Count} process names).");
     }
 
     private void PersistIfReady()

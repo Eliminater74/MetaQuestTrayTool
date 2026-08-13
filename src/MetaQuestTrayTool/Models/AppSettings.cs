@@ -19,6 +19,30 @@ public sealed class AppSettings
     /// <summary>Watch running games and swap to a personal profile, then restore global when the game exits.</summary>
     public bool AutoApplyProfiles { get; set; } = true;
 
+    /// <summary>
+    /// Process names (no .exe) that must never trigger auto-apply — Discord, browsers, overlays, etc.
+    /// </summary>
+    public List<string> ProfileIgnoreProcesses { get; set; } =
+    [
+        "discord",
+        "chrome",
+        "msedge",
+        "firefox",
+        "steam",
+        "steamwebhelper",
+        "steamvr",
+        "vrserver",
+        "vrdashboard",
+        "ovrserver_x64",
+        "oculusclient",
+        "oculusdash",
+        "explorer",
+        "searchhost",
+        "cursor",
+        "code",
+        "devenv"
+    ];
+
     /// <summary>Include Quest Link registry values in the global baseline.</summary>
     public bool ApplyLinkSettingsOnStart { get; set; } = true;
 
