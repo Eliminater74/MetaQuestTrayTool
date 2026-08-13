@@ -159,6 +159,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Hover tooltips across remaining pages and windows
 - [x] Open Oculus Debug Tool GUI (classic OTT shortcut)
 - [x] Tag and publish **v1.0.8**
+- [x] Cut idle CPU and snappy sidebar navigation (watcher / cache / defer Refresh)
+- [x] Tag and publish **v1.0.9**
 
 ## Housekeeping
 

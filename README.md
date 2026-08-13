@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.8) (latest) | [MetaQuestTrayTool-Setup-1.0.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.8/MetaQuestTrayTool-Setup-1.0.8.exe) |
+| [v1.0.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.9) (latest) | [MetaQuestTrayTool-Setup-1.0.9.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.9/MetaQuestTrayTool-Setup-1.0.9.exe) |
+| [v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.8) | [MetaQuestTrayTool-Setup-1.0.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.8/MetaQuestTrayTool-Setup-1.0.8.exe) |
 | [v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.7) | [MetaQuestTrayTool-Setup-1.0.7.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.7/MetaQuestTrayTool-Setup-1.0.7.exe) |
 | [v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.6) | [MetaQuestTrayTool-Setup-1.0.6.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.6/MetaQuestTrayTool-Setup-1.0.6.exe) |
 | [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.5) | [MetaQuestTrayTool-Setup-1.0.5.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.5/MetaQuestTrayTool-Setup-1.0.5.exe) |
@@ -139,7 +140,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds hover tooltips across the UI, **Open Oculus Debug Tool GUI** (classic OTT shortcut), and kills ADB before in-app updates so Setup can replace platform-tools. Builds on v1.0.7 Dash → SteamVR / PreventDashLaunch / CoreChannel.
+Release **[v1.0.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** cuts idle CPU and snappy sidebar navigation (profile watcher no longer enumerates every process; caches for Link probe / ADB / OVRService; deferred page refresh). Builds on v1.0.8 tooltips + Debug Tool GUI.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -176,6 +177,7 @@ Release **[v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - **Service & Startup**: Start/Stop button accent follows live `OVRService` state
 - **In-app updates**: checks GitHub latest release (`v*`) on start, on a user-chosen schedule while running, or manually; downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu). ADB is stopped before Setup so bundled platform-tools can be replaced
 - **Hover tooltips** on pages and settings windows (what each control does, without cluttering the layout)
+- **Low idle CPU / snappy sidebar**: profile watcher checks named games only; short caches for Link probe, ADB devices, and OVRService; page content paints before heavy Refresh
 
 Not yet: Oculus Homeless, Permanent AirLink, custom voice phrases / mic picker.
 

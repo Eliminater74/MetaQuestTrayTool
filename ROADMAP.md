@@ -143,6 +143,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Hover tooltips across shell pages and settings windows
 - [x] Open Oculus Debug Tool GUI (tray / Service & Startup / Game Settings / Advanced / hotkey / voice)
 - [x] Tag **v1.0.8**
+- [x] Cut idle CPU / snappy sidebar (process watcher, probe caches, deferred Refresh)
+- [x] Tag **v1.0.9**
 
 ## Later
 
