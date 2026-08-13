@@ -145,6 +145,9 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tag **v1.0.8**
 - [x] Cut idle CPU / snappy sidebar (process watcher, probe caches, deferred Refresh)
 - [x] Tag **v1.0.9**
+- [x] Wireless ADB connect / tcpip / auto-reconnect
+- [x] Further idle-CPU cuts (audio cache, slower polls, background watchers)
+- [x] Tag **v1.0.10**
 
 ## Later
 

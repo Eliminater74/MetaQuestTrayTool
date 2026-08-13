@@ -161,6 +161,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tag and publish **v1.0.8**
 - [x] Cut idle CPU and snappy sidebar navigation (watcher / cache / defer Refresh)
 - [x] Tag and publish **v1.0.9**
+- [x] Wireless ADB connect, tcpip helper, and auto-reconnect
+- [x] Further idle-CPU cuts (audio/USB caches, slower polls, off-UI watchers)
+- [x] Tag and publish **v1.0.10**
 
 ## Housekeeping
 
