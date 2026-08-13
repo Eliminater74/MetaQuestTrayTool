@@ -22,10 +22,14 @@ public partial class AudioSettingsWindow : Window
             Tag = AudioSwitchTrigger.OculusService
         });
 
-        VrPlaybackBox.SelectionChanged += (_, _) => Persist_Changed();
-        VrRecordingBox.SelectionChanged += (_, _) => Persist_Changed();
-        FallbackPlaybackBox.SelectionChanged += (_, _) => Persist_Changed();
-        FallbackRecordingBox.SelectionChanged += (_, _) => Persist_Changed();
+        WirePersist(VrPlaybackBox);
+        WirePersist(VrRecordingBox);
+        WirePersist(FallbackPlaybackBox);
+        WirePersist(FallbackRecordingBox);
+        WirePersist(VrCommPlaybackBox);
+        WirePersist(VrCommRecordingBox);
+        WirePersist(FallbackCommPlaybackBox);
+        WirePersist(FallbackCommRecordingBox);
         TriggerBox.SelectionChanged += (_, _) => Persist_Changed();
         AutoSwitchBox.Checked += (_, _) => Persist_Changed();
         AutoSwitchBox.Unchecked += (_, _) => Persist_Changed();
@@ -37,6 +41,9 @@ public partial class AudioSettingsWindow : Window
         ReloadDevices();
     }
 
+    private void WirePersist(System.Windows.Controls.ComboBox box) =>
+        box.SelectionChanged += (_, _) => Persist_Changed();
+
     private void ReloadDevices()
     {
         _loading = true;
@@ -45,6 +52,10 @@ public partial class AudioSettingsWindow : Window
         Populate(VrRecordingBox, AudioDeviceKind.Recording, audio.VrRecordingDeviceId);
         Populate(FallbackPlaybackBox, AudioDeviceKind.Playback, audio.FallbackPlaybackDeviceId);
         Populate(FallbackRecordingBox, AudioDeviceKind.Recording, audio.FallbackRecordingDeviceId);
+        Populate(VrCommPlaybackBox, AudioDeviceKind.Playback, audio.VrCommunicationsPlaybackDeviceId, sameAsMultimedia: true);
+        Populate(VrCommRecordingBox, AudioDeviceKind.Recording, audio.VrCommunicationsRecordingDeviceId, sameAsMultimedia: true);
+        Populate(FallbackCommPlaybackBox, AudioDeviceKind.Playback, audio.FallbackCommunicationsPlaybackDeviceId, sameAsMultimedia: true);
+        Populate(FallbackCommRecordingBox, AudioDeviceKind.Recording, audio.FallbackCommunicationsRecordingDeviceId, sameAsMultimedia: true);
         AutoSwitchBox.IsChecked = audio.AutoSwitchEnabled;
         CaptureEachSessionBox.IsChecked = audio.CaptureFallbackOnEachLinkSession;
         CommunicationsBox.IsChecked = audio.AlsoSetCommunicationsRole;
@@ -54,10 +65,18 @@ public partial class AudioSettingsWindow : Window
         _loading = false;
     }
 
-    private void Populate(System.Windows.Controls.ComboBox box, AudioDeviceKind kind, string? selectedId)
+    private void Populate(
+        System.Windows.Controls.ComboBox box,
+        AudioDeviceKind kind,
+        string? selectedId,
+        bool sameAsMultimedia = false)
     {
         box.Items.Clear();
-        box.Items.Add(new ComboBoxItem { Content = "(none)", Tag = null });
+        box.Items.Add(new ComboBoxItem
+        {
+            Content = sameAsMultimedia ? "(same as multimedia)" : "(none)",
+            Tag = null
+        });
 
         foreach (var device in App.Instance.Audio.ListDevices(kind))
         {
@@ -150,6 +169,10 @@ public partial class AudioSettingsWindow : Window
         audio.VrRecordingDeviceId = SelectedId(VrRecordingBox);
         audio.FallbackPlaybackDeviceId = SelectedId(FallbackPlaybackBox);
         audio.FallbackRecordingDeviceId = SelectedId(FallbackRecordingBox);
+        audio.VrCommunicationsPlaybackDeviceId = SelectedId(VrCommPlaybackBox);
+        audio.VrCommunicationsRecordingDeviceId = SelectedId(VrCommRecordingBox);
+        audio.FallbackCommunicationsPlaybackDeviceId = SelectedId(FallbackCommPlaybackBox);
+        audio.FallbackCommunicationsRecordingDeviceId = SelectedId(FallbackCommRecordingBox);
     }
 
     private static string? SelectedId(System.Windows.Controls.ComboBox box) =>

@@ -2,9 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Audio Switching"
-        Height="640"
+        Height="780"
         Width="600"
-        ResizeMode="NoResize"
+        MinHeight="520"
+        MinWidth="520"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}"
@@ -67,14 +69,35 @@
                   ToolTip="Desktop speakers/headphones restored when Link is inactive."/>
 
         <TextBlock Text="Fallback recording (when Link inactive)" Foreground="{DynamicResource AppMutedBrush}"/>
-        <ComboBox x:Name="FallbackRecordingBox" Margin="0,4,0,8" Padding="6"
+        <ComboBox x:Name="FallbackRecordingBox" Margin="0,4,0,12" Padding="6"
                   ToolTip="Desktop microphone restored when Link is inactive."/>
+
+        <TextBlock Text="Communications (Discord / Teams)" Margin="0,4,0,6"
+                   FontWeight="SemiBold" Foreground="{DynamicResource AppAccentBrush}"/>
+        <TextBlock Margin="0,0,0,8" TextWrapping="Wrap" Foreground="{DynamicResource AppMutedBrush}"
+                   Text="Optional. Leave on “(same as multimedia)” to reuse the VR/fallback devices above for the Windows Communications role."/>
+
+        <TextBlock Text="VR communications playback" Foreground="{DynamicResource AppMutedBrush}"/>
+        <ComboBox x:Name="VrCommPlaybackBox" Margin="0,4,0,12" Padding="6"
+                  ToolTip="Communications playback while Link is active. Empty = use VR multimedia playback."/>
+
+        <TextBlock Text="VR communications recording" Foreground="{DynamicResource AppMutedBrush}"/>
+        <ComboBox x:Name="VrCommRecordingBox" Margin="0,4,0,12" Padding="6"
+                  ToolTip="Communications recording (mic) while Link is active. Empty = use VR multimedia recording."/>
+
+        <TextBlock Text="Fallback communications playback" Foreground="{DynamicResource AppMutedBrush}"/>
+        <ComboBox x:Name="FallbackCommPlaybackBox" Margin="0,4,0,12" Padding="6"
+                  ToolTip="Communications playback when Link is inactive. Empty = use fallback multimedia playback."/>
+
+        <TextBlock Text="Fallback communications recording" Foreground="{DynamicResource AppMutedBrush}"/>
+        <ComboBox x:Name="FallbackCommRecordingBox" Margin="0,4,0,8" Padding="6"
+                  ToolTip="Communications mic when Link is inactive. Empty = use fallback multimedia recording."/>
 
         <Button Content="Use current defaults as fallback"
                 HorizontalAlignment="Left"
                 Style="{StaticResource GhostButtonStyle}"
                 Click="CaptureFallback_Click"
-                ToolTip="Copy the current Windows default playback/recording devices into the fallback fields."/>
+                ToolTip="Copy the current Windows default playback/recording devices into the fallback fields (including communications)."/>
       </StackPanel>
     </ScrollViewer>
   </DockPanel>
