@@ -2,9 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Meta Quest Tray Tool"
-        Height="720"
+        Height="820"
         Width="980"
-        MinHeight="580"
+        MinHeight="700"
         MinWidth="860"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackgroundBrush}"
@@ -48,52 +48,57 @@
                      FontSize="11"/>
         </StackPanel>
 
-        <StackPanel Margin="0,16,0,0">
-          <TextBlock Text="META QUEST"
-                     Margin="18,0,0,2"
-                     FontSize="11"
-                     FontWeight="Bold"
-                     Foreground="{DynamicResource AppMutedBrush}"/>
-          <TextBlock Text="Tray Tool"
-                     Margin="18,0,0,16"
-                     FontSize="18"
-                     FontWeight="SemiBold"
-                     Foreground="{DynamicResource AppAccentBrush}"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Margin="0,16,0,0"
+                      CanContentScroll="False">
+          <StackPanel>
+            <TextBlock Text="META QUEST"
+                       Margin="18,0,0,2"
+                       FontSize="11"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource AppMutedBrush}"/>
+            <TextBlock Text="Tray Tool"
+                       Margin="18,0,0,16"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AppAccentBrush}"/>
 
-          <RadioButton x:Name="NavStatus" Content="Status" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Status"
-                       ToolTip="Live PCVR status board — SteamVR, OpenXR, Link, service, profiles, and more. Opens first."/>
-          <RadioButton x:Name="NavGame" Content="Game Settings" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"
-                       ToolTip="OpenXR runtime, global ODT defaults (SS/ASW/FOV), and personal profiles."/>
-          <RadioButton x:Name="NavTray" Content="Tray Tool" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Tray"
-                       ToolTip="Hotkeys, voice commands, and other tray-side helpers."/>
-          <RadioButton x:Name="NavPower" Content="Power Options" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Power"
-                       ToolTip="Windows power plans and USB selective suspend for VR sessions."/>
-          <RadioButton x:Name="NavService" Content="Service &amp; Startup" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Service"
-                       ToolTip="OVRService start/stop, elevation, Dash → SteamVR, and CoreChannel."/>
-          <RadioButton x:Name="NavLog" Content="Log Window" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Log"
-                       ToolTip="Startup checks, service actions, profile applies, and errors."/>
-          <RadioButton x:Name="NavAdvanced" Content="Advanced" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Advanced"
-                       ToolTip="Library import, backup/restore, audio devices, and updates."/>
-          <RadioButton x:Name="NavLink" Content="Quest Link" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"
-                       ToolTip="RemoteHeadset encode width, bitrate, DBR, sharpen, HEVC, and Mobile ASW."/>
-          <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"
-                       ToolTip="ADB tweaks for your trusted Quest. Props do not survive reboot — apply on connect."/>
-          <RadioButton x:Name="NavVrTools" Content="VR Tools" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="VrTools"
-                       ToolTip="Curated links to Revive, Advanced Settings, overlays, wireless PCVR, and more."/>
-          <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
-                       GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"
-                       ToolTip="Full diagnostics report, PCVR Ready checklist, and copy/export helpers."/>
-        </StackPanel>
+            <RadioButton x:Name="NavStatus" Content="Status" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Status"
+                         ToolTip="Live PCVR status board — SteamVR, OpenXR, Link, service, profiles, and more. Opens first."/>
+            <RadioButton x:Name="NavGame" Content="Game Settings" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Game"
+                         ToolTip="OpenXR runtime, global ODT defaults (SS/ASW/FOV), and personal profiles."/>
+            <RadioButton x:Name="NavTray" Content="Tray Tool" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Tray"
+                         ToolTip="Hotkeys, voice commands, and other tray-side helpers."/>
+            <RadioButton x:Name="NavPower" Content="Power Options" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Power"
+                         ToolTip="Windows power plans and USB selective suspend for VR sessions."/>
+            <RadioButton x:Name="NavService" Content="Service &amp; Startup" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Service"
+                         ToolTip="OVRService start/stop, elevation, Dash → SteamVR, and CoreChannel."/>
+            <RadioButton x:Name="NavLog" Content="Log Window" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Log"
+                         ToolTip="Startup checks, service actions, profile applies, and errors."/>
+            <RadioButton x:Name="NavAdvanced" Content="Advanced" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Advanced"
+                         ToolTip="Library import, backup/restore, audio devices, and updates."/>
+            <RadioButton x:Name="NavLink" Content="Quest Link" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"
+                         ToolTip="RemoteHeadset encode width, bitrate, DBR, sharpen, HEVC, and Mobile ASW."/>
+            <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"
+                         ToolTip="ADB tweaks for your trusted Quest. Props do not survive reboot — apply on connect."/>
+            <RadioButton x:Name="NavVrTools" Content="VR Tools" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="VrTools"
+                         ToolTip="Curated links to Revive, Advanced Settings, overlays, wireless PCVR, and more."/>
+            <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"
+                         ToolTip="Full diagnostics report, PCVR Ready checklist, and copy/export helpers."/>
+          </StackPanel>
+        </ScrollViewer>
       </DockPanel>
     </Border>
 
