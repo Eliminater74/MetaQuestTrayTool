@@ -121,6 +121,22 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
 
         _loading = false;
         UpdatePresetHint();
+        UpdateGpuHint();
+    }
+
+    private void UpdateGpuHint()
+    {
+        var rec = App.Instance.Gpu.GetRecommendation();
+        GpuHintText.Text = rec is null
+            ? "No GPU detected — Link presets below still work manually."
+            : $"{rec.Banner} {rec.Rationale}";
+    }
+
+    private void ApplyGpu_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.ApplyGpuRecommendedPresets();
+        Refresh();
+        LiveStatusText.Text = summary;
     }
 
     private void WireLivePersist(System.Windows.Controls.ComboBox box) =>

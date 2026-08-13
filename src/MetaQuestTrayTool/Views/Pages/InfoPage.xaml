@@ -23,11 +23,18 @@
 
       <TextBlock x:Name="ConnectionBanner" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
+      <TextBlock x:Name="GpuBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
+                 Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="OpenXrBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="HeadsetBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
-      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,12" Visibility="Collapsed"
+      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,8" Visibility="Collapsed"
                  Foreground="OrangeRed"/>
+
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+        <Button Content="Apply GPU recommended presets" Style="{StaticResource AccentButtonStyle}" Click="ApplyGpu_Click"
+                ToolTip="Detect your GPU tier and apply matching Quest Link + global SS/ASW defaults. Does not change NVIDIA Control Panel / driver registry."/>
+      </StackPanel>
 
       <Border Background="{DynamicResource AppFieldBrush}"
               BorderBrush="{DynamicResource AppBorderBrush}"

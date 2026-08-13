@@ -52,6 +52,14 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             ? (System.Windows.Media.Brush)FindResource("AppAccentBrush")
             : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
 
+        var gpu = App.Instance.Gpu.GetRecommendation();
+        GpuBanner.Text = gpu is null
+            ? "GPU: not detected"
+            : $"GPU: {gpu.Banner}";
+        GpuBanner.Foreground = gpu is null
+            ? (System.Windows.Media.Brush)FindResource("AppMutedBrush")
+            : (System.Windows.Media.Brush)FindResource("AppAccentBrush");
+
         var openXr = App.Instance.OpenXr.ReadActiveKind();
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
 
@@ -109,5 +117,12 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         {
             System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
         }
+    }
+
+    private void ApplyGpu_Click(object sender, RoutedEventArgs e)
+    {
+        var summary = App.Instance.ApplyGpuRecommendedPresets();
+        Refresh();
+        System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
     }
 }

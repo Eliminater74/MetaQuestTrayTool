@@ -25,6 +25,33 @@ public static class SystemInfoService
         text.AppendLine($"ADB binary: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
 
+        text.AppendLine("Graphics");
+        var gpuRec = app.Gpu.GetRecommendation();
+        if (gpuRec is null)
+        {
+            text.AppendLine("  Adapter: not detected");
+        }
+        else
+        {
+            text.AppendLine($"  Adapter: {gpuRec.Adapter.Name}");
+            text.AppendLine($"  Vendor: {gpuRec.Adapter.VendorLabel}");
+            text.AppendLine($"  Tier: {gpuRec.Adapter.TierLabel}");
+            text.AppendLine($"  VRAM: {gpuRec.Adapter.DedicatedMemoryLabel}");
+            text.AppendLine($"  Recommended Link preset: {gpuRec.LinkPresetName}");
+            text.AppendLine($"  Recommended global preset: {gpuRec.GlobalPresetName}");
+            text.AppendLine($"  Note: {gpuRec.Rationale}");
+        }
+
+        var otherGpus = app.Gpu.ListAdapters()
+            .Where(a => gpuRec is null || !string.Equals(a.Name, gpuRec.Adapter.Name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (otherGpus.Count > 0)
+        {
+            text.AppendLine($"  Other adapters: {string.Join("; ", otherGpus.Select(a => a.Summary))}");
+        }
+
+        text.AppendLine();
+
         text.AppendLine("Link session (Meta / Steam / VD)");
         text.AppendLine($"  Status: {link.InfoBanner}");
         text.AppendLine($"  Kind: {link.Kind}");

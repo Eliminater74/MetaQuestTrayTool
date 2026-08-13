@@ -45,6 +45,7 @@ public partial class App : System.Windows.Application
     public LinkConnectionProbeService LinkConnection { get; }
     public SteamLinkAssistService SteamLinkAssist { get; }
     public DashToSteamVrService DashToSteamVr { get; }
+    public GpuDetectionService Gpu { get; } = new();
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -113,6 +114,7 @@ public partial class App : System.Windows.Application
         Log.Info(Adb.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
+        Log.Info(Gpu.Describe());
         Log.Info(DebugTool.IsAvailable
             ? $"Debug Tool CLI: {DebugTool.CliPath}"
             : "Debug Tool CLI was not found.");
@@ -529,6 +531,37 @@ public partial class App : System.Windows.Application
         }
 
         return result.Summary;
+    }
+
+    /// <summary>
+    /// Detect GPU tier and apply matching Link + global game presets (no NVIDIA driver registry writes).
+    /// </summary>
+    public string ApplyGpuRecommendedPresets()
+    {
+        var recommendation = Gpu.GetRecommendation(forceRefresh: true);
+        if (recommendation is null)
+        {
+            return "No GPU detected — could not apply recommended presets.";
+        }
+
+        Settings.Current.LinkSettings = recommendation.Link.Clone();
+        Settings.Current.DefaultGameSettings = recommendation.Game.Clone();
+        Settings.Save();
+
+        var parts = new List<string>
+        {
+            $"GPU {recommendation.Adapter.Name} ({recommendation.Adapter.TierLabel})",
+            $"Link → {recommendation.LinkPresetName}",
+            $"Globals → {recommendation.GlobalPresetName}"
+        };
+
+        parts.Add(ApplyMetaLinkSettings(Settings.Current.LinkSettings, deleteUnsetOverrides: true));
+        parts.Add(ApplyGlobalGameSettings(includeOdt: true));
+        parts.Add(recommendation.Rationale);
+
+        var summary = string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+        Log.Info("Applied GPU recommended presets — " + summary);
+        return summary;
     }
 
     private string TryApplyCustomAdb(IReadOnlyList<string> commands)

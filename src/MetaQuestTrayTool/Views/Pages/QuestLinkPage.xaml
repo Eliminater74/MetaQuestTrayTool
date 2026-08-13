@@ -12,6 +12,14 @@
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
+      <TextBlock Text="GPU recommended" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock x:Name="GpuHintText" Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Detecting GPU…"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <Button Content="Apply GPU recommended presets" Style="{StaticResource AccentButtonStyle}" Click="ApplyGpu_Click"
+                ToolTip="Apply Link + global SS/ASW defaults matched to your detected GPU tier (e.g. Quality for a 4070 Super). Does not touch NVIDIA driver registry."/>
+      </StackPanel>
+
       <TextBlock Text="Air Link → SteamVR" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="After Meta Link / Air Link connects, kill Oculus Dash and start SteamVR so Steam games run over Link. Options live on Service &amp; Startup."/>
