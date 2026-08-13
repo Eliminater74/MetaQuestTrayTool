@@ -73,8 +73,15 @@
       <TextBlock x:Name="OpenXrBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>
       <TextBlock x:Name="HeadsetBanner" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
-      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,8" Visibility="Collapsed"
+      <TextBlock x:Name="SteamTipBanner" TextWrapping="Wrap" Margin="0,0,0,4" Visibility="Collapsed"
                  Foreground="OrangeRed"/>
+      <Button x:Name="FixSteamOpenXrButton" Content="Switch OpenXR to SteamVR now" Style="{StaticResource AccentButtonStyle}"
+              Margin="0,0,0,8" HorizontalAlignment="Left" Visibility="Collapsed"
+              Click="FixSteamOpenXr_Click"
+              ToolTip="Steam Link / SteamVR session detected but OpenXR is not SteamVR. Switch ActiveRuntime to SteamVR for this session."/>
+      <TextBlock x:Name="SteamVrHintBanner" TextWrapping="Wrap" Margin="0,0,0,12" Visibility="Collapsed"
+                 Foreground="{DynamicResource AppMutedBrush}"/>
+
       <Border x:Name="RecoverBanner" Background="{DynamicResource AppFieldBrush}"
               BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1"
               CornerRadius="6" Padding="10,8" Margin="0,0,0,12" Visibility="Collapsed">

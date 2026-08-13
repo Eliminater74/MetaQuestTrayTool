@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Services;
 using MediaBrush = System.Windows.Media.Brush;
 
@@ -97,11 +98,25 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         {
             SteamTipBanner.Visibility = Visibility.Collapsed;
             SteamTipBanner.Text = string.Empty;
+            FixSteamOpenXrButton.Visibility = Visibility.Collapsed;
         }
         else
         {
             SteamTipBanner.Visibility = Visibility.Visible;
             SteamTipBanner.Text = steamTip;
+            FixSteamOpenXrButton.Visibility = Visibility.Visible;
+        }
+
+        var steamVrHint = SteamVrSettingsHintService.DescribeHints(connection);
+        if (string.IsNullOrWhiteSpace(steamVrHint))
+        {
+            SteamVrHintBanner.Visibility = Visibility.Collapsed;
+            SteamVrHintBanner.Text = string.Empty;
+        }
+        else
+        {
+            SteamVrHintBanner.Visibility = Visibility.Visible;
+            SteamVrHintBanner.Text = steamVrHint;
         }
 
         if (App.Instance.SessionRecover.ShouldSuggestRecover(connection))
@@ -183,6 +198,23 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         var summary = App.Instance.SessionRecover.Recover("Info page");
         Refresh();
         System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
+    }
+
+    private void FixSteamOpenXr_Click(object sender, RoutedEventArgs e)
+    {
+        if (!App.Instance.OpenXr.IsAvailable(OpenXrRuntimeKind.SteamVr))
+        {
+            System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                "SteamVR OpenXR runtime was not found. Install SteamVR from Steam first.",
+                App.AppName);
+            return;
+        }
+
+        var result = App.Instance.OpenXr.Set(OpenXrRuntimeKind.SteamVr);
+        App.Instance.Log.Info(result);
+        Refresh();
+        System.Windows.MessageBox.Show(Window.GetWindow(this), result, App.AppName);
     }
 
     private MediaBrush BrushFor(PcvrReadyLevel level) => level switch

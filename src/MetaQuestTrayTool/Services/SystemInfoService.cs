@@ -148,6 +148,12 @@ public static class SystemInfoService
             text.AppendLine($"  Steam Link tip: {steamTip}");
         }
 
+        var steamVrHint = SteamVrSettingsHintService.DescribeHints(link);
+        if (!string.IsNullOrWhiteSpace(steamVrHint))
+        {
+            text.AppendLine($"  {steamVrHint}");
+        }
+
         text.AppendLine($"  Prefer SteamVR during Steam Link: {app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink}");
 
         return text.ToString().TrimEnd();

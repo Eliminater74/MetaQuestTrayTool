@@ -301,10 +301,21 @@ public sealed class TrayIconHost : IDisposable
         }
 
         var ready = _app.PcvrReady.Evaluate().ShortTraySummary;
+        var openXr = OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind());
+        var profile = _app.IsGameProfileActive
+            ? Truncate(_app.ActiveProfileName ?? "profile", 14)
+            : null;
+
         // NotifyIcon.Text max is 63 chars on Windows.
-        var tip = $"{ready} · {pcvr}\n{OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
+        var tip = profile is null
+            ? $"{ready} · {pcvr}\n{openXr}"
+            : $"{profile} · {pcvr}\n{openXr}";
         _notifyIcon.Text = tip.Length <= 63 ? tip : tip[..63];
     }
+
+    private static string Truncate(string value, int max) =>
+        value.Length <= max ? value : value[..(max - 1)] + "…";
+
 
     private ToolStripMenuItem BuildGameSettingsMenu()
     {
