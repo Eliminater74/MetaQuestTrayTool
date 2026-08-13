@@ -290,13 +290,14 @@ public sealed class TrayIconHost : IDisposable
         SyncPowerChecks(menu);
         SyncHeadsetChecks(menu);
         var pcvr = _app.LinkConnection.Probe(includeEnumHmd: false).Summary;
-        if (pcvr.Length > 28)
+        if (pcvr.Length > 22)
         {
-            pcvr = pcvr[..25] + "…";
+            pcvr = pcvr[..19] + "…";
         }
 
+        var ready = _app.PcvrReady.Evaluate().ShortTraySummary;
         // NotifyIcon.Text max is 63 chars on Windows.
-        var tip = $"{App.AppName}\n{pcvr}\n{OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
+        var tip = $"{ready} · {pcvr}\n{OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind())}";
         _notifyIcon.Text = tip.Length <= 63 ? tip : tip[..63];
     }
 

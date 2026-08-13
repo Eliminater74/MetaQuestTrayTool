@@ -8,18 +8,63 @@
     <StackPanel>
       <TextBlock Text="Info" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Link = Meta Air/wired, Steam Link, or Virtual Desktop. ADB = USB/wireless debugging (optional; not required for Air Link)."/>
+                 Text="PCVR Ready checks your PC before you put the headset on. SteamVR-first tips are included because most Steam PCVR games expect SteamVR OpenXR."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
         <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"
                 ToolTip="Open the donation page to support Meta Quest Tray Tool development."/>
         <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"
-                ToolTip="Re-read Link, OpenXR, headset, and ADB status into the report below."/>
+                ToolTip="Re-read Link, OpenXR, headset, ADB, and PCVR Ready status."/>
         <Button Content="Copy" Style="{StaticResource GhostButtonStyle}" Click="Copy_Click"
                 ToolTip="Copy the full diagnostics report to the clipboard for support or bug reports."/>
         <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"
                 ToolTip="Remember the connected VR serial as your trusted headset for ADB commands."/>
       </StackPanel>
+
+      <TextBlock Text="PCVR Ready" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock x:Name="ReadySummaryText" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,8"
+                 Foreground="{DynamicResource AppAccentBrush}"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="Fix all" Style="{StaticResource AccentButtonStyle}" Click="FixAllReady_Click"
+                ToolTip="Run fix actions for every checklist item that can be auto-fixed (OVRService, OpenXR, power, Link, GPU, Dash→SteamVR)."/>
+        <Button Content="Re-check" Style="{StaticResource GhostButtonStyle}" Click="RefreshReady_Click"
+                ToolTip="Re-evaluate the PCVR Ready checklist now."/>
+      </StackPanel>
+      <ItemsControl x:Name="ReadyItemsList" Margin="0,0,0,16">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Background="{DynamicResource AppFieldBrush}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="10,8"
+                    Margin="0,0,0,6">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="56"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding LevelLabel}" FontWeight="Bold"
+                           VerticalAlignment="Center" Foreground="{Binding LevelBrush}"/>
+                <StackPanel Grid.Column="1" Margin="8,0,8,0">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+                             Foreground="{DynamicResource AppTextBrush}"/>
+                  <TextBlock Text="{Binding Detail}" TextWrapping="Wrap"
+                             Foreground="{DynamicResource AppMutedBrush}"/>
+                </StackPanel>
+                <Button Grid.Column="2" Content="{Binding FixLabel}"
+                        Style="{StaticResource GhostButtonStyle}" Margin="0"
+                        Visibility="{Binding FixVisibility}"
+                        Tag="{Binding Id}"
+                        Click="FixReadyItem_Click"
+                        VerticalAlignment="Center"
+                        ToolTip="Apply the recommended fix for this checklist item."/>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
 
       <TextBlock x:Name="ConnectionBanner" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"
                  Foreground="{DynamicResource AppAccentBrush}"/>

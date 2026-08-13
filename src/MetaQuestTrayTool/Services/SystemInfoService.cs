@@ -25,6 +25,16 @@ public static class SystemInfoService
         text.AppendLine($"ADB binary: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
 
+        var ready = app.PcvrReady.Evaluate();
+        text.AppendLine("PCVR Ready");
+        text.AppendLine($"  {ready.Summary}");
+        foreach (var item in ready.Items)
+        {
+            text.AppendLine($"  [{item.Level}] {item.Title}: {item.Detail}");
+        }
+
+        text.AppendLine();
+
         text.AppendLine("Graphics");
         var gpuRec = app.Gpu.GetRecommendation();
         if (gpuRec is null)
