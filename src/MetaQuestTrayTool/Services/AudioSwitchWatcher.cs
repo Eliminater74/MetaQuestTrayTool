@@ -4,21 +4,22 @@ using MetaQuestTrayTool.Models;
 namespace MetaQuestTrayTool.Services;
 
 /// <summary>
-/// Switches to VR audio while Link is active, then restores desktop hardware when Link drops.
-/// Meta's "Oculus Virtual Audio Device" stays installed forever — presence alone is NOT Link.
-/// Link is treated as active when Windows default output is the headset (Meta sets that on enter),
-/// or when a removable headset endpoint appears.
-/// Startup heal only restores Speakers when no real PCVR session is detected (SteamVR / VD /
-/// DeviceCache / ADB) — never because ADB/EnumHmd alone failed during Air Link.
+/// Audio policy (user boot settings stay until PCVR, then restore after):
+/// 1. App / Windows start — never call SetDefault (leave desktop audio alone).
+/// 2. PCVR session starts — switch to configured VR devices.
+/// 3. PCVR session ends — restore configured fallback / desktop devices.
+/// Meta's virtual audio endpoint stays installed forever; leftover "headset is default"
+/// after a previous night must not trigger a switch on launch.
 /// </summary>
 public sealed class AudioSwitchWatcher : IDisposable
 {
     private readonly App _app;
     private readonly DispatcherTimer _timer;
-    private bool? _wasActive;
-    private bool _vrDevicesActive;
-    private bool _startupHealDone;
-    private int _hmdCheckCounter;
+    private bool _armed;
+    private bool _baselineHardware;
+    private bool _baselineHeadsetAudio;
+    private bool _vrDevicesApplied;
+    private int _deadSessionHits;
 
     public AudioSwitchWatcher(App app)
     {
@@ -39,161 +40,94 @@ public sealed class AudioSwitchWatcher : IDisposable
         var settings = _app.Settings.Current.Audio;
         if (!settings.AutoSwitchEnabled)
         {
-            _wasActive = null;
-            _vrDevicesActive = false;
+            _armed = false;
+            _vrDevicesApplied = false;
+            _deadSessionHits = 0;
             return;
         }
 
-        if (!_startupHealDone)
-        {
-            TryStartupHeal(settings);
-        }
+        var hardware = IsHardwarePcvrSession(settings);
+        var headsetAudio = settings.Trigger == AudioSwitchTrigger.LinkAudioDevice
+                           && _app.Audio.IsLinkAudioSessionActive(settings);
 
-        // While on desktop, keep remembering non-headset defaults for a clean restore later.
-        var active = IsSessionActive(settings);
-        if (!active && !_vrDevicesActive)
+        // Quietly remember desktop defaults only while we have not applied VR this session.
+        if (!_vrDevicesApplied && !hardware)
         {
             RememberDesktopFallback(settings);
         }
 
-        // If we switched to VR earlier but Meta left the headset as default after Link ended,
-        // confirm with a real PCVR session probe (not ADB-only) and restore speakers.
-        if (_vrDevicesActive && active)
+        // First poll after enable: snapshot baselines only — never SetDefault on launch.
+        if (!_armed)
         {
-            MaybeEndStaleVrSession(settings);
+            _armed = true;
+            _baselineHardware = hardware;
+            _baselineHeadsetAudio = headsetAudio;
+            _vrDevicesApplied = false;
+            _deadSessionHits = 0;
+            _app.Log.Info(
+                "Audio watcher: armed — leaving boot audio alone until a new PCVR session starts "
+                + $"(hardware={(hardware ? "yes" : "no")}, headsetDefault={(headsetAudio ? "yes" : "no")}).");
+            return;
         }
 
-        if (_wasActive is null)
+        if (!_vrDevicesApplied)
         {
-            _wasActive = active;
-            // Never treat always-present Oculus Virtual Audio as "already in Link" without
-            // applying the user's configured VR devices — that left wrong endpoints in place.
-            if (active)
+            // Rising edge only — leftover Meta virtual / sticky DeviceCache at boot is ignored.
+            var hardwareStarted = hardware && !_baselineHardware;
+            var headsetAudioStarted = headsetAudio && !_baselineHeadsetAudio;
+            if (hardwareStarted || headsetAudioStarted)
             {
-                _vrDevicesActive = true;
-                if (HasConfiguredVrDevices(settings))
-                {
-                    SwitchToVr("Audio watcher: headset already Windows default at startup — applying configured VR devices.");
-                }
-                else
-                {
-                    _app.Log.Info("Audio watcher: headset already Windows default at startup — watching (no VR devices configured).");
-                }
+                SwitchToVr(hardwareStarted
+                    ? "PCVR session started."
+                    : "Headset became Windows default (Link audio) — treating as PCVR start.");
             }
             else
             {
-                _app.Log.Info("Audio watcher: desktop audio at startup.");
+                // Baselines can clear once the leftover condition goes away, so a later real start edges.
+                if (!hardware)
+                {
+                    _baselineHardware = false;
+                }
+
+                if (!headsetAudio)
+                {
+                    _baselineHeadsetAudio = false;
+                }
             }
 
             return;
         }
 
-        if (active == _wasActive)
+        // VR devices applied — restore only when the hardware session is gone.
+        // Do not wait for headset-default to clear (Meta often leaves it stuck).
+        if (hardware)
+        {
+            _deadSessionHits = 0;
+            return;
+        }
+
+        _deadSessionHits++;
+        if (_deadSessionHits < 2)
         {
             return;
         }
 
-        _wasActive = active;
-        if (active)
-        {
-            SwitchToVr("Link / headset audio became active.");
-        }
-        else
-        {
-            RestoreFallback("Link / headset audio became inactive.");
-        }
+        _deadSessionHits = 0;
+        _baselineHardware = false;
+        _baselineHeadsetAudio = headsetAudio;
+        RestoreFallback("PCVR session ended — restoring desktop / fallback audio.");
     }
 
-    private bool IsSessionActive(AudioSwitchSettings settings) =>
-        settings.Trigger switch
-        {
-            AudioSwitchTrigger.OculusService => IsOculusServiceRunning(),
-            _ => _app.Audio.IsLinkAudioSessionActive(settings)
-        };
-
-    private bool IsOculusServiceRunning()
+    private bool IsHardwarePcvrSession(AudioSwitchSettings settings)
     {
-        _app.Oculus.Refresh();
-        return _app.Oculus.IsServiceRunning;
-    }
-
-    private static bool HasConfiguredVrDevices(AudioSwitchSettings audio) =>
-        !string.IsNullOrWhiteSpace(audio.VrPlaybackDeviceId)
-        || !string.IsNullOrWhiteSpace(audio.VrRecordingDeviceId)
-        || !string.IsNullOrWhiteSpace(audio.VrCommunicationsPlaybackDeviceId)
-        || !string.IsNullOrWhiteSpace(audio.VrCommunicationsRecordingDeviceId);
-
-    private void RememberDesktopFallback(AudioSwitchSettings audio)
-    {
-        var beforePlayback = audio.FallbackPlaybackDeviceId;
-        var beforeRecording = audio.FallbackRecordingDeviceId;
-        _app.Audio.CaptureCurrentAsFallback(audio);
-        if (!string.Equals(beforePlayback, audio.FallbackPlaybackDeviceId, StringComparison.OrdinalIgnoreCase)
-            || !string.Equals(beforeRecording, audio.FallbackRecordingDeviceId, StringComparison.OrdinalIgnoreCase))
+        if (settings.Trigger == AudioSwitchTrigger.OculusService)
         {
-            _app.Settings.Save();
-        }
-    }
-
-    private void TryStartupHeal(AudioSwitchSettings settings)
-    {
-        _startupHealDone = true;
-        if (!_app.Audio.IsCurrentPlaybackHeadset())
-        {
-            return;
+            _app.Oculus.Refresh();
+            return _app.Oculus.IsServiceRunning;
         }
 
-        if (string.IsNullOrWhiteSpace(settings.FallbackPlaybackDeviceId)
-            && string.IsNullOrWhiteSpace(settings.FallbackRecordingDeviceId))
-        {
-            return;
-        }
-
-        if (PcvrSessionLooksAlive())
-        {
-            _vrDevicesActive = true;
-            _app.Log.Info("Audio watcher: headset is default and a PCVR session looks live — leaving / applying VR audio.");
-            return;
-        }
-
-        RestoreFallback("Startup: headset was default but no live PCVR session — restoring desktop speakers.");
-    }
-
-    private void MaybeEndStaleVrSession(AudioSwitchSettings settings)
-    {
-        // PCVR probe is relatively expensive — only every ~20 seconds while VR audio is latched.
-        _hmdCheckCounter++;
-        if (_hmdCheckCounter < 4)
-        {
-            return;
-        }
-
-        _hmdCheckCounter = 0;
-        if (PcvrSessionLooksAlive())
-        {
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(settings.FallbackPlaybackDeviceId)
-            && string.IsNullOrWhiteSpace(settings.FallbackRecordingDeviceId))
-        {
-            return;
-        }
-
-        _wasActive = false;
-        RestoreFallback("Link appears ended (no live PCVR session) but headset was still default — restoring desktop speakers.");
-    }
-
-    /// <summary>
-    /// True when SteamVR / Virtual Desktop / Meta DeviceCache / ADB / EnumHmd indicate a live
-    /// session. Intentionally ignores "headset is Windows default" alone — that stays true after
-    /// Link ends and would otherwise prevent restoring Speakers.
-    /// </summary>
-    private bool PcvrSessionLooksAlive()
-    {
         try
         {
-            // includeAudioLink: false — leftover Meta virtual default must not count as a session.
             var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: false);
             if (status.SessionActive)
             {
@@ -215,21 +149,21 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
         catch
         {
-            // ADB optional for Air Link.
+            // ADB optional.
         }
 
-        if (!_app.DebugTool.IsAvailable)
-        {
-            return false;
-        }
+        return false;
+    }
 
-        try
+    private void RememberDesktopFallback(AudioSwitchSettings audio)
+    {
+        var beforePlayback = audio.FallbackPlaybackDeviceId;
+        var beforeRecording = audio.FallbackRecordingDeviceId;
+        _app.Audio.CaptureCurrentAsFallback(audio);
+        if (!string.Equals(beforePlayback, audio.FallbackPlaybackDeviceId, StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(beforeRecording, audio.FallbackRecordingDeviceId, StringComparison.OrdinalIgnoreCase))
         {
-            return _app.DebugTool.EnumerateHeadsets().Count > 0;
-        }
-        catch
-        {
-            return false;
+            _app.Settings.Save();
         }
     }
 
@@ -246,15 +180,17 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
 
         var result = _app.Audio.ApplyVrDevices(audio);
-        _vrDevicesActive = true;
-        _hmdCheckCounter = 0;
+        _vrDevicesApplied = true;
+        _deadSessionHits = 0;
+        _baselineHardware = true;
+        _baselineHeadsetAudio = true;
         _app.Log.Info($"{reason} Switched to VR audio. {result}");
     }
 
     private void RestoreFallback(string reason)
     {
         var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
-        _vrDevicesActive = false;
-        _app.Log.Info($"{reason} Restored desktop/fallback audio. {result}");
+        _vrDevicesApplied = false;
+        _app.Log.Info($"{reason} {result}");
     }
 }

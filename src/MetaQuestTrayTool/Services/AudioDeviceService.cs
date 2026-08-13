@@ -221,8 +221,8 @@ public sealed class AudioDeviceService
             ? " Oculus/Meta virtual audio is installed (always listed — not the same as Link being on)."
             : string.Empty;
         return active
-            ? $"Link audio active (default output is headset). Default playback: {playbackDefault}.{note}"
-            : $"Link audio inactive. Default playback: {playbackDefault}.{note}";
+            ? $"Headset is Windows default output (Link may be on). Default playback: {playbackDefault}.{note} Auto-switch only changes devices when a PCVR session starts or ends — not at tray launch."
+            : $"Desktop audio. Default playback: {playbackDefault}.{note} Auto-switch leaves this alone until PCVR starts.";
     }
 
     public string SetDefault(string deviceId, bool includeCommunications)

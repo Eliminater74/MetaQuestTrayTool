@@ -37,17 +37,17 @@
         <CheckBox x:Name="AutoSwitchBox"
                   Margin="0,0,0,8"
                   Foreground="{DynamicResource AppTextBrush}"
-                  Content="Auto-switch when Link is active / inactive"
-                  ToolTip="Automatically switch to VR devices when Link connects and restore fallback when Link drops."/>
+                  Content="Auto-switch on PCVR start / restore on PCVR end"
+                  ToolTip="Leaves your boot/desktop audio alone. When a PCVR session starts, switch to VR devices; when it ends, restore fallback. Does not change devices just because the tray app starts."/>
 
-        <TextBlock Text="Detect Link using" Foreground="{DynamicResource AppMutedBrush}"/>
+        <TextBlock Text="Detect PCVR using" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="TriggerBox" Margin="0,4,0,12" Padding="6"
-                  ToolTip="How to detect an active Link session for audio switching (Meta Link, Steam Link, VD, etc.)."/>
+                  ToolTip="How to detect an active PCVR session for audio switching (Meta Link, SteamVR, VD, etc.)."/>
 
         <CheckBox x:Name="CaptureEachSessionBox"
                   Margin="0,0,0,8"
                   Foreground="{DynamicResource AppTextBrush}"
-                  Content="Capture current desktop devices as fallback each time Link connects"
+                  Content="Capture current desktop devices as fallback each time PCVR starts"
                   ToolTip="Before switching to VR, remember the current desktop devices as fallback for that session."/>
 
         <CheckBox x:Name="CommunicationsBox"
@@ -56,21 +56,21 @@
                   Content="Also restore / set Communications role"
                   ToolTip="Also set the Windows Communications default (Discord, Teams, etc.), not only Multimedia."/>
 
-        <TextBlock Text="VR playback (while Link active)" Foreground="{DynamicResource AppMutedBrush}"/>
+        <TextBlock Text="VR playback (while PCVR active)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="VrPlaybackBox" Margin="0,4,0,12" Padding="6"
-                  ToolTip="Default playback device while Link is active (usually the headset)."/>
+                  ToolTip="Default playback device while PCVR is active (usually the headset)."/>
 
-        <TextBlock Text="VR recording (while Link active)" Foreground="{DynamicResource AppMutedBrush}"/>
+        <TextBlock Text="VR recording (while PCVR active)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="VrRecordingBox" Margin="0,4,0,12" Padding="6"
-                  ToolTip="Default recording device while Link is active (headset mic or preferred mic)."/>
+                  ToolTip="Default recording device while PCVR is active (headset mic or preferred mic)."/>
 
-        <TextBlock Text="Fallback playback (when Link inactive)" Foreground="{DynamicResource AppMutedBrush}"/>
+        <TextBlock Text="Fallback playback (desktop / when PCVR ends)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="FallbackPlaybackBox" Margin="0,4,0,12" Padding="6"
-                  ToolTip="Desktop speakers/headphones restored when Link is inactive."/>
+                  ToolTip="Desktop speakers/headphones restored when PCVR ends. Your boot defaults should match this."/>
 
-        <TextBlock Text="Fallback recording (when Link inactive)" Foreground="{DynamicResource AppMutedBrush}"/>
+        <TextBlock Text="Fallback recording (desktop / when PCVR ends)" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="FallbackRecordingBox" Margin="0,4,0,12" Padding="6"
-                  ToolTip="Desktop microphone restored when Link is inactive."/>
+                  ToolTip="Desktop microphone restored when PCVR ends."/>
 
         <TextBlock Text="Communications (Discord / Teams)" Margin="0,4,0,6"
                    FontWeight="SemiBold" Foreground="{DynamicResource AppAccentBrush}"/>

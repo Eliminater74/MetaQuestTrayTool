@@ -141,7 +141,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
             StartWithWindowsBox.IsChecked = settings.StartWithWindows;
             StartAsAdminBox.IsChecked = settings.AutomaticElevation;
             StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
-                              + " Audio switcher restores desktop devices when the Quest Link headset endpoint disappears.";
+                              + " Audio switcher leaves your boot/desktop devices alone until a PCVR session starts, then restores them when it ends.";
             _loading = false;
         }
 
