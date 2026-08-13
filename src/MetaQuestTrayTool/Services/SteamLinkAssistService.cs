@@ -22,7 +22,7 @@ public sealed class SteamLinkAssistService : IDisposable
     public SteamLinkAssistService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+        _timer = new DispatcherTimer { Interval = IdleCadence.Quiet };
         _timer.Tick += (_, _) => BeginPoll();
     }
 
@@ -59,6 +59,11 @@ public sealed class SteamLinkAssistService : IDisposable
                + "Wrong runtime is a common cause of “headset not detected” in OpenXR games.";
     }
 
+    private void ApplyCadence(bool steamSession)
+    {
+        IdleCadence.Set(_timer, steamSession ? IdleCadence.Watching : IdleCadence.Quiet);
+    }
+
     private void BeginPoll()
     {
         if (Interlocked.Exchange(ref _pollGate, 1) != 0)
@@ -88,6 +93,7 @@ public sealed class SteamLinkAssistService : IDisposable
     {
         var status = _app.LinkConnection.Probe(includeEnumHmd: false);
         var steam = IsSteamLinkSession(status);
+        _app.Dispatcher.BeginInvoke(() => ApplyCadence(steam));
         if (!steam)
         {
             if (_wasSteamSession)

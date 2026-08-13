@@ -7,6 +7,7 @@ namespace MetaQuestTrayTool.Services;
 /// <summary>
 /// Polls running processes and applies the matching game profile.
 /// When the game exits, global defaults are restored and the user is notified.
+/// Idle: slow full-process scans; Active profile: cheap exit check only.
 /// </summary>
 public sealed class ProcessWatcherService : IDisposable
 {
@@ -21,7 +22,7 @@ public sealed class ProcessWatcherService : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(5)
+            Interval = IdleCadence.HeavyIdle
         };
         _timer.Tick += (_, _) => BeginPoll();
     }
@@ -49,6 +50,8 @@ public sealed class ProcessWatcherService : IDisposable
             _timer.Start();
             _app.Log.Info("Profile watcher started.");
         }
+
+        ApplyCadence();
     }
 
     public void Stop()
@@ -83,8 +86,20 @@ public sealed class ProcessWatcherService : IDisposable
             finally
             {
                 Interlocked.Exchange(ref _pollGate, 0);
+                _app.Dispatcher.BeginInvoke(ApplyCadence);
             }
         });
+    }
+
+    private void ApplyCadence()
+    {
+        if (!_app.Settings.Current.AutoApplyProfiles)
+        {
+            IdleCadence.Set(_timer, IdleCadence.HeavyIdle);
+            return;
+        }
+
+        IdleCadence.Set(_timer, _activeProcess is not null ? IdleCadence.Active : IdleCadence.HeavyIdle);
     }
 
     private void Poll()
@@ -187,6 +202,7 @@ public sealed class ProcessWatcherService : IDisposable
         Notify(
             "Profile applied",
             $"{profile.Name} is now active for {processName}.exe.\nGlobal defaults will return when you close the game.");
+        ApplyCadence();
     }
 
     private void RestoreDefaults(string processName)
@@ -199,6 +215,7 @@ public sealed class ProcessWatcherService : IDisposable
         Notify(
             "Global defaults restored",
             $"{processName}.exe closed.\nRestored your global VR settings after '{profileName}'.");
+        ApplyCadence();
     }
 
     private void Notify(string title, string message)

@@ -17,7 +17,7 @@ public sealed class LinkSessionWatchService : IDisposable
     public LinkSessionWatchService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+        _timer = new DispatcherTimer { Interval = IdleCadence.Quiet };
         _timer.Tick += (_, _) => BeginPoll();
     }
 
@@ -33,6 +33,11 @@ public sealed class LinkSessionWatchService : IDisposable
     }
 
     public void Dispose() => _timer.Stop();
+
+    private void ApplyCadence(bool sessionActive)
+    {
+        IdleCadence.Set(_timer, sessionActive ? IdleCadence.Watching : IdleCadence.Quiet);
+    }
 
     private void BeginPoll()
     {
@@ -62,6 +67,7 @@ public sealed class LinkSessionWatchService : IDisposable
     private void Poll()
     {
         var status = _app.LinkConnection.Probe(includeEnumHmd: false);
+        _app.Dispatcher.BeginInvoke(() => ApplyCadence(status.SessionActive));
         var fingerprint = BuildFingerprint(status);
         if (string.Equals(fingerprint, _lastFingerprint, StringComparison.Ordinal))
         {

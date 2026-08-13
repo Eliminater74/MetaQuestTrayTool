@@ -54,6 +54,7 @@ public partial class PowerOptionsPage : System.Windows.Controls.UserControl, ISh
         WriteToSettings();
         App.Instance.Settings.Save();
         App.Instance.Log.Info("Power options saved.");
+        App.Instance.PowerWatch?.SyncTimer();
     }
 
     private void ApplyVr_Click(object sender, RoutedEventArgs e)

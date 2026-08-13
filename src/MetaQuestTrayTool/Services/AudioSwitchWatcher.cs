@@ -8,8 +8,7 @@ namespace MetaQuestTrayTool.Services;
 /// 1. App / Windows start — never call SetDefault (leave desktop audio alone).
 /// 2. PCVR session starts — switch to configured VR devices.
 /// 3. PCVR session ends — restore configured fallback / desktop devices.
-/// Meta's virtual audio endpoint stays installed forever; leftover "headset is default"
-/// after a previous night must not trigger a switch on launch.
+/// Idle polls are slow; active VR latch polls faster for a clean restore.
 /// </summary>
 public sealed class AudioSwitchWatcher : IDisposable
 {
@@ -20,20 +19,36 @@ public sealed class AudioSwitchWatcher : IDisposable
     private bool _baselineHeadsetAudio;
     private bool _vrDevicesApplied;
     private int _deadSessionHits;
+    private DateTime _lastFallbackCaptureUtc = DateTime.MinValue;
 
     public AudioSwitchWatcher(App app)
     {
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(5)
+            Interval = IdleCadence.Quiet
         };
         _timer.Tick += (_, _) => Poll();
     }
 
-    public void Start() => _timer.Start();
+    public void Start()
+    {
+        _timer.Start();
+        ApplyCadence();
+    }
 
     public void Dispose() => _timer.Stop();
+
+    private void ApplyCadence()
+    {
+        if (!_app.Settings.Current.Audio.AutoSwitchEnabled)
+        {
+            IdleCadence.Set(_timer, IdleCadence.HeavyIdle);
+            return;
+        }
+
+        IdleCadence.Set(_timer, _vrDevicesApplied ? IdleCadence.Active : IdleCadence.Quiet);
+    }
 
     private void Poll()
     {
@@ -43,6 +58,7 @@ public sealed class AudioSwitchWatcher : IDisposable
             _armed = false;
             _vrDevicesApplied = false;
             _deadSessionHits = 0;
+            ApplyCadence();
             return;
         }
 
@@ -50,10 +66,13 @@ public sealed class AudioSwitchWatcher : IDisposable
         var headsetAudio = settings.Trigger == AudioSwitchTrigger.LinkAudioDevice
                            && _app.Audio.IsLinkAudioSessionActive(settings);
 
-        // Quietly remember desktop defaults only while we have not applied VR this session.
-        if (!_vrDevicesApplied && !hardware)
+        // Rarely remember desktop defaults — MMDevice enumeration is not free.
+        if (!_vrDevicesApplied
+            && !hardware
+            && DateTime.UtcNow - _lastFallbackCaptureUtc > TimeSpan.FromMinutes(2))
         {
             RememberDesktopFallback(settings);
+            _lastFallbackCaptureUtc = DateTime.UtcNow;
         }
 
         // First poll after enable: snapshot baselines only — never SetDefault on launch.
@@ -67,6 +86,7 @@ public sealed class AudioSwitchWatcher : IDisposable
             _app.Log.Info(
                 "Audio watcher: armed — leaving boot audio alone until a new PCVR session starts "
                 + $"(hardware={(hardware ? "yes" : "no")}, headsetDefault={(headsetAudio ? "yes" : "no")}).");
+            ApplyCadence();
             return;
         }
 
@@ -83,7 +103,6 @@ public sealed class AudioSwitchWatcher : IDisposable
             }
             else
             {
-                // Baselines can clear once the leftover condition goes away, so a later real start edges.
                 if (!hardware)
                 {
                     _baselineHardware = false;
@@ -95,20 +114,22 @@ public sealed class AudioSwitchWatcher : IDisposable
                 }
             }
 
+            ApplyCadence();
             return;
         }
 
         // VR devices applied — restore only when the hardware session is gone.
-        // Do not wait for headset-default to clear (Meta often leaves it stuck).
         if (hardware)
         {
             _deadSessionHits = 0;
+            ApplyCadence();
             return;
         }
 
         _deadSessionHits++;
         if (_deadSessionHits < 2)
         {
+            ApplyCadence();
             return;
         }
 
@@ -116,6 +137,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         _baselineHardware = false;
         _baselineHeadsetAudio = headsetAudio;
         RestoreFallback("PCVR session ended — restoring desktop / fallback audio.");
+        ApplyCadence();
     }
 
     private bool IsHardwarePcvrSession(AudioSwitchSettings settings)

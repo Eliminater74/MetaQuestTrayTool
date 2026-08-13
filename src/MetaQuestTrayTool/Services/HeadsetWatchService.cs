@@ -20,7 +20,7 @@ public sealed class HeadsetWatchService : IDisposable
     public HeadsetWatchService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(12) };
+        _timer = new DispatcherTimer { Interval = IdleCadence.HeavyIdle };
         _timer.Tick += (_, _) => BeginPoll();
     }
 
@@ -37,6 +37,19 @@ public sealed class HeadsetWatchService : IDisposable
     }
 
     public void Dispose() => _timer.Stop();
+
+    private void ApplyCadence(bool headsetPresent)
+    {
+        var settings = _app.Settings.Current.Headset;
+        var needsWatch = settings.ApplyWhenHeadsetConnects || settings.WirelessAutoReconnect;
+        if (!needsWatch)
+        {
+            IdleCadence.Set(_timer, IdleCadence.HeavyIdle);
+            return;
+        }
+
+        IdleCadence.Set(_timer, headsetPresent ? IdleCadence.Watching : IdleCadence.HeavyIdle);
+    }
 
     private void BeginPoll()
     {
@@ -87,6 +100,7 @@ public sealed class HeadsetWatchService : IDisposable
                 _app.Dispatcher.BeginInvoke(() => _app.Log.Info(ignored));
             }
 
+            _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: false));
             return;
         }
 
@@ -104,6 +118,7 @@ public sealed class HeadsetWatchService : IDisposable
 
         if (!connected && _appliedForSerial)
         {
+            _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: true));
             return;
         }
 
@@ -115,6 +130,7 @@ public sealed class HeadsetWatchService : IDisposable
                     _app.Log.Info("ADB headset connect — auto-apply is off (enable under Headset settings)."));
             }
 
+            _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: true));
             return;
         }
 
@@ -144,6 +160,8 @@ public sealed class HeadsetWatchService : IDisposable
             {
                 _app.Log.Warn($"Headset ADB: {ex.Message}");
             }
+
+            ApplyCadence(headsetPresent: true);
         });
     }
 

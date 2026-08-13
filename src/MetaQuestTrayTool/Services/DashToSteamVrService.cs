@@ -50,23 +50,38 @@ public sealed class DashToSteamVrService : IDisposable
     public DashToSteamVrService(App app)
     {
         _app = app;
-        _sessionTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
+        _sessionTimer = new DispatcherTimer { Interval = IdleCadence.Quiet };
         _sessionTimer.Tick += (_, _) => PollAuto();
-        _dashReaper = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+        _dashReaper = new DispatcherTimer { Interval = IdleCadence.Active };
         _dashReaper.Tick += (_, _) => ReapDashIfNeeded();
     }
 
     public DashToSteamVrSettings Settings => _app.Settings.Current.DashToSteamVr;
 
-    public void Start()
-    {
-        if (_sessionTimer.IsEnabled)
-        {
-            return;
-        }
+    public void Start() => SyncSessionWatch();
 
-        _sessionTimer.Start();
-        PollAuto();
+    /// <summary>
+    /// Run the Meta Link poll only while auto Dash→SteamVR / PreventDashLaunch is armed.
+    /// Otherwise stay completely quiet in the tray.
+    /// </summary>
+    public void SyncSessionWatch()
+    {
+        if (ShouldAutoStartSteamVrOnMetaLink())
+        {
+            if (!_sessionTimer.IsEnabled)
+            {
+                _sessionTimer.Start();
+                PollAuto();
+            }
+
+            IdleCadence.Set(_sessionTimer, _wasMetaSession ? IdleCadence.Watching : IdleCadence.Quiet);
+        }
+        else
+        {
+            _sessionTimer.Stop();
+            _wasMetaSession = false;
+            _ranThisMetaSession = false;
+        }
     }
 
     public void Dispose()
@@ -386,6 +401,7 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
+                SyncSessionWatch();
                 return;
             }
 
@@ -404,6 +420,7 @@ public sealed class DashToSteamVrService : IDisposable
 
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
+                IdleCadence.Set(_sessionTimer, IdleCadence.Quiet);
                 return;
             }
 
@@ -411,6 +428,7 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 _wasMetaSession = true;
                 _ranThisMetaSession = false;
+                IdleCadence.Set(_sessionTimer, IdleCadence.Watching);
             }
 
             if (_ranThisMetaSession)

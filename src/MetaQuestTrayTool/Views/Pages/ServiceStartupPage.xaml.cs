@@ -168,6 +168,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         dash.CloseMetaClient = DashCloseClientBox.IsChecked == true;
         dash.AlsoSetNoUpdatesWithPreventDash = NoUpdatesWithDashBox.IsChecked == true;
         App.Instance.Settings.Save();
+        App.Instance.DashToSteamVr.SyncSessionWatch();
     }
 
     private void PreventDash_Changed(object sender, RoutedEventArgs e)
@@ -209,6 +210,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch() + " " + summary;
         CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
         LoadCoreChannelBox();
+        App.Instance.DashToSteamVr.SyncSessionWatch();
     }
 
     private void ApplyPreventDash_Click(object sender, RoutedEventArgs e)

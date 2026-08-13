@@ -17,7 +17,7 @@ public partial class StatusPage : System.Windows.Controls.UserControl, IShellPag
     {
         InitializeComponent();
         ChipsList.ItemsSource = _chips;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(12) };
         _timer.Tick += (_, _) =>
         {
             if (IsVisible && IsLoaded)

@@ -54,6 +54,7 @@ public partial class App : System.Windows.Application
     public StatusDashboardService StatusDashboard { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
+    public PowerWatchService? PowerWatch => _powerWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
     public string? ActiveProfileName => _processWatcher?.ActiveProfileName;
     public GameProfile? ActiveProfile => _processWatcher?.GetActiveProfile();

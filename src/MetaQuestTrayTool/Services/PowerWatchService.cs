@@ -15,18 +15,43 @@ public sealed class PowerWatchService : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(8)
+            Interval = IdleCadence.Quiet
         };
         _timer.Tick += (_, _) => Poll();
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
     }
 
-    public void Start() => _timer.Start();
+    public void Start()
+    {
+        SyncTimer();
+    }
 
     public void Dispose()
     {
         _timer.Stop();
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+    }
+
+    /// <summary>Start/stop the poll timer from settings changes (wake resume still uses SystemEvents).</summary>
+    public void SyncTimer()
+    {
+        var settings = _app.Settings.Current.Power;
+        var needsPoll = settings.AutoSwitchEnabled
+                        && settings.ApplyOn != Models.PowerPlanTrigger.ToolStartExit;
+        if (needsPoll)
+        {
+            if (!_timer.IsEnabled)
+            {
+                _timer.Start();
+            }
+
+            IdleCadence.Set(_timer, _vrPlanActive ? IdleCadence.Watching : IdleCadence.Quiet);
+        }
+        else
+        {
+            _timer.Stop();
+            _wasRunning = null;
+        }
     }
 
     private void Poll()
@@ -35,11 +60,11 @@ public sealed class PowerWatchService : IDisposable
         if (!settings.AutoSwitchEnabled || settings.ApplyOn == Models.PowerPlanTrigger.ToolStartExit)
         {
             _wasRunning = null;
+            SyncTimer();
             return;
         }
 
         // LinkAudioSession and OculusService both currently key off OVRService running state.
-        // Audio auto-switch handles headset presence separately.
         _app.Oculus.Refresh();
         var running = _app.Oculus.IsServiceRunning;
         if (_wasRunning is null)
@@ -50,11 +75,13 @@ public sealed class PowerWatchService : IDisposable
                 ApplyVr("Oculus service is already running.");
             }
 
+            SyncTimer();
             return;
         }
 
         if (running == _wasRunning)
         {
+            SyncTimer();
             return;
         }
 
@@ -67,6 +94,8 @@ public sealed class PowerWatchService : IDisposable
         {
             Restore("Oculus service stopped.");
         }
+
+        SyncTimer();
     }
 
     private void ApplyVr(string reason)

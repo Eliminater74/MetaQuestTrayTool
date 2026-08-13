@@ -30,14 +30,14 @@ public sealed class LinkConnectionProbeService
     private bool _cachedIncludeEnumHmd;
     private bool _cachedIncludeAudioLink;
     private long _cachedProbeTicks;
-    private static readonly long ProbeCacheTicks = TimeSpan.FromSeconds(2).Ticks;
+    private static readonly long ProbeCacheTicks = TimeSpan.FromSeconds(5).Ticks;
 
     private bool? _cachedUsbPresent;
     private long _cachedUsbTicks;
     private static readonly long UsbCacheTicks = TimeSpan.FromSeconds(5).Ticks;
 
     private readonly Dictionary<string, (bool Running, long Ticks)> _processCache = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly long ProcessCacheTicks = TimeSpan.FromSeconds(2).Ticks;
+    private static readonly long ProcessCacheTicks = TimeSpan.FromSeconds(5).Ticks;
 
     public LinkConnectionProbeService(App app)
     {
