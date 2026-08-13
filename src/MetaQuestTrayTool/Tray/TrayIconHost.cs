@@ -180,6 +180,11 @@ public sealed class TrayIconHost : IDisposable
             var summary = _app.SaveLastGoodToActiveProfile();
             Notify("Profile", summary.Length > 120 ? summary[..117] + "…" : summary);
         }));
+        menu.Items.Add(new ToolStripMenuItem("Cycle Perf HUD", null, (_, _) => CyclePerfHud())
+        {
+            Name = "CyclePerfHud",
+            ToolTipText = "Cycle OculusDebugTool Visual HUD: Off → Performance → timing modes → Off."
+        });
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");
@@ -358,6 +363,26 @@ public sealed class TrayIconHost : IDisposable
             aswMenu.DropDownItems.Add(item);
         }
 
+        var hudMenu = new ToolStripMenuItem("Visual HUD") { Name = "VisualHudMenu" };
+        foreach (VisualHudMode mode in Enum.GetValues<VisualHudMode>())
+        {
+            var item = new ToolStripMenuItem(FormatHudMode(mode))
+            {
+                Name = HudItemName(mode),
+                Tag = mode
+            };
+            var captured = mode;
+            item.Click += (_, _) =>
+            {
+                _app.Settings.Current.DefaultGameSettings.VisualHud = captured;
+                ApplyGameSettings();
+            };
+            hudMenu.DropDownItems.Add(item);
+        }
+
+        hudMenu.DropDownItems.Add(new ToolStripSeparator());
+        hudMenu.DropDownItems.Add(new ToolStripMenuItem("Cycle next mode", null, (_, _) => CyclePerfHud()));
+
         var applyOnStart = new ToolStripMenuItem("Apply defaults when the app starts")
         {
             Name = "ApplyOnStart",
@@ -387,12 +412,27 @@ public sealed class TrayIconHost : IDisposable
 
         gameSettings.DropDownItems.Add(ssMenu);
         gameSettings.DropDownItems.Add(aswMenu);
+        gameSettings.DropDownItems.Add(hudMenu);
         gameSettings.DropDownItems.Add(PlaceholderItem("CPU Priority"));
         gameSettings.DropDownItems.Add(new ToolStripSeparator());
         gameSettings.DropDownItems.Add(new ToolStripMenuItem("Apply now", null, (_, _) => ApplyGameSettings()));
         gameSettings.DropDownItems.Add(applyOnStart);
         gameSettings.DropDownItems.Add(autoApply);
         return gameSettings;
+    }
+
+    private void CyclePerfHud()
+    {
+        var values = Enum.GetValues<VisualHudMode>();
+        var game = _app.Settings.Current.DefaultGameSettings;
+        var index = Array.IndexOf(values, game.VisualHud);
+        if (index < 0)
+        {
+            index = 0;
+        }
+
+        game.VisualHud = values[(index + 1) % values.Length];
+        ApplyGameSettings();
     }
 
     private void SyncGameSettingChecks(ContextMenuStrip menu)
@@ -419,6 +459,22 @@ public sealed class TrayIconHost : IDisposable
                     menuItem.Checked = mode == current.AswMode;
                 }
             }
+        }
+
+        if (FindItem(menu.Items, "VisualHudMenu") is ToolStripMenuItem hudMenu)
+        {
+            foreach (ToolStripItem item in hudMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is VisualHudMode mode)
+                {
+                    menuItem.Checked = mode == current.VisualHud;
+                }
+            }
+        }
+
+        if (FindItem(menu.Items, "CyclePerfHud") is ToolStripMenuItem cycleHud)
+        {
+            cycleHud.Text = $"Cycle Perf HUD ({FormatHudMode(current.VisualHud)})";
         }
     }
 
@@ -961,8 +1017,21 @@ public sealed class TrayIconHost : IDisposable
         _ => mode.ToString()
     };
 
+    private static string FormatHudMode(VisualHudMode mode) => mode switch
+    {
+        VisualHudMode.None => "Off",
+        VisualHudMode.Performance => "Performance",
+        VisualHudMode.AppRenderTiming => "App render timing",
+        VisualHudMode.CompositorTiming => "Compositor timing",
+        VisualHudMode.PerformanceHeadroom => "Performance headroom",
+        VisualHudMode.Version => "Version",
+        VisualHudMode.AsynchronousSpacewarp => "ASW",
+        _ => mode.ToString()
+    };
+
     private static string SuperSamplingItemName(double value) => $"SS_{value:0.0}";
     private static string AswItemName(AswMode mode) => $"ASW_{mode}";
+    private static string HudItemName(VisualHudMode mode) => $"HUD_{mode}";
 
     private static string Truncate(string text, int max = 240) =>
         text.Length <= max ? text : text[..max] + "…";

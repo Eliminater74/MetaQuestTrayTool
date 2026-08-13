@@ -25,7 +25,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.AswClock45 => SetAsw(AswMode.Clock45),
             HotKeyAction.AswCycle => CycleAsw(),
             HotKeyAction.SuperSamplingCycle => CycleSuperSampling(),
-            HotKeyAction.TogglePerfHud => TogglePerfHud(),
+            HotKeyAction.TogglePerfHud => CyclePerfHud(),
             HotKeyAction.VoicePushToTalk => ExecuteVoicePushToTalk(),
             HotKeyAction.OpenMetaLink => _app.Oculus.ShowMetaHorizonLink(),
             HotKeyAction.OpenDebugTool => _app.Oculus.ShowOculusDebugTool(),
@@ -138,28 +138,42 @@ public sealed class HotKeyCommandService
         return ApplyGameSettings($"SS → {next:0.0}");
     }
 
-    private string TogglePerfHud()
+    private string CyclePerfHud()
     {
-        var blocked = GuardProfileMutation("Performance HUD toggle");
+        var blocked = GuardProfileMutation("Performance HUD");
         if (blocked.Length > 0)
         {
             return blocked;
         }
 
-        var sessionBlock = GuardMetaOdt("Performance HUD toggle");
+        var sessionBlock = GuardMetaOdt("Performance HUD");
         if (sessionBlock.Length > 0)
         {
             return sessionBlock;
         }
 
+        var values = Enum.GetValues<VisualHudMode>();
         var game = _app.Settings.Current.DefaultGameSettings;
-        game.VisualHud = game.VisualHud == VisualHudMode.None
-            ? VisualHudMode.Performance
-            : VisualHudMode.None;
+        var index = Array.IndexOf(values, game.VisualHud);
+        if (index < 0)
+        {
+            index = 0;
+        }
+
+        game.VisualHud = values[(index + 1) % values.Length];
         _app.Settings.Save();
-        return ApplyGameSettings(game.VisualHud == VisualHudMode.None
-            ? "Perf HUD off"
-            : "Perf HUD on");
+        var label = game.VisualHud switch
+        {
+            VisualHudMode.None => "Off",
+            VisualHudMode.Performance => "Performance",
+            VisualHudMode.AppRenderTiming => "App render timing",
+            VisualHudMode.CompositorTiming => "Compositor timing",
+            VisualHudMode.PerformanceHeadroom => "Performance headroom",
+            VisualHudMode.Version => "Version",
+            VisualHudMode.AsynchronousSpacewarp => "ASW",
+            _ => game.VisualHud.ToString()
+        };
+        return ApplyGameSettings($"Perf HUD → {label}");
     }
 
     private string GuardMetaOdt(string actionLabel)
