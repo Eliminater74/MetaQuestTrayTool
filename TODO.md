@@ -90,8 +90,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Hotkeys (global shortcuts + configure UI; default Ctrl+Numpad 1–8)
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
 - [x] Service & Startup: Start/Stop accent follows live OVRService state
-- [ ] Legacy OTT extras (Homeless)
-- [ ] Voice polish (custom phrases, mic picker, always-on tuning)
+- [ ] Legacy OTT extras (Homeless — largely covered by Dash → SteamVR)
+- [x] Voice polish (custom phrases, mic picker, always-on confidence)
 
 ## Phase 9 — headset ADB (v0.8)
 
@@ -177,7 +177,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Auto-close overlays on Link connect
 - [x] Perf HUD tray cycle
 - [x] Wireless ADB pairing-code UI
-- [ ] Voice polish (custom phrases, mic picker, always-on confidence)
+- [x] Voice polish (custom phrases, mic picker, always-on confidence)
+- [x] Bump version to **1.0.12**
 - [ ] Tag and publish **v1.0.12**
 
 ## Housekeeping

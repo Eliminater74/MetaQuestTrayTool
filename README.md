@@ -117,7 +117,7 @@ Export/import profiles and full settings from **Advanced**.
 On **Tray Tool**:
 
 - **HotKeys** — Enable → Configure. Global shortcuts (default **Ctrl+Numpad 1–8**) for ASW, super sampling, apply global, restart OVRService, Performance HUD. Works while the tray app is running, including in VR.
-- **Voice commands (preview)** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Uses Windows speech recognition.
+- **Voice commands (preview)** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Optional mic preference, min confidence (for always-on), and custom phrases. Uses Windows speech recognition.
 
 Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md).
 
@@ -136,13 +136,13 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 - Windows 10 / 11 (64-bit)
 - [Meta Quest PC app](https://www.meta.com/quest/setup-link/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
-- For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once or use Developer → Wireless debugging). ADB is bundled — no Android Studio required
+- For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once, or Wireless debugging **Pair** + Connect). ADB is bundled — no Android Studio required
 
 ---
 
 ## What works now
 
-Release **[v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** fixes a tray-menu crash from concurrent Link probe caches (thread-safe locks). Builds on v1.0.10 Wireless ADB + idle-CPU work.
+Release **[v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is the latest published installer. **main** is at **1.0.12** (Steam-first PCVR polish, wireless ADB Pair, voice mic/confidence/custom phrases) — tag when you want a GitHub Release.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)
@@ -153,21 +153,25 @@ Release **[v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Optional **Restart as Administrator** if that first approval was skipped
 - Start minimized, minimize-on-close, hide from Alt+Tab
 - **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page
-- Tray **Game Settings**: Super Sampling, ASW (including 45/30/18), FOV, Adaptive GPU, mip layer flags, FOV stencil, and Visual HUD via `OculusDebugToolCLI.exe`
+- Tray **Game Settings**: Super Sampling, ASW (including 45/30/18), FOV, Adaptive GPU, mip layer flags, FOV stencil, and Visual HUD via `OculusDebugToolCLI.exe` — plus tray **Cycle Perf HUD**
 - **Open Oculus Debug Tool GUI** (`OculusDebugTool.exe`) from Service & Startup, Game Settings, Advanced, tray, hotkey/voice — same shortcut classic OTT offered
 - Startup probe of connected headset serials through `server:EnumHmd`
 - Create / edit / delete / apply **profiles** from the tray or shell
 - Personal profiles can override **Link sharpening / bitrate / encode width** (inherit keeps global Quest Link settings; restored when the game exits)
+- **Profile ignore list** + **save last-good** into the active profile (tray / Game Settings / mid-session SS·ASW·HUD)
 - **OpenXR runtime switch**: Meta / Oculus vs SteamVR via `HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime` — global preferred + per-game profile override (may prompt for Administrator)
 - **Dash → SteamVR**: after Meta Air Link / Link connects, kill Oculus Dash and launch SteamVR (button / tray / Ctrl+Num 0 / voice “kill dash”) so SteamVR games run over Link — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller); optional auto-on-connect, **PreventDashLaunch**, and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
 - Auto-apply a profile when the matching process starts, then restore defaults when it exits
+- **PCVR Ready** checklist on Info (Steam-biased), headset **battery / Wi‑Fi**, and **Recover PCVR** after a Link drop
+- **Library / profile Launch** (`steam://run/{appId}`)
 - **Quest Link / Air Link**: bitrate, encode width, HEVC, sliced encoding, sharpening, distortion curve, dynamic bitrate (DBR / DBR max / offset), Mobile ASW mode via `HKCU\Software\Oculus\RemoteHeadset` — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
 - **Quest Link presets**: Balanced / Performance / Quality / Air Link HEVC / Wired H.264 / Sim on the Quest Link page (fill fields or apply & save)
-- **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops
+- **Audio switching**: auto-switch when Link audio is active, restore desktop devices when Link drops — including separate **communications** playback/recording pickers
+- Optional **close overlays on Link connect** (Afterburner / RTSS / CAM / iCUE-style list)
 - **Power plan**: auto-switch plans, USB selective-suspend off, restart service after sleep
 - **Steam / Meta library picker** with cover art (Steam librarycache / CDN, Meta StoreAssets), plus separate **global defaults**
 - **Headset (ADB)**: SideQuest-style CPU/GPU, texture size, refresh rate, FFR, chroma, and capture props — auto-applied when the Quest connects (they do not survive reboot)
-- **Wireless ADB**: save LAN IP/port, Connect / Disconnect, Enable tcpip over USB once, optional auto-reconnect when no headset is listed
+- **Wireless ADB**: LAN IP, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB once, optional auto-reconnect
 - **Trusted headset**: first connected **VR headset** serial is remembered; a different VR serial is blocked. Phones, tablets, and Android emulators are ignored and never receive ADB commands or auto-apply
 - **Profiles**: auto-apply on game launch with tray notification; restore global when the game exits. Stored in `profiles.json` (export/import still works). Built-in global + game presets (MSFS 2024, Beat Saber, etc.)
 - **Backup**: export / import settings from Advanced
@@ -176,7 +180,7 @@ Release **[v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - **Steam Link assist**: warns (and optionally auto-switches) if OpenXR is not SteamVR during a Steam Link / SteamVR session, then restores your preferred OpenXR runtime when Steam Link ends; bitrate/resolution stay in Steam Link + SteamVR Video settings
 - **Donate** button (sidebar, About, tray) opens the [PayPal donate page](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 - **HotKeys**: global shortcuts + configure UI (default **Ctrl+Numpad 1–8**)
-- **Voice commands (preview)**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), routes through the same actions as hotkeys
+- **Voice commands**: Windows speech recognition, push-to-talk (**Ctrl+Shift+V** default), preferred mic, min confidence, custom phrases; same actions as hotkeys
 - **Service & Startup**: Start/Stop button accent follows live `OVRService` state
 - **In-app updates**: checks GitHub latest release (`v*`) on start, on a user-chosen schedule while running, or manually; downloads Setup.exe, closes the app, installs over the existing copy (Tray Tool / Advanced / tray menu). ADB is stopped before Setup so bundled platform-tools can be replaced
 - **Hover tooltips** on pages and settings windows (what each control does, without cluttering the layout)

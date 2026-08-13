@@ -114,8 +114,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Expanded settings model for FOV H/V, Link sharpening, power triggers
 - [x] Hotkeys configure UI + global RegisterHotKey bindings
 - [x] Voice commands core (Windows speech, push-to-talk, phrase → HotKeyCommandService)
-- [ ] Voice polish (custom phrases, always-on tuning, mic picker)
-- [ ] Oculus Homeless
+- [x] Voice polish (custom phrases, always-on confidence, mic picker)
+- [ ] Oculus Homeless (largely covered by Dash → SteamVR / PreventDashLaunch)
 - [x] Dash → SteamVR (kill Dash + launch SteamVR; PreventDashLaunch; CoreChannel LIVE/PublicTest/NO_UPDATES; hotkey/voice/auto)
 
 ### Post v1.0.0 (v1.0.1)
@@ -152,11 +152,12 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Tag **v1.0.11**
 - [x] Steam-first PCVR polish: Ready checklist, battery/Wi‑Fi, session recover, library launch, profile ignore, last-good, comms audio, overlay close, Perf HUD cycle
 - [x] Wireless ADB pairing-code UI
+- [x] Voice polish — custom phrases, mic picker, always-on confidence
+- [x] Version **1.0.12**
 
 ## Later
 
 - Authenticode code signing for the installer / exe (SmartScreen; when budget allows)
-- Voice polish — custom phrases, mic picker, always-on confidence tuning
 - Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - Oculus Homeless (largely covered by Dash → SteamVR / PreventDashLaunch)
 
