@@ -44,7 +44,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.10) (latest) | [MetaQuestTrayTool-Setup-1.0.10.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.10/MetaQuestTrayTool-Setup-1.0.10.exe) |
+| [v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.11) (latest) | [MetaQuestTrayTool-Setup-1.0.11.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.11/MetaQuestTrayTool-Setup-1.0.11.exe) |
+| [v1.0.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.10) | [MetaQuestTrayTool-Setup-1.0.10.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.10/MetaQuestTrayTool-Setup-1.0.10.exe) |
 | [v1.0.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.9) | [MetaQuestTrayTool-Setup-1.0.9.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.9/MetaQuestTrayTool-Setup-1.0.9.exe) |
 | [v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.8) | [MetaQuestTrayTool-Setup-1.0.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.8/MetaQuestTrayTool-Setup-1.0.8.exe) |
 | [v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.7) | [MetaQuestTrayTool-Setup-1.0.7.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.7/MetaQuestTrayTool-Setup-1.0.7.exe) |
@@ -141,7 +142,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** adds **Wireless ADB** (host/port, tcpip helper, auto-reconnect) and further idle-CPU cuts (audio/USB caches, slower background polls, watchers off the UI thread). Builds on v1.0.9 snappy navigation.
+Release **[v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** fixes a tray-menu crash from concurrent Link probe caches (thread-safe locks). Builds on v1.0.10 Wireless ADB + idle-CPU work.
 
 - Runs in the notification area with a right-click popup menu
 - Opens a modern **OTT-style sidebar shell** (Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link)

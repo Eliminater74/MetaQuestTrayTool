@@ -148,6 +148,8 @@ Modern sidebar UI matching classic Oculus Tray Tool tabs, wired to today’s Met
 - [x] Wireless ADB connect / tcpip / auto-reconnect
 - [x] Further idle-CPU cuts (audio cache, slower polls, background watchers)
 - [x] Tag **v1.0.10**
+- [x] Thread-safe Link/audio/ADB probe caches (tray menu race fix)
+- [x] Tag **v1.0.11**
 
 ## Later
 

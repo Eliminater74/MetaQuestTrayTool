@@ -30,6 +30,7 @@ public sealed class AudioDeviceService
         "headphones (oculus virtual audio"
     ];
 
+    private readonly object _cacheLock = new();
     private IReadOnlyList<AudioDeviceInfo>? _playbackCache;
     private IReadOnlyList<AudioDeviceInfo>? _recordingCache;
     private DateTime _playbackCacheUtc = DateTime.MinValue;
@@ -45,18 +46,21 @@ public sealed class AudioDeviceService
     {
         if (!force)
         {
-            if (kind == AudioDeviceKind.Playback
-                && _playbackCache is not null
-                && DateTime.UtcNow - _playbackCacheUtc < DeviceListCache)
+            lock (_cacheLock)
             {
-                return _playbackCache;
-            }
+                if (kind == AudioDeviceKind.Playback
+                    && _playbackCache is not null
+                    && DateTime.UtcNow - _playbackCacheUtc < DeviceListCache)
+                {
+                    return _playbackCache;
+                }
 
-            if (kind == AudioDeviceKind.Recording
-                && _recordingCache is not null
-                && DateTime.UtcNow - _recordingCacheUtc < DeviceListCache)
-            {
-                return _recordingCache;
+                if (kind == AudioDeviceKind.Recording
+                    && _recordingCache is not null
+                    && DateTime.UtcNow - _recordingCacheUtc < DeviceListCache)
+                {
+                    return _recordingCache;
+                }
             }
         }
 
@@ -96,15 +100,18 @@ public sealed class AudioDeviceService
             .OrderBy(device => device.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (kind == AudioDeviceKind.Playback)
+        lock (_cacheLock)
         {
-            _playbackCache = list;
-            _playbackCacheUtc = DateTime.UtcNow;
-        }
-        else
-        {
-            _recordingCache = list;
-            _recordingCacheUtc = DateTime.UtcNow;
+            if (kind == AudioDeviceKind.Playback)
+            {
+                _playbackCache = list;
+                _playbackCacheUtc = DateTime.UtcNow;
+            }
+            else
+            {
+                _recordingCache = list;
+                _recordingCacheUtc = DateTime.UtcNow;
+            }
         }
 
         return list;
@@ -143,11 +150,14 @@ public sealed class AudioDeviceService
     public bool IsLinkAudioSessionActive(AudioSwitchSettings settings)
     {
         var cacheKey = settings.VrPlaybackDeviceId ?? string.Empty;
-        if (_linkSessionCached is not null
-            && string.Equals(_linkSessionCacheKey, cacheKey, StringComparison.Ordinal)
-            && DateTime.UtcNow - _linkSessionCachedUtc < LinkSessionCache)
+        lock (_cacheLock)
         {
-            return _linkSessionCached.Value;
+            if (_linkSessionCached is not null
+                && string.Equals(_linkSessionCacheKey, cacheKey, StringComparison.Ordinal)
+                && DateTime.UtcNow - _linkSessionCachedUtc < LinkSessionCache)
+            {
+                return _linkSessionCached.Value;
+            }
         }
 
         var playback = ListDevices(AudioDeviceKind.Playback);
@@ -186,9 +196,13 @@ public sealed class AudioDeviceService
             }
         }
 
-        _linkSessionCached = active;
-        _linkSessionCacheKey = cacheKey;
-        _linkSessionCachedUtc = DateTime.UtcNow;
+        lock (_cacheLock)
+        {
+            _linkSessionCached = active;
+            _linkSessionCacheKey = cacheKey;
+            _linkSessionCachedUtc = DateTime.UtcNow;
+        }
+
         return active;
     }
 

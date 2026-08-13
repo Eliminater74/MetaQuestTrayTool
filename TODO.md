@@ -164,6 +164,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Wireless ADB connect, tcpip helper, and auto-reconnect
 - [x] Further idle-CPU cuts (audio/USB caches, slower polls, off-UI watchers)
 - [x] Tag and publish **v1.0.10**
+- [x] Thread-safe Link/audio/ADB caches (fix concurrent Dictionary crash)
+- [x] Tag and publish **v1.0.11**
 
 ## Housekeeping
 

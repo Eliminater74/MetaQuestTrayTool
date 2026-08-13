@@ -25,6 +25,7 @@ public sealed class LinkConnectionProbeService
     ];
 
     private readonly App _app;
+    private readonly object _cacheLock = new();
     private VrConnectionStatus? _cachedProbe;
     private bool _cachedIncludeEnumHmd;
     private long _cachedProbeTicks;
@@ -45,17 +46,24 @@ public sealed class LinkConnectionProbeService
     public VrConnectionStatus Probe(bool includeEnumHmd = true)
     {
         var now = DateTime.UtcNow.Ticks;
-        if (_cachedProbe is not null
-            && _cachedIncludeEnumHmd == includeEnumHmd
-            && now - _cachedProbeTicks < ProbeCacheTicks)
+        lock (_cacheLock)
         {
-            return _cachedProbe;
+            if (_cachedProbe is not null
+                && _cachedIncludeEnumHmd == includeEnumHmd
+                && now - _cachedProbeTicks < ProbeCacheTicks)
+            {
+                return _cachedProbe;
+            }
         }
 
         var status = ProbeCore(includeEnumHmd);
-        _cachedProbe = status;
-        _cachedIncludeEnumHmd = includeEnumHmd;
-        _cachedProbeTicks = now;
+        lock (_cacheLock)
+        {
+            _cachedProbe = status;
+            _cachedIncludeEnumHmd = includeEnumHmd;
+            _cachedProbeTicks = DateTime.UtcNow.Ticks;
+        }
+
         return status;
     }
 
@@ -438,22 +446,30 @@ public sealed class LinkConnectionProbeService
     private bool IsProcessRunning(string name)
     {
         var now = DateTime.UtcNow.Ticks;
-        if (_processCache.TryGetValue(name, out var cached) && now - cached.Ticks < ProcessCacheTicks)
+        lock (_cacheLock)
         {
-            return cached.Running;
+            if (_processCache.TryGetValue(name, out var cached) && now - cached.Ticks < ProcessCacheTicks)
+            {
+                return cached.Running;
+            }
         }
 
+        bool running;
         try
         {
-            var running = Process.GetProcessesByName(name).Length > 0;
-            _processCache[name] = (running, now);
-            return running;
+            running = Process.GetProcessesByName(name).Length > 0;
         }
         catch
         {
-            _processCache[name] = (false, now);
-            return false;
+            running = false;
         }
+
+        lock (_cacheLock)
+        {
+            _processCache[name] = (running, DateTime.UtcNow.Ticks);
+        }
+
+        return running;
     }
 
     private static bool IsConnectedState(string? connectionState, string? rdConnectionState)
@@ -475,14 +491,21 @@ public sealed class LinkConnectionProbeService
     private bool IsOculusUsbPresent()
     {
         var now = DateTime.UtcNow.Ticks;
-        if (_cachedUsbPresent is not null && now - _cachedUsbTicks < UsbCacheTicks)
+        lock (_cacheLock)
         {
-            return _cachedUsbPresent.Value;
+            if (_cachedUsbPresent is not null && now - _cachedUsbTicks < UsbCacheTicks)
+            {
+                return _cachedUsbPresent.Value;
+            }
         }
 
         var present = IsOculusUsbPresentCore();
-        _cachedUsbPresent = present;
-        _cachedUsbTicks = now;
+        lock (_cacheLock)
+        {
+            _cachedUsbPresent = present;
+            _cachedUsbTicks = DateTime.UtcNow.Ticks;
+        }
+
         return present;
     }
 
