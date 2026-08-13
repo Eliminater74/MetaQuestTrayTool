@@ -26,6 +26,8 @@ public sealed class VoiceCommandService : IDisposable
     private PushToTalkWindow? _pushToTalkWindow;
     private bool _listeningOnce;
     private bool _isListeningContinuous;
+    private string? _micOverridePreviousId;
+    private bool _micOverrideActive;
 
     public VoiceCommandService(App app, HotKeyCommandService commands)
     {
@@ -66,7 +68,7 @@ public sealed class VoiceCommandService : IDisposable
             IsAvailable = true;
             Status = voice.PushToTalkOnly
                 ? $"Voice ready. Press {DescribePushToTalk(voice)} then speak a command."
-                : "Voice listening continuously. Speak a command.";
+                : $"Voice listening continuously (min confidence {voice.MinConfidence:P0}). Speak a command.";
         }
         catch (Exception ex)
         {
@@ -102,6 +104,7 @@ public sealed class VoiceCommandService : IDisposable
         }
         else
         {
+            ApplyPreferredMic(forContinuous: true);
             StartContinuousListening();
         }
 
@@ -123,6 +126,7 @@ public sealed class VoiceCommandService : IDisposable
 
         try
         {
+            ApplyPreferredMic(forContinuous: false);
             _listeningOnce = true;
             Speak("Listening");
             _engine.RecognizeAsync(RecognizeMode.Single);
@@ -131,6 +135,7 @@ public sealed class VoiceCommandService : IDisposable
         catch (Exception ex)
         {
             _listeningOnce = false;
+            RestorePreferredMic();
             _app.Log.Error("Voice listen failed.", ex);
         }
     }
@@ -138,6 +143,7 @@ public sealed class VoiceCommandService : IDisposable
     public void Dispose()
     {
         StopRecognition();
+        RestorePreferredMic();
         UnregisterPushToTalk();
         DisposeEngine();
         _synthesizer?.Dispose();
@@ -152,6 +158,11 @@ public sealed class VoiceCommandService : IDisposable
             choices.Add(phrase.Phrase);
         }
 
+        foreach (var phrase in _app.Settings.Current.Voice.NormalizedCustomPhrases())
+        {
+            choices.Add(phrase.Phrase);
+        }
+
         return new Grammar(new GrammarBuilder(choices)) { Name = "MetaQuestTrayToolVoice" };
     }
 
@@ -159,7 +170,8 @@ public sealed class VoiceCommandService : IDisposable
     {
         _listeningOnce = false;
         var text = e.Result?.Text ?? string.Empty;
-        _app.Dispatcher.BeginInvoke(() => HandleRecognition(text, accepted: true, confidence: e.Result?.Confidence ?? 0));
+        var confidence = e.Result?.Confidence ?? 0;
+        _app.Dispatcher.BeginInvoke(() => HandleRecognition(text, accepted: true, confidence));
     }
 
     private void OnSpeechRejected(object? sender, SpeechRecognitionRejectedEventArgs e)
@@ -170,7 +182,35 @@ public sealed class VoiceCommandService : IDisposable
 
     private void HandleRecognition(string text, bool accepted, float confidence)
     {
-        if (!accepted || !VoicePhraseCatalog.TryMatch(text, out var action))
+        var voice = _app.Settings.Current.Voice;
+        if (voice.PushToTalkOnly)
+        {
+            RestorePreferredMic();
+        }
+
+        var minConfidence = Math.Clamp(voice.MinConfidence, 0.30f, 0.95f);
+        if (accepted && confidence < minConfidence)
+        {
+            var low = $"Voice ignored (confidence {confidence:P0} < {minConfidence:P0}): \"{text}\".";
+            _app.Log.Info(low);
+            if (!voice.PushToTalkOnly && _app.Settings.Current.ShowNotifications)
+            {
+                // Always-on: stay quiet on low-confidence noise unless debugging via log.
+            }
+
+            if (voice.PushToTalkOnly)
+            {
+                Speak("Sorry");
+                if (_app.Settings.Current.ShowNotifications)
+                {
+                    _app.TrayNotify("Voice", low);
+                }
+            }
+
+            return;
+        }
+
+        if (!accepted || !VoicePhraseCatalog.TryMatch(text, voice.NormalizedCustomPhrases(), out var action))
         {
             var message = string.IsNullOrWhiteSpace(text)
                 ? "Voice command not recognized."
@@ -200,6 +240,69 @@ public sealed class VoiceCommandService : IDisposable
         {
             _app.Log.Error("Voice command failed.", ex);
             Speak("Error");
+        }
+    }
+
+    private void ApplyPreferredMic(bool forContinuous)
+    {
+        var preferred = (_app.Settings.Current.Voice.PreferredRecordingDeviceId ?? string.Empty).Trim();
+        if (preferred.Length == 0)
+        {
+            return;
+        }
+
+        if (!_app.Audio.IsDeviceActive(preferred))
+        {
+            _app.Log.Warn("Voice preferred mic is not active — using Windows default capture.");
+            return;
+        }
+
+        try
+        {
+            var current = _app.Audio.GetDefault(AudioDeviceKind.Recording);
+            if (current?.Id is string id && id.Equals(preferred, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _micOverridePreviousId ??= current?.Id;
+            _app.Audio.SetDefault(preferred, includeCommunications: false);
+            _micOverrideActive = true;
+            _app.Log.Info(forContinuous
+                ? "Voice using preferred microphone (always-on)."
+                : "Voice temporarily switched to preferred microphone.");
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn($"Could not switch voice microphone: {ex.Message}");
+        }
+    }
+
+    private void RestorePreferredMic()
+    {
+        if (!_micOverrideActive)
+        {
+            _micOverridePreviousId = null;
+            return;
+        }
+
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(_micOverridePreviousId)
+                && _app.Audio.IsDeviceActive(_micOverridePreviousId))
+            {
+                _app.Audio.SetDefault(_micOverridePreviousId, includeCommunications: false);
+                _app.Log.Info("Restored previous default microphone after voice listen.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn($"Could not restore previous microphone: {ex.Message}");
+        }
+        finally
+        {
+            _micOverrideActive = false;
+            _micOverridePreviousId = null;
         }
     }
 
@@ -254,6 +357,10 @@ public sealed class VoiceCommandService : IDisposable
         }
 
         _listeningOnce = false;
+        if (!_app.Settings.Current.Voice.PushToTalkOnly)
+        {
+            RestorePreferredMic();
+        }
     }
 
     private void DisposeEngine()

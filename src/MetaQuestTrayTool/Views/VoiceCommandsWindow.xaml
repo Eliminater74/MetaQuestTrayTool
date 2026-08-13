@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Voice Commands"
-        Height="620"
-        Width="720"
+        Height="720"
+        Width="760"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
@@ -36,9 +36,25 @@
         <CheckBox x:Name="EnabledBox" Content="Enable voice commands" Margin="0,0,0,8"
                   ToolTip="Listen for supported phrases while the tray runs. Prefer push-to-talk in VR."/>
         <CheckBox x:Name="PushToTalkBox" Content="Push-to-talk only (recommended)" Margin="0,0,0,8"
-                  ToolTip="Only listen while the push-to-talk shortcut is held. Stops game audio from triggering commands."/>
+                  ToolTip="Only listen while the push-to-talk shortcut is held. Uncheck for always-on listening (raise min confidence to reduce false triggers)."/>
         <CheckBox x:Name="AudioConfirmBox" Content="Spoken confirmation when a command is recognized" Margin="0,0,0,12"
                   ToolTip="Speak a short confirmation when a phrase is recognized so you know it fired in VR."/>
+
+        <TextBlock Text="Microphone" Style="{StaticResource SettingLabelStyle}"/>
+        <TextBlock Style="{StaticResource PageHintStyle}"
+                   Text="Windows speech uses the default capture device. Prefer a mic here and the tray switches temporarily while listening, then restores."/>
+        <ComboBox x:Name="MicBox" MaxWidth="480" HorizontalAlignment="Left" Margin="0,0,0,12" Padding="6"
+                  SelectionChanged="Mic_Changed"
+                  ToolTip="Preferred recording device for voice. Windows default leaves your system mic alone."/>
+
+        <TextBlock Text="Minimum confidence" Style="{StaticResource SettingLabelStyle}"/>
+        <DockPanel Margin="0,0,0,12" MaxWidth="480">
+          <TextBlock x:Name="ConfidenceValueText" DockPanel.Dock="Right" Width="48" VerticalAlignment="Center"
+                     TextAlignment="Right" Foreground="{DynamicResource AppMutedBrush}"/>
+          <Slider x:Name="ConfidenceSlider" Minimum="0.35" Maximum="0.90" TickFrequency="0.05"
+                  IsSnapToTickEnabled="True" ValueChanged="Confidence_Changed"
+                  ToolTip="Ignore recognitions below this confidence. Raise this for always-on mode."/>
+        </DockPanel>
 
         <TextBlock Text="Push-to-talk shortcut" Style="{StaticResource SettingLabelStyle}"/>
         <TextBlock x:Name="PushToTalkText" Margin="0,0,0,8" Foreground="{DynamicResource AppMutedBrush}"/>
@@ -49,9 +65,36 @@
                   ToolTip="Restore the default push-to-talk shortcut (Ctrl+Shift+V)."/>
         </StackPanel>
 
-        <TextBlock Text="Supported phrases" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
+        <TextBlock Text="Custom phrases" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBlock Style="{StaticResource PageHintStyle}"
+                   Text="Add your own spoken phrases mapped to tray actions. Keep them short and distinct from the built-ins."/>
+        <DockPanel Margin="0,0,0,8">
+          <Button DockPanel.Dock="Right" Content="Add" Style="{StaticResource AccentButtonStyle}" Margin="8,0,0,0"
+                  Click="AddCustom_Click" ToolTip="Add a custom phrase using the text and action below."/>
+          <ComboBox x:Name="CustomActionBox" DockPanel.Dock="Right" Width="220" Margin="8,0,0,0" Padding="6"
+                    ToolTip="Tray action to run when the custom phrase is recognized."/>
+          <TextBox x:Name="CustomPhraseBox" Padding="6"
+                   ToolTip="Phrase to speak, e.g. recover pcvr or switch steam open x r."/>
+        </DockPanel>
+        <ListView x:Name="CustomPhrasesList"
+                  MinHeight="100"
+                  MaxHeight="160"
+                  Style="{StaticResource ThemedListViewStyle}"
+                  ToolTip="Your custom phrases. Select a row and Remove to delete.">
+          <ListView.View>
+            <GridView ColumnHeaderContainerStyle="{StaticResource ThemedGridViewColumnHeaderStyle}">
+              <GridViewColumn Header="Say this" Width="280" DisplayMemberBinding="{Binding Phrase}"/>
+              <GridViewColumn Header="Action" Width="280" DisplayMemberBinding="{Binding ActionLabel}"/>
+            </GridView>
+          </ListView.View>
+        </ListView>
+        <Button Content="Remove selected" Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Left"
+                Margin="0,6,0,16" Click="RemoveCustom_Click"
+                ToolTip="Delete the selected custom phrase."/>
+
+        <TextBlock Text="Built-in phrases" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
         <ListView x:Name="PhrasesList"
-                  MinHeight="240"
+                  MinHeight="180"
                   Style="{StaticResource ThemedListViewStyle}"
                   ToolTip="Built-in phrases and the tray actions they run (e.g. kill dash, start service).">
           <ListView.View>

@@ -40,7 +40,13 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "steam v r from link", Action = HotKeyAction.DashToSteamVr }
     ];
 
-    public static bool TryMatch(string recognizedText, out HotKeyAction action)
+    public static bool TryMatch(string recognizedText, out HotKeyAction action) =>
+        TryMatch(recognizedText, extraPhrases: null, out action);
+
+    public static bool TryMatch(
+        string recognizedText,
+        IEnumerable<VoiceCustomPhrase>? extraPhrases,
+        out HotKeyAction action)
     {
         action = default;
         var normalized = Normalize(recognizedText);
@@ -49,13 +55,19 @@ public static class VoicePhraseCatalog
             return false;
         }
 
-        foreach (var phrase in Phrases.OrderByDescending(phrase => Normalize(phrase.Phrase).Length))
+        var catalog = Phrases
+            .Select(phrase => (phrase.Phrase, phrase.Action))
+            .Concat((extraPhrases ?? [])
+                .Where(phrase => !string.IsNullOrWhiteSpace(phrase.Phrase))
+                .Select(phrase => (phrase.Phrase, phrase.Action)));
+
+        foreach (var (phrase, mapped) in catalog.OrderByDescending(entry => Normalize(entry.Phrase).Length))
         {
-            var candidate = Normalize(phrase.Phrase);
+            var candidate = Normalize(phrase);
             if (normalized.Equals(candidate, StringComparison.Ordinal)
                 || normalized.Contains(candidate, StringComparison.Ordinal))
             {
-                action = phrase.Action;
+                action = mapped;
                 return true;
             }
         }
