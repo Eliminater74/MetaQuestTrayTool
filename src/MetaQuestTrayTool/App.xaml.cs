@@ -49,6 +49,7 @@ public partial class App : System.Windows.Application
     public PcvrReadyService PcvrReady { get; }
     public SessionRecoverService SessionRecover { get; }
     public GameLaunchService GameLaunch { get; }
+    public OverlayCloseService OverlayClose { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
@@ -72,6 +73,7 @@ public partial class App : System.Windows.Application
         PcvrReady = new PcvrReadyService(this);
         SessionRecover = new SessionRecoverService(this);
         GameLaunch = new GameLaunchService(this);
+        OverlayClose = new OverlayCloseService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)

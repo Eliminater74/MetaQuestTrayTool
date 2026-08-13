@@ -101,6 +101,8 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         CliCommandsBox.Text = settings.CustomCommands.ToCliText();
         AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
         IgnoreListBox.Text = string.Join(Environment.NewLine, settings.ProfileIgnoreProcesses ?? []);
+        CloseOverlaysBox.IsChecked = settings.CloseOverlaysOnLinkConnect;
+        OverlayListBox.Text = string.Join(Environment.NewLine, settings.OverlayCloseProcesses ?? []);
         ApplySessionCapabilities();
         var active = App.Instance.ActiveProfile;
         SaveLastGoodButton.IsEnabled = active is not null;
@@ -224,6 +226,45 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         App.Instance.Settings.Current.ProfileIgnoreProcesses = lines;
         App.Instance.Settings.Save();
         App.Instance.Log.Info($"Profile ignore list saved ({lines.Count} process names).");
+    }
+
+    private void OverlaySettings_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        App.Instance.Settings.Current.CloseOverlaysOnLinkConnect = CloseOverlaysBox.IsChecked == true;
+        PersistOverlayList(saveLog: false);
+        App.Instance.Settings.Save();
+    }
+
+    private void OverlayList_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        PersistOverlayList(saveLog: true);
+        App.Instance.Settings.Save();
+    }
+
+    private void PersistOverlayList(bool saveLog)
+    {
+        var lines = (OverlayListBox.Text ?? string.Empty)
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(ProfileService.NormalizeProcessName)
+            .Where(line => line.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(line => line, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        App.Instance.Settings.Current.OverlayCloseProcesses = lines;
+        if (saveLog)
+        {
+            App.Instance.Log.Info($"Overlay close list saved ({lines.Count} process names).");
+        }
     }
 
     private void PersistIfReady()

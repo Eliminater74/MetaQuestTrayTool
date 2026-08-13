@@ -138,6 +138,12 @@ public sealed class LinkSessionWatchService : IDisposable
             + $"ODT SS/ASW {(caps.AllowsOculusDebugTool ? "allowed" : "skipped")}; "
             + $"ADB tweaks {(caps.AllowsHeadsetAdb ? "allowed" : "skipped")}; "
             + $"OpenXR switch {(caps.AllowsOpenXrSwitch ? "allowed" : "skipped")}.");
+
+        var overlays = _app.OverlayClose.CloseConfiguredOverlays(status.InfoBanner);
+        if (!string.IsNullOrWhiteSpace(overlays))
+        {
+            _app.Log.Info(overlays);
+        }
     }
 
     private static string BuildFingerprint(VrConnectionStatus status)

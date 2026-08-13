@@ -98,6 +98,17 @@
                    Text="Voice commands live on Tray Tool. Oculus Homeless is not ported yet."/>
       </Grid>
 
+      <TextBlock Text="Close overlays on Link connect" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
+      <CheckBox x:Name="CloseOverlaysBox" Content="When Link / SteamVR / VD connects, close overlay / RGB / OSD processes below"
+                Margin="0,0,0,6" Checked="OverlaySettings_Changed" Unchecked="OverlaySettings_Changed"
+                ToolTip="Frees a bit of GPU/CPU by closing Afterburner OSD, RTSS, CAM, iCUE, etc. Never kills SteamVR, Oculus, or Discord."/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="One process name per line (no .exe). Safe defaults included — edit as needed. Off by default."/>
+      <TextBox x:Name="OverlayListBox" Margin="0,0,0,12" MinHeight="64" AcceptsReturn="True"
+               TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+               LostFocus="OverlayList_LostFocus"
+               ToolTip="Processes to close when a PCVR session connects. SteamVR / Oculus / Discord are always protected."/>
+
       <TextBlock Text="Profile ignore list" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="One process name per line (no .exe). Auto-apply will never activate a profile for these — Discord, browsers, Steam helpers, etc."/>

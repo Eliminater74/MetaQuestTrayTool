@@ -43,6 +43,30 @@ public sealed class AppSettings
         "devenv"
     ];
 
+    /// <summary>
+    /// Optional: when a PCVR Link/SteamVR session connects, quietly end these overlay / RGB / OSD processes.
+    /// Process names without .exe. Empty = disabled.
+    /// </summary>
+    public bool CloseOverlaysOnLinkConnect { get; set; }
+
+    public List<string> OverlayCloseProcesses { get; set; } =
+    [
+        "rtss",
+        "encoder_server64",
+        "msi afterburner",
+        "afterburner",
+        "rivatuner",
+        "hwinfo64",
+        "hwinfo32",
+        "nzxt cam",
+        "cam",
+        "icue",
+        "lghub",
+        "armourycrate",
+        "wallpaper64",
+        "wallpaper32"
+    ];
+
     /// <summary>Include Quest Link registry values in the global baseline.</summary>
     public bool ApplyLinkSettingsOnStart { get; set; } = true;
 
