@@ -116,8 +116,8 @@ Export/import profiles and full settings from **Advanced**.
 
 On **Tray Tool**:
 
-- **HotKeys** — Enable → Configure. Global shortcuts (default **Ctrl+Numpad 1–8**) for ASW, super sampling, apply global, restart OVRService, Performance HUD. Works while the tray app is running, including in VR.
-- **Voice commands (preview)** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Optional mic preference, min confidence (for always-on), and custom phrases. Uses Windows speech recognition.
+- **HotKeys** — Enable → Configure. Global shortcuts (default **Ctrl+Numpad 1–8**) for ASW, super sampling, apply global, restart OVRService, Performance HUD. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
+- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off” or “apply global”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
 
 Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md).
 
@@ -149,7 +149,7 @@ Release **[v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Detects the Oculus PC install and `OVRService` status
 - Start / stop / restart the Oculus runtime service, with optional start/stop automation
 - Saves settings to `%AppData%\MetaQuestTrayTool\settings.json`
-- **Hands-free Administrator mode** (on by default): one Windows approval, then the tray starts itself at logon already elevated so OpenXR, OVRService, and profiles apply while you are in VR — no UAC in-headset
+- **Hands-free Administrator mode** (on by default): one Windows approval, then the tray starts itself at logon already elevated so OpenXR, OVRService, and profiles apply while you are in VR — no UAC in-headset. **SteamVR cannot click that elevated tray** (Air Link → SteamVR included); use HotKeys, voice, and automation mid-session.
 - Optional **Restart as Administrator** if that first approval was skipped
 - Start minimized, minimize-on-close, hide from Alt+Tab
 - **Themes:** Pure Black (default), Dark, and Light — change anytime on the Tray Tool page

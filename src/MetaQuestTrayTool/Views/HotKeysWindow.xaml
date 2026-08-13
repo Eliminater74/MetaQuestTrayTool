@@ -25,8 +25,8 @@
                  FontSize="22"
                  FontWeight="SemiBold"
                  Foreground="{DynamicResource AppAccentBrush}"/>
-      <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Global shortcuts work while this app runs in the tray — including in VR. Numpad combos avoid many game conflicts. Restart is not required after saving."/>
+        <TextBlock Style="{StaticResource PageHintStyle}"
+                   Text="Global shortcuts work while this app runs in the tray — including in SteamVR / Air Link. An elevated tray cannot be clicked from SteamVR for security reasons, so HotKeys (and voice) are the main way to change SS / ASW / HUD / Dash→SteamVR mid-session. Numpad combos avoid many game conflicts."/>
       <TextBlock x:Name="StatusText"
                  Margin="0,6,0,12"
                  TextWrapping="Wrap"

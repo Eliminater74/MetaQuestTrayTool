@@ -12,9 +12,9 @@
 
       <TextBlock Text="This tool" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Once the headset is on you cannot click UAC. This tool therefore runs elevated in the tray (same idea as Oculus Tray Tool). A Windows Service cannot show a tray icon, so a logon scheduled task with highest privileges is used — one approval, then it handles everything itself."/>
+                 Text="Once the headset is on you cannot click UAC — and with SteamVR (including Air Link → SteamVR) you also cannot click an elevated tray menu. This tool therefore runs elevated so actions need no UAC, and you control it in VR with HotKeys, voice, and automation. A Windows Service cannot show a tray icon, so a logon scheduled task with highest privileges is used — one approval, then it handles everything itself."/>
       <CheckBox x:Name="StartAsAdminBox" Content="Run with Administrator rights at logon (recommended)"
-                ToolTip="Starts the tray elevated at Windows logon via a scheduled task so OpenXR, OVRService, and profiles never need a UAC click while you are in VR."
+                ToolTip="Starts the tray elevated at Windows logon via a scheduled task so OpenXR, OVRService, and profiles never need a UAC click while you are in VR. SteamVR cannot click that elevated tray — use HotKeys / voice / auto instead."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <Button Content="Restart as Administrator…" Style="{StaticResource AccentButtonStyle}" Click="RestartElevated_Click"

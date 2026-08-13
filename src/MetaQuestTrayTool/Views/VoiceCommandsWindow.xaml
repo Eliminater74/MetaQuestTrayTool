@@ -27,7 +27,7 @@
                    FontWeight="SemiBold"
                    Foreground="{DynamicResource AppAccentBrush}"/>
         <TextBlock Style="{StaticResource PageHintStyle}"
-                   Text="Core OTT-style phrases using Windows speech recognition. Push-to-talk is recommended in VR so game audio does not trigger commands."/>
+                   Text="Hands-free control while in SteamVR / Air Link. An elevated tray menu cannot be clicked from SteamVR, so voice (and HotKeys) are how you run the same tray actions mid-session. Push-to-talk is recommended so game audio does not trigger commands."/>
         <TextBlock x:Name="StatusText"
                    Margin="0,6,0,12"
                    TextWrapping="Wrap"
