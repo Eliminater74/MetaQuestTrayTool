@@ -313,9 +313,6 @@ public sealed class TrayIconHost : IDisposable
         _notifyIcon.Text = tip.Length <= 63 ? tip : tip[..63];
     }
 
-    private static string Truncate(string value, int max) =>
-        value.Length <= max ? value : value[..(max - 1)] + "…";
-
 
     private ToolStripMenuItem BuildGameSettingsMenu()
     {
