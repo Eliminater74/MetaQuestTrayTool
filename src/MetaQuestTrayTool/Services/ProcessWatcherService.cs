@@ -14,15 +14,16 @@ public sealed class ProcessWatcherService : IDisposable
     private readonly DispatcherTimer _timer;
     private string? _activeProcess;
     private string? _activeProfileName;
+    private int _pollGate;
 
     public ProcessWatcherService(App app)
     {
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(3)
+            Interval = TimeSpan.FromSeconds(5)
         };
-        _timer.Tick += (_, _) => Poll();
+        _timer.Tick += (_, _) => BeginPoll();
     }
 
     public string? ActiveProfileName => _activeProfileName;
@@ -49,6 +50,31 @@ public sealed class ProcessWatcherService : IDisposable
 
     public void Dispose() => _timer.Stop();
 
+    private void BeginPoll()
+    {
+        if (Interlocked.Exchange(ref _pollGate, 1) != 0)
+        {
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            try
+            {
+                Poll();
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.Log.Error("Profile watcher failed while scanning processes.", ex));
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _pollGate, 0);
+            }
+        });
+    }
+
     private void Poll()
     {
         if (!_app.Settings.Current.AutoApplyProfiles)
@@ -56,41 +82,56 @@ public sealed class ProcessWatcherService : IDisposable
             return;
         }
 
+        if (_activeProcess is not null)
+        {
+            if (IsProcessRunning(_activeProcess))
+            {
+                return;
+            }
+
+            _app.Dispatcher.Invoke(() => RestoreDefaults(_activeProcess!));
+            return;
+        }
+
+        var profiles = _app.Profiles.All;
+        if (profiles.Count == 0)
+        {
+            return;
+        }
+
+        // One process snapshot for all profile names — cheaper than GetProcessesByName × N.
+        HashSet<string> running;
         try
         {
-            // Only probe named profile processes — never Process.GetProcesses() (hundreds of
-            // processes × every 2s on the UI thread was burning ~5% CPU on busy PCs).
-            if (_activeProcess is not null)
-            {
-                if (IsProcessRunning(_activeProcess))
+            running = Process.GetProcesses()
+                .Select(process =>
                 {
-                    return;
-                }
-
-                RestoreDefaults(_activeProcess);
-                return;
-            }
-
-            if (_app.Profiles.All.Count == 0)
-            {
-                return;
-            }
-
-            foreach (var profile in _app.Profiles.All)
-            {
-                var processName = ProfileService.NormalizeProcessName(profile.ProcessName);
-                if (processName.Length == 0 || !IsProcessRunning(processName))
-                {
-                    continue;
-                }
-
-                ApplyProfile(profile, processName);
-                return;
-            }
+                    try
+                    {
+                        return process.ProcessName;
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                })
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
         }
-        catch (Exception ex)
+        catch
         {
-            _app.Log.Error("Profile watcher failed while scanning processes.", ex);
+            return;
+        }
+
+        foreach (var profile in profiles)
+        {
+            var processName = ProfileService.NormalizeProcessName(profile.ProcessName);
+            if (processName.Length == 0 || !running.Contains(processName))
+            {
+                continue;
+            }
+
+            _app.Dispatcher.Invoke(() => ApplyProfile(profile, processName));
+            return;
         }
     }
 

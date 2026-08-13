@@ -50,9 +50,9 @@ public sealed class DashToSteamVrService : IDisposable
     public DashToSteamVrService(App app)
     {
         _app = app;
-        _sessionTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _sessionTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
         _sessionTimer.Tick += (_, _) => PollAuto();
-        _dashReaper = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _dashReaper = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
         _dashReaper.Tick += (_, _) => ReapDashIfNeeded();
     }
 

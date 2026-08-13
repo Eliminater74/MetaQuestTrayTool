@@ -28,7 +28,14 @@ public sealed class LinkConnectionProbeService
     private VrConnectionStatus? _cachedProbe;
     private bool _cachedIncludeEnumHmd;
     private long _cachedProbeTicks;
-    private static readonly long ProbeCacheTicks = TimeSpan.FromMilliseconds(750).Ticks;
+    private static readonly long ProbeCacheTicks = TimeSpan.FromSeconds(2).Ticks;
+
+    private bool? _cachedUsbPresent;
+    private long _cachedUsbTicks;
+    private static readonly long UsbCacheTicks = TimeSpan.FromSeconds(5).Ticks;
+
+    private readonly Dictionary<string, (bool Running, long Ticks)> _processCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly long ProcessCacheTicks = TimeSpan.FromSeconds(2).Ticks;
 
     public LinkConnectionProbeService(App app)
     {
@@ -428,14 +435,23 @@ public sealed class LinkConnectionProbeService
         }
     }
 
-    private static bool IsProcessRunning(string name)
+    private bool IsProcessRunning(string name)
     {
+        var now = DateTime.UtcNow.Ticks;
+        if (_processCache.TryGetValue(name, out var cached) && now - cached.Ticks < ProcessCacheTicks)
+        {
+            return cached.Running;
+        }
+
         try
         {
-            return Process.GetProcessesByName(name).Length > 0;
+            var running = Process.GetProcessesByName(name).Length > 0;
+            _processCache[name] = (running, now);
+            return running;
         }
         catch
         {
+            _processCache[name] = (false, now);
             return false;
         }
     }
@@ -456,7 +472,21 @@ public sealed class LinkConnectionProbeService
                && !state.Contains("disconnect", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsOculusUsbPresent()
+    private bool IsOculusUsbPresent()
+    {
+        var now = DateTime.UtcNow.Ticks;
+        if (_cachedUsbPresent is not null && now - _cachedUsbTicks < UsbCacheTicks)
+        {
+            return _cachedUsbPresent.Value;
+        }
+
+        var present = IsOculusUsbPresentCore();
+        _cachedUsbPresent = present;
+        _cachedUsbTicks = now;
+        return present;
+    }
+
+    private static bool IsOculusUsbPresentCore()
     {
         try
         {
@@ -480,8 +510,6 @@ public sealed class LinkConnectionProbeService
                     continue;
                 }
 
-                // Presence of an instance key usually means Windows enumerated the device at least once;
-                // prefer instances that still look plugged in via the Device Parameters / Container.
                 foreach (var instance in vidKey.GetSubKeyNames())
                 {
                     using var inst = vidKey.OpenSubKey(instance);
@@ -490,7 +518,6 @@ public sealed class LinkConnectionProbeService
                         continue;
                     }
 
-                    // ConfigFlags bit 1 (CONFIGFLAG_REMOVED) often marks yanked devices.
                     var configFlags = inst.GetValue("ConfigFlags") as int? ?? 0;
                     if ((configFlags & 0x2) != 0)
                     {

@@ -12,12 +12,13 @@ public sealed class LinkSessionWatchService : IDisposable
     private readonly DispatcherTimer _timer;
     private string? _lastFingerprint;
     private VrConnectionKind? _lastActiveKind;
+    private int _pollGate;
 
     public LinkSessionWatchService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _timer.Tick += (_, _) => Poll();
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+        _timer.Tick += (_, _) => BeginPoll();
     }
 
     public void Start()
@@ -28,53 +29,71 @@ public sealed class LinkSessionWatchService : IDisposable
         }
 
         _timer.Start();
-        Poll();
+        BeginPoll();
     }
 
     public void Dispose() => _timer.Stop();
 
+    private void BeginPoll()
+    {
+        if (Interlocked.Exchange(ref _pollGate, 1) != 0)
+        {
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            try
+            {
+                Poll();
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.Log.Warn($"Link session watcher failed: {ex.Message}"));
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _pollGate, 0);
+            }
+        });
+    }
+
     private void Poll()
     {
-        try
+        var status = _app.LinkConnection.Probe(includeEnumHmd: false);
+        var fingerprint = BuildFingerprint(status);
+        if (string.Equals(fingerprint, _lastFingerprint, StringComparison.Ordinal))
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: false);
-            var fingerprint = BuildFingerprint(status);
-            if (string.Equals(fingerprint, _lastFingerprint, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            var previous = _lastFingerprint;
-            var previousActive = _lastActiveKind;
-            _lastFingerprint = fingerprint;
-
-            if (status.SessionActive)
-            {
-                _lastActiveKind = status.Kind;
-                LogConnected(status);
-                return;
-            }
-
-            _lastActiveKind = null;
-
-            if (!string.IsNullOrEmpty(previous) && previous.StartsWith("active:", StringComparison.Ordinal))
-            {
-                LogSessionEnded(previousActive, status);
-                return;
-            }
-
-            // Meta Wi‑Fi auto-connect without Link UI — informational, not an error.
-            if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink
-                && status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase))
-            {
-                _app.Log.Info(
-                    $"Meta DeviceCache — {status.InfoBanner}. "
-                    + "Headset is on the network without a Link stream (normal if you use Steam Link / VD).");
-            }
+            return;
         }
-        catch (Exception ex)
+
+        var previous = _lastFingerprint;
+        var previousActive = _lastActiveKind;
+        _lastFingerprint = fingerprint;
+
+        if (status.SessionActive)
         {
-            _app.Log.Warn($"Link session watcher failed: {ex.Message}");
+            _lastActiveKind = status.Kind;
+            _app.Dispatcher.BeginInvoke(() => LogConnected(status));
+            return;
+        }
+
+        _lastActiveKind = null;
+
+        if (!string.IsNullOrEmpty(previous) && previous.StartsWith("active:", StringComparison.Ordinal))
+        {
+            _app.Dispatcher.BeginInvoke(() => LogSessionEnded(previousActive, status));
+            return;
+        }
+
+        // Meta Wi‑Fi auto-connect without Link UI — informational, not an error.
+        if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink
+            && status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase))
+        {
+            _app.Dispatcher.BeginInvoke(() => _app.Log.Info(
+                $"Meta DeviceCache — {status.InfoBanner}. "
+                + "Headset is on the network without a Link stream (normal if you use Steam Link / VD)."));
         }
     }
 

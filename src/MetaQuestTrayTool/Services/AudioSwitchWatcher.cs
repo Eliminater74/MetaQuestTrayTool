@@ -23,7 +23,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(3)
+            Interval = TimeSpan.FromSeconds(5)
         };
         _timer.Tick += (_, _) => Poll();
     }
@@ -146,9 +146,9 @@ public sealed class AudioSwitchWatcher : IDisposable
 
     private void MaybeEndStaleVrSession(AudioSwitchSettings settings)
     {
-        // EnumHmd is relatively expensive — only every ~16 seconds while VR audio is latched.
+        // EnumHmd / ADB is relatively expensive — only every ~20 seconds while VR audio is latched.
         _hmdCheckCounter++;
-        if (_hmdCheckCounter < 8)
+        if (_hmdCheckCounter < 4)
         {
             return;
         }

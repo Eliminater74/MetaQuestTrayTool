@@ -17,12 +17,13 @@ public sealed class SteamLinkAssistService : IDisposable
     private bool _mismatchLoggedThisSession;
     private bool _switchedOpenXrForSession;
     private OpenXrRuntimeKind? _openXrBeforeSwitch;
+    private int _pollGate;
 
     public SteamLinkAssistService(App app)
     {
         _app = app;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _timer.Tick += (_, _) => Poll();
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+        _timer.Tick += (_, _) => BeginPoll();
     }
 
     public void Start()
@@ -33,7 +34,7 @@ public sealed class SteamLinkAssistService : IDisposable
         }
 
         _timer.Start();
-        Poll();
+        BeginPoll();
     }
 
     public void Dispose() => _timer.Stop();
@@ -41,7 +42,7 @@ public sealed class SteamLinkAssistService : IDisposable
     /// <summary>OpenXR mismatch tip for Info / banners (null if fine).</summary>
     public string? DescribeOpenXrMismatch(VrConnectionStatus? status = null)
     {
-        status ??= _app.LinkConnection.Probe();
+        status ??= _app.LinkConnection.Probe(includeEnumHmd: false);
         if (!IsSteamLinkSession(status))
         {
             return null;
@@ -58,75 +59,99 @@ public sealed class SteamLinkAssistService : IDisposable
                + "Wrong runtime is a common cause of “headset not detected” in OpenXR games.";
     }
 
+    private void BeginPoll()
+    {
+        if (Interlocked.Exchange(ref _pollGate, 1) != 0)
+        {
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            try
+            {
+                Poll();
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.Log.Warn($"Steam Link assist failed: {ex.Message}"));
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _pollGate, 0);
+            }
+        });
+    }
+
     private void Poll()
     {
-        try
+        var status = _app.LinkConnection.Probe(includeEnumHmd: false);
+        var steam = IsSteamLinkSession(status);
+        if (!steam)
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: false);
-            var steam = IsSteamLinkSession(status);
-            if (!steam)
+            if (_wasSteamSession)
             {
-                if (_wasSteamSession)
-                {
-                    RestorePreferredOpenXrAfterSteamLink();
-                }
-
-                _wasSteamSession = false;
-                _nudgeDoneThisSession = false;
-                _mismatchLoggedThisSession = false;
-                return;
+                _app.Dispatcher.Invoke(RestorePreferredOpenXrAfterSteamLink);
             }
 
-            if (!_wasSteamSession)
-            {
-                _wasSteamSession = true;
-                _nudgeDoneThisSession = false;
-                _mismatchLoggedThisSession = false;
-                _switchedOpenXrForSession = false;
-                _openXrBeforeSwitch = null;
-                _app.Log.Info(
-                    "Steam Link / SteamVR session detected — Meta Link registry and ODT are gated. "
-                    + "Use Steam Link / SteamVR Video settings for bitrate and resolution. ADB + OpenXR still apply.");
-            }
+            _wasSteamSession = false;
+            _nudgeDoneThisSession = false;
+            _mismatchLoggedThisSession = false;
+            return;
+        }
 
-            var mismatch = DescribeOpenXrMismatch(status);
-            if (mismatch is not null && !_mismatchLoggedThisSession)
+        if (!_wasSteamSession)
+        {
+            _wasSteamSession = true;
+            _nudgeDoneThisSession = false;
+            _mismatchLoggedThisSession = false;
+            _switchedOpenXrForSession = false;
+            _openXrBeforeSwitch = null;
+            _app.Dispatcher.BeginInvoke(() => _app.Log.Info(
+                "Steam Link / SteamVR session detected — Meta Link registry and ODT are gated. "
+                + "Use Steam Link / SteamVR Video settings for bitrate and resolution. ADB + OpenXR still apply."));
+        }
+
+        var mismatch = DescribeOpenXrMismatch(status);
+        if (mismatch is not null && !_mismatchLoggedThisSession)
+        {
+            _mismatchLoggedThisSession = true;
+            _app.Dispatcher.BeginInvoke(() =>
             {
-                _mismatchLoggedThisSession = true;
                 _app.Log.Warn(mismatch);
                 if (_app.Settings.Current.ShowNotifications)
                 {
                     _app.TrayNotify("Steam Link", "OpenXR is not SteamVR — OpenXR games may fail. See Info / Game Settings.");
                 }
-            }
+            });
+        }
 
-            if (_nudgeDoneThisSession
-                || !_app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink)
-            {
-                return;
-            }
+        if (_nudgeDoneThisSession
+            || !_app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink)
+        {
+            return;
+        }
 
-            var openXr = _app.OpenXr.ReadActiveKind();
-            if (openXr == OpenXrRuntimeKind.SteamVr)
-            {
-                _nudgeDoneThisSession = true;
-                return;
-            }
-
+        var openXr = _app.OpenXr.ReadActiveKind();
+        if (openXr == OpenXrRuntimeKind.SteamVr)
+        {
             _nudgeDoneThisSession = true;
-            _openXrBeforeSwitch = openXr;
-            _switchedOpenXrForSession = true;
+            return;
+        }
+
+        _nudgeDoneThisSession = true;
+        _openXrBeforeSwitch = openXr;
+        _switchedOpenXrForSession = true;
+        _app.Dispatcher.Invoke(() =>
+        {
             var result = _app.OpenXr.Set(OpenXrRuntimeKind.SteamVr);
             _app.Log.Info("Steam Link assist: " + result);
             if (_app.Settings.Current.ShowNotifications)
             {
                 _app.TrayNotify("Steam Link", "Switched OpenXR to SteamVR for this session.");
             }
-        }
-        catch (Exception ex)
-        {
-            _app.Log.Warn($"Steam Link assist failed: {ex.Message}");
-        }
+        });
     }
 
     private void RestorePreferredOpenXrAfterSteamLink()

@@ -25,7 +25,7 @@ public sealed class AdbService
 
     private IReadOnlyList<AdbDevice>? _cachedDevices;
     private DateTime _cachedDevicesUtc = DateTime.MinValue;
-    private static readonly TimeSpan DevicesCache = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan DevicesCache = TimeSpan.FromSeconds(5);
 
     public void Refresh()
     {

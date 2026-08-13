@@ -12,13 +12,15 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     public InfoPage()
     {
         InitializeComponent();
-        // Light banner refresh only — full SystemInfo report is expensive (ADB + probes).
-        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(8) };
+        // Light banner refresh — ADB identity only every 3rd tick (expensive).
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(12) };
+        var tick = 0;
         _refreshTimer.Tick += (_, _) =>
         {
             if (IsVisible && IsLoaded)
             {
-                RefreshBanners();
+                tick++;
+                RefreshBanners(includeAdb: tick % 3 == 0);
             }
         };
         Loaded += (_, _) => _refreshTimer.Start();
@@ -27,7 +29,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 
     public void Refresh()
     {
-        RefreshBanners();
+        RefreshBanners(includeAdb: true);
         ReportBox.Text = "Building report…";
         Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
         {
@@ -41,7 +43,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         });
     }
 
-    private void RefreshBanners()
+    private void RefreshBanners(bool includeAdb = true)
     {
         // No EnumHmd on the auto-refresh path — it can interfere with Air Link connect.
         var connection = App.Instance.LinkConnection.Probe(includeEnumHmd: false);
@@ -53,13 +55,16 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         var openXr = App.Instance.OpenXr.ReadActiveKind();
         OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
 
-        var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
-        HeadsetBanner.Text = $"ADB: {headset.DescribeAdbBanner(connection)}";
-        HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
-            ? System.Windows.Media.Brushes.OrangeRed
-            : headset.IsReady
-                ? (System.Windows.Media.Brush)FindResource("AppTextBrush")
-                : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
+        if (includeAdb)
+        {
+            var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
+            HeadsetBanner.Text = $"ADB: {headset.DescribeAdbBanner(connection)}";
+            HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
+                ? System.Windows.Media.Brushes.OrangeRed
+                : headset.IsReady
+                    ? (System.Windows.Media.Brush)FindResource("AppTextBrush")
+                    : (System.Windows.Media.Brush)FindResource("AppMutedBrush");
+        }
 
         var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch(connection);
         if (string.IsNullOrWhiteSpace(steamTip))

@@ -30,8 +30,36 @@ public sealed class AudioDeviceService
         "headphones (oculus virtual audio"
     ];
 
-    public IReadOnlyList<AudioDeviceInfo> ListDevices(AudioDeviceKind kind)
+    private IReadOnlyList<AudioDeviceInfo>? _playbackCache;
+    private IReadOnlyList<AudioDeviceInfo>? _recordingCache;
+    private DateTime _playbackCacheUtc = DateTime.MinValue;
+    private DateTime _recordingCacheUtc = DateTime.MinValue;
+    private static readonly TimeSpan DeviceListCache = TimeSpan.FromSeconds(3);
+
+    private bool? _linkSessionCached;
+    private string? _linkSessionCacheKey;
+    private DateTime _linkSessionCachedUtc = DateTime.MinValue;
+    private static readonly TimeSpan LinkSessionCache = TimeSpan.FromSeconds(2);
+
+    public IReadOnlyList<AudioDeviceInfo> ListDevices(AudioDeviceKind kind, bool force = false)
     {
+        if (!force)
+        {
+            if (kind == AudioDeviceKind.Playback
+                && _playbackCache is not null
+                && DateTime.UtcNow - _playbackCacheUtc < DeviceListCache)
+            {
+                return _playbackCache;
+            }
+
+            if (kind == AudioDeviceKind.Recording
+                && _recordingCache is not null
+                && DateTime.UtcNow - _recordingCacheUtc < DeviceListCache)
+            {
+                return _recordingCache;
+            }
+        }
+
         using var enumerator = new MMDeviceEnumerator();
         var dataFlow = kind == AudioDeviceKind.Playback ? DataFlow.Render : DataFlow.Capture;
         var devices = enumerator.EnumerateAudioEndPoints(dataFlow, DeviceState.Active);
@@ -56,7 +84,7 @@ public sealed class AudioDeviceService
             // No default communications device.
         }
 
-        return devices
+        var list = devices
             .Select(device => new AudioDeviceInfo
             {
                 Id = device.ID,
@@ -67,6 +95,19 @@ public sealed class AudioDeviceService
             })
             .OrderBy(device => device.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        if (kind == AudioDeviceKind.Playback)
+        {
+            _playbackCache = list;
+            _playbackCacheUtc = DateTime.UtcNow;
+        }
+        else
+        {
+            _recordingCache = list;
+            _recordingCacheUtc = DateTime.UtcNow;
+        }
+
+        return list;
     }
 
     public AudioDeviceInfo? GetDefault(AudioDeviceKind kind, bool communications = false)
@@ -101,35 +142,54 @@ public sealed class AudioDeviceService
     /// </summary>
     public bool IsLinkAudioSessionActive(AudioSwitchSettings settings)
     {
+        var cacheKey = settings.VrPlaybackDeviceId ?? string.Empty;
+        if (_linkSessionCached is not null
+            && string.Equals(_linkSessionCacheKey, cacheKey, StringComparison.Ordinal)
+            && DateTime.UtcNow - _linkSessionCachedUtc < LinkSessionCache)
+        {
+            return _linkSessionCached.Value;
+        }
+
         var playback = ListDevices(AudioDeviceKind.Playback);
+        bool active;
         if (!string.IsNullOrWhiteSpace(settings.VrPlaybackDeviceId))
         {
             var configured = playback.FirstOrDefault(device =>
                 device.Id.Equals(settings.VrPlaybackDeviceId, StringComparison.OrdinalIgnoreCase));
             if (configured is null)
             {
-                return false;
+                active = false;
             }
-
-            return IsPersistentVirtualHeadsetDriver(configured)
-                ? configured.IsDefaultMultimedia
-                : true;
+            else
+            {
+                active = IsPersistentVirtualHeadsetDriver(configured)
+                    ? configured.IsDefaultMultimedia
+                    : true;
+            }
         }
-
-        var headsets = playback.Where(LooksLikeHeadset).ToList();
-        if (headsets.Count == 0)
+        else
         {
-            return false;
+            var headsets = playback.Where(LooksLikeHeadset).ToList();
+            if (headsets.Count == 0)
+            {
+                active = false;
+            }
+            else if (headsets.Any(device => !IsPersistentVirtualHeadsetDriver(device)))
+            {
+                // Removable / non-virtual headset endpoints appearing still mean "session".
+                active = true;
+            }
+            else
+            {
+                // Only always-present Meta/Oculus virtual drivers: require Windows default output.
+                active = headsets.Any(device => device.IsDefaultMultimedia);
+            }
         }
 
-        // Removable / non-virtual headset endpoints appearing still mean "session".
-        if (headsets.Any(device => !IsPersistentVirtualHeadsetDriver(device)))
-        {
-            return true;
-        }
-
-        // Only always-present Meta/Oculus virtual drivers: require Windows default output.
-        return headsets.Any(device => device.IsDefaultMultimedia);
+        _linkSessionCached = active;
+        _linkSessionCacheKey = cacheKey;
+        _linkSessionCachedUtc = DateTime.UtcNow;
+        return active;
     }
 
     public bool IsCurrentPlaybackHeadset()

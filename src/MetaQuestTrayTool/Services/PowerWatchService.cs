@@ -15,7 +15,7 @@ public sealed class PowerWatchService : IDisposable
         _app = app;
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(5)
+            Interval = TimeSpan.FromSeconds(8)
         };
         _timer.Tick += (_, _) => Poll();
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
