@@ -18,7 +18,6 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
     {
         _loading = true;
         App.Instance.Oculus.Refresh();
-        App.Instance.StartupRegistration.SyncFromSystem(App.Instance.Settings.Current);
         StartAsAdminBox.IsChecked = App.Instance.Settings.Current.AutomaticElevation;
         ElevationStatusText.Text = App.Instance.StartupRegistration.DescribeStatus();
         var service = App.Instance.Settings.Current.Service;

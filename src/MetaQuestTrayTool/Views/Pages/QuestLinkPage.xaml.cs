@@ -79,6 +79,21 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         {
             MobileAswBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
         }
+
+        WireLivePersist(EncodeWidthBox);
+        WireLivePersist(BitrateBox);
+        WireLivePersist(DynamicBox);
+        WireLivePersist(DynamicMaxBox);
+        WireLivePersist(DynamicOffsetBox);
+        WireLivePersist(SharpenBox);
+        WireLivePersist(DistortionBox);
+        WireLivePersist(MobileAswBox);
+        HevcBox.Checked += (_, _) => PersistApply();
+        HevcBox.Unchecked += (_, _) => PersistApply();
+        SlicesBox.Checked += (_, _) => PersistApply();
+        SlicesBox.Unchecked += (_, _) => PersistApply();
+        ApplyOnStartBox.Checked += (_, _) => PersistApply();
+        ApplyOnStartBox.Unchecked += (_, _) => PersistApply();
     }
 
     public void Refresh()
@@ -108,6 +123,9 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         UpdatePresetHint();
     }
 
+    private void WireLivePersist(System.Windows.Controls.ComboBox box) =>
+        box.SelectionChanged += (_, _) => PersistApply();
+
     private void PresetBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading || !IsLoaded)
@@ -128,8 +146,8 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         _loading = true;
         LoadFieldsFrom(preset.Settings);
         _loading = false;
-        LiveStatusText.Text = $"Loaded preset “{preset.Name}” into fields — click Save to write the registry.";
-        App.Instance.Log.Info($"Quest Link preset loaded into fields: {preset.Name}.");
+        PersistApply($"Loaded preset “{preset.Name}”. ");
+        App.Instance.Log.Info($"Quest Link preset loaded: {preset.Name}.");
     }
 
     private void DashToSteamVr_Click(object sender, RoutedEventArgs e)
@@ -148,34 +166,47 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         _loading = true;
         LoadFieldsFrom(preset.Settings);
         _loading = false;
-        Apply(restart: false);
-        LiveStatusText.Text = $"Applied preset “{preset.Name}”. " + LiveStatusText.Text;
+        PersistApply($"Applied preset “{preset.Name}”. ");
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e) => Apply(restart: false);
-
-    private void SaveRestart_Click(object sender, RoutedEventArgs e) => Apply(restart: true);
+    private void RestartService_Click(object sender, RoutedEventArgs e)
+    {
+        PersistApply(restartService: true);
+    }
 
     private void ReadLive_Click(object sender, RoutedEventArgs e)
     {
         LiveStatusText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
     }
 
-    private void Apply(bool restart)
+    private void PersistApply(string? prefix = null, bool restartService = false)
     {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
         WriteToSettings();
         App.Instance.Settings.Save();
-        var summary = App.Instance.ApplyMetaLinkSettings(App.Instance.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
 
-        if (restart && App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
+        if (!App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
+        {
+            LiveStatusText.Text = (prefix ?? string.Empty) + "Saved to settings (Meta Link registry unavailable for this session).";
+            return;
+        }
+
+        var summary = App.Instance.ApplyMetaLinkSettings(App.Instance.Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+        App.Instance.Log.Info(summary);
+
+        if (restartService)
         {
             var serviceResult = App.Instance.Oculus.Restart();
             App.Instance.Log.Info(serviceResult);
-            LiveStatusText.Text = summary + " " + serviceResult;
+            LiveStatusText.Text = (prefix ?? string.Empty) + summary + " " + serviceResult;
         }
         else
         {
-            LiveStatusText.Text = summary;
+            LiveStatusText.Text = (prefix ?? string.Empty) + summary;
         }
     }
 
@@ -261,8 +292,6 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
                 return;
             }
         }
-
-        // Leave current selection; fields still load from settings.
     }
 
     private void UpdatePresetHint()

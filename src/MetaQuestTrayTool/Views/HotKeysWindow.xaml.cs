@@ -53,9 +53,7 @@ public partial class HotKeysWindow : Window
             return;
         }
 
-        StatusText.Text = EnabledBox.IsChecked == true
-            ? $"{_rows.Count} binding(s). Save to activate globally."
-            : "HotKeys are off until you save with Enable checked.";
+        PersistIfValid();
     }
 
     private void BindingsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -77,6 +75,7 @@ public partial class HotKeysWindow : Window
 
         _selectedRow.Action = action;
         _selectedRow.RefreshLabels();
+        PersistIfValid();
     }
 
     private void AddBinding_Click(object sender, RoutedEventArgs e)
@@ -92,6 +91,7 @@ public partial class HotKeysWindow : Window
         var row = HotKeyBindingRow.From(binding);
         _rows.Add(row);
         BindingsList.SelectedItem = row;
+        PersistIfValid();
     }
 
     private void RemoveBinding_Click(object sender, RoutedEventArgs e)
@@ -105,6 +105,7 @@ public partial class HotKeysWindow : Window
         _selectedRow = null;
         RemoveButton.IsEnabled = false;
         RecordPanel.Visibility = Visibility.Collapsed;
+        PersistIfValid();
     }
 
     private void Record_Click(object sender, RoutedEventArgs e)
@@ -192,6 +193,7 @@ public partial class HotKeysWindow : Window
         _recordingRow.RefreshLabels();
         e.Handled = true;
         StopRecording();
+        PersistIfValid();
     }
 
     private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
@@ -202,20 +204,23 @@ public partial class HotKeysWindow : Window
             _rows.Add(HotKeyBindingRow.From(binding));
         }
 
-        StatusText.Text = "Defaults restored — click Save to apply.";
+        StatusText.Text = "Defaults restored.";
+        PersistIfValid();
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void Save_Click(object sender, RoutedEventArgs e) => PersistIfValid();
+
+    private void PersistIfValid()
     {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
         var bindings = _rows.Select(row => row.ToBinding()).ToList();
         if (HotKeyChordHelper.TryFindDuplicate(bindings, out var duplicate))
         {
-            System.Windows.MessageBox.Show(
-                Window.GetWindow(this),
-                $"Duplicate shortcut: {duplicate!.DescribeChord()}. Each binding needs a unique key combo.",
-                App.AppName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            StatusText.Text = $"Duplicate shortcut: {duplicate!.DescribeChord()} — fix before it saves.";
             return;
         }
 
@@ -226,19 +231,14 @@ public partial class HotKeysWindow : Window
                 Bindings = bindings
             }))
         {
-            System.Windows.MessageBox.Show(
-                Window.GetWindow(this),
-                "One of these shortcuts matches the voice push-to-talk chord. Change it before saving.",
-                App.AppName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            StatusText.Text = "Shortcut conflicts with voice push-to-talk — change one combo.";
             return;
         }
 
         var settings = App.Instance.Settings.Current;
         settings.HotKeys.Enabled = EnabledBox.IsChecked == true;
         settings.Tray.EnableHotKeys = settings.HotKeys.Enabled;
-        settings.HotKeys.Bindings = _rows.Select(row => row.ToBinding()).ToList();
+        settings.HotKeys.Bindings = bindings;
         settings.HotKeys.EnsureBindingIds();
         App.Instance.Settings.Save();
         App.Instance.HotKeys.Reload();

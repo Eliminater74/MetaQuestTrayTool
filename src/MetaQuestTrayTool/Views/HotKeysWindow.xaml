@@ -16,10 +16,8 @@
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
       <Button Content="Restore defaults" Style="{StaticResource GhostButtonStyle}" Click="RestoreDefaults_Click"
               ToolTip="Reset all hotkey bindings to the built-in defaults (e.g. Ctrl+Num 0 for Dash → SteamVR)."/>
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
-              ToolTip="Save bindings and register global shortcuts. No restart required."/>
-      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
-              ToolTip="Close without saving unsaved edits."/>
+      <Button Content="Close" Style="{StaticResource AccentButtonStyle}" Click="Close_Click"
+              ToolTip="Close (changes already saved as you edit)."/>
     </StackPanel>
 
     <StackPanel>

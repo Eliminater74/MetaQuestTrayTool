@@ -6,6 +6,8 @@ namespace MetaQuestTrayTool.Views.Pages;
 
 public partial class PowerOptionsPage : System.Windows.Controls.UserControl, IShellPage
 {
+    private bool _loading;
+
     public PowerOptionsPage()
     {
         InitializeComponent();
@@ -16,10 +18,20 @@ public partial class PowerOptionsPage : System.Windows.Controls.UserControl, ISh
 
         UsbBox.Items.Add(new ComboBoxItem { Content = "Disabled while VR plan active", Tag = true });
         UsbBox.Items.Add(new ComboBoxItem { Content = "Leave Windows default", Tag = false });
+
+        VrPlanBox.SelectionChanged += (_, _) => Persist_Changed();
+        FallbackPlanBox.SelectionChanged += (_, _) => Persist_Changed();
+        TriggerBox.SelectionChanged += (_, _) => Persist_Changed();
+        UsbBox.SelectionChanged += (_, _) => Persist_Changed();
+        AutoSwitchBox.Checked += (_, _) => Persist_Changed();
+        AutoSwitchBox.Unchecked += (_, _) => Persist_Changed();
+        SleepBox.Checked += (_, _) => Persist_Changed();
+        SleepBox.Unchecked += (_, _) => Persist_Changed();
     }
 
     public void Refresh()
     {
+        _loading = true;
         var settings = App.Instance.Settings.Current.Power;
         var plans = App.Instance.Power.ListPlans();
         PopulatePlans(VrPlanBox, plans, settings.VrPlanGuid);
@@ -29,14 +41,19 @@ public partial class PowerOptionsPage : System.Windows.Controls.UserControl, ISh
         AutoSwitchBox.IsChecked = settings.AutoSwitchEnabled;
         SleepBox.IsChecked = settings.RestartServiceAfterSleep;
         ActivePlanText.Text = "Active plan: " + (App.Instance.Power.GetActivePlan()?.Name ?? "unknown");
+        _loading = false;
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void Persist_Changed()
     {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
         WriteToSettings();
         App.Instance.Settings.Save();
-        App.Instance.Log.Info("Saved power options.");
-        System.Windows.MessageBox.Show(Window.GetWindow(this), "Power settings saved.", App.AppName);
+        App.Instance.Log.Info("Power options saved.");
     }
 
     private void ApplyVr_Click(object sender, RoutedEventArgs e)

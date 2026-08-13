@@ -16,10 +16,8 @@
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
       <Button Content="Test listen once" Style="{StaticResource GhostButtonStyle}" Click="TestListen_Click"
               ToolTip="Listen once with Windows speech recognition and show which phrase matched (if any)."/>
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
-              ToolTip="Save voice settings and push-to-talk shortcut. No restart required."/>
-      <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
-              ToolTip="Close without saving unsaved edits."/>
+      <Button Content="Close" Style="{StaticResource AccentButtonStyle}" Click="Close_Click"
+              ToolTip="Close (changes already saved as you edit)."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">

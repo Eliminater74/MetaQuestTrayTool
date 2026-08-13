@@ -13,14 +13,12 @@
         ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
-              ToolTip="Save audio switching preferences without changing devices yet."/>
-      <Button Content="Switch to VR now" Style="{StaticResource GhostButtonStyle}" Click="SwitchVr_Click"
+      <Button Content="Switch to VR now" Style="{StaticResource AccentButtonStyle}" Click="SwitchVr_Click"
               ToolTip="Set Windows default playback/recording to the selected VR devices immediately."/>
       <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"
               ToolTip="Restore the fallback (desktop) playback and recording devices now."/>
       <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
-              ToolTip="Close without saving unsaved edits."/>
+              ToolTip="Close (changes already saved as you edit)."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">

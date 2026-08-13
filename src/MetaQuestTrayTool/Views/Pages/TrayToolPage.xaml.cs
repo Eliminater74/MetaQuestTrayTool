@@ -31,7 +31,6 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
     {
         _loading = true;
         var app = App.Instance.Settings.Current;
-        App.Instance.StartupRegistration.SyncFromSystem(app);
         StartWithWindowsBox.IsChecked = app.StartWithWindows;
         StartAsAdminBox.IsChecked = app.AutomaticElevation;
         StartMinimizedBox.IsChecked = app.Tray.StartMinimized;

@@ -8,7 +8,7 @@
     <StackPanel>
       <TextBlock Text="Quest Link" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="These settings are for Quest when using Link / Air Link. Higher encode values need more GPU and PC encode headroom. Written to HKCU\Software\Oculus\RemoteHeadset."/>
+                 Text="These settings apply live as you change them. Written to HKCU\Software\Oculus\RemoteHeadset when Meta Link is available."/>
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
@@ -22,17 +22,17 @@
 
       <TextBlock Text="Global Link presets" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="Pick a preset to fill the fields below, then Save (or Save &amp; Restart Service) to write the registry. Does not change game SS/ASW profiles."/>
+                 Text="Pick a preset to load values into the fields below. Changes apply immediately — use Load preset first, then tweak."/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
         <ComboBox x:Name="PresetBox" MinWidth="220" MaxWidth="320" Padding="6"
                   SelectionChanged="PresetBox_SelectionChanged"
-                  ToolTip="Fill encode / sharpen / HEVC fields from a preset. Does not write the registry until you Apply &amp; save or Save."/>
-        <Button Content="Apply to fields" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
+                  ToolTip="Choose a starting preset, then click Load preset to fill the fields below."/>
+        <Button Content="Load preset" Style="{StaticResource GhostButtonStyle}" Margin="8,0,0,0"
                 Click="ApplyPresetFields_Click"
-                ToolTip="Copy the selected preset into the controls below without writing HKCU RemoteHeadset yet."/>
-        <Button Content="Apply &amp; save" Style="{StaticResource AccentButtonStyle}" Margin="8,0,0,0"
+                ToolTip="Copy the selected preset into the controls — values apply to the registry immediately."/>
+        <Button Content="Load &amp; apply preset" Style="{StaticResource AccentButtonStyle}" Margin="8,0,0,0"
                 Click="ApplyPresetSave_Click"
-                ToolTip="Apply the preset to the fields and write RemoteHeadset now. Reconnect Link or restart OVRService if the stream does not update."/>
+                ToolTip="Load the preset and write RemoteHeadset now. Same as Load preset (both apply live)."/>
       </StackPanel>
       <TextBlock x:Name="PresetHintText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
@@ -104,10 +104,8 @@
       <TextBlock x:Name="LiveStatusText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <StackPanel Orientation="Horizontal">
-        <Button x:Name="SaveButton" Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
-                ToolTip="Write the current Link fields to HKCU\Software\Oculus\RemoteHeadset. Reconnect Link if the stream does not update."/>
-        <Button x:Name="SaveRestartButton" Content="Save &amp; Restart Service" Style="{StaticResource GhostButtonStyle}" Click="SaveRestart_Click"
-                ToolTip="Write RemoteHeadset, then restart OVRService so Link picks up encode changes more reliably."/>
+        <Button x:Name="SaveRestartButton" Content="Restart OVRService" Style="{StaticResource AccentButtonStyle}" Click="RestartService_Click"
+                ToolTip="Re-apply current Link settings and restart OVRService so encode changes pick up more reliably."/>
       </StackPanel>
       </StackPanel>
 

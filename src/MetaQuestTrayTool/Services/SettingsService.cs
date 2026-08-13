@@ -25,15 +25,15 @@ public sealed class SettingsService
 
         if (File.Exists(AppPaths.SettingsFile))
         {
-            try
+            if (!TryLoadSettingsFile(AppPaths.SettingsFile, ref legacyProfiles))
             {
-                var json = File.ReadAllText(AppPaths.SettingsFile);
-                legacyProfiles = TryReadLegacyProfiles(json);
-                Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-            }
-            catch
-            {
-                Current = new AppSettings();
+                var backup = AppPaths.SettingsFile + ".bak";
+                if (File.Exists(backup))
+                {
+                    TryLoadSettingsFile(backup, ref legacyProfiles);
+                }
+
+                Current ??= new AppSettings();
             }
         }
 
@@ -57,7 +57,37 @@ public sealed class SettingsService
         AppPaths.EnsureAppDataDirectory();
         _profileStore.Save(Current.Profiles);
         var json = JsonSerializer.Serialize(Current, JsonOptions);
-        File.WriteAllText(AppPaths.SettingsFile, json);
+        var path = AppPaths.SettingsFile;
+        var temp = path + ".tmp";
+        File.WriteAllText(temp, json);
+        if (File.Exists(path))
+        {
+            try
+            {
+                File.Copy(path, path + ".bak", overwrite: true);
+            }
+            catch
+            {
+                // backup is best-effort
+            }
+        }
+
+        File.Move(temp, path, overwrite: true);
+    }
+
+    private bool TryLoadSettingsFile(string path, ref List<GameProfile>? legacyProfiles)
+    {
+        try
+        {
+            var json = File.ReadAllText(path);
+            legacyProfiles = TryReadLegacyProfiles(json);
+            Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public void ResetKeepingProfiles()

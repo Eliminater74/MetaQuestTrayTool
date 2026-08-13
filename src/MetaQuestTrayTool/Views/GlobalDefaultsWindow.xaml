@@ -17,12 +17,12 @@
                 Orientation="Horizontal"
                 HorizontalAlignment="Right"
                 Margin="0,24,0,0">
-      <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
-              ToolTip="Persist these global defaults without applying them yet."/>
-      <Button Content="Apply now" Style="{StaticResource GhostButtonStyle}" Click="Apply_Click"
-              ToolTip="Push current global defaults (ODT + custom CLI/ADB) immediately."/>
+      <Button Content="Done" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
+              ToolTip="Close (changes already saved and applied as you edit)."/>
+      <Button Content="Re-apply now" Style="{StaticResource GhostButtonStyle}" Click="Apply_Click"
+              ToolTip="Push current global defaults again. Usually not needed — changes already apply live."/>
       <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="Cancel_Click"
-              ToolTip="Close without saving changes."/>
+              ToolTip="Close without further changes."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">

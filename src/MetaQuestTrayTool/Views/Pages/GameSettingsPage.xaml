@@ -8,7 +8,7 @@
     <StackPanel>
       <TextBlock Text="Game Settings" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Global defaults run whenever no personal profile is active — tool start, VR headset connect, and after a game exits. Turn on Auto-apply profiles so matching games swap in their own tweaks automatically."/>
+                 Text="Global defaults apply live as you change them — tool start, VR headset connect, and after a game exits. Turn on Auto-apply profiles so matching games swap in their own tweaks automatically."/>
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 
@@ -67,11 +67,9 @@
         <TextBlock Grid.Row="3" Text="FoV Multiplier (H / V)" Style="{StaticResource SettingLabelStyle}"/>
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
           <TextBox x:Name="FovHBox" Width="80" Padding="6" Margin="0,0,8,0"
-                   ToolTip="Horizontal FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50."/>
+                   ToolTip="Horizontal FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50. Saves when you leave the field."/>
           <TextBox x:Name="FovVBox" Width="80" Padding="6" Margin="0,0,8,0"
-                   ToolTip="Vertical FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50."/>
-          <Button Content="Save" Style="{StaticResource GhostButtonStyle}" Click="SaveFov_Click"
-                  ToolTip="Save the H/V FOV multipliers into the current global defaults (does not apply until Apply now)."/>
+                   ToolTip="Vertical FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50. Saves when you leave the field."/>
         </StackPanel>
 
         <TextBlock Grid.Row="4" Text="OVR Server Priority" Style="{StaticResource SettingLabelStyle}"/>
@@ -117,10 +115,8 @@
                ToolTip="Shell commands for your trusted headset when globals apply. One per line; ADB props do not survive reboot."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-        <Button x:Name="ApplyNowButton" Content="Apply now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"
-                ToolTip="Push current global defaults (ODT + custom CLI/ADB) immediately. Under Steam Link / VD some Meta ODT options may be gated."/>
-        <Button Content="Save defaults" Style="{StaticResource GhostButtonStyle}" Click="Save_Click"
-                ToolTip="Persist these global defaults to settings without applying them yet."/>
+        <Button x:Name="ApplyNowButton" Content="Re-apply now" Style="{StaticResource GhostButtonStyle}" Click="Apply_Click"
+                ToolTip="Push current global defaults again (ODT + custom CLI/ADB). Usually not needed — changes already apply live."/>
         <Button Content="Open Debug Tool" Style="{StaticResource GhostButtonStyle}" Click="OpenDebugTool_Click"
                 ToolTip="Launch Meta’s Oculus Debug Tool GUI (OculusDebugTool.exe). Same shortcut as classic OTT. Connect Link first; close/reopen if values look stale."/>
         <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"

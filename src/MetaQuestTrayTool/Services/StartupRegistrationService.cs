@@ -65,20 +65,17 @@ public sealed class StartupRegistrationService
         return rights + " Not set to start with Windows.";
     }
 
-    public void SyncFromSystem(Models.AppSettings settings)
+    /// <summary>
+    /// Read-only view of Windows startup registration. Does not mutate saved settings.
+    /// </summary>
+    public (bool StartWithWindows, bool ElevatedTask) ReadSystemStartupState()
     {
-        var task = IsAdministratorTaskRegistered();
-        var run = IsRunKeyEnabled();
-        if (task)
+        if (IsAdministratorTaskRegistered())
         {
-            settings.StartWithWindows = true;
-            settings.StartWithWindowsAsAdministrator = true;
-            settings.AutomaticElevation = true;
-            return;
+            return (true, true);
         }
 
-        settings.StartWithWindowsAsAdministrator = false;
-        settings.StartWithWindows = run || settings.AutomaticElevation;
+        return (IsRunKeyEnabled(), false);
     }
 
     /// <summary>

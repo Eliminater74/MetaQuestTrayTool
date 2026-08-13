@@ -6,14 +6,27 @@ namespace MetaQuestTrayTool.Views;
 
 public partial class PowerSettingsWindow : Window
 {
+    private bool _loading;
+
     public PowerSettingsWindow()
     {
         InitializeComponent();
+
+        VrPlanBox.SelectionChanged += (_, _) => Persist_Changed();
+        FallbackPlanBox.SelectionChanged += (_, _) => Persist_Changed();
+        AutoSwitchBox.Checked += (_, _) => Persist_Changed();
+        AutoSwitchBox.Unchecked += (_, _) => Persist_Changed();
+        UsbBox.Checked += (_, _) => Persist_Changed();
+        UsbBox.Unchecked += (_, _) => Persist_Changed();
+        SleepBox.Checked += (_, _) => Persist_Changed();
+        SleepBox.Unchecked += (_, _) => Persist_Changed();
+
         Reload();
     }
 
     private void Reload()
     {
+        _loading = true;
         var settings = App.Instance.Settings.Current.Power;
         var plans = App.Instance.Power.ListPlans();
         Populate(VrPlanBox, plans, settings.VrPlanGuid);
@@ -22,6 +35,7 @@ public partial class PowerSettingsWindow : Window
         UsbBox.IsChecked = settings.DisableUsbSelectiveSuspendWhileRunning;
         SleepBox.IsChecked = settings.RestartServiceAfterSleep;
         ActivePlanText.Text = "Active plan: " + (App.Instance.Power.GetActivePlan()?.Name ?? "unknown");
+        _loading = false;
     }
 
     private static void Populate(System.Windows.Controls.ComboBox box, IReadOnlyList<PowerPlanInfo> plans, string? selectedGuid)
@@ -49,12 +63,16 @@ public partial class PowerSettingsWindow : Window
         box.SelectedIndex = 0;
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void Persist_Changed()
     {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
         WriteToSettings();
         App.Instance.Settings.Save();
-        App.Instance.Log.Info("Saved power plan settings.");
-        System.Windows.MessageBox.Show(this, "Power settings saved.", App.AppName);
+        App.Instance.Log.Info("Power settings saved.");
     }
 
     private void ApplyVr_Click(object sender, RoutedEventArgs e)

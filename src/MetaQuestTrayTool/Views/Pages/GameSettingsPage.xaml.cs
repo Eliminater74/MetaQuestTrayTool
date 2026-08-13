@@ -65,8 +65,8 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         SteamLinkOpenXrBox.Unchecked += (_, _) => PersistOpenXr();
         ApplyOnStartBox.Checked += (_, _) => PersistFlags();
         ApplyOnStartBox.Unchecked += (_, _) => PersistFlags();
-        AutoApplyBox.Checked += (_, _) => PersistFlags();
-        AutoApplyBox.Unchecked += (_, _) => PersistFlags();
+        FovHBox.LostFocus += (_, _) => PersistIfReady();
+        FovVBox.LostFocus += (_, _) => PersistIfReady();
     }
 
     public void Refresh()
@@ -140,30 +140,6 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         }
     }
 
-    private void SaveFov_Click(object sender, RoutedEventArgs e)
-    {
-        if (!TryWriteFov())
-        {
-            return;
-        }
-
-        App.Instance.Settings.Save();
-        App.Instance.Log.Info("Saved FOV multipliers.");
-        StatusText.Text = "FOV saved.";
-    }
-
-    private void Save_Click(object sender, RoutedEventArgs e)
-    {
-        if (!TryWriteAll())
-        {
-            return;
-        }
-
-        App.Instance.Settings.Save();
-        App.Instance.Log.Info("Saved game setting defaults.");
-        StatusText.Text = "Defaults saved.";
-    }
-
     private void OpenDebugTool_Click(object sender, RoutedEventArgs e)
     {
         var summary = App.Instance.Oculus.ShowOculusDebugTool();
@@ -212,8 +188,24 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
             return;
         }
 
-        TryWriteAll(showErrors: false);
+        if (!TryWriteAll(showErrors: false))
+        {
+            return;
+        }
+
         App.Instance.Settings.Save();
+        App.Instance.Log.Info("Game settings saved.");
+
+        if (App.Instance.LinkConnection.GetCapabilities().AllowsOculusDebugTool)
+        {
+            var summary = App.Instance.ApplyGlobalGameSettings();
+            App.Instance.Log.Info(summary);
+            StatusText.Text = summary;
+        }
+        else
+        {
+            StatusText.Text = "Saved (Meta ODT apply skipped for this session).";
+        }
     }
 
     private void SwitchOpenXr_Click(object sender, RoutedEventArgs e)

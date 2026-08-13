@@ -8,6 +8,8 @@ namespace MetaQuestTrayTool.Views;
 
 public partial class GlobalDefaultsWindow : Window
 {
+    private bool _loading;
+
     public GlobalDefaultsWindow()
     {
         InitializeComponent();
@@ -45,6 +47,14 @@ public partial class GlobalDefaultsWindow : Window
         OpenXrBox.Items.Add(new ComboBoxItem { Content = "Meta / Oculus", Tag = OpenXrRuntimeKind.Meta });
         OpenXrBox.Items.Add(new ComboBoxItem { Content = "SteamVR", Tag = OpenXrRuntimeKind.SteamVr });
 
+        SuperSamplingBox.SelectionChanged += (_, _) => PersistIfValid();
+        AswBox.SelectionChanged += (_, _) => PersistIfValid();
+        OpenXrBox.SelectionChanged += (_, _) => PersistIfValid();
+        FovBox.LostFocus += (_, _) => PersistIfValid();
+        CliCommandsBox.LostFocus += (_, _) => PersistIfValid();
+        AdbCommandsBox.LostFocus += (_, _) => PersistIfValid();
+
+        _loading = true;
         var defaults = App.Instance.Settings.Current.DefaultGameSettings;
         SelectByTag(SuperSamplingBox, defaults.SuperSampling);
         SelectByTag(AswBox, defaults.AswMode);
@@ -54,6 +64,7 @@ public partial class GlobalDefaultsWindow : Window
         FovBox.Text = defaults.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
         CliCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToCliText();
         AdbCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToAdbText();
+        _loading = false;
     }
 
     private void ApplyPreset_Click(object sender, RoutedEventArgs e)
@@ -64,13 +75,16 @@ public partial class GlobalDefaultsWindow : Window
         }
 
         ProfilePresetCatalog.ApplyGlobalPreset(App.Instance.Settings.Current, preset);
+        _loading = true;
         SelectByTag(SuperSamplingBox, App.Instance.Settings.Current.DefaultGameSettings.SuperSampling);
         SelectByTag(AswBox, App.Instance.Settings.Current.DefaultGameSettings.AswMode);
         SelectByTag(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
             ? OpenXrRuntimeKind.Meta
             : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = App.Instance.Settings.Current.DefaultGameSettings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        _loading = false;
         UpdatePresetHint(preset);
+        PersistIfValid(applyPreset: true);
     }
 
     private void UpdatePresetHint(ProfilePreset preset) =>
@@ -78,24 +92,19 @@ public partial class GlobalDefaultsWindow : Window
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {
-        if (!TryWrite(out _))
+        if (PersistIfValid())
         {
-            return;
+            DialogResult = true;
         }
-
-        App.Instance.Settings.Save();
-        App.Instance.Log.Info("Saved global default game settings.");
-        DialogResult = true;
     }
 
     private void Apply_Click(object sender, RoutedEventArgs e)
     {
-        if (!TryWrite(out _))
+        if (!PersistIfValid(applyOnly: true))
         {
             return;
         }
 
-        App.Instance.Settings.Save();
         var summary = App.Instance.ApplyGlobalGameSettings();
         App.Instance.Log.Info("Applied global defaults: " + summary);
         System.Windows.MessageBox.Show(this, summary, App.AppName);
@@ -103,13 +112,41 @@ public partial class GlobalDefaultsWindow : Window
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
+    private bool PersistIfValid(bool applyOnly = false, bool applyPreset = false)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return false;
+        }
+
+        if (!TryWrite(out _))
+        {
+            return false;
+        }
+
+        App.Instance.Settings.Save();
+        App.Instance.Log.Info(applyPreset ? "Applied global preset." : "Saved global default game settings.");
+
+        if (!applyOnly && App.Instance.LinkConnection.GetCapabilities().AllowsOculusDebugTool)
+        {
+            var summary = App.Instance.ApplyGlobalGameSettings();
+            App.Instance.Log.Info(summary);
+        }
+
+        return true;
+    }
+
     private bool TryWrite(out GameSettings settings)
     {
         settings = App.Instance.Settings.Current.DefaultGameSettings;
         if (!double.TryParse(FovBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var fov)
             || fov < 0.5 || fov > 1.5)
         {
-            System.Windows.MessageBox.Show(this, "FOV multiplier must be between 0.50 and 1.50.", App.AppName);
+            if (IsLoaded)
+            {
+                System.Windows.MessageBox.Show(this, "FOV multiplier must be between 0.50 and 1.50.", App.AppName);
+            }
+
             return false;
         }
 

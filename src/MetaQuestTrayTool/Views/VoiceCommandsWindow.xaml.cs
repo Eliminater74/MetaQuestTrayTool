@@ -10,8 +10,7 @@ namespace MetaQuestTrayTool.Views;
 public partial class VoiceCommandsWindow : Window
 {
     private readonly ObservableCollection<VoicePhraseRow> _rows = [];
-    private readonly VoiceSettings _voiceSnapshot;
-    private bool _saved;
+    private bool _loading;
     private bool _recordingPtt;
     private HotKeyModifiers _pttModifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift;
     private string _pttKey = "V";
@@ -19,23 +18,21 @@ public partial class VoiceCommandsWindow : Window
     public VoiceCommandsWindow()
     {
         InitializeComponent();
-        _voiceSnapshot = App.Instance.Settings.Current.Voice.Clone();
         PhrasesList.ItemsSource = _rows;
-        Closing += (_, _) =>
-        {
-            if (_saved)
-            {
-                return;
-            }
 
-            App.Instance.Settings.Current.Voice = _voiceSnapshot.Clone();
-            App.Instance.Voice.Reload();
-        };
+        EnabledBox.Checked += (_, _) => PersistIfValid();
+        EnabledBox.Unchecked += (_, _) => PersistIfValid();
+        PushToTalkBox.Checked += (_, _) => PersistIfValid();
+        PushToTalkBox.Unchecked += (_, _) => PersistIfValid();
+        AudioConfirmBox.Checked += (_, _) => PersistIfValid();
+        AudioConfirmBox.Unchecked += (_, _) => PersistIfValid();
+
         LoadFromSettings();
     }
 
     private void LoadFromSettings()
     {
+        _loading = true;
         var voice = App.Instance.Settings.Current.Voice;
         EnabledBox.IsChecked = voice.Enabled;
         PushToTalkBox.IsChecked = voice.PushToTalkOnly;
@@ -50,7 +47,8 @@ public partial class VoiceCommandsWindow : Window
             _rows.Add(new VoicePhraseRow(phrase.Phrase, phrase.DescribeAction()));
         }
 
-        StatusText.Text = App.Instance.Voice.Status;
+        StatusText.Text = App.Instance.Voice.Status + " Changes save automatically.";
+        _loading = false;
     }
 
     private void UpdatePushToTalkText()
@@ -75,6 +73,7 @@ public partial class VoiceCommandsWindow : Window
         _pttModifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift;
         _pttKey = "V";
         UpdatePushToTalkText();
+        PersistIfValid();
     }
 
     private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -109,45 +108,46 @@ public partial class VoiceCommandsWindow : Window
         UpdatePushToTalkText();
         _recordingPtt = false;
         RecordPttButton.Content = "Record shortcut…";
-        StatusText.Text = "Push-to-talk shortcut updated — click Save.";
         e.Handled = true;
+        PersistIfValid();
     }
 
     private void TestListen_Click(object sender, RoutedEventArgs e)
     {
-        WriteUiToSettings(temporary: true);
+        WriteUiToSettings();
         App.Instance.Voice.Reload();
         App.Instance.Voice.ListenOnce();
         StatusText.Text = "Testing one-shot listen — speak a phrase from the list.";
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void Save_Click(object sender, RoutedEventArgs e) => PersistIfValid();
+
+    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void PersistIfValid()
     {
-        WriteUiToSettings(temporary: false);
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        WriteUiToSettings();
         var voice = App.Instance.Settings.Current.Voice;
         if (voice.Enabled
             && App.Instance.Settings.Current.HotKeys.Enabled
             && HotKeyChordHelper.ConflictsWithHotKeys(voice, App.Instance.Settings.Current.HotKeys))
         {
-            System.Windows.MessageBox.Show(
-                Window.GetWindow(this),
-                "Push-to-talk matches an enabled hotkey. Change one shortcut before saving.",
-                App.AppName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            StatusText.Text = "Push-to-talk conflicts with a hotkey — change one shortcut.";
             return;
         }
 
         App.Instance.Settings.Save();
         App.Instance.Voice.Reload();
-        _saved = true;
         StatusText.Text = App.Instance.Voice.Status;
         App.Instance.Log.Info(StatusText.Text);
     }
 
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
-
-    private void WriteUiToSettings(bool temporary)
+    private void WriteUiToSettings()
     {
         var voice = App.Instance.Settings.Current.Voice;
         voice.Enabled = EnabledBox.IsChecked == true;
@@ -155,10 +155,6 @@ public partial class VoiceCommandsWindow : Window
         voice.AudioConfirmation = AudioConfirmBox.IsChecked == true;
         voice.PushToTalkModifiers = _pttModifiers;
         voice.PushToTalkKey = _pttKey;
-        if (!temporary)
-        {
-            App.Instance.Settings.Save();
-        }
     }
 
     private static HotKeyModifiers ReadModifiers()

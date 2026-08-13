@@ -6,6 +6,8 @@ namespace MetaQuestTrayTool.Views;
 
 public partial class AudioSettingsWindow : Window
 {
+    private bool _loading;
+
     public AudioSettingsWindow()
     {
         InitializeComponent();
@@ -19,11 +21,25 @@ public partial class AudioSettingsWindow : Window
             Content = "Oculus service running (legacy — often wrong after Link ends)",
             Tag = AudioSwitchTrigger.OculusService
         });
+
+        VrPlaybackBox.SelectionChanged += (_, _) => Persist_Changed();
+        VrRecordingBox.SelectionChanged += (_, _) => Persist_Changed();
+        FallbackPlaybackBox.SelectionChanged += (_, _) => Persist_Changed();
+        FallbackRecordingBox.SelectionChanged += (_, _) => Persist_Changed();
+        TriggerBox.SelectionChanged += (_, _) => Persist_Changed();
+        AutoSwitchBox.Checked += (_, _) => Persist_Changed();
+        AutoSwitchBox.Unchecked += (_, _) => Persist_Changed();
+        CaptureEachSessionBox.Checked += (_, _) => Persist_Changed();
+        CaptureEachSessionBox.Unchecked += (_, _) => Persist_Changed();
+        CommunicationsBox.Checked += (_, _) => Persist_Changed();
+        CommunicationsBox.Unchecked += (_, _) => Persist_Changed();
+
         ReloadDevices();
     }
 
     private void ReloadDevices()
     {
+        _loading = true;
         var audio = App.Instance.Settings.Current.Audio;
         Populate(VrPlaybackBox, AudioDeviceKind.Playback, audio.VrPlaybackDeviceId);
         Populate(VrRecordingBox, AudioDeviceKind.Recording, audio.VrRecordingDeviceId);
@@ -34,7 +50,8 @@ public partial class AudioSettingsWindow : Window
         CommunicationsBox.IsChecked = audio.AlsoSetCommunicationsRole;
         SelectTrigger(audio.Trigger);
         StatusText.Text = App.Instance.Audio.DescribeLinkAudioState(audio)
-                          + " Pick your speakers/mic as fallback so hardware returns after Link disconnects.";
+                          + " Changes save automatically.";
+        _loading = false;
     }
 
     private void Populate(System.Windows.Controls.ComboBox box, AudioDeviceKind kind, string? selectedId)
@@ -79,13 +96,16 @@ public partial class AudioSettingsWindow : Window
         TriggerBox.SelectedIndex = 0;
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void Persist_Changed()
     {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
         WriteToSettings();
         App.Instance.Settings.Save();
-        App.Instance.Log.Info("Saved audio switching settings.");
-        System.Windows.MessageBox.Show(this, "Audio settings saved.", App.AppName);
-        ReloadDevices();
+        App.Instance.Log.Info("Audio settings saved.");
     }
 
     private void SwitchVr_Click(object sender, RoutedEventArgs e)

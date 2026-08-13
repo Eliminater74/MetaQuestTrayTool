@@ -13,12 +13,10 @@
         ToolTipService.BetweenShowDelay="200">
   <DockPanel Margin="20">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button Content="Apply" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"
-              ToolTip="Write these values to HKCU\Software\Oculus\RemoteHeadset. Reconnect Link if the stream does not update."/>
-      <Button Content="Apply + Restart Service" Style="{StaticResource GhostButtonStyle}" Click="ApplyRestart_Click"
-              ToolTip="Write RemoteHeadset, then restart OVRService so encode changes take effect more reliably."/>
+      <Button Content="Restart OVRService" Style="{StaticResource AccentButtonStyle}" Click="ApplyRestart_Click"
+              ToolTip="Re-apply current Link settings and restart OVRService so encode changes pick up more reliably."/>
       <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="Close_Click"
-              ToolTip="Close without applying unsaved changes."/>
+              ToolTip="Close (changes already saved and applied as you edit)."/>
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">

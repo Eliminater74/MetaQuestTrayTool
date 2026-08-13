@@ -8,7 +8,7 @@
     <StackPanel>
       <TextBlock Text="Power Options" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Switch Windows power plans for VR sessions and keep USB ports awake so Link stays connected."/>
+                 Text="Changes save and apply as you adjust them — no Save button needed. Switch Windows power plans with the action buttons below."/>
 
       <Grid>
         <Grid.ColumnDefinitions>
@@ -52,9 +52,7 @@
       <TextBlock x:Name="ActivePlanText" Margin="0,4,0,12" Foreground="{DynamicResource AppMutedBrush}"/>
 
       <StackPanel Orientation="Horizontal">
-        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Click="Save_Click"
-                ToolTip="Save these power options without switching plans immediately."/>
-        <Button Content="Apply VR plan" Style="{StaticResource GhostButtonStyle}" Click="ApplyVr_Click"
+        <Button Content="Apply VR plan" Style="{StaticResource AccentButtonStyle}" Click="ApplyVr_Click"
                 ToolTip="Switch Windows to the selected VR power plan right now."/>
         <Button Content="Restore fallback" Style="{StaticResource GhostButtonStyle}" Click="Restore_Click"
                 ToolTip="Switch Windows back to the fallback (non-VR) power plan."/>

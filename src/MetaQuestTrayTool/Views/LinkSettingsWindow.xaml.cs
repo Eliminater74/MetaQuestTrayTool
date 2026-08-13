@@ -6,6 +6,8 @@ namespace MetaQuestTrayTool.Views;
 
 public partial class LinkSettingsWindow : Window
 {
+    private bool _loading;
+
     public LinkSettingsWindow()
     {
         InitializeComponent();
@@ -63,11 +65,30 @@ public partial class LinkSettingsWindow : Window
             MobileAswBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
         }
 
+        WireLivePersist(EncodeWidthBox);
+        WireLivePersist(BitrateBox);
+        WireLivePersist(DynamicBox);
+        WireLivePersist(DynamicMaxBox);
+        WireLivePersist(DynamicOffsetBox);
+        WireLivePersist(SharpenBox);
+        WireLivePersist(DistortionBox);
+        WireLivePersist(MobileAswBox);
+        HevcBox.Checked += (_, _) => PersistApply();
+        HevcBox.Unchecked += (_, _) => PersistApply();
+        SlicesBox.Checked += (_, _) => PersistApply();
+        SlicesBox.Unchecked += (_, _) => PersistApply();
+        ApplyOnStartBox.Checked += (_, _) => PersistApply();
+        ApplyOnStartBox.Unchecked += (_, _) => PersistApply();
+
         LoadFromSettings();
     }
 
+    private void WireLivePersist(System.Windows.Controls.ComboBox box) =>
+        box.SelectionChanged += (_, _) => PersistApply();
+
     private void LoadFromSettings()
     {
+        _loading = true;
         var settings = App.Instance.Settings.Current.LinkSettings;
         SelectByTag(EncodeWidthBox, settings.EncodeResolutionWidth);
         SelectByTag(BitrateBox, settings.BitrateMbps);
@@ -81,25 +102,35 @@ public partial class LinkSettingsWindow : Window
         SlicesBox.IsChecked = settings.DisableSlicedEncoding;
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
         LiveStatusText.Text = "Live registry: " + App.Instance.Link.ReadCurrent().Describe();
+        _loading = false;
     }
 
-    private void Apply_Click(object sender, RoutedEventArgs e) => Apply(restartService: false);
-
-    private void ApplyRestart_Click(object sender, RoutedEventArgs e) => Apply(restartService: true);
+    private void ApplyRestart_Click(object sender, RoutedEventArgs e) => PersistApply(restartService: true);
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 
-    private void Apply(bool restartService)
+    private void PersistApply(bool restartService = false)
     {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
         var settings = ReadUi();
         App.Instance.Settings.Current.LinkSettings = settings;
         App.Instance.Settings.Current.ApplyLinkSettingsOnStart = ApplyOnStartBox.IsChecked == true;
         App.Instance.Settings.Save();
 
+        if (!App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
+        {
+            LiveStatusText.Text = "Saved to settings (Meta Link registry unavailable for this session).";
+            return;
+        }
+
         var summary = App.Instance.ApplyMetaLinkSettings(settings, deleteUnsetOverrides: true);
         App.Instance.Log.Info(summary);
 
-        if (restartService && App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
+        if (restartService)
         {
             var serviceResult = App.Instance.Oculus.Restart();
             App.Instance.Log.Info(serviceResult);
