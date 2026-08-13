@@ -245,6 +245,7 @@ public sealed class TrayIconHost : IDisposable
             await _app.Updates.CheckInteractivelyAsync(_shell, quietIfUpToDate: false);
         }));
         menu.Items.Add(new ToolStripMenuItem("Donate", null, (_, _) => DonateService.Open(_shell)));
+        menu.Items.Add(BuildVrToolsMenu());
         menu.Items.Add(new ToolStripMenuItem("About", null, (_, _) => ShowAbout()));
         menu.Items.Add(new ToolStripMenuItem("Exit", null, (_, _) =>
         {
@@ -253,6 +254,46 @@ public sealed class TrayIconHost : IDisposable
         }));
 
         return menu;
+    }
+
+    private ToolStripMenuItem BuildVrToolsMenu()
+    {
+        var root = new ToolStripMenuItem("VR Tools");
+        root.DropDownItems.Add(new ToolStripMenuItem("Open VR Tools page…", null, (_, _) =>
+        {
+            ShowShell();
+            _shell?.ShowPage("VrTools");
+        }));
+        root.DropDownItems.Add(new ToolStripSeparator());
+
+        foreach (var group in VrToolCatalog.ByCategory())
+        {
+            var category = new ToolStripMenuItem(group.Key);
+            foreach (var tool in group)
+            {
+                var captured = tool;
+                category.DropDownItems.Add(new ToolStripMenuItem(captured.Name, null, (_, _) =>
+                {
+                    try
+                    {
+                        UrlLaunchService.Open(captured.Url);
+                        _app.Log.Info($"Opened VR tool link: {captured.Name}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _app.Log.Warn($"Could not open {captured.Name}: {ex.Message}");
+                        Notify("VR Tools", ex.Message);
+                    }
+                })
+                {
+                    ToolTipText = captured.Summary
+                });
+            }
+
+            root.DropDownItems.Add(category);
+        }
+
+        return root;
     }
 
     private void RefreshDynamicItems(ContextMenuStrip menu)

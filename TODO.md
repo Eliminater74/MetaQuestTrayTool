@@ -179,6 +179,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Wireless ADB pairing-code UI
 - [x] Voice polish (custom phrases, mic picker, always-on confidence)
 - [x] Bump version to **1.0.12**
+- [x] VR Tools page + tray menu (curated third-party links)
 - [ ] Tag and publish **v1.0.12**
 
 ## Housekeeping

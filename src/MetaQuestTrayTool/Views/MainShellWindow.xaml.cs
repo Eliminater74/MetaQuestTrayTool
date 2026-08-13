@@ -16,6 +16,7 @@ public partial class MainShellWindow : Window
     private readonly QuestLinkPage _linkPage = new();
     private readonly HeadsetPage _headsetPage = new();
     private readonly InfoPage _infoPage = new();
+    private readonly VrToolsPage _vrToolsPage = new();
     private bool _forceClose;
 
     public MainShellWindow()
@@ -39,6 +40,7 @@ public partial class MainShellWindow : Window
             "Link" => NavLink,
             "Headset" => NavHeadset,
             "Info" => NavInfo,
+            "VrTools" => NavVrTools,
             _ => NavGame
         };
         nav.IsChecked = true;
@@ -79,6 +81,7 @@ public partial class MainShellWindow : Window
             "Link" => _linkPage,
             "Headset" => _headsetPage,
             "Info" => _infoPage,
+            "VrTools" => _vrToolsPage,
             _ => _gamePage
         };
 
@@ -92,6 +95,7 @@ public partial class MainShellWindow : Window
             "Link" => "Quest Link",
             "Headset" => "Headset",
             "Info" => "Info",
+            "VrTools" => "VR Tools",
             _ => "Game Settings"
         };
 

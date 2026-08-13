@@ -1,0 +1,56 @@
+<UserControl x:Class="MetaQuestTrayTool.Views.Pages.VrToolsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ToolTipService.InitialShowDelay="400"
+             ToolTipService.ShowDuration="20000"
+             ToolTipService.BetweenShowDelay="200">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <TextBlock Text="VR Tools" Style="{StaticResource PageTitleStyle}"/>
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="Curated links to utilities many PCVR / SteamVR / Quest players end up needing. Opens in your browser — third-party projects; not affiliated with Meta Quest Tray Tool. Install only what you need."/>
+
+      <ItemsControl x:Name="CategoriesList" Margin="0,8,0,0">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Margin="0,0,0,16">
+              <TextBlock Text="{Binding Key}" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,8"/>
+              <ItemsControl ItemsSource="{Binding}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Background="{DynamicResource AppFieldBrush}"
+                            BorderBrush="{DynamicResource AppBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12,10"
+                            Margin="0,0,0,8">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*"/>
+                          <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                     Foreground="{DynamicResource AppTextBrush}"/>
+                          <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                     Foreground="{DynamicResource AppMutedBrush}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Open"
+                                Style="{StaticResource AccentButtonStyle}"
+                                VerticalAlignment="Center"
+                                MinWidth="72"
+                                Tag="{Binding Url}"
+                                Click="Open_Click"
+                                ToolTip="{Binding Url}"/>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

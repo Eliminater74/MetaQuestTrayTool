@@ -87,6 +87,9 @@
           <RadioButton x:Name="NavInfo" Content="Info" Style="{StaticResource NavButtonStyle}"
                        GroupName="ShellNav" Checked="Nav_Checked" Tag="Info"
                        ToolTip="Live Link, OpenXR, and headset diagnostics report."/>
+          <RadioButton x:Name="NavVrTools" Content="VR Tools" Style="{StaticResource NavButtonStyle}"
+                       GroupName="ShellNav" Checked="Nav_Checked" Tag="VrTools"
+                       ToolTip="Curated links to Revive, Advanced Settings, overlays, wireless PCVR, and more."/>
         </StackPanel>
       </DockPanel>
     </Border>
