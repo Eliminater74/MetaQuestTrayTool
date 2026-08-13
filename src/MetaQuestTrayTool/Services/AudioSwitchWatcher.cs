@@ -7,7 +7,9 @@ namespace MetaQuestTrayTool.Services;
 /// Switches to VR audio while Link is active, then restores desktop hardware when Link drops.
 /// Meta's "Oculus Virtual Audio Device" stays installed forever — presence alone is NOT Link.
 /// Link is treated as active when Windows default output is the headset (Meta sets that on enter),
-/// or when a removable headset endpoint appears. Startup heals leftover headset-default switches.
+/// or when a removable headset endpoint appears.
+/// Startup heal only restores Speakers when no real PCVR session is detected (SteamVR / VD /
+/// DeviceCache / ADB) — never because ADB/EnumHmd alone failed during Air Link.
 /// </summary>
 public sealed class AudioSwitchWatcher : IDisposable
 {
@@ -55,7 +57,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
 
         // If we switched to VR earlier but Meta left the headset as default after Link ended,
-        // confirm with a slow HMD probe and restore speakers.
+        // confirm with a real PCVR session probe (not ADB-only) and restore speakers.
         if (_vrDevicesActive && active)
         {
             MaybeEndStaleVrSession(settings);
@@ -64,12 +66,19 @@ public sealed class AudioSwitchWatcher : IDisposable
         if (_wasActive is null)
         {
             _wasActive = active;
-            // Never SwitchToVr on the first poll — old logic treated always-present
-            // Oculus Virtual Audio as "already in Link" and stole the speakers every launch.
+            // Never treat always-present Oculus Virtual Audio as "already in Link" without
+            // applying the user's configured VR devices — that left wrong endpoints in place.
             if (active)
             {
-                _vrDevicesActive = _app.Audio.IsCurrentPlaybackHeadset();
-                _app.Log.Info("Audio watcher: headset already Windows default at startup — watching only (will not re-apply VR audio).");
+                _vrDevicesActive = true;
+                if (HasConfiguredVrDevices(settings))
+                {
+                    SwitchToVr("Audio watcher: headset already Windows default at startup — applying configured VR devices.");
+                }
+                else
+                {
+                    _app.Log.Info("Audio watcher: headset already Windows default at startup — watching (no VR devices configured).");
+                }
             }
             else
             {
@@ -108,6 +117,12 @@ public sealed class AudioSwitchWatcher : IDisposable
         return _app.Oculus.IsServiceRunning;
     }
 
+    private static bool HasConfiguredVrDevices(AudioSwitchSettings audio) =>
+        !string.IsNullOrWhiteSpace(audio.VrPlaybackDeviceId)
+        || !string.IsNullOrWhiteSpace(audio.VrRecordingDeviceId)
+        || !string.IsNullOrWhiteSpace(audio.VrCommunicationsPlaybackDeviceId)
+        || !string.IsNullOrWhiteSpace(audio.VrCommunicationsRecordingDeviceId);
+
     private void RememberDesktopFallback(AudioSwitchSettings audio)
     {
         var beforePlayback = audio.FallbackPlaybackDeviceId;
@@ -134,19 +149,19 @@ public sealed class AudioSwitchWatcher : IDisposable
             return;
         }
 
-        if (LooksLikeHeadsetIsReallyConnected())
+        if (PcvrSessionLooksAlive())
         {
             _vrDevicesActive = true;
-            _app.Log.Info("Audio watcher: headset is default and an HMD looks connected — leaving VR audio.");
+            _app.Log.Info("Audio watcher: headset is default and a PCVR session looks live — leaving / applying VR audio.");
             return;
         }
 
-        RestoreFallback("Startup: headset was default but no connected HMD — restoring desktop speakers.");
+        RestoreFallback("Startup: headset was default but no live PCVR session — restoring desktop speakers.");
     }
 
     private void MaybeEndStaleVrSession(AudioSwitchSettings settings)
     {
-        // EnumHmd / ADB is relatively expensive — only every ~20 seconds while VR audio is latched.
+        // PCVR probe is relatively expensive — only every ~20 seconds while VR audio is latched.
         _hmdCheckCounter++;
         if (_hmdCheckCounter < 4)
         {
@@ -154,7 +169,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
 
         _hmdCheckCounter = 0;
-        if (LooksLikeHeadsetIsReallyConnected())
+        if (PcvrSessionLooksAlive())
         {
             return;
         }
@@ -166,11 +181,30 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
 
         _wasActive = false;
-        RestoreFallback("Link appears ended (no HMD) but headset was still default — restoring desktop speakers.");
+        RestoreFallback("Link appears ended (no live PCVR session) but headset was still default — restoring desktop speakers.");
     }
 
-    private bool LooksLikeHeadsetIsReallyConnected()
+    /// <summary>
+    /// True when SteamVR / Virtual Desktop / Meta DeviceCache / ADB / EnumHmd indicate a live
+    /// session. Intentionally ignores "headset is Windows default" alone — that stays true after
+    /// Link ends and would otherwise prevent restoring Speakers.
+    /// </summary>
+    private bool PcvrSessionLooksAlive()
     {
+        try
+        {
+            // includeAudioLink: false — leftover Meta virtual default must not count as a session.
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: false);
+            if (status.SessionActive)
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // Probe optional.
+        }
+
         try
         {
             var quest = _app.Headset.ReadIdentity(_app.Settings.Current.Headset);

@@ -98,6 +98,20 @@ public partial class AudioSettingsWindow : Window
             }
         }
 
+        // Keep a saved ID even if the endpoint is temporarily offline — selecting "(none)"
+        // would wipe the setting on the next live-save.
+        if (!string.IsNullOrWhiteSpace(selectedId))
+        {
+            var orphan = new ComboBoxItem
+            {
+                Content = "(saved device — not active right now)",
+                Tag = selectedId
+            };
+            box.Items.Insert(1, orphan);
+            box.SelectedItem = orphan;
+            return;
+        }
+
         box.SelectedIndex = 0;
     }
 

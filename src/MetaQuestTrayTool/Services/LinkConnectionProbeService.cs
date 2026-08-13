@@ -28,6 +28,7 @@ public sealed class LinkConnectionProbeService
     private readonly object _cacheLock = new();
     private VrConnectionStatus? _cachedProbe;
     private bool _cachedIncludeEnumHmd;
+    private bool _cachedIncludeAudioLink;
     private long _cachedProbeTicks;
     private static readonly long ProbeCacheTicks = TimeSpan.FromSeconds(2).Ticks;
 
@@ -43,31 +44,33 @@ public sealed class LinkConnectionProbeService
         _app = app;
     }
 
-    public VrConnectionStatus Probe(bool includeEnumHmd = true)
+    public VrConnectionStatus Probe(bool includeEnumHmd = true, bool includeAudioLink = true)
     {
         var now = DateTime.UtcNow.Ticks;
         lock (_cacheLock)
         {
             if (_cachedProbe is not null
                 && _cachedIncludeEnumHmd == includeEnumHmd
+                && _cachedIncludeAudioLink == includeAudioLink
                 && now - _cachedProbeTicks < ProbeCacheTicks)
             {
                 return _cachedProbe;
             }
         }
 
-        var status = ProbeCore(includeEnumHmd);
+        var status = ProbeCore(includeEnumHmd, includeAudioLink);
         lock (_cacheLock)
         {
             _cachedProbe = status;
             _cachedIncludeEnumHmd = includeEnumHmd;
+            _cachedIncludeAudioLink = includeAudioLink;
             _cachedProbeTicks = DateTime.UtcNow.Ticks;
         }
 
         return status;
     }
 
-    private VrConnectionStatus ProbeCore(bool includeEnumHmd)
+    private VrConnectionStatus ProbeCore(bool includeEnumHmd, bool includeAudioLink)
     {
         // Quest Steam Link runs full SteamVR (vrserver). vrmonitor alone can be a leftover UI.
         var steamVr = IsProcessRunning("vrserver")
@@ -79,13 +82,16 @@ public sealed class LinkConnectionProbeService
         var metaHmd = includeEnumHmd && MetaHmdReported();
         var cache = ReadHeadsetCache();
         var audioLink = false;
-        try
+        if (includeAudioLink)
         {
-            audioLink = _app.Audio.IsLinkAudioSessionActive(_app.Settings.Current.Audio);
-        }
-        catch
-        {
-            // audio probe optional
+            try
+            {
+                audioLink = _app.Audio.IsLinkAudioSessionActive(_app.Settings.Current.Audio);
+            }
+            catch
+            {
+                // audio probe optional
+            }
         }
 
         // Healthy Meta Link wins only with a strong live signal. Meta often auto-connects when
