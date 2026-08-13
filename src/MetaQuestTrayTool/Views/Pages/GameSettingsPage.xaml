@@ -125,6 +125,8 @@
       <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
         <Button x:Name="ApplyNowButton" Content="Re-apply now" Style="{StaticResource GhostButtonStyle}" Click="Apply_Click"
                 ToolTip="Push current global defaults again (ODT + custom CLI/ADB). Usually not needed — changes already apply live."/>
+        <Button x:Name="SaveLastGoodButton" Content="Save to active profile" Style="{StaticResource AccentButtonStyle}" Click="SaveLastGood_Click"
+                ToolTip="While a game profile is active, save the current SS/ASW/FOV (and Link overrides) back into that profile as last-good."/>
         <Button Content="Open Debug Tool" Style="{StaticResource GhostButtonStyle}" Click="OpenDebugTool_Click"
                 ToolTip="Launch Meta’s Oculus Debug Tool GUI (OculusDebugTool.exe). Same shortcut as classic OTT. Connect Link first; close/reopen if values look stale."/>
         <CheckBox x:Name="ApplyOnStartBox" Content="Apply on tool start" VerticalAlignment="Center" Margin="8,0,0,0"

@@ -30,6 +30,18 @@ public sealed class ProcessWatcherService : IDisposable
     public string? ActiveProcessName => _activeProcess;
     public bool IsProfileActive => _activeProcess is not null;
 
+    public GameProfile? GetActiveProfile()
+    {
+        if (_activeProcess is null)
+        {
+            return null;
+        }
+
+        return _app.Profiles.FindByProcess(_activeProcess)
+               ?? _app.Profiles.All.FirstOrDefault(p =>
+                   string.Equals(p.Name, _activeProfileName, StringComparison.OrdinalIgnoreCase));
+    }
+
     public void Start()
     {
         if (!_timer.IsEnabled)

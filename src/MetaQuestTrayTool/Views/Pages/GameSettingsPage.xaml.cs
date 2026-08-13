@@ -102,6 +102,11 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         AdbCommandsBox.Text = settings.CustomCommands.ToAdbText();
         IgnoreListBox.Text = string.Join(Environment.NewLine, settings.ProfileIgnoreProcesses ?? []);
         ApplySessionCapabilities();
+        var active = App.Instance.ActiveProfile;
+        SaveLastGoodButton.IsEnabled = active is not null;
+        SaveLastGoodButton.Content = active is null
+            ? "Save to active profile"
+            : $"Save to “{active.Name}”";
         StatusText.Text = BuildStatus();
     }
 
@@ -168,6 +173,20 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         var summary = App.Instance.ApplyGlobalGameSettings();
         App.Instance.Log.Info(summary);
         StatusText.Text = summary;
+    }
+
+    private void SaveLastGood_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryWriteAll(showErrors: false))
+        {
+            // still allow saving whatever is already in settings
+        }
+
+        App.Instance.Settings.Save();
+        var summary = App.Instance.SaveLastGoodToActiveProfile();
+        StatusText.Text = summary;
+        Refresh();
+        System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
     }
 
     private void CustomCommands_LostFocus(object sender, RoutedEventArgs e)

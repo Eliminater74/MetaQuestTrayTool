@@ -53,6 +53,7 @@ public partial class App : System.Windows.Application
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
     public string? ActiveProfileName => _processWatcher?.ActiveProfileName;
+    public GameProfile? ActiveProfile => _processWatcher?.GetActiveProfile();
 
     public App()
     {
@@ -378,6 +379,44 @@ public partial class App : System.Windows.Application
         }
 
         return string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
+    }
+
+    /// <summary>
+    /// Copy the current live game / Link defaults into the active personal profile ("remember last good").
+    /// </summary>
+    public string SaveLastGoodToActiveProfile()
+    {
+        var profile = ActiveProfile;
+        if (profile is null)
+        {
+            return "No personal profile is active — start a game with auto-apply first.";
+        }
+
+        profile.Settings = Settings.Current.DefaultGameSettings.Clone();
+        var link = Settings.Current.LinkSettings;
+        if (profile.Link.HasAny
+            || link.BitrateMbps > 0
+            || link.EncodeResolutionWidth > 0
+            || link.Sharpening != LinkSharpeningMode.Default)
+        {
+            profile.Link.BitrateMbps = link.BitrateMbps > 0 ? link.BitrateMbps : profile.Link.BitrateMbps;
+            profile.Link.EncodeResolutionWidth = link.EncodeResolutionWidth > 0
+                ? link.EncodeResolutionWidth
+                : profile.Link.EncodeResolutionWidth;
+            if (link.Sharpening != LinkSharpeningMode.Default)
+            {
+                profile.Link.Sharpening = link.Sharpening;
+            }
+        }
+
+        Profiles.Save();
+        Settings.Save();
+        var summary =
+            $"Saved last-good settings into '{profile.Name}' ({profile.Settings.Describe()}). "
+            + "Next launch of this game will use them.";
+        Log.Info(summary);
+        TrayNotify("Profile updated", $"{profile.Name}\n{profile.Settings.Describe()}");
+        return summary;
     }
 
     public string RestoreGlobalDefaults()

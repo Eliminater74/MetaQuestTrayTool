@@ -175,6 +175,11 @@ public sealed class TrayIconHost : IDisposable
             var summary = _app.SessionRecover.Recover("tray menu");
             Notify("PCVR recover", summary.Length > 120 ? summary[..117] + "…" : summary);
         }));
+        menu.Items.Add(new ToolStripMenuItem("Save last-good to active profile", null, (_, _) =>
+        {
+            var summary = _app.SaveLastGoodToActiveProfile();
+            Notify("Profile", summary.Length > 120 ? summary[..117] + "…" : summary);
+        }));
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");
@@ -454,7 +459,18 @@ public sealed class TrayIconHost : IDisposable
             _app.Log.Warn("ODT error: " + Truncate(result.Error));
         }
 
-        Notify("Game Settings", result.Summary);
+        // Mid-session tray tweaks while a game profile is active — remember as last-good.
+        if (_app.IsGameProfileActive)
+        {
+            var saved = _app.SaveLastGoodToActiveProfile();
+            _app.Log.Info(saved);
+            Notify("Game Settings", result.Summary + " · " + saved);
+        }
+        else
+        {
+            Notify("Game Settings", result.Summary);
+        }
+
         _shell?.RefreshActivePage();
         _profiles?.Reload();
     }
