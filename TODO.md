@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -207,6 +207,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Bump version to **1.0.13**
 - [x] Tag and publish **v1.0.13**
 - [x] Refresh README / REDDIT / ROADMAP / TODO for v1.0.13 accuracy
+- [x] Enlarge main shell + scrollable nav (Info not clipped)
+- [x] Fix Game Settings OpenXR checkboxes wiped on Refresh
+- [x] Bump version to **1.0.14**
+- [x] Tag and publish **v1.0.14**
 
 ### Housekeeping (ongoing)
 
