@@ -103,7 +103,8 @@ public sealed class LinkConnectionProbeService
 
         if (strongMeta)
         {
-            return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
+            return ClassifyMetaSession(
+                cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: true);
         }
 
         if (virtualDesktop)
@@ -151,7 +152,9 @@ public sealed class LinkConnectionProbeService
         // No Steam/VD — DeviceCache-only Meta (including auto-connect / broken) is fine to show.
         if (cacheMeta)
         {
-            return ClassifyMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true);
+            var streaming = LooksLikeStreamingMetaLink(cache, metaHmd, audioLink, steamVr);
+            return ClassifyMetaSession(
+                cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: streaming);
         }
 
         var brokenMeta = TryDescribeBrokenMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop);
@@ -254,6 +257,34 @@ public sealed class LinkConnectionProbeService
         return false;
     }
 
+    /// <summary>
+    /// Stricter than <see cref="LooksLikeActiveMetaSession"/> — excludes operable/primary DeviceCache
+    /// ghosts when the headset is on Wi‑Fi but Link is not streaming.
+    /// </summary>
+    private static bool LooksLikeStreamingMetaLink(
+        HeadsetCacheEntry? cache,
+        bool metaHmd,
+        bool audioLink,
+        bool steamVrRunning)
+    {
+        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVrRunning))
+        {
+            return true;
+        }
+
+        if (cache is null)
+        {
+            return false;
+        }
+
+        if (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return IsConnectedState(cache.ConnectionState, cache.RdConnectionState);
+    }
+
     private static bool LooksLikeActiveMetaSession(
         HeadsetCacheEntry? cache,
         bool metaHmd,
@@ -343,7 +374,8 @@ public sealed class LinkConnectionProbeService
         bool metaHmd,
         bool steamVr,
         bool virtualDesktop,
-        bool sessionActive)
+        bool sessionActive,
+        bool metaLinkStreaming)
     {
         // Meta's own flag — primary signal for Air vs wired.
         if (cache?.IsUsingAirLink == true)
@@ -354,6 +386,7 @@ public sealed class LinkConnectionProbeService
                 Summary = "Meta Air Link",
                 Detail = BuildMetaDetail(cache, usb, "wireless Air Link (isUsingAirLink=true)"),
                 SessionActive = sessionActive,
+                MetaLinkStreaming = metaLinkStreaming,
                 IsUsingAirLink = true,
                 HeadsetSerial = cache.SerialNumber,
                 DeviceCacheConnectionState = cache.ConnectionState,
@@ -372,6 +405,7 @@ public sealed class LinkConnectionProbeService
                 Summary = "Meta wired Link",
                 Detail = BuildMetaDetail(cache, usb, "wired Link (isUsingAirLink=false)"),
                 SessionActive = sessionActive,
+                MetaLinkStreaming = metaLinkStreaming,
                 IsUsingAirLink = false,
                 HeadsetSerial = cache.SerialNumber,
                 DeviceCacheConnectionState = cache.ConnectionState,
@@ -391,6 +425,7 @@ public sealed class LinkConnectionProbeService
                 Summary = "Meta wired Link (USB heuristic)",
                 Detail = "Meta HMD session + Oculus USB device; DeviceCache isUsingAirLink unavailable",
                 SessionActive = sessionActive,
+                MetaLinkStreaming = metaLinkStreaming,
                 UsbHeadsetPresent = true,
                 MetaHmdReported = metaHmd,
                 SteamVrRunning = steamVr,
@@ -406,6 +441,7 @@ public sealed class LinkConnectionProbeService
             Summary = "Meta Link (transport unknown)",
             Detail = "Meta HMD session active but DeviceCache isUsingAirLink unavailable and no Oculus USB VID",
             SessionActive = sessionActive,
+            MetaLinkStreaming = metaLinkStreaming,
             UsbHeadsetPresent = false,
             MetaHmdReported = metaHmd,
             SteamVrRunning = steamVr,

@@ -446,11 +446,8 @@ public sealed class DashToSteamVrService : IDisposable
 
             SyncSteamVrExitWatch();
 
-            var status = _app.LinkConnection.Probe(includeEnumHmd: false);
-            var meta = status.SessionActive
-                       && status.Kind is VrConnectionKind.MetaAirLink
-                           or VrConnectionKind.MetaWiredLink
-                           or VrConnectionKind.MetaLinkUnknownTransport;
+            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var meta = status.MetaLinkStreaming;
 
             if (!meta)
             {
@@ -490,11 +487,8 @@ public sealed class DashToSteamVrService : IDisposable
                 try
                 {
                     // Re-check still on Meta Link (user may have switched to Steam Link).
-                    var again = _app.LinkConnection.Probe(includeEnumHmd: false);
-                    if (!(again.SessionActive
-                          && again.Kind is VrConnectionKind.MetaAirLink
-                              or VrConnectionKind.MetaWiredLink
-                              or VrConnectionKind.MetaLinkUnknownTransport))
+                    var again = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+                    if (!again.MetaLinkStreaming)
                     {
                         _app.Log.Info("Auto Dash → SteamVR cancelled — Meta Link session no longer active.");
                         return;
@@ -523,11 +517,8 @@ public sealed class DashToSteamVrService : IDisposable
     {
         try
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: false);
-            var meta = status.SessionActive
-                       && status.Kind is VrConnectionKind.MetaAirLink
-                           or VrConnectionKind.MetaWiredLink
-                           or VrConnectionKind.MetaLinkUnknownTransport;
+            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var meta = status.MetaLinkStreaming;
             if (meta)
             {
                 return RunNow(reason);
