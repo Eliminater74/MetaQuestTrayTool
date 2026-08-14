@@ -159,6 +159,7 @@ public sealed class SettingsService
         Current.DashToSteamVr ??= new DashToSteamVrSettings();
         Current.HotKeys ??= new HotKeySettings();
         Current.Voice ??= new VoiceSettings();
+        Current.HeadsetAnnouncer ??= new HeadsetAnnouncerSettings();
         if (Current.HotKeys.Bindings.Count == 0)
         {
             Current.HotKeys.Bindings = HotKeySettings.CreateDefaultBindings();
