@@ -26,7 +26,8 @@ It’s a **brand-new C# app**, not a decompile and not a continuation of older u
 **Status:** public releases on GitHub (**v1.1.2** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
-**Repo / docs / screenshots / short demo:** https://github.com/Eliminater74/MetaQuestTrayTool
+**Wiki (install, pages, Dash→SteamVR, voice, troubleshooting):** https://github.com/Eliminater74/MetaQuestTrayTool/wiki  
+**Repo / screenshots / short demo:** https://github.com/Eliminater74/MetaQuestTrayTool
 
 ---
 
@@ -59,7 +60,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Sidebar: **Status**, Game Settings, Tray Tool, Power Options, Service & Startup, Log, Advanced, Quest Link, Headset, **VR Tools**, Info / About
 - Hover tooltips; close-to-tray; start minimized; hide from Alt+Tab; single-instance
 - Hands-free elevated start (one UAC, then silent elevated at logon)
-- Screenshots + short demo video in the repo README
+- Screenshots + demo in the repo README; **full walkthrough video + user guide:** https://github.com/Eliminater74/MetaQuestTrayTool/wiki
 
 **Status & SteamVR**
 - Live Status chips (PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, session type, ADB, battery/Wi‑Fi, profile, HotKeys/Voice, Dash→SteamVR, GPU, audio)
@@ -102,7 +103,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Voice: Windows speech — push-to-talk (**Ctrl+Shift+V** default) or always-on; mic picker; min confidence; custom phrases
 - New phrases: recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset
 - **Headset announcements** (Tray Tool): optional spoken status in the Quest on connect, profile apply, launch, Dash→SteamVR
-- Full list: `docs/VOICE-AND-HOTKEYS.md`
+- Full list: wiki → HotKeys, voice, and headset announcements (`docs/VOICE-AND-HOTKEYS.md` in the repo)
 
 **OpenXR / audio / power**
 - Switch ActiveRuntime Meta vs SteamVR (global + per-profile)
@@ -170,7 +171,10 @@ Feedback and bug reports welcome — especially “profile didn’t apply for ga
 **Installer (recommended):**  
 https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 
-Run `MetaQuestTrayTool-Setup-*.exe` — Program Files, Start Menu, Uninstall. Self-contained (includes .NET 8). Settings under `%AppData%\MetaQuestTrayTool\` survive uninstall.
+**User guide (wiki):**  
+https://github.com/Eliminater74/MetaQuestTrayTool/wiki  
+
+Run `MetaQuestTrayTool-Setup-*.exe` — Program Files, Start Menu, Uninstall. Self-contained (includes .NET 8). Settings under `%AppData%\MetaQuestTrayTool\` survive uninstall. Wiki covers first launch, each sidebar page, Manual-at-boot, PreventDashLaunch, voice phrases, and troubleshooting.
 
 **From source:** open `MetaQuestTrayTool.sln` → F5, or `dotnet build` / `.\scripts\build-installer.ps1`.
 
@@ -202,5 +206,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.2) — Status board, global defaults + per-game auto apply/restore, Link + OpenXR, PreventDashLaunch→SteamVR + OVRService Manual-at-boot + headset announcements + expanded voice, Wireless ADB Pair, HotKeys/voice (needed in SteamVR — elevated tray can’t be clicked), PCVR Ready / recover, VR Tools. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest
+TL;DR: free modern OTT-inspired tray app (v1.1.2) — Status board, global defaults + per-game auto apply/restore, Link + OpenXR, PreventDashLaunch→SteamVR + OVRService Manual-at-boot + headset announcements + expanded voice, Wireless ADB Pair, HotKeys/voice (needed in SteamVR — elevated tray can’t be clicked), PCVR Ready / recover, VR Tools. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki
 ```
