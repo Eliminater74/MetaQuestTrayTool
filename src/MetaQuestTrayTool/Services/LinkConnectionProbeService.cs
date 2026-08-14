@@ -44,6 +44,19 @@ public sealed class LinkConnectionProbeService
         _app = app;
     }
 
+    /// <summary>Drop cached probe results after sleep/resume so DeviceCache / audio are re-read.</summary>
+    public void InvalidateCache()
+    {
+        lock (_cacheLock)
+        {
+            _cachedProbe = null;
+            _cachedProbeTicks = 0;
+            _cachedUsbPresent = null;
+            _cachedUsbTicks = 0;
+            _processCache.Clear();
+        }
+    }
+
     public VrConnectionStatus Probe(bool includeEnumHmd = true, bool includeAudioLink = true)
     {
         var now = DateTime.UtcNow.Ticks;

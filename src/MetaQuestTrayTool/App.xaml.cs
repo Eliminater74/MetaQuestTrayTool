@@ -58,6 +58,7 @@ public partial class App : System.Windows.Application
     public PowerWatchService? PowerWatch => _powerWatcher;
     public AudioSwitchWatcher? AudioWatch => _audioWatcher;
     public HeadsetWatchService? HeadsetWatch => _headsetWatcher;
+    public LinkSessionWatchService? LinkSessionWatch => _linkSessionWatcher;
     public bool IsGameProfileActive => _processWatcher?.IsProfileActive == true;
     public string? ActiveProfileName => _processWatcher?.ActiveProfileName;
     public GameProfile? ActiveProfile => _processWatcher?.GetActiveProfile();

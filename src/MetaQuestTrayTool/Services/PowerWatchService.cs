@@ -126,15 +126,20 @@ public sealed class PowerWatchService : IDisposable
             return;
         }
 
-        var restart = _app.Settings.Current.Service.RestartServiceWhenComputerWakes
-                      || _app.Settings.Current.Power.RestartServiceAfterSleep;
-        if (!restart)
+        _app.Dispatcher.BeginInvoke(() =>
         {
-            return;
-        }
+            _app.LinkSessionWatch?.NotifySystemResumed();
 
-        _app.Log.Info("System resumed from sleep — restarting OVRService.");
-        var result = _app.Oculus.Restart();
-        _app.Log.Info(result);
+            var restart = _app.Settings.Current.Service.RestartServiceWhenComputerWakes
+                          || _app.Settings.Current.Power.RestartServiceAfterSleep;
+            if (!restart)
+            {
+                return;
+            }
+
+            _app.Log.Info("System resumed from sleep — restarting OVRService.");
+            var result = _app.Oculus.Restart();
+            _app.Log.Info(result);
+        });
     }
 }

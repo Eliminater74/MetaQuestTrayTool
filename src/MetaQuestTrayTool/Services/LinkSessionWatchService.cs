@@ -13,6 +13,13 @@ public sealed class LinkSessionWatchService : IDisposable
     private string? _lastFingerprint;
     private VrConnectionKind? _lastActiveKind;
     private int _pollGate;
+    private int _endConfirmPolls;
+    private DateTime _resumeQuietUntilUtc = DateTime.MinValue;
+
+    /// <summary>Ignore connect/disconnect edges while Windows audio / DeviceCache settle after sleep.</summary>
+    private static readonly TimeSpan ResumeQuiet = TimeSpan.FromSeconds(20);
+
+    private const int EndConfirmPollsRequired = 2;
 
     public LinkSessionWatchService(App app)
     {
@@ -33,6 +40,33 @@ public sealed class LinkSessionWatchService : IDisposable
     }
 
     public void Dispose() => _timer.Stop();
+
+    /// <summary>
+    /// PC woke from sleep — DeviceCache / OVRService / audio often blip. Re-baseline quietly
+    /// so we do not toast “Link session ended” for a ghost drop.
+    /// </summary>
+    public void NotifySystemResumed()
+    {
+        _resumeQuietUntilUtc = DateTime.UtcNow + ResumeQuiet;
+        _endConfirmPolls = 0;
+        _app.LinkConnection.InvalidateCache();
+        try
+        {
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false);
+            _lastFingerprint = BuildFingerprint(status);
+            _lastActiveKind = IsLivePcvrSession(status) ? status.Kind : null;
+            ApplyCadence(status.SessionActive);
+            _app.Log.Info(
+                "System resumed — ignoring Link connect/disconnect edges for "
+                + $"{(int)ResumeQuiet.TotalSeconds}s (probe: {status.InfoBanner}).");
+        }
+        catch (Exception ex)
+        {
+            _lastFingerprint = null;
+            _lastActiveKind = null;
+            _app.Log.Warn($"Resume Link baseline failed: {ex.Message}");
+        }
+    }
 
     private void ApplyCadence(bool sessionActive)
     {
@@ -67,19 +101,35 @@ public sealed class LinkSessionWatchService : IDisposable
     private void Poll()
     {
         var status = _app.LinkConnection.Probe(includeEnumHmd: false);
-        _app.Dispatcher.BeginInvoke(() => ApplyCadence(status.SessionActive));
+        var live = IsLivePcvrSession(status);
+        _app.Dispatcher.BeginInvoke(() => ApplyCadence(live || status.SessionActive));
         var fingerprint = BuildFingerprint(status);
+
+        if (DateTime.UtcNow < _resumeQuietUntilUtc)
+        {
+            _lastFingerprint = fingerprint;
+            _lastActiveKind = live ? status.Kind : null;
+            _endConfirmPolls = 0;
+            return;
+        }
+
         if (string.Equals(fingerprint, _lastFingerprint, StringComparison.Ordinal))
         {
+            if (!live)
+            {
+                _endConfirmPolls = 0;
+            }
+
             return;
         }
 
         var previous = _lastFingerprint;
         var previousActive = _lastActiveKind;
-        _lastFingerprint = fingerprint;
 
-        if (status.SessionActive)
+        if (live)
         {
+            _endConfirmPolls = 0;
+            _lastFingerprint = fingerprint;
             _lastActiveKind = status.Kind;
             _app.Dispatcher.BeginInvoke(() =>
             {
@@ -90,13 +140,27 @@ public sealed class LinkSessionWatchService : IDisposable
             return;
         }
 
-        _lastActiveKind = null;
-
         if (!string.IsNullOrEmpty(previous) && previous.StartsWith("active:", StringComparison.Ordinal))
         {
+            _endConfirmPolls++;
+            if (_endConfirmPolls < EndConfirmPollsRequired)
+            {
+                _app.Log.Info(
+                    $"Link drop suspected ({_endConfirmPolls}/{EndConfirmPollsRequired}) — "
+                    + $"{status.InfoBanner}; waiting before treating as session end.");
+                return;
+            }
+
+            _endConfirmPolls = 0;
+            _lastFingerprint = fingerprint;
+            _lastActiveKind = null;
             _app.Dispatcher.BeginInvoke(() => LogSessionEnded(previousActive, status));
             return;
         }
+
+        _endConfirmPolls = 0;
+        _lastFingerprint = fingerprint;
+        _lastActiveKind = null;
 
         // Meta Wi‑Fi auto-connect without Link UI — informational, not an error.
         if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink
@@ -159,7 +223,7 @@ public sealed class LinkSessionWatchService : IDisposable
 
     private static string BuildFingerprint(VrConnectionStatus status)
     {
-        if (!status.SessionActive)
+        if (!IsLivePcvrSession(status))
         {
             if (status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase)
                 || status.Summary.Contains("inoperable", StringComparison.OrdinalIgnoreCase))
@@ -171,5 +235,23 @@ public sealed class LinkSessionWatchService : IDisposable
         }
 
         return $"active:{status.Kind}:{status.HeadsetSerial}:{status.DeviceCacheConnectionState}:{status.IsUsingAirLink}";
+    }
+
+    /// <summary>
+    /// Real PCVR stream — not DeviceCache Wi‑Fi auto-connect / EnumHmd ghosts that flip on sleep/wake.
+    /// </summary>
+    private static bool IsLivePcvrSession(VrConnectionStatus status)
+    {
+        if (!status.SessionActive)
+        {
+            return false;
+        }
+
+        return status.Kind switch
+        {
+            VrConnectionKind.SteamLinkOrSteamVr => true,
+            VrConnectionKind.VirtualDesktop => true,
+            _ => status.MetaLinkStreaming
+        };
     }
 }
