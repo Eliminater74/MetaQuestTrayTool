@@ -81,6 +81,8 @@ When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the
 
 Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller): PreventDashLaunch blocks Dash entirely but **does not** start SteamVR by itself. The tray’s **Service & Startup** page can write these keys (needs Admin), restart `OVRService`, and while PreventDashLaunch is ON **auto-starts SteamVR** when Meta Link / Air Link connects. Setting `CoreChannel` is optional and never changes until you Apply; enabling PreventDashLaunch can optionally offer `NO_UPDATES` as a precaution.
 
+**PreventDashLaunch does not block Meta Horizon Link (`Client.exe`).** A full registry sweep of `Oculus VR, LLC` (HKLM + HKCU) found no documented equivalent such as `PreventClientLaunch` / `AutoStartClient`. Boot launch is usually `OVRService` (Automatic) → `OVRServiceLauncher.exe` → per-session `LaunchedApplication`; `OVRServer_x64.exe` can **restore** a client window (`Restored top-level window for pid`) if the app was hidden, not fully quit. Stop/start/restart of `OVRService` after a **full quit** usually does **not** reopen the desktop app. Meta also does not register in Windows `Run` / Startup apps on most installs. **Steam Link only** users can uninstall Meta PC software entirely; Quest Link PCVR still needs the runtime and usually the Link app when connecting.
+
 ---
 
 ## Runtime commands (not RemoteHeadset)
