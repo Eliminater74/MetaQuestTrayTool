@@ -85,8 +85,15 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | open debug tool / open oculus debug tool / launch debug tool | Open Oculus Debug Tool GUI |
 | dash to steam v r / start steam v r over link / start steam v r | Start SteamVR over Link (PreventDashLaunch) |
 | open steam v r home / steam v r home / launch steam v r home | Open SteamVR Home (steamtours) |
+| recover PCVR / recover link / recover PCVR session | Recover PCVR (restart OVRService, re-apply Link/globals/audio) |
+| restore desktop audio / restore audio / switch to desktop audio | Restore fallback/desktop audio devices |
+| switch to VR audio / switch to headset audio / headset audio | Switch Windows audio to configured VR devices |
+| switch open x r meta / open x r meta / meta open x r | Switch OpenXR runtime to Meta |
+| switch open x r steam / open x r steam v r / steam open x r | Switch OpenXR runtime to SteamVR |
+| close overlays / kill overlays / close overlay apps | Close configured overlay processes (RTSS, CAM, etc.) |
+| apply GPU preset / apply GPU presets / GPU preset | Apply GPU-tier Link + global game presets |
 
-Custom phrases can be added in Configure (phrase → tray action).
+Custom phrases can be added in Configure (phrase → tray action). New actions above can also be bound as hotkeys in Configure.
 
 Spell out **A S W**, **H U D**, and **steam v r** — Windows recognition handles that better than “ASW” / “SteamVR” as one word.
 

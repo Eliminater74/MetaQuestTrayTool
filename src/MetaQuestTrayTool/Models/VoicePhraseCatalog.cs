@@ -40,7 +40,31 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "steam v r from link", Action = HotKeyAction.DashToSteamVr },
         new VoicePhrase { Phrase = "open steam v r home", Action = HotKeyAction.OpenSteamVrHome },
         new VoicePhrase { Phrase = "steam v r home", Action = HotKeyAction.OpenSteamVrHome },
-        new VoicePhrase { Phrase = "launch steam v r home", Action = HotKeyAction.OpenSteamVrHome }
+        new VoicePhrase { Phrase = "launch steam v r home", Action = HotKeyAction.OpenSteamVrHome },
+        new VoicePhrase { Phrase = "recover PCVR", Action = HotKeyAction.RecoverPcvr },
+        new VoicePhrase { Phrase = "recover pcvr", Action = HotKeyAction.RecoverPcvr },
+        new VoicePhrase { Phrase = "recover link", Action = HotKeyAction.RecoverPcvr },
+        new VoicePhrase { Phrase = "recover PCVR session", Action = HotKeyAction.RecoverPcvr },
+        new VoicePhrase { Phrase = "restore desktop audio", Action = HotKeyAction.RestoreDesktopAudio },
+        new VoicePhrase { Phrase = "restore audio", Action = HotKeyAction.RestoreDesktopAudio },
+        new VoicePhrase { Phrase = "switch to desktop audio", Action = HotKeyAction.RestoreDesktopAudio },
+        new VoicePhrase { Phrase = "switch to VR audio", Action = HotKeyAction.SwitchToVrAudio },
+        new VoicePhrase { Phrase = "switch to headset audio", Action = HotKeyAction.SwitchToVrAudio },
+        new VoicePhrase { Phrase = "headset audio", Action = HotKeyAction.SwitchToVrAudio },
+        new VoicePhrase { Phrase = "switch open x r meta", Action = HotKeyAction.OpenXrMeta },
+        new VoicePhrase { Phrase = "open x r meta", Action = HotKeyAction.OpenXrMeta },
+        new VoicePhrase { Phrase = "meta open x r", Action = HotKeyAction.OpenXrMeta },
+        new VoicePhrase { Phrase = "switch open x r steam", Action = HotKeyAction.OpenXrSteamVr },
+        new VoicePhrase { Phrase = "open x r steam", Action = HotKeyAction.OpenXrSteamVr },
+        new VoicePhrase { Phrase = "open x r steam v r", Action = HotKeyAction.OpenXrSteamVr },
+        new VoicePhrase { Phrase = "steam open x r", Action = HotKeyAction.OpenXrSteamVr },
+        new VoicePhrase { Phrase = "close overlays", Action = HotKeyAction.CloseOverlays },
+        new VoicePhrase { Phrase = "kill overlays", Action = HotKeyAction.CloseOverlays },
+        new VoicePhrase { Phrase = "close overlay apps", Action = HotKeyAction.CloseOverlays },
+        new VoicePhrase { Phrase = "apply GPU preset", Action = HotKeyAction.ApplyGpuPresets },
+        new VoicePhrase { Phrase = "apply gpu preset", Action = HotKeyAction.ApplyGpuPresets },
+        new VoicePhrase { Phrase = "apply GPU presets", Action = HotKeyAction.ApplyGpuPresets },
+        new VoicePhrase { Phrase = "GPU preset", Action = HotKeyAction.ApplyGpuPresets }
     ];
 
     public static bool TryMatch(string recognizedText, out HotKeyAction action) =>

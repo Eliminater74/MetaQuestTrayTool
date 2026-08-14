@@ -17,6 +17,13 @@ public static class HotKeyCatalog
         HotKeyAction.OpenDebugTool => "Open Oculus Debug Tool",
         HotKeyAction.DashToSteamVr => "Start SteamVR over Link (PreventDashLaunch)",
         HotKeyAction.OpenSteamVrHome => "Open SteamVR Home",
+        HotKeyAction.RecoverPcvr => "Recover PCVR",
+        HotKeyAction.RestoreDesktopAudio => "Restore desktop audio",
+        HotKeyAction.SwitchToVrAudio => "Switch to VR audio",
+        HotKeyAction.OpenXrMeta => "Switch OpenXR to Meta",
+        HotKeyAction.OpenXrSteamVr => "Switch OpenXR to SteamVR",
+        HotKeyAction.CloseOverlays => "Close configured overlays",
+        HotKeyAction.ApplyGpuPresets => "Apply GPU recommended presets",
         _ => action.ToString()
     };
 

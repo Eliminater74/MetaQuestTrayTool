@@ -20,10 +20,10 @@ public sealed class OverlayCloseService
 
     public OverlayCloseService(App app) => _app = app;
 
-    public string CloseConfiguredOverlays(string reason = "Link connect")
+    public string CloseConfiguredOverlays(string reason = "Link connect", bool force = false)
     {
         var settings = _app.Settings.Current;
-        if (!settings.CloseOverlaysOnLinkConnect)
+        if (!force && !settings.CloseOverlaysOnLinkConnect)
         {
             return string.Empty;
         }

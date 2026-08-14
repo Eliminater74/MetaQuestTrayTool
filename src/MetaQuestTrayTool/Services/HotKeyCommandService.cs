@@ -31,8 +31,63 @@ public sealed class HotKeyCommandService
             HotKeyAction.OpenDebugTool => _app.Oculus.ShowOculusDebugTool(),
             HotKeyAction.DashToSteamVr => _app.DashToSteamVr.RunNow("hotkey/voice"),
             HotKeyAction.OpenSteamVrHome => _app.SteamVrInstall.OpenSteamVrHome(),
+            HotKeyAction.RecoverPcvr => _app.SessionRecover.Recover("hotkey/voice"),
+            HotKeyAction.RestoreDesktopAudio => ExecuteRestoreDesktopAudio(),
+            HotKeyAction.SwitchToVrAudio => ExecuteSwitchToVrAudio(),
+            HotKeyAction.OpenXrMeta => SwitchOpenXr(OpenXrRuntimeKind.Meta),
+            HotKeyAction.OpenXrSteamVr => SwitchOpenXr(OpenXrRuntimeKind.SteamVr),
+            HotKeyAction.CloseOverlays => ExecuteCloseOverlays(),
+            HotKeyAction.ApplyGpuPresets => ExecuteApplyGpuPresets(),
             _ => $"Unknown hotkey action: {action}"
         };
+    }
+
+    private string ExecuteRestoreDesktopAudio()
+    {
+        var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
+        _app.Log.Info(result);
+        return result;
+    }
+
+    private string ExecuteSwitchToVrAudio()
+    {
+        var result = _app.Audio.ApplyVrDevices(_app.Settings.Current.Audio);
+        _app.Log.Info(result);
+        return result;
+    }
+
+    private string SwitchOpenXr(OpenXrRuntimeKind kind)
+    {
+        _app.Settings.Current.OpenXr.PreferredRuntime = kind;
+        _app.Settings.Save();
+        var result = _app.OpenXr.Set(kind);
+        _app.Log.Info(result);
+        return result;
+    }
+
+    private string ExecuteCloseOverlays()
+    {
+        var summary = _app.OverlayClose.CloseConfiguredOverlays("voice/hotkey", force: true);
+        if (string.IsNullOrWhiteSpace(summary))
+        {
+            var count = (_app.Settings.Current.OverlayCloseProcesses ?? []).Count;
+            return count == 0
+                ? "No overlay processes configured — add names under Game Settings → Close overlays on Link connect."
+                : "No matching overlay processes were running.";
+        }
+
+        return summary;
+    }
+
+    private string ExecuteApplyGpuPresets()
+    {
+        var blocked = GuardProfileMutation("GPU preset apply");
+        if (blocked.Length > 0)
+        {
+            return blocked;
+        }
+
+        return _app.ApplyGpuRecommendedPresets();
     }
 
     private string ExecuteVoicePushToTalk()

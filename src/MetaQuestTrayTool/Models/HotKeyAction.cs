@@ -14,5 +14,12 @@ public enum HotKeyAction
     OpenMetaLink,
     OpenDebugTool,
     DashToSteamVr,
-    OpenSteamVrHome
+    OpenSteamVrHome,
+    RecoverPcvr,
+    RestoreDesktopAudio,
+    SwitchToVrAudio,
+    OpenXrMeta,
+    OpenXrSteamVr,
+    CloseOverlays,
+    ApplyGpuPresets
 }
