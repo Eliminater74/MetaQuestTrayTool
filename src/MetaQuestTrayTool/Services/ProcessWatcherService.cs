@@ -208,6 +208,7 @@ public sealed class ProcessWatcherService : IDisposable
         Notify(
             "Profile applied",
             $"{profile.Name} is now active for {processName}.exe.\nGlobal defaults will return when you close the game.");
+        _app.HeadsetAnnouncer.AnnounceProfileApplied(profile.Name);
         ApplyCadence();
     }
 
@@ -221,6 +222,7 @@ public sealed class ProcessWatcherService : IDisposable
         Notify(
             "Global defaults restored",
             $"{processName}.exe closed.\nRestored your global VR settings after '{profileName}'.");
+        _app.HeadsetAnnouncer.AnnounceProfileRestored(profileName);
         ApplyCadence();
     }
 
