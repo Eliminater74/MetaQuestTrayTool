@@ -148,6 +148,21 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 - [Meta Quest PC app](https://www.meta.com/quest/setup-link/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
 - For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once, or Wireless debugging **Pair** + Connect). ADB is bundled — no Android Studio required
 
+### Steam Link vs Quest Link — do I need Meta on the PC?
+
+These are different PCVR paths:
+
+| Path | On the PC | On the Quest |
+| --- | --- | --- |
+| **Quest Link / Air Link** | Meta Horizon Link + `OVRService` (Meta’s PCVR runtime) | Link / Air Link to the PC |
+| **Steam Link only** | Steam only — **no Meta PC app required** | Steam Link app |
+
+**Meta’s PC software is for Quest Link**, not for Steam Link. If you play PCVR **only** through Steam Link and never use Quest Link or Air Link, you can **uninstall Meta Horizon Link** and run 100% Steam — you do not need this tray tool’s Link-specific features (`OVRService`, Dash → SteamVR, Link registry, PreventDashLaunch, etc.).
+
+**This tray tool targets Quest Link + SteamVR OpenXR** (Steam-first PCVR over Meta Link). It still helps some mixed setups (OpenXR assist while Steam Link is active, audio, power, HotKeys), but most Link pages and service control assume Meta is installed.
+
+**Meta Horizon Link at startup:** there is no supported registry flag to permanently block the desktop app (unlike `PreventDashLaunch`, which only blocks Dash). Meta removed the old in-app startup toggle. Boot launch is often tied to `OVRService` starting automatically in Windows Services. Right-click Meta’s tray icon → **Hide** keeps it running in the background; **Quit** fully closes it. Restarting `OVRService` after a full quit usually does **not** reopen the app — but you will need to open Meta Link again when you want Quest Link PCVR. This tray tool does **not** offer a “block Meta at startup” option.
+
 ---
 
 ## What works now
