@@ -41,6 +41,7 @@ public partial class App : System.Windows.Application
     public HotKeyCommandService HotKeyCommands { get; }
     public HotKeyService HotKeys { get; }
     public VoiceCommandService Voice { get; }
+    public HeadsetAnnouncerService HeadsetAnnouncer { get; }
     public UpdateService Updates { get; }
     public LinkConnectionProbeService LinkConnection { get; }
     public SteamLinkAssistService SteamLinkAssist { get; }
@@ -71,6 +72,7 @@ public partial class App : System.Windows.Application
         HotKeyCommands = new HotKeyCommandService(this);
         HotKeys = new HotKeyService(this, HotKeyCommands);
         Voice = new VoiceCommandService(this, HotKeyCommands);
+        HeadsetAnnouncer = new HeadsetAnnouncerService(this);
         Updates = new UpdateService(this);
         LinkConnection = new LinkConnectionProbeService(this);
         SteamLinkAssist = new SteamLinkAssistService(this);
@@ -190,6 +192,7 @@ public partial class App : System.Windows.Application
 
         HotKeys.Reload();
         Voice.Reload();
+        HeadsetAnnouncer.Reload();
 
         _updateWatcher = new UpdateWatchService(this);
         _updateWatcher.Start();
@@ -248,6 +251,7 @@ public partial class App : System.Windows.Application
         _processWatcher?.Dispose();
         HotKeys.Dispose();
         Voice.Dispose();
+        HeadsetAnnouncer.Dispose();
         _tray?.Dispose();
         Settings.Save();
         try
