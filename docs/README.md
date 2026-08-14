@@ -6,6 +6,8 @@
 | [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
 | [../README.md](../README.md) | User guide, download, feature inventory (v1.1.2) |
+| [wiki/](wiki/) | GitHub Wiki source (user guide, troubleshooting, videos) |
+| [GitHub Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) | Published wiki (after first page is created on GitHub) |
 | [../ROADMAP.md](../ROADMAP.md) | Current product summary, done phases, later / non-goals |
 | [../TODO.md](../TODO.md) | Remaining work + shipped checklist |
 | [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.1.2) |

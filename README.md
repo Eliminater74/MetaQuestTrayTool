@@ -6,6 +6,8 @@
 
 Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
 
+**User guide:** [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) (install, pages, Dash → SteamVR, voice, troubleshooting).
+
 ### Preview
 
 [Watch a short walkthrough (MP4)](docs/media/demo.mp4)
