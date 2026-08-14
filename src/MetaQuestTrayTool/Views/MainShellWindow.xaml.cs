@@ -27,6 +27,19 @@ public partial class MainShellWindow : Window
         VersionText.Text = $"v{App.GetVersion()}";
         ApplyAltTabPreference();
         NavStatus.IsChecked = true;
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible)
+            {
+                _statusPage.SetLiveRefresh(true);
+                _infoPage.SetLiveRefresh(true);
+            }
+            else
+            {
+                _statusPage.SetLiveRefresh(false);
+                _infoPage.SetLiveRefresh(false);
+            }
+        };
     }
 
     public void ShowPage(string tag)

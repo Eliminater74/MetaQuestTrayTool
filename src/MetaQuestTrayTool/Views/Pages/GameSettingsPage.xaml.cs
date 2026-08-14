@@ -351,6 +351,14 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         settings.ApplyGameSettingsOnStart = ApplyOnStartBox.IsChecked == true;
         settings.AutoApplyProfiles = AutoApplyBox.IsChecked == true;
         App.Instance.Settings.Save();
+        if (settings.AutoApplyProfiles)
+        {
+            App.Instance.ProcessWatcher?.Start();
+        }
+        else
+        {
+            App.Instance.ProcessWatcher?.Stop();
+        }
     }
 
     private bool TryWriteAll(bool showErrors = true)

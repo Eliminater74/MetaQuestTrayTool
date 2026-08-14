@@ -25,8 +25,30 @@ public partial class StatusPage : System.Windows.Controls.UserControl, IShellPag
                 Refresh();
             }
         };
-        Loaded += (_, _) => _timer.Start();
+        Loaded += (_, _) =>
+        {
+            if (IsVisible)
+            {
+                _timer.Start();
+            }
+        };
         Unloaded += (_, _) => _timer.Stop();
+        IsVisibleChanged += (_, _) => SetLiveRefresh(IsVisible && IsLoaded);
+    }
+
+    public void SetLiveRefresh(bool enabled)
+    {
+        if (enabled)
+        {
+            if (!_timer.IsEnabled)
+            {
+                _timer.Start();
+            }
+        }
+        else
+        {
+            _timer.Stop();
+        }
     }
 
     public void Refresh()

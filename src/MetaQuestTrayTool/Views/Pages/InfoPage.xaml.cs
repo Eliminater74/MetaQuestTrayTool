@@ -29,8 +29,30 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
                 RefreshReadyChecklist();
             }
         };
-        Loaded += (_, _) => _refreshTimer.Start();
+        Loaded += (_, _) =>
+        {
+            if (IsVisible)
+            {
+                _refreshTimer.Start();
+            }
+        };
         Unloaded += (_, _) => _refreshTimer.Stop();
+        IsVisibleChanged += (_, _) => SetLiveRefresh(IsVisible && IsLoaded);
+    }
+
+    public void SetLiveRefresh(bool enabled)
+    {
+        if (enabled)
+        {
+            if (!_refreshTimer.IsEnabled)
+            {
+                _refreshTimer.Start();
+            }
+        }
+        else
+        {
+            _refreshTimer.Stop();
+        }
     }
 
     public void Refresh()

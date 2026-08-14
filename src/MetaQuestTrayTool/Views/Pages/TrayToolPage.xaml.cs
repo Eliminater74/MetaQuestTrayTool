@@ -152,6 +152,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         settings.Tray.CheckForUpdatesOnStart = UpdatesBox.IsChecked == true;
         settings.ShowNotifications = NotificationsBox.IsChecked == true;
         App.Instance.Settings.Save();
+        App.Instance.AudioWatch?.SyncTimer();
 
         if (Window.GetWindow(this) is MainShellWindow shell)
         {

@@ -139,6 +139,7 @@ public partial class AudioSettingsWindow : Window
         WriteToSettings();
         App.Instance.Settings.Save();
         App.Instance.Log.Info("Audio settings saved.");
+        App.Instance.AudioWatch?.SyncTimer();
     }
 
     private void SwitchVr_Click(object sender, RoutedEventArgs e)

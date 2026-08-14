@@ -133,6 +133,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
         headset.WirelessAutoReconnect = WirelessAutoBox.IsChecked == true;
         App.Instance.Settings.Save();
+        App.Instance.HeadsetWatch?.SyncWatch();
     }
 
     private void WirelessConnect_Click(object sender, RoutedEventArgs e)

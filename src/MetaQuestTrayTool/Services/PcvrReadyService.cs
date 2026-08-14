@@ -378,6 +378,7 @@ public sealed class PcvrReadyService
 
         power.AutoSwitchEnabled = true;
         _app.Settings.Save();
+        _app.PowerWatch?.SyncTimer();
         return _app.Power.ApplyVrPlan(power);
     }
 
@@ -395,6 +396,7 @@ public sealed class PcvrReadyService
         dash.AutoOnMetaLinkConnect = true;
         dash.SwitchOpenXrToSteamVr = true;
         _app.Settings.Save();
+        _app.DashToSteamVr.SyncSessionWatch();
         return "Auto Dash → SteamVR on Meta Link connect enabled (OpenXR → SteamVR).";
     }
 

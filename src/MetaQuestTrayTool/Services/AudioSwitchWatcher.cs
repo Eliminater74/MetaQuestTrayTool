@@ -9,6 +9,7 @@ namespace MetaQuestTrayTool.Services;
 /// 2. PCVR session starts — switch to configured VR devices.
 /// 3. PCVR session ends — restore configured fallback / desktop devices.
 /// Idle polls are slow; active VR latch polls faster for a clean restore.
+/// Timer stops entirely when auto-switch is disabled.
 /// </summary>
 public sealed class AudioSwitchWatcher : IDisposable
 {
@@ -31,23 +32,30 @@ public sealed class AudioSwitchWatcher : IDisposable
         _timer.Tick += (_, _) => Poll();
     }
 
-    public void Start()
-    {
-        _timer.Start();
-        ApplyCadence();
-    }
+    public void Start() => SyncTimer();
 
     public void Dispose() => _timer.Stop();
 
-    private void ApplyCadence()
+    /// <summary>Start/stop from settings changes (tray / audio window).</summary>
+    public void SyncTimer()
     {
-        if (!_app.Settings.Current.Audio.AutoSwitchEnabled)
+        if (_app.Settings.Current.Audio.AutoSwitchEnabled)
         {
-            IdleCadence.Set(_timer, IdleCadence.HeavyIdle);
-            return;
-        }
+            if (!_timer.IsEnabled)
+            {
+                _armed = false;
+                _timer.Start();
+            }
 
-        IdleCadence.Set(_timer, _vrDevicesApplied ? IdleCadence.Active : IdleCadence.Quiet);
+            IdleCadence.Set(_timer, _vrDevicesApplied ? IdleCadence.Active : IdleCadence.Quiet);
+        }
+        else
+        {
+            _timer.Stop();
+            _armed = false;
+            _vrDevicesApplied = false;
+            _deadSessionHits = 0;
+        }
     }
 
     private void Poll()
@@ -55,20 +63,19 @@ public sealed class AudioSwitchWatcher : IDisposable
         var settings = _app.Settings.Current.Audio;
         if (!settings.AutoSwitchEnabled)
         {
-            _armed = false;
-            _vrDevicesApplied = false;
-            _deadSessionHits = 0;
-            ApplyCadence();
+            SyncTimer();
             return;
         }
 
         var hardware = IsHardwarePcvrSession(settings);
         var headsetAudio = settings.Trigger == AudioSwitchTrigger.LinkAudioDevice
                            && _app.Audio.IsLinkAudioSessionActive(settings);
+        var sessionAlive = hardware
+                           || (settings.Trigger == AudioSwitchTrigger.LinkAudioDevice && headsetAudio);
 
         // Rarely remember desktop defaults — MMDevice enumeration is not free.
         if (!_vrDevicesApplied
-            && !hardware
+            && !sessionAlive
             && DateTime.UtcNow - _lastFallbackCaptureUtc > TimeSpan.FromMinutes(2))
         {
             RememberDesktopFallback(settings);
@@ -86,7 +93,7 @@ public sealed class AudioSwitchWatcher : IDisposable
             _app.Log.Info(
                 "Audio watcher: armed — leaving boot audio alone until a new PCVR session starts "
                 + $"(hardware={(hardware ? "yes" : "no")}, headsetDefault={(headsetAudio ? "yes" : "no")}).");
-            ApplyCadence();
+            SyncTimer();
             return;
         }
 
@@ -114,30 +121,30 @@ public sealed class AudioSwitchWatcher : IDisposable
                 }
             }
 
-            ApplyCadence();
+            SyncTimer();
             return;
         }
 
-        // VR devices applied — restore only when the hardware session is gone.
-        if (hardware)
+        // Stay latched while hardware OR (Link-audio trigger) headset default remains.
+        if (sessionAlive)
         {
             _deadSessionHits = 0;
-            ApplyCadence();
+            SyncTimer();
             return;
         }
 
         _deadSessionHits++;
         if (_deadSessionHits < 2)
         {
-            ApplyCadence();
+            SyncTimer();
             return;
         }
 
         _deadSessionHits = 0;
         _baselineHardware = false;
-        _baselineHeadsetAudio = headsetAudio;
+        _baselineHeadsetAudio = false;
         RestoreFallback("PCVR session ended — restoring desktop / fallback audio.");
-        ApplyCadence();
+        SyncTimer();
     }
 
     private bool IsHardwarePcvrSession(AudioSwitchSettings settings)
@@ -150,7 +157,8 @@ public sealed class AudioSwitchWatcher : IDisposable
 
         try
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: false);
+            // Match other watchers' probe args so the 5s cache is shared.
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
             if (status.SessionActive)
             {
                 return true;
@@ -159,6 +167,12 @@ public sealed class AudioSwitchWatcher : IDisposable
         catch
         {
             // Probe optional.
+        }
+
+        // Skip ADB while quiet/unlatched — Link probe + headset-default cover enter/exit.
+        if (!_vrDevicesApplied)
+        {
+            return false;
         }
 
         try

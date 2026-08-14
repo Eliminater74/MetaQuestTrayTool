@@ -73,6 +73,7 @@ public partial class PowerSettingsWindow : Window
         WriteToSettings();
         App.Instance.Settings.Save();
         App.Instance.Log.Info("Power settings saved.");
+        App.Instance.PowerWatch?.SyncTimer();
     }
 
     private void ApplyVr_Click(object sender, RoutedEventArgs e)

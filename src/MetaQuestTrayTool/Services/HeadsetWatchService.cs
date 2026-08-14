@@ -24,30 +24,38 @@ public sealed class HeadsetWatchService : IDisposable
         _timer.Tick += (_, _) => BeginPoll();
     }
 
-    public void Start()
-    {
-        if (_timer.IsEnabled)
-        {
-            return;
-        }
-
-        _timer.Start();
-        _app.Log.Info("Headset ADB watcher started.");
-        BeginPoll();
-    }
+    public void Start() => SyncWatch();
 
     public void Dispose() => _timer.Stop();
 
-    private void ApplyCadence(bool headsetPresent)
+    /// <summary>Stop ADB polling when apply-on-connect and wireless auto-reconnect are both off.</summary>
+    public void SyncWatch()
     {
         var settings = _app.Settings.Current.Headset;
         var needsWatch = settings.ApplyWhenHeadsetConnects || settings.WirelessAutoReconnect;
         if (!needsWatch)
         {
-            IdleCadence.Set(_timer, IdleCadence.HeavyIdle);
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+                _app.Log.Info("Headset ADB watcher paused (auto-apply and wireless reconnect off).");
+            }
+
             return;
         }
 
+        if (!_timer.IsEnabled)
+        {
+            _timer.Start();
+            _app.Log.Info("Headset ADB watcher started.");
+            BeginPoll();
+        }
+
+        ApplyCadence(_lastSerial is not null);
+    }
+
+    private void ApplyCadence(bool headsetPresent)
+    {
         IdleCadence.Set(_timer, headsetPresent ? IdleCadence.Watching : IdleCadence.HeavyIdle);
     }
 
@@ -78,6 +86,13 @@ public sealed class HeadsetWatchService : IDisposable
 
     private void Poll()
     {
+        var settings = _app.Settings.Current.Headset;
+        if (!settings.ApplyWhenHeadsetConnects && !settings.WirelessAutoReconnect)
+        {
+            _app.Dispatcher.BeginInvoke(SyncWatch);
+            return;
+        }
+
         MaybeAutoReconnectWireless();
 
         var quest = _app.Adb.FindQuest();

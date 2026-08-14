@@ -452,6 +452,15 @@ public sealed class TrayIconHost : IDisposable
         {
             _app.Settings.Current.AutoApplyProfiles = autoApply.Checked;
             _app.Settings.Save();
+            if (autoApply.Checked)
+            {
+                _app.ProcessWatcher?.Start();
+            }
+            else
+            {
+                _app.ProcessWatcher?.Stop();
+            }
+
             _app.Log.Info(autoApply.Checked
                 ? "Profile auto-apply enabled."
                 : "Profile auto-apply disabled.");
@@ -874,6 +883,7 @@ public sealed class TrayIconHost : IDisposable
         {
             _app.Settings.Current.Audio.AutoSwitchEnabled = auto.Checked;
             _app.Settings.Save();
+            _app.AudioWatch?.SyncTimer();
             _app.Log.Info(auto.Checked ? "Audio auto-switch enabled." : "Audio auto-switch disabled.");
         };
 
@@ -937,6 +947,7 @@ public sealed class TrayIconHost : IDisposable
         {
             _app.Settings.Current.Power.AutoSwitchEnabled = auto.Checked;
             _app.Settings.Save();
+            _app.PowerWatch?.SyncTimer();
             _app.Log.Info(auto.Checked ? "Power plan auto-switch enabled." : "Power plan auto-switch disabled.");
         };
 

@@ -45,6 +45,12 @@ public sealed class ProcessWatcherService : IDisposable
 
     public void Start()
     {
+        if (!_app.Settings.Current.AutoApplyProfiles)
+        {
+            Stop();
+            return;
+        }
+
         if (!_timer.IsEnabled)
         {
             _timer.Start();

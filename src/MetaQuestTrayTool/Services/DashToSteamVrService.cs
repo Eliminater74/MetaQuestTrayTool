@@ -348,6 +348,7 @@ public sealed class DashToSteamVrService : IDisposable
 
             Settings.PreferPreventDashLaunch = enabled;
             _app.Settings.Save();
+            SyncSessionWatch();
 
             var message = enabled
                 ? "PreventDashLaunch set to 1 — Meta should not launch Dash."
