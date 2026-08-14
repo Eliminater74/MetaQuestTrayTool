@@ -38,6 +38,8 @@ Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Stea
 
 Developer Mode + USB debugging **or** Wireless Pair. Same Wi‑Fi for wireless. Phones/emulators are ignored. Props reset on Quest reboot — leave apply-on-connect on.
 
+**SideQuest on the headset:** if SideQuest is running in VR, it may open an ADB port (often 5555). Use that LAN IP:port with **Connect** on the Headset page — see [[Headset-ADB]].
+
 ## Meta will not start after Manual-at-boot
 
 Start **OVRService** in the tray, then Open Meta Horizon Link. Or enable **Start Oculus service when tool starts**. See [[Service-and-Startup]].

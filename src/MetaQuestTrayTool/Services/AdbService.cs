@@ -190,7 +190,7 @@ public sealed class AdbService
         return $"{host}:{port}";
     }
 
-    /// <summary>Connect over Wi‑Fi (<c>adb connect host:port</c>). Works after tcpip mode or Wireless debugging.</summary>
+    /// <summary>Connect over Wi‑Fi (<c>adb connect host:port</c>). Works after tcpip, Wireless debugging, or SideQuest on-headset ADB.</summary>
     public string ConnectWireless(string host, int port)
     {
         var endpoint = FormatEndpoint(host, port);
@@ -203,7 +203,8 @@ public sealed class AdbService
             throw new InvalidOperationException(
                 $"Could not connect to {endpoint}. {TrimAdbNoise(output)} "
                 + "Same Wi‑Fi as the PC? For classic mode: plug USB → Enable tcpip → unplug → Connect. "
-                + "Or Pair with the Wireless debugging code, then Connect with the connect port.");
+                + "Or Pair with the Wireless debugging code, then Connect with the connect port. "
+                + "SideQuest running on the headset can also open an ADB port — use that IP:port here.");
         }
 
         return output.Contains("already connected", StringComparison.OrdinalIgnoreCase)

@@ -19,7 +19,7 @@
 
       <TextBlock Text="Wireless ADB" Style="{StaticResource SettingLabelStyle}" Margin="0,16,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Same Wi‑Fi as the PC. Classic: USB → Enable tcpip → unplug → Connect. Or Quest Settings → Developer → Wireless debugging: Pair with code once, then Connect with the connect port."/>
+                 Text="Same Wi‑Fi as the PC. Classic: USB → Enable tcpip → unplug → Connect. Or Quest Settings → Developer → Wireless debugging: Pair with code once, then Connect with the connect port. SideQuest running on the headset can also open an ADB port — use that headset LAN IP and port here (often 5555), then Connect."/>
       <Grid Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="200"/>
@@ -34,15 +34,15 @@
         <TextBlock Grid.Row="0" Text="Host (LAN IP)" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <TextBox x:Name="WirelessHostBox" Grid.Row="0" Grid.Column="1" MaxWidth="280" HorizontalAlignment="Left"
                  Padding="6" Margin="0,0,0,8" LostFocus="Persist_Changed"
-                 ToolTip="Headset Wi‑Fi IPv4, e.g. 192.168.1.40. Do not use Air Link alone — wireless ADB is separate."/>
+                 ToolTip="Headset Wi‑Fi IPv4, e.g. 192.168.1.40. Do not use Air Link alone — wireless ADB is separate. SideQuest on the headset can expose this path too."/>
         <TextBlock Grid.Row="1" Text="Connect port" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <TextBox x:Name="WirelessPortBox" Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left"
                  Padding="6" Margin="0,0,0,8" LostFocus="Persist_Changed"
-                 ToolTip="5555 after Enable tcpip. Wireless debugging uses the connect port on the main Wireless debugging screen (not the pairing port)."/>
+                 ToolTip="5555 after Enable tcpip or when SideQuest on the headset opens ADB. Wireless debugging uses the connect port on the main Wireless debugging screen (not the pairing port)."/>
         <TextBlock Grid.Row="2" Text="Pairing port" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <TextBox x:Name="PairingPortBox" Grid.Row="2" Grid.Column="1" Width="100" HorizontalAlignment="Left"
                  Padding="6" Margin="0,0,0,8"
-                 ToolTip="From Wireless debugging → Pair device with pairing code. Expires quickly; only needed for Pair."/>
+                 ToolTip="From Wireless debugging → Pair device with pairing code. Expires quickly; only needed for Pair. Not required if SideQuest (or tcpip) already opened ADB."/>
         <TextBlock Grid.Row="3" Text="Pairing code" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <TextBox x:Name="PairingCodeBox" Grid.Row="3" Grid.Column="1" Width="120" HorizontalAlignment="Left"
                  Padding="6" Margin="0,0,0,8" MaxLength="8"
@@ -52,15 +52,15 @@
         <Button Content="Pair" Style="{StaticResource AccentButtonStyle}" Click="WirelessPair_Click"
                 ToolTip="adb pair host:pairingPort code. Do this once (or after forgetting the device), then Connect with the connect port."/>
         <Button Content="Connect" Style="{StaticResource AccentButtonStyle}" Click="WirelessConnect_Click"
-                ToolTip="adb connect host:connectPort. Remembered for next time. Trust still uses the hardware serial from getprop."/>
+                ToolTip="adb connect host:connectPort. Works with tcpip, Wireless debugging, or a port opened by SideQuest on the headset. Remembered for next time."/>
         <Button Content="Disconnect" Style="{StaticResource GhostButtonStyle}" Click="WirelessDisconnect_Click"
                 ToolTip="adb disconnect for this host:port (leaves USB devices alone when possible)."/>
         <Button Content="Enable tcpip (USB)" Style="{StaticResource GhostButtonStyle}" Click="WirelessTcpip_Click"
-                ToolTip="Requires USB once: adb tcpip PORT, then unplug and Connect. Fills IP when the headset reports one."/>
+                ToolTip="Requires USB once: adb tcpip PORT, then unplug and Connect. Fills IP when the headset reports one. Skip if SideQuest on the headset already opened ADB."/>
       </StackPanel>
       <CheckBox x:Name="WirelessAutoBox" Content="Auto-reconnect wireless ADB when no headset is listed"
                 Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
-                ToolTip="Every ~30s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off."/>
+                ToolTip="Every ~30s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off. Use after SideQuest/tcpip/Wireless debugging has opened a port once."/>
 
       <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <Grid>

@@ -8,6 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Docs
+- Note that SideQuest running on the headset can open a wireless ADB port for Connect / auto-reconnect.
+
 ## [1.1.7] - 2026-08-14
 
 ### Added
