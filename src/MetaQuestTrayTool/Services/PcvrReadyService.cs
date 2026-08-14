@@ -313,7 +313,6 @@ public sealed class PcvrReadyService
         var dash = _app.Settings.Current.DashToSteamVr;
         var prevent = _app.DashToSteamVr.IsPreventDashLaunchEnabled() || dash.PreferPreventDashLaunch;
         var steamVrRunning = IsSteamVrRunning();
-        var auto = dash.AutoOnMetaLinkConnect || prevent;
 
         if (steamVrRunning)
         {
@@ -321,18 +320,16 @@ public sealed class PcvrReadyService
                 "SteamVR (vrserver) is running.", PcvrReadyLevel.Ok);
         }
 
-        if (auto)
+        if (prevent)
         {
             return Item("dash-steamvr", "Dash → SteamVR",
-                prevent
-                    ? "PreventDashLaunch / auto SteamVR on Meta Link is configured."
-                    : "Auto Dash → SteamVR on Meta Link connect is on.",
+                "PreventDashLaunch — SteamVR auto-starts on Meta Link connect.",
                 PcvrReadyLevel.Ok);
         }
 
         return Item("dash-steamvr", "Dash → SteamVR",
-            "Off — for Steam PCVR over Meta Link, enable auto Dash→SteamVR or PreventDashLaunch.",
-            PcvrReadyLevel.Warn, "Enable auto on Link", canFix: true);
+            "PreventDashLaunch is off — enable on Service & Startup for Steam PCVR over Meta Link.",
+            PcvrReadyLevel.Warn, "Enable PreventDashLaunch", canFix: true);
     }
 
     private string FixOvrService()
@@ -393,11 +390,12 @@ public sealed class PcvrReadyService
     private string FixDashToSteamVr()
     {
         var dash = _app.Settings.Current.DashToSteamVr;
-        dash.AutoOnMetaLinkConnect = true;
+        dash.PreferPreventDashLaunch = true;
         dash.SwitchOpenXrToSteamVr = true;
         _app.Settings.Save();
         _app.DashToSteamVr.SyncSessionWatch();
-        return "Auto Dash → SteamVR on Meta Link connect enabled (OpenXR → SteamVR).";
+        return _app.DashToSteamVr.SetPreventDashLaunch(enabled: true, restartOvrService: false)
+               + " Enable Apply + restart OVRService on Service & Startup for full effect.";
     }
 
     private static bool IsSteamVrRunning()

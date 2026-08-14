@@ -22,10 +22,10 @@
 
       <TextBlock Text="Air Link → SteamVR" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="After Meta Link / Air Link connects, kill Oculus Dash and start SteamVR so Steam games run over Link. Options live on Service &amp; Startup."/>
+                 Text="Requires PreventDashLaunch on Service &amp; Startup. SteamVR over Link without killing Meta processes — Dash is blocked via registry only."/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-        <Button Content="Kill Dash → SteamVR" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
-                ToolTip="Kill OculusDash, optionally switch OpenXR to SteamVR, and launch SteamVR. Connect with Meta Link first. More options on Service &amp; Startup. Hotkey: Ctrl+Num 0."/>
+        <Button Content="Start SteamVR over Link" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
+                ToolTip="Requires PreventDashLaunch. Optionally switch OpenXR to SteamVR and launch SteamVR. Connect with Meta Link first. Hotkey: Ctrl+Num 0."/>
       </StackPanel>
 
       <TextBlock Text="Global Link presets" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>

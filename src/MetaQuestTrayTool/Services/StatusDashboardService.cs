@@ -156,13 +156,11 @@ public sealed class StatusDashboardService
                 voice ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("Dash → SteamVR",
-                dash.AutoOnMetaLinkConnect || preventDash ? "Armed" : "Manual",
+                preventDash ? "Armed" : "Off",
                 preventDash
-                    ? "PreventDashLaunch / auto SteamVR path enabled"
-                    : dash.AutoOnMetaLinkConnect
-                        ? "Auto when Meta Link connects"
-                        : "Use tray / Ctrl+Num 0 / voice “kill dash”",
-                dash.AutoOnMetaLinkConnect || preventDash ? StatusChipKind.On : StatusChipKind.Off),
+                    ? "PreventDashLaunch — auto SteamVR on Meta Link; no Meta process killing"
+                    : "Enable PreventDashLaunch on Service & Startup",
+                preventDash ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("GPU",
                 gpu?.Adapter.Name ?? "Unknown",

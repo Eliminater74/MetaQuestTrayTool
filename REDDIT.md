@@ -72,8 +72,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Detect Meta/Oculus install + `OVRService` (start / stop / restart + automation)
 - **Open Meta Horizon Link** — tray, hotkey (**Ctrl+Num 9**), voice
 - **Open Oculus Debug Tool GUI** (`OculusDebugTool.exe`) — classic OTT shortcut — tray / shell / hotkey / voice
-- **Dash → SteamVR** (OculusKiller-style): kill Dash + launch SteamVR over Link — tray, Quest Link, Service & Startup, **Ctrl+Num 0**, voice (“kill dash”)
-- Optional auto-on-connect, keep-killing Dash, close Meta client
+- **PreventDashLaunch → SteamVR over Link** (OculusKiller registry — no Meta process killing): auto SteamVR on Link — tray, Quest Link, Service & Startup, **Ctrl+Num 0**, voice (“dash to steam v r”)
 - **PreventDashLaunch** + **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`)
 - **SteamVR Home** (`steamtours`) on demand — Service & Startup / tray / hotkey / voice  
   (Meta’s old Oculus Home / Homeless is gone — not coming back)

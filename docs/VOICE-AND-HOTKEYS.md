@@ -35,7 +35,7 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 7 | Restart OVRService |
 | Ctrl+Num 8 | Cycle Performance HUD |
 | Ctrl+Num 9 | Open Meta Horizon Link |
-| Ctrl+Num 0 | Kill Dash → start SteamVR |
+| Ctrl+Num 0 | Start SteamVR over Link (PreventDashLaunch) |
 
 Assign **Open Oculus Debug Tool** or **Open SteamVR Home** in Configure if you want a shortcut (no default numpad binding — Num 0–9 are taken).
 
@@ -83,7 +83,7 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | toggle H U D / performance H U D | Cycle Performance HUD |
 | open meta link / show meta link / open oculus client | Open Meta Horizon Link |
 | open debug tool / open oculus debug tool / launch debug tool | Open Oculus Debug Tool GUI |
-| kill dash / dash to steam v r / start steam v r | Kill Dash → start SteamVR |
+| dash to steam v r / start steam v r over link / start steam v r | Start SteamVR over Link (PreventDashLaunch) |
 | open steam v r home / steam v r home / launch steam v r home | Open SteamVR Home (steamtours) |
 
 Custom phrases can be added in Configure (phrase → tray action).
@@ -104,7 +104,7 @@ Use **Test listen once** in Configure to try without leaving the window.
 
 - Hotkey profiles per game (global only today)
 
-**Dash → SteamVR** (kill OculusDash + launch SteamVR over Air Link) is available on Service & Startup / Quest Link / tray / hotkey / voice — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller). Optional **PreventDashLaunch** and **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) live on Service & Startup. It does not permanently replace `OculusDash.exe` (use OculusKiller / Dash Manager for that install style).
+**PreventDashLaunch → SteamVR over Link** (registry blocks Dash — no Meta process killing) is on Service & Startup / Quest Link / tray / hotkey / voice — inspired by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller). Optional **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup.
 
 **SteamVR Home** is on-demand (Service & Startup / tray / hotkey / voice) — Meta’s old Oculus Home is gone.
 

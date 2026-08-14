@@ -26,10 +26,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         RestartOnWakeBox.IsChecked = service.RestartServiceWhenComputerWakes
                                      || App.Instance.Settings.Current.Power.RestartServiceAfterSleep;
         var dash = App.Instance.Settings.Current.DashToSteamVr;
-        DashAutoBox.IsChecked = dash.AutoOnMetaLinkConnect;
         DashOpenXrBox.IsChecked = dash.SwitchOpenXrToSteamVr;
-        DashReaperBox.IsChecked = dash.KeepKillingDashWhileSteamVr;
-        DashCloseClientBox.IsChecked = dash.CloseMetaClient;
         PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
                                    || dash.PreferPreventDashLaunch;
         NoUpdatesWithDashBox.IsChecked = dash.AlsoSetNoUpdatesWithPreventDash;
@@ -163,10 +160,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         }
 
         var dash = App.Instance.Settings.Current.DashToSteamVr;
-        dash.AutoOnMetaLinkConnect = DashAutoBox.IsChecked == true;
         dash.SwitchOpenXrToSteamVr = DashOpenXrBox.IsChecked == true;
-        dash.KeepKillingDashWhileSteamVr = DashReaperBox.IsChecked == true;
-        dash.CloseMetaClient = DashCloseClientBox.IsChecked == true;
         dash.AlsoSetNoUpdatesWithPreventDash = NoUpdatesWithDashBox.IsChecked == true;
         dash.RestartOvrServiceWhenSteamVrExits = RestartOvrOnSteamVrExitBox.IsChecked == true;
         App.Instance.Settings.Save();

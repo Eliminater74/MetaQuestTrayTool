@@ -117,7 +117,7 @@ Export/import profiles and full settings from **Advanced**.
 **Right-click** the tray icon for:
 
 - Open Settings, Meta Horizon Link, Oculus Debug Tool
-- Kill Dash → SteamVR, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
+- Start SteamVR over Link, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
 - Game Settings (SS, ASW, FOV, …), Profiles, Quest Link, OpenXR, Audio, Power, Headset
 - Start / stop / restart **OVRService**, Check for updates, VR Tools, Donate, Exit
 
@@ -126,7 +126,7 @@ Export/import profiles and full settings from **Advanced**.
 On **Tray Tool**:
 
 - **HotKeys** — Enable → Configure. Defaults **Ctrl+Numpad 0–9** (ASW, SS cycle, apply global, restart OVRService, Perf HUD, open Meta Link, Dash → SteamVR). Assign **Open Debug Tool** / **Open SteamVR Home** if you want them. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
-- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off”, “kill dash”, or “open steam v r home”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
+- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off”, “dash to steam v r”, or “open steam v r home”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
 
 Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md).
 
@@ -195,9 +195,7 @@ Release **[v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 ### Quest Link / Dash → SteamVR
 
 - Link registry (`RemoteHeadset`): bitrate, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
-- **Dash → SteamVR**: kill Oculus Dash + launch SteamVR over Meta Link (tray / Ctrl+Num 0 / voice “kill dash”); optional auto-on-connect, keep-killing Dash, close Meta client
-- **PreventDashLaunch** + **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
-- Optional **restart OVRService when SteamVR exits** (drops Link so Quest Home returns — recommended with PreventDashLaunch)
+- **PreventDashLaunch → SteamVR over Link**: registry blocks Dash (no Meta process killing); auto-start SteamVR on Meta Link connect; optional restart OVRService when SteamVR exits (tray / Ctrl+Num 0 / voice “dash to steam v r”)
 - **SteamVR Home** (`steamtours.exe`) on demand — Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
 - **Open Meta Horizon Link** from tray / hotkey / voice
 
@@ -240,7 +238,7 @@ Release **[v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Link registry changes usually need a **Link reconnect** or `OVRService` restart
 - ADB `debug.oculus.*` props **reset on Quest reboot** — leave apply-on-connect on
 - Wireless ADB is **not** Air Link — separate Developer Mode / pair flow
-- Dash → SteamVR does **not** replace `OculusDash.exe` on disk
+- PreventDashLaunch blocks Dash via registry only — this tool does **not** kill Meta processes or replace `OculusDash.exe` on disk
 
 See [ROADMAP.md](ROADMAP.md) and [TODO.md](TODO.md) for history and remaining housekeeping.
 
