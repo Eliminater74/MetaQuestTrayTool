@@ -40,6 +40,7 @@ public sealed class DashToSteamVrService : IDisposable
     private bool _ranThisMetaSession;
     private bool _wasMetaSession;
     private bool _sawSteamVrRunning;
+    private bool _sawHealthySteamVr;
     private int _steamVrGonePolls;
     private int _waitingForFirstSteamVrPolls;
     private bool _restartingOvrAfterSteamVrExit;
@@ -483,6 +484,15 @@ public sealed class DashToSteamVrService : IDisposable
             var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
             var meta = status.MetaLinkStreaming;
 
+            // Manual SteamVR start (or zombie relaunch) during PreventDash Link must still arm
+            // the exit watch — otherwise SteamVR exit leaves a black void with no Dash / Quest Home.
+            if (meta
+                && Settings.RestartOvrServiceWhenSteamVrExits
+                && (IsSteamVrSessionHealthy() || IsProcessRunning("vrserver")))
+            {
+                ArmSteamVrExitWatch(sawRunning: true);
+            }
+
             if (!meta)
             {
                 if (_wasMetaSession)
@@ -610,6 +620,10 @@ public sealed class DashToSteamVrService : IDisposable
             _sawSteamVrRunning = true;
             _steamVrGonePolls = 0;
             _waitingForFirstSteamVrPolls = 0;
+            if (IsSteamVrSessionHealthy())
+            {
+                _sawHealthySteamVr = true;
+            }
         }
         else
         {
@@ -619,6 +633,8 @@ public sealed class DashToSteamVrService : IDisposable
         if (!_steamVrExitWatch.IsEnabled)
         {
             _steamVrExitWatch.Start();
+            _app.Log.Info(
+                "SteamVR exit watch armed — will restart OVRService when SteamVR ends so Quest Home can return.");
         }
 
         IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
@@ -632,6 +648,7 @@ public sealed class DashToSteamVrService : IDisposable
         if (resetSaw)
         {
             _sawSteamVrRunning = false;
+            _sawHealthySteamVr = false;
         }
     }
 
@@ -650,18 +667,44 @@ public sealed class DashToSteamVrService : IDisposable
                 return;
             }
 
-            if (IsProcessRunning("vrserver"))
+            // Healthy compositor/dashboard = still in SteamVR.
+            if (IsSteamVrSessionHealthy() || IsProcessRunning("vrstartup"))
             {
                 _sawSteamVrRunning = true;
+                _sawHealthySteamVr = IsSteamVrSessionHealthy() || _sawHealthySteamVr;
                 _steamVrGonePolls = 0;
                 _waitingForFirstSteamVrPolls = 0;
                 IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
                 return;
             }
 
+            // vrserver without compositor: either still starting, or zombie after an "invisible" exit.
+            if (IsProcessRunning("vrserver"))
+            {
+                if (!_sawHealthySteamVr)
+                {
+                    _waitingForFirstSteamVrPolls++;
+                    if (_waitingForFirstSteamVrPolls < MaxWaitForSteamVrPolls)
+                    {
+                        IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
+                        return;
+                    }
+
+                    _app.Log.Info(
+                        "SteamVR exit watch: vrserver never became healthy — clearing zombie and dropping Link.");
+                    StopSteamVrRuntime("SteamVR never became healthy");
+                }
+                else
+                {
+                    // Was healthy; compositor gone — user left SteamVR / stuck in dark void.
+                    StopSteamVrRuntime("SteamVR compositor gone after healthy session");
+                }
+
+                _sawSteamVrRunning = true;
+            }
+
             if (!_sawSteamVrRunning)
             {
-                // Armed after LaunchSteamVr but vrserver not up yet — keep waiting a bit.
                 _waitingForFirstSteamVrPolls++;
                 if (_waitingForFirstSteamVrPolls >= MaxWaitForSteamVrPolls)
                 {
@@ -685,7 +728,9 @@ public sealed class DashToSteamVrService : IDisposable
             _app.AudioWatch?.NotifyPcvrSessionEnded("SteamVR exited — restoring desktop / fallback audio.");
             try
             {
-                var result = _app.Oculus.Restart();
+                // Hold OVRService down long enough for Air Link to drop; instant restart often
+                // leaves PreventDash users on a black void with no Dash / Quest Home.
+                var result = _app.Oculus.RestartForLinkDrop(TimeSpan.FromSeconds(5));
                 var summary =
                     "SteamVR exited — restarted OVRService so Meta Link can drop and Quest Home can return. "
                     + result;

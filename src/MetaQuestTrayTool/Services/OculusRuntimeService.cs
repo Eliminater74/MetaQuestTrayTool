@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
+using System.Threading;
 using Microsoft.Win32;
 
 namespace MetaQuestTrayTool.Services;
@@ -198,6 +199,50 @@ public sealed class OculusRuntimeService
         }
 
         return Start();
+    }
+
+    /// <summary>
+    /// Stop OVRService, hold it down so Air Link / wired Link fully drops, then start again.
+    /// Used after SteamVR exits under PreventDashLaunch (no Dash) so the headset can return to Quest Home
+    /// instead of a black void.
+    /// </summary>
+    public string RestartForLinkDrop(TimeSpan? settleDelay = null)
+    {
+        Refresh();
+        if (!ServiceExists)
+        {
+            return $"{ServiceName} was not found.";
+        }
+
+        var settle = settleDelay ?? TimeSpan.FromSeconds(5);
+        var parts = new List<string>();
+
+        if (IsServiceRunning)
+        {
+            var stopResult = Stop();
+            parts.Add(stopResult);
+            if (stopResult.Contains("denied", StringComparison.OrdinalIgnoreCase))
+            {
+                return stopResult;
+            }
+        }
+        else
+        {
+            parts.Add($"{ServiceName} already stopped.");
+        }
+
+        try
+        {
+            Thread.Sleep(settle);
+        }
+        catch
+        {
+            // ignore
+        }
+
+        parts.Add(Start());
+        parts.Add($"Held {ServiceName} stopped {(int)settle.TotalSeconds}s so Link can drop for Quest Home.");
+        return string.Join(" ", parts);
     }
 
     /// <summary>
