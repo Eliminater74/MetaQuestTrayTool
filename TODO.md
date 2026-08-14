@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -228,6 +228,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Bump version to **1.1.0**
 - [x] Tag and publish **v1.1.0**
 - [x] OVRService Manual-at-boot toggle (Service & Startup) + re-apply after Meta reset
+- [x] Bump version to **1.1.1**
+- [x] Tag and publish **v1.1.1**
 
 ### Housekeeping (ongoing)
 

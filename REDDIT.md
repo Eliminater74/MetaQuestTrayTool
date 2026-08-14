@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```
-[PC] Meta Quest Tray Tool v1.1.0 — free modern OTT-style tray app for Quest Link / SteamVR (Status, PreventDashLaunch→SteamVR, Wireless ADB, HotKeys/Voice)
+[PC] Meta Quest Tray Tool v1.1.1 — free modern OTT-style tray app for Quest Link / SteamVR (Status, PreventDashLaunch→SteamVR, OVRService boot control, Wireless ADB, HotKeys/Voice)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.0** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.1** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Repo / docs / screenshots / short demo:** https://github.com/Eliminater74/MetaQuestTrayTool
@@ -52,7 +52,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.0)
+### What works now (v1.1.1)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -72,6 +72,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Detect Meta/Oculus install + `OVRService` (start / stop / restart + automation)
 - **Open Meta Horizon Link** — tray, hotkey (**Ctrl+Num 9**), voice
 - **Open Oculus Debug Tool GUI** (`OculusDebugTool.exe`) — classic OTT shortcut — tray / shell / hotkey / voice
+- **OVRService Manual-at-boot** (Service & Startup) — optional Manual startup so Meta Horizon Link does not auto-open at Windows sign-in; documented what it does/does not do; re-applies after Meta updates
 - **PreventDashLaunch → SteamVR over Link** (OculusKiller registry — no Meta process killing): auto SteamVR on Link — tray, Quest Link, Service & Startup, **Ctrl+Num 0**, voice (“dash to steam v r”); optional **restart OVRService when SteamVR exits** (return to Quest Home)
 - **PreventDashLaunch** + **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`)
 - **SteamVR Home** (`steamtours`) on demand — Service & Startup / tray / hotkey / voice  
@@ -199,5 +200,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.0) — Status board, global defaults + per-game auto apply/restore, Link + OpenXR, PreventDashLaunch→SteamVR + OVRService restart on exit + SteamVR Home, Wireless ADB Pair, HotKeys/voice (needed in SteamVR — elevated tray can’t be clicked), PCVR Ready / recover, VR Tools. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest
+TL;DR: free modern OTT-inspired tray app (v1.1.1) — Status board, global defaults + per-game auto apply/restore, Link + OpenXR, PreventDashLaunch→SteamVR + OVRService Manual-at-boot + OVRService restart on exit + SteamVR Home, Wireless ADB Pair, HotKeys/voice (needed in SteamVR — elevated tray can’t be clicked), PCVR Ready / recover, VR Tools. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest
 ```

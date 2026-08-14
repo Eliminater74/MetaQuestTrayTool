@@ -46,7 +46,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.0) (latest) | [MetaQuestTrayTool-Setup-1.1.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.0/MetaQuestTrayTool-Setup-1.1.0.exe) |
+| [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.1) (latest) | [MetaQuestTrayTool-Setup-1.1.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.1/MetaQuestTrayTool-Setup-1.1.1.exe) |
+| [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.0) | [MetaQuestTrayTool-Setup-1.1.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.0/MetaQuestTrayTool-Setup-1.1.0.exe) |
 | [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.19) | [MetaQuestTrayTool-Setup-1.0.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.19/MetaQuestTrayTool-Setup-1.0.19.exe) |
 | [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.18) | [MetaQuestTrayTool-Setup-1.0.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.18/MetaQuestTrayTool-Setup-1.0.18.exe) |
 | [v1.0.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.17) | [MetaQuestTrayTool-Setup-1.0.17.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.17/MetaQuestTrayTool-Setup-1.0.17.exe) |
@@ -171,7 +172,7 @@ These are different PCVR paths:
 
 ## What works now
 
-Release **[v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Fixes: desktop audio restores when PCVR/SteamVR ends; PreventDashLaunch no longer auto-starts SteamVR on tray launch (EnumHmd ghost); update check works from tray without settings window open. v1.0.17–1.0.18 covered PreventDashLaunch-only SteamVR path and DeviceCache auto-connect.
+Release **[v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **OVRService Manual-at-boot** on Service & Startup — keep Quest Link installed but stop Meta starting at Windows sign-in (documented limits). v1.1.0 fixed PCVR audio restore, PreventDashLaunch tray-start SteamVR, and tray update check.
 
 ### Shell & tray
 
