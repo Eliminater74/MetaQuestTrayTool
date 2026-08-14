@@ -42,36 +42,11 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**[Download latest Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** — open the newest release and click the `.exe` asset.
+**Latest:** [v1.1.3 — MetaQuestTrayTool-Setup-1.1.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.3/MetaQuestTrayTool-Setup-1.1.3.exe)
 
-Direct asset links (same files GitHub counts for the Downloads badge):
+Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset.
 
-| Release | Installer |
-| --- | --- |
-| [v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.3) (latest) | [MetaQuestTrayTool-Setup-1.1.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.3/MetaQuestTrayTool-Setup-1.1.3.exe) |
-| [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.2) | [MetaQuestTrayTool-Setup-1.1.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/MetaQuestTrayTool-Setup-1.1.2.exe) |
-| [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.1) | [MetaQuestTrayTool-Setup-1.1.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.1/MetaQuestTrayTool-Setup-1.1.1.exe) |
-| [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.0) | [MetaQuestTrayTool-Setup-1.1.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.0/MetaQuestTrayTool-Setup-1.1.0.exe) |
-| [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.19) | [MetaQuestTrayTool-Setup-1.0.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.19/MetaQuestTrayTool-Setup-1.0.19.exe) |
-| [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.18) | [MetaQuestTrayTool-Setup-1.0.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.18/MetaQuestTrayTool-Setup-1.0.18.exe) |
-| [v1.0.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.17) | [MetaQuestTrayTool-Setup-1.0.17.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.17/MetaQuestTrayTool-Setup-1.0.17.exe) |
-| [v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.16) | [MetaQuestTrayTool-Setup-1.0.16.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.16/MetaQuestTrayTool-Setup-1.0.16.exe) |
-| [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.15) | [MetaQuestTrayTool-Setup-1.0.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.15/MetaQuestTrayTool-Setup-1.0.15.exe) |
-| [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.14) | [MetaQuestTrayTool-Setup-1.0.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.14/MetaQuestTrayTool-Setup-1.0.14.exe) |
-| [v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.13) | [MetaQuestTrayTool-Setup-1.0.13.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.13/MetaQuestTrayTool-Setup-1.0.13.exe) |
-| [v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.12) | [MetaQuestTrayTool-Setup-1.0.12.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.12/MetaQuestTrayTool-Setup-1.0.12.exe) |
-| [v1.0.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.11) | [MetaQuestTrayTool-Setup-1.0.11.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.11/MetaQuestTrayTool-Setup-1.0.11.exe) |
-| [v1.0.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.10) | [MetaQuestTrayTool-Setup-1.0.10.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.10/MetaQuestTrayTool-Setup-1.0.10.exe) |
-| [v1.0.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.9) | [MetaQuestTrayTool-Setup-1.0.9.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.9/MetaQuestTrayTool-Setup-1.0.9.exe) |
-| [v1.0.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.8) | [MetaQuestTrayTool-Setup-1.0.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.8/MetaQuestTrayTool-Setup-1.0.8.exe) |
-| [v1.0.7](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.7) | [MetaQuestTrayTool-Setup-1.0.7.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.7/MetaQuestTrayTool-Setup-1.0.7.exe) |
-| [v1.0.6](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.6) | [MetaQuestTrayTool-Setup-1.0.6.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.6/MetaQuestTrayTool-Setup-1.0.6.exe) |
-| [v1.0.5](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.5) | [MetaQuestTrayTool-Setup-1.0.5.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.5/MetaQuestTrayTool-Setup-1.0.5.exe) |
-| [v1.0.4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.4) | [MetaQuestTrayTool-Setup-1.0.4.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.4/MetaQuestTrayTool-Setup-1.0.4.exe) |
-| [v1.0.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.3) | [MetaQuestTrayTool-Setup-1.0.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.3/MetaQuestTrayTool-Setup-1.0.3.exe) |
-| [v1.0.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.2) | [MetaQuestTrayTool-Setup-1.0.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.2/MetaQuestTrayTool-Setup-1.0.2.exe) |
-| [v1.0.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.1) | [MetaQuestTrayTool-Setup-1.0.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.1/MetaQuestTrayTool-Setup-1.0.1.exe) |
-| [v1.0.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.0) | [MetaQuestTrayTool-Setup-1.0.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.0/MetaQuestTrayTool-Setup-1.0.0.exe) |
+**Past releases:** [all versions on GitHub](https://github.com/Eliminater74/MetaQuestTrayTool/releases)
 
 The installer is **self-contained** (includes .NET 8 — no separate runtime install). Settings are stored in `%AppData%\MetaQuestTrayTool\` and are kept if you uninstall.
 
