@@ -182,6 +182,7 @@ Release **[v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Link registry (`RemoteHeadset`): bitrate, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
 - **Dash → SteamVR**: kill Oculus Dash + launch SteamVR over Meta Link (tray / Ctrl+Num 0 / voice “kill dash”); optional auto-on-connect, keep-killing Dash, close Meta client
 - **PreventDashLaunch** + **CoreChannel** (`LIVE` / `PublicTest` / `NO_UPDATES`) on Service & Startup
+- Optional **restart OVRService when SteamVR exits** (drops Link so Quest Home returns — recommended with PreventDashLaunch)
 - **SteamVR Home** (`steamtours.exe`) on demand — Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
 - **Open Meta Horizon Link** from tray / hotkey / voice
 

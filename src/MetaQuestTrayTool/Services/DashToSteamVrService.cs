@@ -44,8 +44,19 @@ public sealed class DashToSteamVrService : IDisposable
     private readonly App _app;
     private readonly DispatcherTimer _sessionTimer;
     private readonly DispatcherTimer _dashReaper;
+    private readonly DispatcherTimer _steamVrExitWatch;
     private bool _ranThisMetaSession;
     private bool _wasMetaSession;
+    private bool _sawSteamVrRunning;
+    private int _steamVrGonePolls;
+    private int _waitingForFirstSteamVrPolls;
+    private bool _restartingOvrAfterSteamVrExit;
+
+    /// <summary>Confirm SteamVR is really gone before restarting OVRService (avoids restart blips).</summary>
+    private const int SteamVrExitConfirmPolls = 2;
+
+    /// <summary>Give vrstartup a few minutes to spawn vrserver before disarming.</summary>
+    private const int MaxWaitForSteamVrPolls = 36;
 
     public DashToSteamVrService(App app)
     {
@@ -54,11 +65,17 @@ public sealed class DashToSteamVrService : IDisposable
         _sessionTimer.Tick += (_, _) => PollAuto();
         _dashReaper = new DispatcherTimer { Interval = IdleCadence.Active };
         _dashReaper.Tick += (_, _) => ReapDashIfNeeded();
+        _steamVrExitWatch = new DispatcherTimer { Interval = IdleCadence.Active };
+        _steamVrExitWatch.Tick += (_, _) => PollSteamVrExit();
     }
 
     public DashToSteamVrSettings Settings => _app.Settings.Current.DashToSteamVr;
 
-    public void Start() => SyncSessionWatch();
+    public void Start()
+    {
+        SyncSessionWatch();
+        SyncSteamVrExitWatch();
+    }
 
     /// <summary>
     /// Run the Meta Link poll only while auto Dash→SteamVR / PreventDashLaunch is armed.
@@ -84,10 +101,41 @@ public sealed class DashToSteamVrService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Arm SteamVR-exit → OVRService restart when the option is on and we either already
+    /// saw SteamVR this session, or SteamVR is running now (e.g. PreventDashLaunch path).
+    /// </summary>
+    public void SyncSteamVrExitWatch()
+    {
+        if (!Settings.RestartOvrServiceWhenSteamVrExits)
+        {
+            StopSteamVrExitWatch(resetSaw: true);
+            return;
+        }
+
+        if (IsProcessRunning("vrserver"))
+        {
+            ArmSteamVrExitWatch(sawRunning: true);
+            return;
+        }
+
+        if (_sawSteamVrRunning || _steamVrExitWatch.IsEnabled)
+        {
+            // Keep polling until exit is confirmed / handled.
+            if (!_steamVrExitWatch.IsEnabled)
+            {
+                _steamVrExitWatch.Start();
+            }
+
+            IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
+        }
+    }
+
     public void Dispose()
     {
         _sessionTimer.Stop();
         _dashReaper.Stop();
+        _steamVrExitWatch.Stop();
     }
 
     /// <summary>Manual / hotkey / voice entry point.</summary>
@@ -115,6 +163,9 @@ public sealed class DashToSteamVrService : IDisposable
         }
 
         parts.Add(LaunchSteamVr());
+        var steamVrLaunchedOrRunning = IsProcessRunning("vrserver")
+            || parts[^1].Contains("Started SteamVR", StringComparison.OrdinalIgnoreCase)
+            || parts[^1].Contains("already running", StringComparison.OrdinalIgnoreCase);
 
         if (Settings.KeepKillingDashWhileSteamVr && !IsPreventDashLaunchEnabled())
         {
@@ -124,6 +175,12 @@ public sealed class DashToSteamVrService : IDisposable
         else if (IsPreventDashLaunchEnabled())
         {
             parts.Add("PreventDashLaunch is on — Dash should not spawn.");
+        }
+
+        if (Settings.RestartOvrServiceWhenSteamVrExits && steamVrLaunchedOrRunning)
+        {
+            ArmSteamVrExitWatch(sawRunning: IsProcessRunning("vrserver"));
+            parts.Add("Will restart OVRService when SteamVR exits.");
         }
 
         var summary = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
@@ -403,8 +460,11 @@ public sealed class DashToSteamVrService : IDisposable
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
                 SyncSessionWatch();
+                SyncSteamVrExitWatch();
                 return;
             }
+
+            SyncSteamVrExitWatch();
 
             var status = _app.LinkConnection.Probe(includeEnumHmd: false);
             var meta = status.SessionActive
@@ -524,6 +584,115 @@ public sealed class DashToSteamVrService : IDisposable
         catch
         {
             // ignore reaper errors
+        }
+    }
+
+    private void ArmSteamVrExitWatch(bool sawRunning)
+    {
+        if (!Settings.RestartOvrServiceWhenSteamVrExits)
+        {
+            return;
+        }
+
+        if (sawRunning)
+        {
+            _sawSteamVrRunning = true;
+            _steamVrGonePolls = 0;
+            _waitingForFirstSteamVrPolls = 0;
+        }
+        else
+        {
+            _waitingForFirstSteamVrPolls = 0;
+        }
+
+        if (!_steamVrExitWatch.IsEnabled)
+        {
+            _steamVrExitWatch.Start();
+        }
+
+        IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
+    }
+
+    private void StopSteamVrExitWatch(bool resetSaw)
+    {
+        _steamVrExitWatch.Stop();
+        _steamVrGonePolls = 0;
+        _waitingForFirstSteamVrPolls = 0;
+        if (resetSaw)
+        {
+            _sawSteamVrRunning = false;
+        }
+    }
+
+    private void PollSteamVrExit()
+    {
+        try
+        {
+            if (!Settings.RestartOvrServiceWhenSteamVrExits)
+            {
+                StopSteamVrExitWatch(resetSaw: true);
+                return;
+            }
+
+            if (_restartingOvrAfterSteamVrExit)
+            {
+                return;
+            }
+
+            if (IsProcessRunning("vrserver"))
+            {
+                _sawSteamVrRunning = true;
+                _steamVrGonePolls = 0;
+                _waitingForFirstSteamVrPolls = 0;
+                IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
+                return;
+            }
+
+            if (!_sawSteamVrRunning)
+            {
+                // Armed after LaunchSteamVr but vrserver not up yet — keep waiting a bit.
+                _waitingForFirstSteamVrPolls++;
+                if (_waitingForFirstSteamVrPolls >= MaxWaitForSteamVrPolls)
+                {
+                    _app.Log.Info("SteamVR exit watch: vrserver never appeared — disarming.");
+                    StopSteamVrExitWatch(resetSaw: true);
+                    return;
+                }
+
+                IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
+                return;
+            }
+
+            _steamVrGonePolls++;
+            if (_steamVrGonePolls < SteamVrExitConfirmPolls)
+            {
+                return;
+            }
+
+            _restartingOvrAfterSteamVrExit = true;
+            StopSteamVrExitWatch(resetSaw: true);
+            try
+            {
+                var result = _app.Oculus.Restart();
+                var summary =
+                    "SteamVR exited — restarted OVRService so Meta Link can drop and Quest Home can return. "
+                    + result;
+                _app.Log.Info(summary);
+                if (_app.Settings.Current.ShowNotifications)
+                {
+                    _app.TrayNotify("SteamVR exit", summary);
+                }
+            }
+            finally
+            {
+                _restartingOvrAfterSteamVrExit = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _restartingOvrAfterSteamVrExit = false;
+            _app.Log.Warn("SteamVR exit watch failed: " + ex.Message);
+            StopSteamVrExitWatch(resetSaw: true);
         }
     }
 

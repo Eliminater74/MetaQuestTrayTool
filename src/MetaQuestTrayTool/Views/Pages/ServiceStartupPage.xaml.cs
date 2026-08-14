@@ -33,6 +33,7 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
                                    || dash.PreferPreventDashLaunch;
         NoUpdatesWithDashBox.IsChecked = dash.AlsoSetNoUpdatesWithPreventDash;
+        RestartOvrOnSteamVrExitBox.IsChecked = dash.RestartOvrServiceWhenSteamVrExits;
         LoadCoreChannelBox();
         DashPathText.Text = App.Instance.DashToSteamVr.DescribeSteamVrPaths();
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
@@ -167,8 +168,10 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         dash.KeepKillingDashWhileSteamVr = DashReaperBox.IsChecked == true;
         dash.CloseMetaClient = DashCloseClientBox.IsChecked == true;
         dash.AlsoSetNoUpdatesWithPreventDash = NoUpdatesWithDashBox.IsChecked == true;
+        dash.RestartOvrServiceWhenSteamVrExits = RestartOvrOnSteamVrExitBox.IsChecked == true;
         App.Instance.Settings.Save();
         App.Instance.DashToSteamVr.SyncSessionWatch();
+        App.Instance.DashToSteamVr.SyncSteamVrExitWatch();
     }
 
     private void PreventDash_Changed(object sender, RoutedEventArgs e)

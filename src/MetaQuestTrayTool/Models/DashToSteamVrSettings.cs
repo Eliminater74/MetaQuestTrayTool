@@ -30,6 +30,12 @@ public sealed class DashToSteamVrSettings
     /// </summary>
     public bool AlsoSetNoUpdatesWithPreventDash { get; set; }
 
+    /// <summary>
+    /// After Dash → SteamVR (especially PreventDashLaunch), watch for SteamVR (vrserver) exit
+    /// and restart OVRService so Meta Link drops and the headset can return to Quest Home.
+    /// </summary>
+    public bool RestartOvrServiceWhenSteamVrExits { get; set; } = true;
+
     /// <summary>Last CoreChannel before we switched to NO_UPDATES (so Stable / PublicTest can be restored).</summary>
     public string? CoreChannelBeforeNoUpdates { get; set; }
 }

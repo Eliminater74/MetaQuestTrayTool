@@ -218,6 +218,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Audit: SyncTimer / SyncSessionWatch wiring; stop disabled watchers; pause Status/Info when shell hidden
 - [x] Bump version to **1.0.16**
 - [x] Tag and publish **v1.0.16**
+- [x] Restart OVRService when SteamVR exits (PreventDashLaunch / stuck-in-Link fix)
 
 ### Housekeeping (ongoing)
 

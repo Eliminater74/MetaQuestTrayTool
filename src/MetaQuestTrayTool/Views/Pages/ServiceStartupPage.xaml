@@ -80,6 +80,10 @@
       <CheckBox x:Name="NoUpdatesWithDashBox" Content="Optional: when enabling PreventDashLaunch, also set CoreChannel to NO_UPDATES (blocks Meta updates)"
                 ToolTip="Optional precaution from OculusKiller: when you turn PreventDashLaunch on, also set CoreChannel to NO_UPDATES so Meta updates do not overwrite runtime/Dash tweaks. Your previous channel is remembered for Restore. Off by default — you stay on PublicTest/LIVE unless you opt in."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
+      <CheckBox x:Name="RestartOvrOnSteamVrExitBox"
+                Content="When SteamVR exits, restart OVRService (drops Link → return to Quest Home)"
+                ToolTip="Recommended with PreventDashLaunch / OculusKiller: without Dash, exiting SteamVR leaves you stuck in Link. After vrserver exits (debounced), restart OVRService so Link breaks and the headset can go back to Quest Home. Also arms after Dash → SteamVR."
+                Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
         <Button Content="Apply PreventDashLaunch + restart OVRService (+ SteamVR if linked)" Style="{StaticResource GhostButtonStyle}"
                 Click="ApplyPreventDash_Click"
