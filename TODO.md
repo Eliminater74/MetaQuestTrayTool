@@ -227,6 +227,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Fix PreventDashLaunch auto SteamVR on tray start (EnumHmd-only ghost)
 - [x] Bump version to **1.1.0**
 - [x] Tag and publish **v1.1.0**
+- [x] OVRService Manual-at-boot toggle (Service & Startup) + re-apply after Meta reset
 
 ### Housekeeping (ongoing)
 

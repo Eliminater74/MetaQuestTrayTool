@@ -139,7 +139,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 - **Themes:** Pure Black (default), Dark, or Light — change on the **Tray Tool** page.
 - **Updates:** Tray Tool → Check for updates on start (on by default), **Also check while running** (default weekly: daily / 3 days / week / 2 weeks / month / off), or **Check now** / tray menu **Check for updates…**. Confirms, downloads the latest Setup.exe from GitHub, exits the app, then installs over the current location (ADB is stopped first so bundled platform-tools can be replaced).
 - **Start minimized** and **minimize-on-close** keep the app in the tray instead of the taskbar.
-- **Service & Startup** highlights **Start** or **Stop** based on whether `OVRService` is running.
+- **Service & Startup** highlights **Start** or **Stop** based on whether `OVRService` is running; optional **Manual-at-boot** (no OVRService at Windows sign-in) with documented limits
 - Newer Meta runtimes may reject some `server:` ASW commands; check **Log** if something does not apply.
 - Pixel density changes often need a **new VR session** to take effect.
 - Meta’s old **Oculus Home** is gone — use **Dash → SteamVR** and optional **SteamVR Home** instead.
@@ -165,7 +165,7 @@ These are different PCVR paths:
 
 **This tray tool targets Quest Link + SteamVR OpenXR** (Steam-first PCVR over Meta Link). It still helps some mixed setups (OpenXR assist while Steam Link is active, audio, power, HotKeys), but most Link pages and service control assume Meta is installed.
 
-**Meta Horizon Link at startup:** there is no supported registry flag to permanently block the desktop app (unlike `PreventDashLaunch`, which only blocks Dash). Meta removed the old in-app startup toggle. Boot launch is often tied to `OVRService` starting automatically in Windows Services. Right-click Meta’s tray icon → **Hide** keeps it running in the background; **Quit** fully closes it. Restarting `OVRService` after a full quit usually does **not** reopen the app — but you will need to open Meta Link again when you want Quest Link PCVR. This tray tool does **not** offer a “block Meta at startup” option.
+**Meta Horizon Link at startup:** Meta usually opens because **`OVRService`** is a Windows service set to **Automatic** at install (not listed in Settings → Startup apps). **Service & Startup** can set **Manual** so the runtime does not start at boot — with clear notes on what that does and does not do. You must **Start** OVRService, open Meta Horizon Link, or enable **Start Oculus service when tool starts** before Quest Link PCVR. Meta updates may reset Automatic; the tray can re-apply Manual on launch. This does **not** block Meta when you deliberately start Link. Steam Link–only with no Quest Link: uninstall Meta PC software.
 
 ---
 

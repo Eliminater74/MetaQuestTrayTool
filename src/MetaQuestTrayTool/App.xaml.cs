@@ -129,6 +129,12 @@ public partial class App : System.Windows.Application
         Log.Info(Adb.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
+        var bootPref = Oculus.EnsurePreferredBootStartMode(Settings.Current.Service.PreferManualOvrServiceAtBoot);
+        if (!string.IsNullOrWhiteSpace(bootPref))
+        {
+            Log.Info(bootPref);
+        }
+
         Log.Info(Gpu.Describe());
         Log.Info(DebugTool.IsAvailable
             ? $"Debug Tool CLI: {DebugTool.CliPath}"

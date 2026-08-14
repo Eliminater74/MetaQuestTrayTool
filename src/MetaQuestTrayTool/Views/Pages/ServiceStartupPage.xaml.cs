@@ -36,6 +36,11 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
         CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
         ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+        OvrServiceBootStartBox.IsChecked = App.Instance.Oculus.IsBootStartEnabled();
+        OvrServiceBootStatusText.Text = App.Instance.Oculus.DescribeBootStartMode()
+                                        + (service.PreferManualOvrServiceAtBoot
+                                            ? " · Tray will re-apply Manual if Meta resets this to Automatic."
+                                            : string.Empty);
         UpdateServiceButtons();
         _loading = false;
     }
@@ -260,6 +265,82 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
             App.AppName,
             MessageBoxButton.OK,
             MessageBoxImage.Information);
+    }
+
+    private void OvrServiceBootStart_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        var startAtBoot = OvrServiceBootStartBox.IsChecked == true;
+        var service = App.Instance.Settings.Current.Service;
+
+        if (!startAtBoot)
+        {
+            var confirm = System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                "Turn OFF automatic OVRService at Windows boot?\n\n"
+                + "• OVRService startup type becomes Manual — it will not start when you sign in.\n"
+                + "• Meta Horizon Link usually stays closed until you start the runtime.\n\n"
+                + "Before Quest Link / PCVR you must: Start OVRService (button above), open Meta Horizon Link, "
+                + "or enable “Start Oculus service when tool starts”.\n\n"
+                + "This does not block Meta when you choose to start Link. Meta updates may reset Automatic — "
+                + "this tool re-applies Manual on tray launch when that preference is saved.\n\n"
+                + "Apply Manual now?",
+                App.AppName,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (confirm != MessageBoxResult.Yes)
+            {
+                _loading = true;
+                OvrServiceBootStartBox.IsChecked = true;
+                _loading = false;
+                return;
+            }
+        }
+
+        var summary = App.Instance.Oculus.SetBootStartEnabled(startAtBoot);
+        service.PreferManualOvrServiceAtBoot = !startAtBoot;
+        App.Instance.Settings.Save();
+        App.Instance.Log.Info(summary);
+        OvrServiceBootStatusText.Text = App.Instance.Oculus.DescribeBootStartMode()
+                                        + (service.PreferManualOvrServiceAtBoot
+                                            ? " · Tray will re-apply Manual if Meta resets this to Automatic."
+                                            : string.Empty);
+        ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
+
+        if (!startAtBoot && App.Instance.Oculus.IsServiceRunning)
+        {
+            var stopNow = System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                "OVRService is still running from before this change.\n\n"
+                + "Manual-at-boot applies on the next Windows restart. "
+                + "Stop the service now as well?",
+                App.AppName,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (stopNow == MessageBoxResult.Yes)
+            {
+                Run(App.Instance.Oculus.Stop);
+                return;
+            }
+        }
+
+        if (summary.Contains("denied", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase))
+        {
+            System.Windows.MessageBox.Show(
+                Window.GetWindow(this),
+                summary,
+                App.AppName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            _loading = true;
+            OvrServiceBootStartBox.IsChecked = App.Instance.Oculus.IsBootStartEnabled();
+            _loading = false;
+        }
     }
 
     private void Persist_Changed(object sender, RoutedEventArgs e)

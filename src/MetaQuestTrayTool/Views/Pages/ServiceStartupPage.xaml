@@ -37,7 +37,24 @@
         <Button Content="Start SteamVR over Link" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
                 ToolTip="Requires PreventDashLaunch (registry). Optionally switch OpenXR to SteamVR and launch SteamVR (vrstartup.exe). Does not kill Meta processes. Hotkey: Ctrl+Num 0. Voice: dash to steam v r."/>
       </StackPanel>
-      <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,16" FontWeight="SemiBold"/>
+      <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,8" FontWeight="SemiBold"/>
+
+      <TextBlock Text="OVRService at Windows boot" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8" TextWrapping="Wrap"
+                 Text="Meta Horizon Link usually opens at sign-in because the Oculus VR Runtime Service (OVRService) is a Windows service set to Automatic — not because it appears in Settings → Apps → Startup."/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8" TextWrapping="Wrap"
+                 Text="What turning OFF boot start DOES: sets OVRService to Manual so Windows does not start it when you log in. Meta Horizon Link normally stays closed until something starts the runtime."/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8" TextWrapping="Wrap"
+                 Text="What it DOES NOT do: uninstall Meta; block Link forever; or prevent Meta Horizon from opening when you deliberately start OVRService / open Link / connect Air Link or wired Link (that is expected Meta behavior). There is no registry switch to permanently block Client.exe."/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8" TextWrapping="Wrap"
+                 Text="What YOU must do before Quest Link / PCVR when boot start is OFF: use Start above, Open Meta Horizon Link, or turn on “Start Oculus service when tool starts” below so the tray starts OVRService when you log in. Steam Link–only PCVR with no Quest Link: uninstall Meta PC software instead."/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8" TextWrapping="Wrap"
+                 Text="After a Meta PC app update, re-open this page — updates sometimes reset OVRService back to Automatic. With boot start OFF saved here, the tray re-applies Manual on launch when it detects that reset."/>
+      <CheckBox x:Name="OvrServiceBootStartBox"
+                Content="Start OVRService automatically at Windows boot (Meta default = Automatic)"
+                ToolTip="Automatic: Windows starts OVRService at sign-in (Meta Horizon Link often follows). Manual: no runtime at boot — you start it when you want Link/PCVR. Needs Administrator."
+                Checked="OvrServiceBootStart_Changed" Unchecked="OvrServiceBootStart_Changed"/>
+      <TextBlock x:Name="OvrServiceBootStatusText" Margin="0,0,0,16" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>
 
       <CheckBox x:Name="StartOnToolBox" Content="Start Oculus service when tool starts"
                 ToolTip="When the tray app starts, start OVRService if it is not already running."

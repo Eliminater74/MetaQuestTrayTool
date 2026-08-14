@@ -18,6 +18,7 @@ public sealed class OculusRuntimeService
     public bool IsServiceRunning => ServiceStatus.Equals("Running", StringComparison.OrdinalIgnoreCase);
     private DateTime _lastServiceRefreshUtc = DateTime.MinValue;
     private static readonly TimeSpan ServiceStatusCache = TimeSpan.FromSeconds(1.5);
+    private ServiceStartMode? _cachedStartMode;
 
     public string? DebugToolCliPath =>
         string.IsNullOrWhiteSpace(InstallPath)
@@ -52,11 +53,13 @@ public sealed class OculusRuntimeService
             controller.Refresh();
             ServiceExists = true;
             ServiceStatus = controller.Status.ToString();
+            _cachedStartMode = controller.StartType;
         }
         catch
         {
             ServiceExists = false;
             ServiceStatus = "Not found";
+            _cachedStartMode = null;
         }
 
         _lastServiceRefreshUtc = DateTime.UtcNow;
@@ -65,7 +68,113 @@ public sealed class OculusRuntimeService
     public string DescribeStatus()
     {
         var install = IsInstalled ? InstallPath : "not found";
-        return $"Oculus install: {install}. {ServiceName}: {ServiceStatus}.";
+        return $"Oculus install: {install}. {ServiceName}: {ServiceStatus}. {DescribeBootStartMode()}.";
+    }
+
+    /// <summary>True when Windows will start OVRService at boot (Automatic / Boot).</summary>
+    public bool IsBootStartEnabled()
+    {
+        Refresh();
+        return _cachedStartMode is ServiceStartMode.Automatic or ServiceStartMode.Boot;
+    }
+
+    public string DescribeBootStartMode()
+    {
+        Refresh();
+        if (!ServiceExists || _cachedStartMode is null)
+        {
+            return "Boot policy: unknown";
+        }
+
+        var label = _cachedStartMode.Value switch
+        {
+            ServiceStartMode.Automatic => "Automatic (starts at Windows boot — Meta default)",
+            ServiceStartMode.Boot => "Boot (starts early at Windows boot)",
+            ServiceStartMode.Manual => "Manual (starts only when you or an app requests it)",
+            ServiceStartMode.Disabled => "Disabled (service cannot start until re-enabled)",
+            ServiceStartMode.System => "System",
+            _ => _cachedStartMode.Value.ToString()
+        };
+        return $"Boot policy: {label}";
+    }
+
+    /// <summary>
+    /// Sets OVRService Windows startup type to Automatic (boot) or Manual (on demand). Needs Administrator.
+    /// </summary>
+    public string SetBootStartEnabled(bool startAtBoot)
+    {
+        Refresh(force: true);
+        if (!ServiceExists)
+        {
+            return $"{ServiceName} was not found. Is the Meta Quest / Oculus PC software installed?";
+        }
+
+        var desired = startAtBoot ? ServiceStartMode.Automatic : ServiceStartMode.Manual;
+        if (_cachedStartMode == desired)
+        {
+            return startAtBoot
+                ? $"{ServiceName} is already set to start automatically at Windows boot."
+                : $"{ServiceName} is already set to Manual (will not start at Windows boot).";
+        }
+
+        var scArg = startAtBoot ? "auto" : "demand";
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "sc.exe",
+                Arguments = $"config {ServiceName} start= {scArg}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+            using var process = Process.Start(psi)
+                ?? throw new InvalidOperationException("Could not run sc.exe.");
+            var stdout = process.StandardOutput.ReadToEnd();
+            var stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit(TimeSpan.FromSeconds(15));
+            if (process.ExitCode != 0)
+            {
+                var detail = string.IsNullOrWhiteSpace(stderr) ? stdout.Trim() : stderr.Trim();
+                if (detail.Contains("Access is denied", StringComparison.OrdinalIgnoreCase)
+                    || detail.Contains("5", StringComparison.Ordinal))
+                {
+                    return "Access denied — enable Run with Administrator rights at logon on this page, then try again.";
+                }
+
+                return $"Could not change {ServiceName} boot policy: {detail}";
+            }
+
+            Refresh(force: true);
+            return startAtBoot
+                ? $"{ServiceName} is now Automatic — Windows will start it at boot (Meta default). {DescribeBootStartMode()}"
+                : $"{ServiceName} is now Manual — it will not start at Windows boot. "
+                  + "Use Start / Open Meta Horizon Link before Quest Link, or enable “Start Oculus service when tool starts” below. "
+                  + DescribeBootStartMode();
+        }
+        catch (Exception ex)
+        {
+            return $"Could not change {ServiceName} boot policy: {ex.Message}";
+        }
+    }
+
+    /// <summary>If the user prefers Manual-at-boot, re-apply when Meta updates reset the service to Automatic.</summary>
+    public string EnsurePreferredBootStartMode(bool preferManualAtBoot)
+    {
+        if (!preferManualAtBoot)
+        {
+            return string.Empty;
+        }
+
+        Refresh(force: true);
+        if (!ServiceExists || _cachedStartMode is not ServiceStartMode.Automatic and not ServiceStartMode.Boot)
+        {
+            return string.Empty;
+        }
+
+        var result = SetBootStartEnabled(startAtBoot: false);
+        return "Meta reset OVRService to Automatic — re-applied Manual-at-boot preference. " + result;
     }
 
     public string Start() => ChangeState(start: true);

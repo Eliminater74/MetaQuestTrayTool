@@ -17,7 +17,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Shell | Status (default), Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
 | Status / Ready | Live chips, SteamVR install/version/Stable\|Beta, PCVR Ready checklist, Recover PCVR, session probe (Air/wired/Steam/VD) |
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
-| Link / Dash | RemoteHeadset Link settings + presets, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit |
+| Link / Dash | RemoteHeadset Link settings + presets, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial |
 | Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases), automation |
