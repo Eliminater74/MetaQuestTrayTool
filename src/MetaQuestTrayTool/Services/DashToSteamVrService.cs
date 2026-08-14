@@ -61,8 +61,39 @@ public sealed class DashToSteamVrService : IDisposable
 
     public void Start()
     {
+        ArmSessionBaselineFromCurrentProbe();
         SyncSessionWatch();
         SyncSteamVrExitWatch();
+    }
+
+    /// <summary>
+    /// If Link already looks active when the tray starts, do not treat that as a fresh connect
+    /// (avoids launching SteamVR on every app/update restart while OVRService is up).
+    /// </summary>
+    private void ArmSessionBaselineFromCurrentProbe()
+    {
+        if (!ShouldAutoStartSteamVrOnMetaLink())
+        {
+            return;
+        }
+
+        try
+        {
+            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            if (!status.MetaLinkStreaming)
+            {
+                return;
+            }
+
+            _wasMetaSession = true;
+            _ranThisMetaSession = true;
+            _app.Log.Info(
+                "Meta Link already streaming at tray start — auto SteamVR armed for the next connect only.");
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn($"Dash → SteamVR baseline probe failed: {ex.Message}");
+        }
     }
 
     /// <summary>

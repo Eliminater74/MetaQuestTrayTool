@@ -258,8 +258,8 @@ public sealed class LinkConnectionProbeService
     }
 
     /// <summary>
-    /// Stricter than <see cref="LooksLikeActiveMetaSession"/> — excludes operable/primary DeviceCache
-    /// ghosts when the headset is on Wi‑Fi but Link is not streaming.
+    /// Stricter than <see cref="LooksLikeStrongMetaSession"/> — excludes operable/primary DeviceCache
+    /// ghosts and EnumHmd-only (OVRService sees the HMD while Quest is on Wi‑Fi but Link is not streaming).
     /// </summary>
     private static bool LooksLikeStreamingMetaLink(
         HeadsetCacheEntry? cache,
@@ -267,7 +267,17 @@ public sealed class LinkConnectionProbeService
         bool audioLink,
         bool steamVrRunning)
     {
-        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVrRunning))
+        _ = metaHmd;
+        _ = steamVrRunning;
+
+        if (audioLink)
+        {
+            return true;
+        }
+
+        if (cache is not null
+            && !string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase)
+            && LooksConnected(cache.RdConnectionState))
         {
             return true;
         }

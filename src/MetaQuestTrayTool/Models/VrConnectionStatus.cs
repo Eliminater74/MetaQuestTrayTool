@@ -19,8 +19,8 @@ public sealed class VrConnectionStatus
     public bool SessionActive { get; init; }
 
     /// <summary>
-    /// Meta Link is actively streaming — not DeviceCache auto-connect (headset on Wi‑Fi / primary
-    /// without opening Link). Used for PreventDashLaunch → auto SteamVR.
+    /// Meta Link is actively streaming — not DeviceCache auto-connect or EnumHmd-only with OVRService up.
+    /// Used for PreventDashLaunch → auto SteamVR (requires Link audio, rd connected, or connectionState).
     /// </summary>
     public bool MetaLinkStreaming { get; init; }
     public bool? IsUsingAirLink { get; init; }
