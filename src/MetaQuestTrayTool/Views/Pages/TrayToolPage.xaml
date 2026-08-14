@@ -66,6 +66,39 @@
                 ToolTip="Balloon tips for profile apply/restore, audio switch, updates, and Dash→SteamVR."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
+      <TextBlock Text="Headset announcements" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Spoken status in the Quest headset while PCVR is active — so you hear connect, profile apply, and launch even when desktop toasts are not visible."/>
+      <CheckBox x:Name="HeadsetAnnounceBox" Content="Speak status in headset"
+                ToolTip="Use Windows text-to-speech on the Link / VR audio path when a PCVR session is active."
+                Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+      <StackPanel x:Name="HeadsetAnnouncePanel" Margin="28,0,0,8">
+        <CheckBox x:Name="AnnounceConnectBox" Content="Session connect (Air Link, wired Link, Steam Link, VD)"
+                  ToolTip="Example: Connected. Air Link."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceDisconnectBox" Content="Session disconnect"
+                  ToolTip="Example: Air Link session ended."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceProfilesBox" Content="Profile apply and global restore"
+                  ToolTip="Example: Applying profile. Beat Saber."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceLaunchBox" Content="Game launch from library / profile"
+                  ToolTip="Example: Launching. Half-Life Alyx."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceDashBox" Content="Dash → SteamVR and SteamVR exit"
+                  ToolTip="Example: Starting SteamVR."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceSteamLinkBox" Content="Steam Link OpenXR assist"
+                  ToolTip="OpenXR nudge / restore during Steam Link sessions."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (connect/disconnect only)"
+                  ToolTip="Reduce chatter mid-game — still announce session connect and disconnect."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <Button Content="Test in headset" Style="{StaticResource GhostButtonStyle}" Margin="0,8,0,0"
+                HorizontalAlignment="Left" Click="HeadsetAnnounceTest_Click"
+                ToolTip="Speak a test phrase on the VR audio path. Connect Link first for best results."/>
+      </StackPanel>
+
       <TextBlock Text="Theme" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,8"/>
       <ComboBox x:Name="ThemeBox" MaxWidth="280" HorizontalAlignment="Left" Padding="6" SelectionChanged="Theme_Changed"
                 ToolTip="Pure Black, Dark, or Light for the shell and menus."/>

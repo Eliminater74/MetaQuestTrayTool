@@ -42,11 +42,69 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
         SelectUpdateInterval(app.Tray.AutoUpdateCheckInterval);
         NotificationsBox.IsChecked = app.ShowNotifications;
+        LoadHeadsetAnnouncer(app.HeadsetAnnouncer);
         SelectTheme(app.Tray.Theme);
         StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
                           + " Voice: " + App.Instance.Voice.Status
+                          + " " + App.Instance.HeadsetAnnouncer.Status
                           + " " + App.Instance.Updates.DescribeSchedule();
         _loading = false;
+    }
+
+    private void LoadHeadsetAnnouncer(HeadsetAnnouncerSettings announcer)
+    {
+        HeadsetAnnounceBox.IsChecked = announcer.Enabled;
+        AnnounceConnectBox.IsChecked = announcer.SessionConnect;
+        AnnounceDisconnectBox.IsChecked = announcer.SessionDisconnect;
+        AnnounceProfilesBox.IsChecked = announcer.Profiles;
+        AnnounceLaunchBox.IsChecked = announcer.GameLaunch;
+        AnnounceDashBox.IsChecked = announcer.DashToSteamVr;
+        AnnounceSteamLinkBox.IsChecked = announcer.SteamLinkAssist;
+        AnnounceQuietBox.IsChecked = announcer.QuietWhileGameProfileActive;
+        HeadsetAnnouncePanel.IsEnabled = announcer.Enabled;
+    }
+
+    private void SaveHeadsetAnnouncer()
+    {
+        var announcer = App.Instance.Settings.Current.HeadsetAnnouncer;
+        announcer.Enabled = HeadsetAnnounceBox.IsChecked == true;
+        announcer.SessionConnect = AnnounceConnectBox.IsChecked == true;
+        announcer.SessionDisconnect = AnnounceDisconnectBox.IsChecked == true;
+        announcer.Profiles = AnnounceProfilesBox.IsChecked == true;
+        announcer.GameLaunch = AnnounceLaunchBox.IsChecked == true;
+        announcer.DashToSteamVr = AnnounceDashBox.IsChecked == true;
+        announcer.SteamLinkAssist = AnnounceSteamLinkBox.IsChecked == true;
+        announcer.QuietWhileGameProfileActive = AnnounceQuietBox.IsChecked == true;
+        App.Instance.Settings.Save();
+        App.Instance.HeadsetAnnouncer.Reload();
+    }
+
+    private void HeadsetAnnounce_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading || !IsLoaded)
+        {
+            return;
+        }
+
+        HeadsetAnnouncePanel.IsEnabled = HeadsetAnnounceBox.IsChecked == true;
+        SaveHeadsetAnnouncer();
+        StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
+                          + " Voice: " + App.Instance.Voice.Status
+                          + " " + App.Instance.HeadsetAnnouncer.Status
+                          + " " + App.Instance.Updates.DescribeSchedule();
+        App.Instance.Log.Info(App.Instance.HeadsetAnnouncer.Status);
+    }
+
+    private void HeadsetAnnounceTest_Click(object sender, RoutedEventArgs e)
+    {
+        if (HeadsetAnnounceBox.IsChecked != true)
+        {
+            HeadsetAnnounceBox.IsChecked = true;
+            SaveHeadsetAnnouncer();
+        }
+
+        App.Instance.HeadsetAnnouncer.TestSpeak();
+        StatusText.Text = "Test phrase queued — connect Link first if you hear nothing.";
     }
 
     private void Theme_Changed(object sender, SelectionChangedEventArgs e)
