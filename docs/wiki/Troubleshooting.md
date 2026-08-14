@@ -12,7 +12,7 @@ Fixed in v1.1.2+: auto-start needs a **live** Meta Link stream (not Wi‑Fi Devi
 
 ## “Link session ended” / Recover PCVR toast when the PC wakes
 
-DeviceCache and Oculus virtual audio often blip on resume. The tray now ignores connect/disconnect edges for ~20 seconds after wake and only toasts a real stream drop.
+DeviceCache and Oculus virtual audio often blip on resume. **v1.1.3** ignores connect/disconnect edges for ~20 seconds after wake and only toasts a real stream drop.
 
 **Restart OVRService after sleep** (on by default) *will* kill an actual Link session — turn that off on Power / Service & Startup if you sleep mid-PCVR.
 

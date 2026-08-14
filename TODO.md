@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -235,6 +235,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Expand voice commands (recover PCVR, audio, OpenXR, overlays, GPU preset)
 - [x] Bump version to **1.1.2**
 - [x] Tag and publish **v1.1.2**
+- [x] GitHub Wiki user guide + walkthrough video
+- [x] Fix false Link session-end toast after PC wake
+- [x] Bump version to **1.1.3**
+- [x] Tag and publish **v1.1.3**
 
 ### Housekeeping (ongoing)
 

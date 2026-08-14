@@ -48,7 +48,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.2) (latest) | [MetaQuestTrayTool-Setup-1.1.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/MetaQuestTrayTool-Setup-1.1.2.exe) |
+| [v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.3) (latest) | [MetaQuestTrayTool-Setup-1.1.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.3/MetaQuestTrayTool-Setup-1.1.3.exe) |
+| [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.2) | [MetaQuestTrayTool-Setup-1.1.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/MetaQuestTrayTool-Setup-1.1.2.exe) |
 | [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.1) | [MetaQuestTrayTool-Setup-1.1.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.1/MetaQuestTrayTool-Setup-1.1.1.exe) |
 | [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.0) | [MetaQuestTrayTool-Setup-1.1.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.0/MetaQuestTrayTool-Setup-1.1.0.exe) |
 | [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.19) | [MetaQuestTrayTool-Setup-1.0.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.19/MetaQuestTrayTool-Setup-1.0.19.exe) |
@@ -175,7 +176,7 @@ These are different PCVR paths:
 
 ## What works now
 
-Release **[v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **Headset announcements** speak connect/profile/launch status in the Quest; **expanded voice** (recover PCVR, audio, OpenXR, overlays, GPU preset); tighter **PreventDashLaunch** streaming detect so SteamVR does not auto-start when disconnected. v1.1.1 added OVRService Manual-at-boot.
+Release **[v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **Wiki** user guide + walkthrough; no false “Link session ended” toast after PC wake. v1.1.2 added headset announcements, expanded voice, and a tighter PreventDashLaunch streaming check.
 
 ### Shell & tray
 

@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.2)
+## Current product (v1.1.3)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -21,7 +21,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial |
 | Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU), headset announcements, automation |
-| Updates / polish | In-app GitHub updates, themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate |
+| Updates / polish | In-app GitHub updates, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
@@ -77,7 +77,7 @@ Bundled platform-tools, SideQuest-style props, apply on connect, paste/proximity
 
 Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + Donate, Inno Setup self-contained Setup.exe, CI + Release on `v*` tags.
 
-### Post v1.0.0 → v1.1.2
+### Post v1.0.0 → v1.1.3
 
 | Tag | Focus |
 | --- | --- |
@@ -96,6 +96,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.0 | Restore desktop audio on PCVR exit; fix PreventDashLaunch auto SteamVR on tray start (EnumHmd ghost) |
 | v1.1.1 | OVRService Manual-at-boot toggle — delay Meta at Windows sign-in; re-apply after Meta updates |
 | v1.1.2 | Headset announcements (TTS status in Quest); expanded voice commands; fix false PreventDashLaunch SteamVR auto-start when not streaming |
+| v1.1.3 | GitHub Wiki user guide; ignore false Link session-end toast after PC wake |
 
 ---
 
