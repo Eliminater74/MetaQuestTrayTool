@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -214,6 +214,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Audio switcher: leave boot audio alone; switch only on PCVR start/end
 - [x] Bump version to **1.0.15**
 - [x] Tag and publish **v1.0.15**
+- [x] Adaptive IdleCadence — quiet tray watchers until PCVR / armed features
+- [x] Audit: SyncTimer / SyncSessionWatch wiring; stop disabled watchers; pause Status/Info when shell hidden
+- [x] Bump version to **1.0.16**
+- [x] Tag and publish **v1.0.16**
 
 ### Housekeeping (ongoing)
 

@@ -46,7 +46,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.15) (latest) | [MetaQuestTrayTool-Setup-1.0.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.15/MetaQuestTrayTool-Setup-1.0.15.exe) |
+| [v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.16) (latest) | [MetaQuestTrayTool-Setup-1.0.16.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.16/MetaQuestTrayTool-Setup-1.0.16.exe) |
+| [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.15) | [MetaQuestTrayTool-Setup-1.0.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.15/MetaQuestTrayTool-Setup-1.0.15.exe) |
 | [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.14) | [MetaQuestTrayTool-Setup-1.0.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.14/MetaQuestTrayTool-Setup-1.0.14.exe) |
 | [v1.0.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.13) | [MetaQuestTrayTool-Setup-1.0.13.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.13/MetaQuestTrayTool-Setup-1.0.13.exe) |
 | [v1.0.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.12) | [MetaQuestTrayTool-Setup-1.0.12.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.12/MetaQuestTrayTool-Setup-1.0.12.exe) |
@@ -151,7 +152,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 ## What works now
 
-Release **[v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Audio switcher leaves boot/desktop devices alone until a PCVR session starts, then restores fallback when it ends. v1.0.14 fixed shell height (Info visible) and OpenXR checkbox persist.
+Release **[v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Quieter tray idle (adaptive watcher cadence; timers stop when features are off; Status/Info pause when shell is hidden). Audio switcher leaves boot devices alone until PCVR start/end. v1.0.14–1.0.15 also fixed shell height, OpenXR checkbox persist, and audio boot switching.
 
 ### Shell & tray
 
@@ -206,7 +207,7 @@ Release **[v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
 - In-app updates from GitHub `v*` (on start, schedule, or Check now); ADB stopped before Setup
 - **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
-- Backup export/import from Advanced; Donate (PayPal); low idle CPU / snappy sidebar (probe caches, background watchers)
+- Backup export/import from Advanced; Donate (PayPal); **quiet tray idle** — adaptive watcher cadence (~30–45s when unused, faster only in PCVR / armed features); timers stop when features are off; Status/Info pause when the shell is hidden to the tray; shared Link probe caches
 
 ### Out of scope / not planned
 

@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.0.15)
+## Current product (v1.0.16)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -21,7 +21,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial |
 | Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases), automation |
-| Updates / polish | In-app GitHub updates, themes, tooltips, low idle CPU, VR Tools links, Donate |
+| Updates / polish | In-app GitHub updates, themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
@@ -77,7 +77,7 @@ Bundled platform-tools, SideQuest-style props, apply on connect, paste/proximity
 
 Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + Donate, Inno Setup self-contained Setup.exe, CI + Release on `v*` tags.
 
-### Post v1.0.0 → v1.0.15
+### Post v1.0.0 → v1.0.16
 
 | Tag | Focus |
 | --- | --- |
@@ -89,6 +89,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.0.13 | Remove Oculus Home leftovers; SteamVR Home open action |
 | v1.0.14 | Taller shell (Info visible); fix OpenXR checkbox persist on Game Settings Refresh |
 | v1.0.15 | Audio switcher: leave boot audio alone; switch only on PCVR start/end |
+| v1.0.16 | Quieter idle: adaptive watcher cadence; Sync* wiring; stop disabled timers; pause Status/Info when shell hidden |
 
 ---
 
