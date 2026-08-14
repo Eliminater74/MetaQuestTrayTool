@@ -110,9 +110,10 @@ public sealed class LinkConnectionProbeService
         // Healthy Meta Link wins only with a strong live signal. Meta often auto-connects when
         // the headset wakes on Wi‑Fi (DeviceCache connected/primary) without launching Link —
         // that must not hide an active Steam Link / SteamVR or Virtual Desktop session.
-        // EnumHmd alone is also weak while SteamVR is up (auto-connect ghosts during Steam Link).
-        var strongMeta = LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVr);
-        var cacheMeta = LooksLikeActiveMetaSession(cache, metaHmd, audioLink, steamVr);
+        // EnumHmd / Link-audio alone are also weak while SteamVR or VD is up (same headset
+        // endpoint after audio auto-switch).
+        var strongMeta = LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVr, virtualDesktop);
+        var cacheMeta = LooksLikeActiveMetaSession(cache, metaHmd, audioLink, steamVr, virtualDesktop);
 
         if (strongMeta)
         {
@@ -240,17 +241,21 @@ public sealed class LinkConnectionProbeService
 
     /// <summary>
     /// Live Meta Link stream signals that should beat SteamVR/VD process detection
-    /// (e.g. Meta Link + SteamVR OpenXR). DeviceCache auto-connect and EnumHmd alone are not
-    /// enough while SteamVR is running — Meta often reports the headset when it wakes on Wi‑Fi
-    /// without launching Link, which would otherwise unblock SS/Link applies under Steam Link.
+    /// (e.g. Meta Link + SteamVR OpenXR). DeviceCache auto-connect, EnumHmd, and Link-audio alone
+    /// are not enough while SteamVR or Virtual Desktop is running — audio switcher often routes
+    /// the Quest as Windows default under Steam Link too.
     /// </summary>
     private static bool LooksLikeStrongMetaSession(
         HeadsetCacheEntry? cache,
         bool metaHmd,
         bool audioLink,
-        bool steamVrRunning)
+        bool steamVrRunning,
+        bool virtualDesktopRunning = false)
     {
-        if (audioLink)
+        var competingRuntime = steamVrRunning || virtualDesktopRunning;
+
+        // Link audio alone only wins when no competing SteamVR / VD session is up.
+        if (audioLink && !competingRuntime)
         {
             return true;
         }
@@ -262,8 +267,8 @@ public sealed class LinkConnectionProbeService
             return true;
         }
 
-        // EnumHmd without SteamVR: treat as Meta. With SteamVR: ignore — auto-connect ghosts.
-        if (metaHmd && !steamVrRunning)
+        // EnumHmd without a competing runtime: treat as Meta. With SteamVR/VD: ignore ghosts.
+        if (metaHmd && !competingRuntime)
         {
             return true;
         }
@@ -275,6 +280,8 @@ public sealed class LinkConnectionProbeService
     /// Stricter than <see cref="LooksLikeStrongMetaSession"/> — excludes operable/primary DeviceCache
     /// ghosts and EnumHmd-only (OVRService sees the HMD while Quest is on Wi‑Fi but Link is not streaming).
     /// Air Link requires Link audio on the headset; wired Link requires USB + connected cache (or rd/audio).
+    /// While SteamVR is running, require RD connected so Steam Link + sticky Air Link / audio is not
+    /// treated as a Meta stream (that would auto-start Dash→SteamVR and arm OVR-on-exit).
     /// </summary>
     private static bool LooksLikeStreamingMetaLink(
         HeadsetCacheEntry? cache,
@@ -282,12 +289,15 @@ public sealed class LinkConnectionProbeService
         bool usbPresent,
         bool steamVrRunning)
     {
-        _ = steamVrRunning;
-
         if (cache is not null
             && string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
         {
             return false;
+        }
+
+        if (steamVrRunning)
+        {
+            return cache is not null && LooksConnected(cache.RdConnectionState);
         }
 
         // Remote desktop stream — strongest Meta signal besides Link audio.
@@ -336,9 +346,10 @@ public sealed class LinkConnectionProbeService
         HeadsetCacheEntry? cache,
         bool metaHmd,
         bool audioLink,
-        bool steamVrRunning = false)
+        bool steamVrRunning = false,
+        bool virtualDesktopRunning = false)
     {
-        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVrRunning))
+        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVrRunning, virtualDesktopRunning))
         {
             return true;
         }

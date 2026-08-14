@@ -230,18 +230,26 @@ public partial class App : System.Windows.Application
 
     public void NotifyStillRunningInTray() => _tray?.NotifyStillRunning();
 
+    /// <summary>
+    /// Re-bind timers / listeners after settings reset or import so watchers match disk state.
+    /// </summary>
+    public void ReloadFeatureWatchers()
+    {
+        HotKeys.Reload();
+        Voice.Reload();
+        HeadsetAnnouncer.Reload();
+        ThemeService.Apply(Settings.Current.Tray.Theme);
+        _audioWatcher?.SyncTimer();
+        _powerWatcher?.SyncTimer();
+        _headsetWatcher?.SyncWatch();
+        DashToSteamVr.SyncSessionWatch();
+        DashToSteamVr.SyncSteamVrExitWatch();
+        Log.Info("Reloaded feature watchers after settings change.");
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
-        if (Settings.Current.Service.StopServiceWhenToolExits)
-        {
-            Log.Info(Oculus.Stop());
-        }
-
-        if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
-        {
-            Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
-        }
-
+        // Stop session watchers first so stopping OVRService does not fire exit toasts / audio restore races.
         _dashToSteamVr?.Dispose();
         _linkSessionWatcher?.Dispose();
         _steamLinkAssist?.Dispose();
@@ -253,6 +261,17 @@ public partial class App : System.Windows.Application
         HotKeys.Dispose();
         Voice.Dispose();
         HeadsetAnnouncer.Dispose();
+
+        if (Settings.Current.Service.StopServiceWhenToolExits)
+        {
+            Log.Info(Oculus.Stop());
+        }
+
+        if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
+        {
+            Log.Info(Power.RestoreFallbackPlan(Settings.Current.Power));
+        }
+
         _tray?.Dispose();
         Settings.Save();
         try

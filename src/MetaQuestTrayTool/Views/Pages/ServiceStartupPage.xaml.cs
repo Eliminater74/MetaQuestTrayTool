@@ -205,10 +205,14 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
             }
         }
 
-        App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch = enabled;
-        App.Instance.Settings.Save();
-        // Write registry immediately (without service restart); user can click Apply for restart.
+        // PreferPreventDashLaunch is set inside SetPreventDashLaunch only after registry write succeeds.
         var summary = App.Instance.DashToSteamVr.SetPreventDashLaunch(enabled, restartOvrService: false);
+        // Re-sync checkbox if the write failed (typically missing elevation).
+        _loading = true;
+        PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
+                                   || App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch;
+        _loading = false;
+
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch() + " " + summary;
         CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
         LoadCoreChannelBox();
@@ -219,11 +223,16 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
     {
         var enabled = PreventDashBox.IsChecked == true;
         var summary = App.Instance.DashToSteamVr.SetPreventDashLaunch(enabled, restartOvrService: true);
+        _loading = true;
+        PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
+                                   || App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch;
+        _loading = false;
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
         CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();
         LoadCoreChannelBox();
         ServiceStatusText.Text = $"{OculusRuntimeService.ServiceName}: {App.Instance.Oculus.ServiceStatus}";
         UpdateServiceButtons();
+        App.Instance.DashToSteamVr.SyncSessionWatch();
         System.Windows.MessageBox.Show(
             Window.GetWindow(this),
             summary,

@@ -390,10 +390,9 @@ public sealed class PcvrReadyService
     private string FixDashToSteamVr()
     {
         var dash = _app.Settings.Current.DashToSteamVr;
-        dash.PreferPreventDashLaunch = true;
         dash.SwitchOpenXrToSteamVr = true;
         _app.Settings.Save();
-        _app.DashToSteamVr.SyncSessionWatch();
+        // PreferPreventDashLaunch is latched only inside SetPreventDashLaunch after a successful write.
         return _app.DashToSteamVr.SetPreventDashLaunch(enabled: true, restartOvrService: false)
                + " Enable Apply + restart OVRService on Service & Startup for full effect.";
     }

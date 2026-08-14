@@ -107,6 +107,22 @@ Use **Test listen once** in Configure to try without leaving the window.
 
 ---
 
+## Headset announcements
+
+**Tray Tool → Speak status in headset** (off by default)
+
+Windows TTS on the Link / VR audio path so you **hear** what the tray is doing when you cannot see desktop balloons.
+
+Examples: “Connected. Air Link.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.” · “Starting SteamVR.”
+
+Sub-toggles: connect, disconnect, profiles, launch, Dash→SteamVR, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect only mid-game.
+
+**Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
+
+Waits ~900 ms for Link audio; uses WASAPI if Windows default is not the headset.
+
+---
+
 ## Not implemented yet
 
 - Hotkey profiles per game (global only today)

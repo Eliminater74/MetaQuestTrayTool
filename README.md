@@ -129,7 +129,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 ## Requirements
 
 - Windows 10 / 11 (64-bit)
-- [Meta Quest PC app](https://www.meta.com/quest/setup-link/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
+- [Meta Quest PC app](https://www.meta.com/quest/setup/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
 - For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once, or Wireless debugging **Pair** + Connect). ADB is bundled — no Android Studio required
 
 ### Steam Link vs Quest Link — do I need Meta on the PC?

@@ -54,7 +54,7 @@ More stills: [[Screenshots-and-Videos]]
 ## Requirements
 
 - Windows 10 / 11 (64-bit)
-- [Meta Quest PC app](https://www.meta.com/quest/setup-link/) for Quest Link / Air Link features
+- [Meta Quest PC app](https://www.meta.com/quest/setup/) for Quest Link / Air Link features
 - [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for Steam PCVR
 - Headset ADB: Quest **Developer Mode** (USB or Wireless debugging). ADB is bundled.
 

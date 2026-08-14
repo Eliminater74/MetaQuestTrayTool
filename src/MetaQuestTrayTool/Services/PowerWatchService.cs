@@ -64,15 +64,13 @@ public sealed class PowerWatchService : IDisposable
             return;
         }
 
-        // LinkAudioSession and OculusService both currently key off OVRService running state.
-        _app.Oculus.Refresh();
-        var running = _app.Oculus.IsServiceRunning;
+        var running = IsVrPowerSessionActive(settings);
         if (_wasRunning is null)
         {
             _wasRunning = running;
             if (running && !_vrPlanActive)
             {
-                ApplyVr("Oculus service is already running.");
+                ApplyVr("VR power session already active.");
             }
 
             SyncTimer();
@@ -88,14 +86,43 @@ public sealed class PowerWatchService : IDisposable
         _wasRunning = running;
         if (running)
         {
-            ApplyVr("Oculus service started.");
+            ApplyVr(settings.ApplyOn == Models.PowerPlanTrigger.OculusService
+                ? "Oculus service started."
+                : "PCVR / Link session started.");
         }
         else
         {
-            Restore("Oculus service stopped.");
+            Restore(settings.ApplyOn == Models.PowerPlanTrigger.OculusService
+                ? "Oculus service stopped."
+                : "PCVR / Link session ended.");
         }
 
         SyncTimer();
+    }
+
+    private bool IsVrPowerSessionActive(Models.PowerSettings settings)
+    {
+        if (settings.ApplyOn == Models.PowerPlanTrigger.OculusService)
+        {
+            _app.Oculus.Refresh();
+            return _app.Oculus.IsServiceRunning;
+        }
+
+        // LinkAudioSession — live PCVR stream or headset as Windows default (Link audio).
+        try
+        {
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
+            if (status.SteamVrRunning || status.VirtualDesktopRunning || status.MetaLinkStreaming)
+            {
+                return true;
+            }
+
+            return _app.Audio.IsLinkAudioSessionActive(_app.Settings.Current.Audio);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void ApplyVr(string reason)

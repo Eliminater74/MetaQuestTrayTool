@@ -35,6 +35,7 @@ public sealed class DashToSteamVrService : IDisposable
     private readonly App _app;
     private readonly DispatcherTimer _sessionTimer;
     private readonly DispatcherTimer _steamVrExitWatch;
+    private DispatcherTimer? _pendingAutoLaunchTimer;
     private bool _ranThisMetaSession;
     private bool _wasMetaSession;
     private bool _sawSteamVrRunning;
@@ -126,8 +127,8 @@ public sealed class DashToSteamVrService : IDisposable
     }
 
     /// <summary>
-    /// Arm SteamVR-exit → OVRService restart when the option is on and we either already
-    /// saw SteamVR this session, or SteamVR is running now (e.g. PreventDashLaunch path).
+    /// Keep SteamVR-exit → OVRService watch only if we armed it from Dash→SteamVR (RunNow).
+    /// Do not latch onto Steam Link / unrelated SteamVR sessions at tray start.
     /// </summary>
     public void SyncSteamVrExitWatch()
     {
@@ -137,15 +138,8 @@ public sealed class DashToSteamVrService : IDisposable
             return;
         }
 
-        if (IsProcessRunning("vrserver"))
+        if (_sawSteamVrRunning || _steamVrExitWatch.IsEnabled || _waitingForFirstSteamVrPolls > 0)
         {
-            ArmSteamVrExitWatch(sawRunning: true);
-            return;
-        }
-
-        if (_sawSteamVrRunning || _steamVrExitWatch.IsEnabled)
-        {
-            // Keep polling until exit is confirmed / handled.
             if (!_steamVrExitWatch.IsEnabled)
             {
                 _steamVrExitWatch.Start();
@@ -157,6 +151,7 @@ public sealed class DashToSteamVrService : IDisposable
 
     public void Dispose()
     {
+        CancelPendingAutoLaunch();
         _sessionTimer.Stop();
         _steamVrExitWatch.Stop();
     }
@@ -530,35 +525,53 @@ public sealed class DashToSteamVrService : IDisposable
                 ? "auto SteamVR (PreventDashLaunch)"
                 : "auto on Meta Link connect";
             _app.Log.Info($"Meta Link connected — {reason} in 3s…");
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-            timer.Tick += (_, _) =>
-            {
-                timer.Stop();
-                try
-                {
-                    // Re-check still on Meta Link (user may have switched to Steam Link).
-                    var again = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
-                    if (!again.MetaLinkStreaming)
-                    {
-                        _app.Log.Info("Auto Dash → SteamVR cancelled — Meta Link session no longer active.");
-                        _ranThisMetaSession = false;
-                        _streamingConfirmPolls = 0;
-                        return;
-                    }
-
-                    RunNow(reason);
-                }
-                catch (Exception ex)
-                {
-                    _app.Log.Warn($"Auto Dash → SteamVR failed: {ex.Message}");
-                }
-            };
-            timer.Start();
+            CancelPendingAutoLaunch();
+            _pendingAutoLaunchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _pendingAutoLaunchTimer.Tick += OnPendingAutoLaunchTick;
+            _pendingAutoLaunchTimer.Tag = reason;
+            _pendingAutoLaunchTimer.Start();
         }
         catch (Exception ex)
         {
             _app.Log.Warn($"Dash → SteamVR auto poll failed: {ex.Message}");
         }
+    }
+
+    private void OnPendingAutoLaunchTick(object? sender, EventArgs e)
+    {
+        var timer = sender as DispatcherTimer ?? _pendingAutoLaunchTimer;
+        var reason = timer?.Tag as string ?? "auto SteamVR (PreventDashLaunch)";
+        CancelPendingAutoLaunch();
+        try
+        {
+            // Re-check still on Meta Link (user may have switched to Steam Link).
+            var again = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            if (!again.MetaLinkStreaming)
+            {
+                _app.Log.Info("Auto Dash → SteamVR cancelled — Meta Link session no longer active.");
+                _ranThisMetaSession = false;
+                _streamingConfirmPolls = 0;
+                return;
+            }
+
+            RunNow(reason);
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn($"Auto Dash → SteamVR failed: {ex.Message}");
+        }
+    }
+
+    private void CancelPendingAutoLaunch()
+    {
+        if (_pendingAutoLaunchTimer is null)
+        {
+            return;
+        }
+
+        _pendingAutoLaunchTimer.Stop();
+        _pendingAutoLaunchTimer.Tick -= OnPendingAutoLaunchTick;
+        _pendingAutoLaunchTimer = null;
     }
 
     private bool ShouldAutoStartSteamVrOnMetaLink() =>

@@ -167,10 +167,7 @@ public sealed class AudioSwitchWatcher : IDisposable
 
     private bool IsPcvrSessionActive(AudioSwitchSettings settings, bool forExitWhileLatched)
     {
-        if (forExitWhileLatched)
-        {
-            return IsLivePcvrStream();
-        }
+        _ = forExitWhileLatched;
 
         if (settings.Trigger == AudioSwitchTrigger.OculusService)
         {
@@ -178,21 +175,9 @@ public sealed class AudioSwitchWatcher : IDisposable
             return _app.Oculus.IsServiceRunning;
         }
 
-        try
-        {
-            // Match other watchers' probe args so the 5s cache is shared.
-            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
-            if (status.SessionActive)
-            {
-                return true;
-            }
-        }
-        catch
-        {
-            // Probe optional.
-        }
-
-        return false;
+        // Entry and exit both require a live stream — SessionActive alone includes EnumHmd /
+        // DeviceCache Wi‑Fi ghosts that would steal desktop audio while Link is not up.
+        return IsLivePcvrStream();
     }
 
     /// <summary>
