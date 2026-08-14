@@ -63,27 +63,42 @@ jobs:
           path: dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
           retention-days: 30
 
+      - name: Extract changelog
+        id: changelog
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $section = & .\scripts\Extract-Changelog.ps1 -Version $version
+          $path = Join-Path $env:RUNNER_TEMP "release-notes.md"
+          $sb = New-Object System.Text.StringBuilder
+          [void]$sb.AppendLine("## Meta Quest Tray Tool $version")
+          [void]$sb.AppendLine()
+          [void]$sb.AppendLine($section)
+          [void]$sb.AppendLine()
+          [void]$sb.AppendLine("---")
+          [void]$sb.AppendLine()
+          [void]$sb.AppendLine("**Windows Setup (recommended):** download ``MetaQuestTrayTool-Setup-$version.exe``, run it, then launch from the Start Menu or system tray.")
+          [void]$sb.AppendLine()
+          [void]$sb.AppendLine("- Self-contained installer (includes .NET 8 — no separate runtime install)")
+          [void]$sb.AppendLine("- Settings persist in ``%AppData%\MetaQuestTrayTool\``")
+          [void]$sb.AppendLine("- Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)")
+          [void]$sb.AppendLine()
+          [void]$sb.AppendLine("### Requirements")
+          [void]$sb.AppendLine("- Windows 10 / 11 (64-bit)")
+          [void]$sb.AppendLine("- Meta Quest PC app and/or SteamVR for the features you use")
+          Set-Content -Path $path -Value $sb.ToString().TrimEnd() -Encoding utf8
+          "notes_path=$path" >> $env:GITHUB_OUTPUT
+          Write-Host "Release notes written to $path"
+          Get-Content $path
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Meta Quest Tray Tool ${{ steps.version.outputs.tag }}
-          body: |
-            ## Meta Quest Tray Tool ${{ steps.version.outputs.version }}
-
-            **Windows Setup (recommended):** download `MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe`, run it, then launch from the Start Menu or system tray.
-
-            - Self-contained installer (includes .NET 8 — no separate runtime install)
-            - Inspired by ApollyonVR's Oculus Tray Tool — new C# rewrite, not a decompile
-            - Settings persist in `%AppData%\MetaQuestTrayTool\`
-
-            ### Requirements
-            - Windows 10 / 11 (64-bit)
-            - Meta Quest PC app and/or SteamVR for the features you use
-
-            See [README](https://github.com/Eliminater74/MetaQuestTrayTool#readme) for full feature list.
+          body_path: ${{ steps.changelog.outputs.notes_path }}
           files: dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
           draft: false
           prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease }}
-          generate_release_notes: true
+          generate_release_notes: false
           make_latest: true

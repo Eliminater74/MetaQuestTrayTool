@@ -73,5 +73,8 @@ git push origin v1.0.0
 | --- | --- |
 | `MetaQuestTrayTool.iss` | Inno Setup script |
 | `LICENSE.txt` | Shown on the license page |
-| `WELCOME.txt` | Info page before install |
-| `../scripts/build-installer.ps1` | One-shot publish + compile |
+| `WHATSNEW.txt` | Generated from `CHANGELOG.md` — shown before install so users can review changes |
+| `WELCOME.txt` | Short product overview (kept for docs / reference) |
+| `../scripts/build-installer.ps1` | One-shot publish + changelog extract + compile |
+| `../scripts/Extract-Changelog.ps1` | Pulls one version section from `CHANGELOG.md` |
+| `../CHANGELOG.md` | Source of truth for release / update / installer notes |

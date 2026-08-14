@@ -103,6 +103,14 @@ if (-not $iscc) {
 Write-Host "Compiling installer with Inno Setup..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Path $distDir -Force | Out-Null
 
+# Generate plain-text "What's new" page from CHANGELOG.md for this version.
+$whatsNew = Join-Path $root "installer\WHATSNEW.txt"
+& (Join-Path $PSScriptRoot "Extract-Changelog.ps1") `
+    -Version $Version `
+    -OutFile $whatsNew `
+    -IncludeHeader `
+    -PlainText
+
 # Paths in the .iss are relative to the .iss file location (installer\).
 $publishForIss = "..\publish\win-x64"
 & $iscc `

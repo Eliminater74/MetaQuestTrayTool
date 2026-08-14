@@ -15,6 +15,7 @@ public sealed class UpdateCheckResult
     public Version? LatestVersion { get; init; }
     public string? TagName { get; init; }
     public string? ReleaseHtmlUrl { get; init; }
+    public string? ReleaseNotes { get; init; }
     public string? InstallerFileName { get; init; }
     public Uri? InstallerDownloadUrl { get; init; }
     public string? Error { get; init; }
@@ -90,6 +91,7 @@ public sealed class UpdateService
             }
 
             string? htmlUrl = root.TryGetProperty("html_url", out var htmlEl) ? htmlEl.GetString() : null;
+            string? releaseNotes = root.TryGetProperty("body", out var bodyEl) ? bodyEl.GetString() : null;
             string? fileName = null;
             Uri? downloadUrl = null;
             if (root.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
@@ -126,6 +128,7 @@ public sealed class UpdateService
                     LatestVersion = latest,
                     TagName = tag,
                     ReleaseHtmlUrl = htmlUrl,
+                    ReleaseNotes = releaseNotes,
                     Error = $"Release {tag} has no Setup.exe asset."
                 };
             }
@@ -136,6 +139,7 @@ public sealed class UpdateService
                 LatestVersion = latest,
                 TagName = tag,
                 ReleaseHtmlUrl = htmlUrl,
+                ReleaseNotes = releaseNotes,
                 InstallerFileName = fileName,
                 InstallerDownloadUrl = downloadUrl
             };
@@ -335,13 +339,28 @@ public sealed class UpdateService
                 _app.TrayNotify("Update available", $"{result.TagName} is ready to install.");
             }
 
-            answer = ShowMessage(
-                owner,
+            var notes = FormatReleaseNotesForPrompt(result.ReleaseNotes);
+            var prompt =
                 $"A newer version is available.\n\n" +
                 $"Current: {result.CurrentVersion}\n" +
-                $"Latest:  {result.LatestVersion} ({result.TagName})\n\n" +
+                $"Latest:  {result.LatestVersion} ({result.TagName})\n\n";
+            if (!string.IsNullOrWhiteSpace(notes))
+            {
+                prompt += "What's new:\n" + notes + "\n\n";
+            }
+            else if (!string.IsNullOrWhiteSpace(result.ReleaseHtmlUrl))
+            {
+                prompt += $"Release notes: {result.ReleaseHtmlUrl}\n\n";
+            }
+
+            prompt +=
                 "Download the Setup installer and install over this copy?\n" +
-                "Meta Quest Tray Tool will close so files can be replaced.",
+                "Meta Quest Tray Tool will close so files can be replaced.\n\n" +
+                "Choose No to stay on your current version.";
+
+            answer = ShowMessage(
+                owner,
+                prompt,
                 App.AppName,
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -398,6 +417,61 @@ public sealed class UpdateService
         return owner is null
             ? System.Windows.MessageBox.Show(message, caption, buttons, icon)
             : System.Windows.MessageBox.Show(owner, message, caption, buttons, icon);
+    }
+
+    /// <summary>
+    /// Strip markdown noise and keep the prompt readable in a WinForms/WPF MessageBox.
+    /// </summary>
+    private static string FormatReleaseNotesForPrompt(string? markdown, int maxChars = 1200)
+    {
+        if (string.IsNullOrWhiteSpace(markdown))
+        {
+            return string.Empty;
+        }
+
+        var lines = markdown
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Split('\n')
+            .Select(line => line.TrimEnd())
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Where(line => !line.StartsWith("---", StringComparison.Ordinal))
+            .Where(line => !line.StartsWith("**Windows Setup", StringComparison.OrdinalIgnoreCase))
+            .Where(line => !line.StartsWith("### Requirements", StringComparison.OrdinalIgnoreCase))
+            .Where(line => !line.StartsWith("- Self-contained", StringComparison.OrdinalIgnoreCase))
+            .Where(line => !line.StartsWith("- Settings persist", StringComparison.OrdinalIgnoreCase))
+            .Where(line => !line.StartsWith("- Full history", StringComparison.OrdinalIgnoreCase))
+            .Where(line => !line.StartsWith("- Windows 10", StringComparison.OrdinalIgnoreCase))
+            .Where(line => !line.StartsWith("- Meta Quest PC", StringComparison.OrdinalIgnoreCase))
+            .Select(line =>
+            {
+                var cleaned = line
+                    .Replace("**", "", StringComparison.Ordinal)
+                    .Replace("`", "", StringComparison.Ordinal);
+                if (cleaned.StartsWith("## ", StringComparison.Ordinal))
+                {
+                    cleaned = cleaned[3..].Trim();
+                }
+                else if (cleaned.StartsWith("### ", StringComparison.Ordinal))
+                {
+                    cleaned = cleaned[4..].Trim() + ":";
+                }
+
+                return cleaned;
+            })
+            .ToList();
+
+        if (lines.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var text = string.Join(Environment.NewLine, lines);
+        if (text.Length <= maxChars)
+        {
+            return text;
+        }
+
+        return text[..(maxChars - 1)].TrimEnd() + "…";
     }
 
     public static Version? ParseVersion(string? text)

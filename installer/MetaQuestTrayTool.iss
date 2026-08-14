@@ -28,7 +28,8 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\installer\LICENSE.txt
-InfoBeforeFile=..\installer\WELCOME.txt
+; Generated from CHANGELOG.md by scripts/build-installer.ps1 (see what's new before install).
+InfoBeforeFile=..\installer\WHATSNEW.txt
 OutputDir=..\dist
 OutputBaseFilename=MetaQuestTrayTool-Setup-{#MyAppVersion}
 SetupIconFile=..\src\MetaQuestTrayTool\Resources\Icons\App.ico

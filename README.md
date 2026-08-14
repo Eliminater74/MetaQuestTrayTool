@@ -46,7 +46,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset.
 
-**Past releases:** [all versions on GitHub](https://github.com/Eliminater74/MetaQuestTrayTool/releases)
+**Past releases:** [all versions on GitHub](https://github.com/Eliminater74/MetaQuestTrayTool/releases) · **What's new:** [CHANGELOG.md](CHANGELOG.md)
 
 The installer is **self-contained** (includes .NET 8 — no separate runtime install). Settings are stored in `%AppData%\MetaQuestTrayTool\` and are kept if you uninstall.
 

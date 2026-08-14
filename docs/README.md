@@ -4,6 +4,7 @@
 | --- | --- |
 | [ODT-REGISTRY.md](ODT-REGISTRY.md) | Oculus Debug Tool registry keys vs CLI commands (from Meta binaries) |
 | [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
+| [../CHANGELOG.md](../CHANGELOG.md) | What's new per release (also shown in Setup and the in-app updater) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
 | [../README.md](../README.md) | User guide, download, feature inventory (v1.1.3) |
 | [wiki/](wiki/) | GitHub Wiki source (user guide, troubleshooting, videos) |
