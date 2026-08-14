@@ -246,7 +246,7 @@ public sealed class UpdateService
         {
             await _app.Dispatcher.InvokeAsync(() =>
             {
-                System.Windows.MessageBox.Show(
+                ShowMessage(
                     owner,
                     "An update check is already in progress.",
                     App.AppName,
@@ -302,7 +302,7 @@ public sealed class UpdateService
                 _app.Log.Warn($"Update check failed: {result.Error}");
                 if (!quietIfUpToDate)
                 {
-                    System.Windows.MessageBox.Show(
+                    ShowMessage(
                         owner,
                         $"Could not check for updates.\n\n{result.Error}",
                         App.AppName,
@@ -318,7 +318,7 @@ public sealed class UpdateService
                 _app.Log.Info($"Up to date ({result.CurrentVersion}). Latest release: {result.TagName}.");
                 if (!quietIfUpToDate)
                 {
-                    System.Windows.MessageBox.Show(
+                    ShowMessage(
                         owner,
                         $"You are on the latest version ({result.CurrentVersion}).",
                         App.AppName,
@@ -335,7 +335,7 @@ public sealed class UpdateService
                 _app.TrayNotify("Update available", $"{result.TagName} is ready to install.");
             }
 
-            answer = System.Windows.MessageBox.Show(
+            answer = ShowMessage(
                 owner,
                 $"A newer version is available.\n\n" +
                 $"Current: {result.CurrentVersion}\n" +
@@ -377,7 +377,7 @@ public sealed class UpdateService
             _app.Log.Error("Update download/install failed.", ex);
             await _app.Dispatcher.InvokeAsync(() =>
             {
-                System.Windows.MessageBox.Show(
+                ShowMessage(
                     owner,
                     $"Could not download or start the installer.\n\n{ex.Message}",
                     App.AppName,
@@ -385,6 +385,19 @@ public sealed class UpdateService
                     MessageBoxImage.Error);
             });
         }
+    }
+
+    private static MessageBoxResult ShowMessage(
+        Window? owner,
+        string message,
+        string caption,
+        MessageBoxButton buttons,
+        MessageBoxImage icon)
+    {
+        // Tray-only / scheduled checks have no shell window — owner overload throws on null.
+        return owner is null
+            ? System.Windows.MessageBox.Show(message, caption, buttons, icon)
+            : System.Windows.MessageBox.Show(owner, message, caption, buttons, icon);
     }
 
     public static Version? ParseVersion(string? text)
