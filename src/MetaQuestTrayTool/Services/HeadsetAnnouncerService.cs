@@ -160,7 +160,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
                 _queue.Enqueue(phrase);
             }
 
-            _app.Dispatcher.BeginInvoke(new Action(BeginDrainQueue));
+            _ = _app.Dispatcher.InvokeAsync(BeginDrainQueue);
         });
     }
 

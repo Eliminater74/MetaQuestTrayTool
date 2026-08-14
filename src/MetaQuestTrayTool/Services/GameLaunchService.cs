@@ -32,6 +32,7 @@ public sealed class GameLaunchService
 
         var launch = StartGame(game);
         _app.TrayNotify("Launch", $"{game.Name}\n{launch}");
+        _app.HeadsetAnnouncer.AnnounceGameLaunch(game.Name);
         return launch;
     }
 
@@ -54,6 +55,7 @@ public sealed class GameLaunchService
             var msg = $"Launched Steam app {profile.AppId} ({profile.Name}). Profile armed.";
             _app.Log.Info(msg);
             _app.TrayNotify("Launch", msg);
+            _app.HeadsetAnnouncer.AnnounceGameLaunch(profile.Name);
             return msg;
         }
 
@@ -66,6 +68,7 @@ public sealed class GameLaunchService
                 var msg = $"Launched {profile.Name} ({exe}). Profile armed.";
                 _app.Log.Info(msg);
                 _app.TrayNotify("Launch", msg);
+                _app.HeadsetAnnouncer.AnnounceGameLaunch(profile.Name);
                 return msg;
             }
         }

@@ -130,6 +130,8 @@ public sealed class SteamLinkAssistService : IDisposable
                 {
                     _app.TrayNotify("Steam Link", "OpenXR is not SteamVR — OpenXR games may fail. See Info / Game Settings.");
                 }
+
+                _app.HeadsetAnnouncer.AnnounceSteamLink("OpenXR is not SteamVR.");
             });
         }
 
@@ -157,6 +159,8 @@ public sealed class SteamLinkAssistService : IDisposable
             {
                 _app.TrayNotify("Steam Link", "Switched OpenXR to SteamVR for this session.");
             }
+
+            _app.HeadsetAnnouncer.AnnounceSteamLink("Switched OpenXR to SteamVR.");
         });
     }
 
@@ -203,6 +207,9 @@ public sealed class SteamLinkAssistService : IDisposable
                 "Steam Link",
                 $"Restored OpenXR to {OpenXrRuntimeService.Label(restoreTo)}.");
         }
+
+        _app.HeadsetAnnouncer.AnnounceSteamLink(
+            $"Restored OpenXR to {OpenXrRuntimeService.Label(restoreTo)}.");
     }
 
     private static bool IsSteamLinkSession(VrConnectionStatus status) =>

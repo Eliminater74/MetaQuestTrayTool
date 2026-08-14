@@ -201,6 +201,8 @@ public sealed class DashToSteamVrService : IDisposable
             _app.TrayNotify("Dash → SteamVR", summary);
         }
 
+        _app.HeadsetAnnouncer.AnnounceDashToSteamVr();
+
         return summary;
     }
 
@@ -659,6 +661,8 @@ public sealed class DashToSteamVrService : IDisposable
                 {
                     _app.TrayNotify("SteamVR exit", summary);
                 }
+
+                _app.HeadsetAnnouncer.AnnounceSteamVrExit();
             }
             finally
             {
