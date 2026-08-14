@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -230,6 +230,11 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] OVRService Manual-at-boot toggle (Service & Startup) + re-apply after Meta reset
 - [x] Bump version to **1.1.1**
 - [x] Tag and publish **v1.1.1**
+- [x] Headset announcements (TTS in Quest on connect/profile/launch/Dash→SteamVR)
+- [x] Fix false PreventDashLaunch SteamVR auto-start when Link not streaming
+- [x] Expand voice commands (recover PCVR, audio, OpenXR, overlays, GPU preset)
+- [x] Bump version to **1.1.2**
+- [x] Tag and publish **v1.1.2**
 
 ### Housekeeping (ongoing)
 

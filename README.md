@@ -46,7 +46,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.1) (latest) | [MetaQuestTrayTool-Setup-1.1.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.1/MetaQuestTrayTool-Setup-1.1.1.exe) |
+| [v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.2) (latest) | [MetaQuestTrayTool-Setup-1.1.2.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/MetaQuestTrayTool-Setup-1.1.2.exe) |
+| [v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.1) | [MetaQuestTrayTool-Setup-1.1.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.1/MetaQuestTrayTool-Setup-1.1.1.exe) |
 | [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.0) | [MetaQuestTrayTool-Setup-1.1.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.0/MetaQuestTrayTool-Setup-1.1.0.exe) |
 | [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.19) | [MetaQuestTrayTool-Setup-1.0.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.19/MetaQuestTrayTool-Setup-1.0.19.exe) |
 | [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.18) | [MetaQuestTrayTool-Setup-1.0.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.18/MetaQuestTrayTool-Setup-1.0.18.exe) |
@@ -172,7 +173,7 @@ These are different PCVR paths:
 
 ## What works now
 
-Release **[v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **OVRService Manual-at-boot** on Service & Startup — keep Quest Link installed but stop Meta starting at Windows sign-in (documented limits). v1.1.0 fixed PCVR audio restore, PreventDashLaunch tray-start SteamVR, and tray update check.
+Release **[v1.1.2](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **Headset announcements** speak connect/profile/launch status in the Quest; **expanded voice** (recover PCVR, audio, OpenXR, overlays, GPU preset); tighter **PreventDashLaunch** streaming detect so SteamVR does not auto-start when disconnected. v1.1.1 added OVRService Manual-at-boot.
 
 ### Shell & tray
 
@@ -222,8 +223,9 @@ Release **[v1.1.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 
 ### HotKeys, voice, updates, tools
 
-- HotKeys: default **Ctrl+Numpad 0–9**; configure UI; assign Debug Tool / SteamVR Home
-- Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
+- HotKeys: default **Ctrl+Numpad 0–9**; configure UI; assign Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
+- Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
+- **Headset announcements** (Tray Tool): optional TTS in the Quest on connect, profile apply, launch, Dash→SteamVR — when desktop toasts are not visible in-headset
 - In-app updates from GitHub `v*` (on start, schedule, or Check now); ADB stopped before Setup
 - **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
 - Backup export/import from Advanced; Donate (PayPal); **quiet tray idle** — adaptive watcher cadence (~30–45s when unused, faster only in PCVR / armed features); timers stop when features are off; Status/Info pause when the shell is hidden to the tray; shared Link probe caches
