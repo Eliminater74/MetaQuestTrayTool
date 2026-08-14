@@ -647,6 +647,7 @@ public sealed class DashToSteamVrService : IDisposable
 
             _restartingOvrAfterSteamVrExit = true;
             StopSteamVrExitWatch(resetSaw: true);
+            _app.AudioWatch?.NotifyPcvrSessionEnded("SteamVR exited — restoring desktop / fallback audio.");
             try
             {
                 var result = _app.Oculus.Restart();

@@ -58,6 +58,21 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
     }
 
+    /// <summary>Immediate restore when Link / SteamVR session drop is detected elsewhere.</summary>
+    public void NotifyPcvrSessionEnded(string reason)
+    {
+        if (!_app.Settings.Current.Audio.AutoSwitchEnabled || !_vrDevicesApplied)
+        {
+            return;
+        }
+
+        _deadSessionHits = 0;
+        _baselineHardware = false;
+        _baselineHeadsetAudio = false;
+        RestoreFallback(reason);
+        SyncTimer();
+    }
+
     private void Poll()
     {
         var settings = _app.Settings.Current.Audio;
@@ -67,8 +82,11 @@ public sealed class AudioSwitchWatcher : IDisposable
             return;
         }
 
-        var hardware = IsHardwarePcvrSession(settings);
-        var headsetAudio = settings.Trigger == AudioSwitchTrigger.LinkAudioDevice
+        // While latched we switched output to the headset — do not treat "headset is still
+        // default" as session-alive or audio never restores after PCVR exit.
+        var hardware = IsPcvrSessionActive(settings, forExitWhileLatched: _vrDevicesApplied);
+        var headsetAudio = !_vrDevicesApplied
+                           && settings.Trigger == AudioSwitchTrigger.LinkAudioDevice
                            && _app.Audio.IsLinkAudioSessionActive(settings);
         var sessionAlive = hardware
                            || (settings.Trigger == AudioSwitchTrigger.LinkAudioDevice && headsetAudio);
@@ -125,7 +143,7 @@ public sealed class AudioSwitchWatcher : IDisposable
             return;
         }
 
-        // Stay latched while hardware OR (Link-audio trigger) headset default remains.
+        // Latched: only live PCVR stream signals (SteamVR / Link streaming / VD) — not our own VR default.
         if (sessionAlive)
         {
             _deadSessionHits = 0;
@@ -147,8 +165,13 @@ public sealed class AudioSwitchWatcher : IDisposable
         SyncTimer();
     }
 
-    private bool IsHardwarePcvrSession(AudioSwitchSettings settings)
+    private bool IsPcvrSessionActive(AudioSwitchSettings settings, bool forExitWhileLatched)
     {
+        if (forExitWhileLatched)
+        {
+            return IsLivePcvrStream();
+        }
+
         if (settings.Trigger == AudioSwitchTrigger.OculusService)
         {
             _app.Oculus.Refresh();
@@ -169,26 +192,29 @@ public sealed class AudioSwitchWatcher : IDisposable
             // Probe optional.
         }
 
-        // Skip ADB while quiet/unlatched — Link probe + headset-default cover enter/exit.
-        if (!_vrDevicesApplied)
-        {
-            return false;
-        }
+        return false;
+    }
 
+    /// <summary>
+    /// True while a real PCVR stream is up — used to release the VR-audio latch on exit.
+    /// Ignores DeviceCache auto-connect, ADB, and headset-as-default (we set that ourselves).
+    /// </summary>
+    private bool IsLivePcvrStream()
+    {
         try
         {
-            var quest = _app.Headset.ReadIdentity(_app.Settings.Current.Headset);
-            if (quest.IsVrHeadset && quest.IsReady && !quest.IsRogue)
+            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            if (status.SteamVrRunning || status.VirtualDesktopRunning)
             {
                 return true;
             }
+
+            return status.MetaLinkStreaming;
         }
         catch
         {
-            // ADB optional.
+            return false;
         }
-
-        return false;
     }
 
     private void RememberDesktopFallback(AudioSwitchSettings audio)
