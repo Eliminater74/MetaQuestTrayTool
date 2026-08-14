@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.0.18)
+## Current product (v1.0.19)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -77,7 +77,7 @@ Bundled platform-tools, SideQuest-style props, apply on connect, paste/proximity
 
 Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + Donate, Inno Setup self-contained Setup.exe, CI + Release on `v*` tags.
 
-### Post v1.0.0 → v1.0.18
+### Post v1.0.0 → v1.0.19
 
 | Tag | Focus |
 | --- | --- |
@@ -92,6 +92,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.0.16 | Quieter idle: adaptive watcher cadence; Sync* wiring; stop disabled timers; pause Status/Info when shell hidden |
 | v1.0.17 | Restart OVRService on SteamVR exit; PreventDashLaunch-only path (removed Meta process killing); Steam Link vs Quest Link docs |
 | v1.0.18 | Fix PreventDashLaunch auto SteamVR on DeviceCache auto-connect (headset on Wi‑Fi, Link not streaming) |
+| v1.0.19 | Fix Check for updates crash from tray when settings window is closed |
 
 ---
 

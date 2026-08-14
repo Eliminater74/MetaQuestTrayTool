@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -222,8 +222,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] PreventDashLaunch-only — remove Meta process killing (Dash reaper, close client)
 - [x] Docs: Steam Link vs Quest Link; Meta Horizon Link startup investigation
 - [x] Fix PreventDashLaunch auto SteamVR on DeviceCache auto-connect ghost
-- [x] Bump version to **1.0.18**
-- [x] Tag and publish **v1.0.18**
+- [x] Fix Check for updates crash (null MessageBox owner from tray)
+- [x] Bump version to **1.0.19**
+- [x] Tag and publish **v1.0.19**
 
 ### Housekeeping (ongoing)
 
