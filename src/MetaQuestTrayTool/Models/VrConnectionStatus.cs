@@ -20,7 +20,7 @@ public sealed class VrConnectionStatus
 
     /// <summary>
     /// Meta Link is actively streaming — not DeviceCache auto-connect or EnumHmd-only with OVRService up.
-    /// Used for PreventDashLaunch → auto SteamVR (requires Link audio, rd connected, or connectionState).
+    /// Used for PreventDashLaunch → auto SteamVR (connectionState, RD, EnumHmd+primary, RemoteDesktopCompanion, or Link audio).
     /// </summary>
     public bool MetaLinkStreaming { get; init; }
     public bool? IsUsingAirLink { get; init; }

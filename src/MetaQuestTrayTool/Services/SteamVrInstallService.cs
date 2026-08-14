@@ -339,7 +339,10 @@ public sealed class SteamVrInstallService
     {
         try
         {
-            return Process.GetProcessesByName("vrserver").Length > 0
+            // Match Dash→SteamVR: lone vrserver without compositor is not a healthy session.
+            return (Process.GetProcessesByName("vrserver").Length > 0
+                    && (Process.GetProcessesByName("vrcompositor").Length > 0
+                        || Process.GetProcessesByName("vrdashboard").Length > 0))
                    || Process.GetProcessesByName("vrstartup").Length > 0;
         }
         catch

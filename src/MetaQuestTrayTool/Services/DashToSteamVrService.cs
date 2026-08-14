@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using MetaQuestTrayTool.Models;
@@ -184,7 +185,7 @@ public sealed class DashToSteamVrService : IDisposable
         }
 
         parts.Add(LaunchSteamVr());
-        var steamVrLaunchedOrRunning = IsProcessRunning("vrserver")
+        var steamVrLaunchedOrRunning = IsSteamVrSessionHealthy()
             || parts[^1].Contains("Started SteamVR", StringComparison.OrdinalIgnoreCase)
             || parts[^1].Contains("already running", StringComparison.OrdinalIgnoreCase);
 
@@ -711,15 +712,46 @@ public sealed class DashToSteamVrService : IDisposable
 
     private string LaunchSteamVr()
     {
-        if (IsProcessRunning("vrserver"))
+        if (IsSteamVrSessionHealthy())
         {
-            return "SteamVR already running (vrserver).";
+            return "SteamVR already running (vrserver + compositor).";
+        }
+
+        var notes = new List<string>();
+        if (IsSteamVrRuntimePresent())
+        {
+            notes.Add(StopSteamVrRuntime("zombie / invisible SteamVR (vrserver without compositor)"));
+            try
+            {
+                Thread.Sleep(1500);
+            }
+            catch
+            {
+                // ignore
+            }
         }
 
         var paths = TryResolveSteamVrPaths();
         if (paths is null)
         {
-            return "Could not find SteamVR (openvrpaths.vrpath / vrstartup.exe). Launch SteamVR once from Steam, then retry.";
+            // steam:// still works when openvrpaths is missing after a bad exit.
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "steam://run/250820",
+                    UseShellExecute = true
+                });
+                notes.Add("Started SteamVR (steam://run/250820).");
+                return string.Join(" ", notes);
+            }
+            catch (Exception ex)
+            {
+                notes.Add(
+                    "Could not find SteamVR (openvrpaths.vrpath / vrstartup.exe). "
+                    + $"steam:// launch failed: {ex.Message}");
+                return string.Join(" ", notes);
+            }
         }
 
         try
@@ -730,13 +762,98 @@ public sealed class DashToSteamVrService : IDisposable
                 WorkingDirectory = Path.GetDirectoryName(paths.Value.StartupPath) ?? Environment.CurrentDirectory,
                 UseShellExecute = true
             });
-            return $"Started SteamVR ({Path.GetFileName(paths.Value.StartupPath)}).";
+            notes.Add($"Started SteamVR ({Path.GetFileName(paths.Value.StartupPath)}).");
+            return string.Join(" ", notes);
         }
         catch (Exception ex)
         {
-            return $"Could not start SteamVR: {ex.Message}";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "steam://run/250820",
+                    UseShellExecute = true
+                });
+                notes.Add($"vrstartup failed ({ex.Message}); started SteamVR via steam://run/250820.");
+                return string.Join(" ", notes);
+            }
+            catch (Exception steamEx)
+            {
+                notes.Add($"Could not start SteamVR: {ex.Message}; steam:// also failed: {steamEx.Message}");
+                return string.Join(" ", notes);
+            }
         }
     }
+
+    /// <summary>
+    /// Healthy SteamVR needs the compositor (or dashboard). A lone vrserver / vrmonitor leftover is
+    /// often invisible in the headset — relaunch instead of reporting "already running".
+    /// </summary>
+    private static bool IsSteamVrSessionHealthy() =>
+        IsProcessRunning("vrserver")
+        && (IsProcessRunning("vrcompositor") || IsProcessRunning("vrdashboard"));
+
+    private static bool IsSteamVrRuntimePresent() =>
+        SteamVrRuntimeProcessNames.Any(IsProcessRunning);
+
+    private string StopSteamVrRuntime(string reason)
+    {
+        var killed = 0;
+        foreach (var name in SteamVrRuntimeProcessNames)
+        {
+            Process[] processes;
+            try
+            {
+                processes = Process.GetProcessesByName(name);
+            }
+            catch
+            {
+                continue;
+            }
+
+            foreach (var process in processes)
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                    killed++;
+                }
+                catch
+                {
+                    try
+                    {
+                        process.Kill();
+                        killed++;
+                    }
+                    catch
+                    {
+                        // best-effort
+                    }
+                }
+                finally
+                {
+                    process.Dispose();
+                }
+            }
+        }
+
+        var summary = killed > 0
+            ? $"Stopped {killed} SteamVR process(es) ({reason})."
+            : $"No SteamVR processes to stop ({reason}).";
+        _app.Log.Info(summary);
+        return summary;
+    }
+
+    private static readonly string[] SteamVrRuntimeProcessNames =
+    [
+        "vrserver",
+        "vrcompositor",
+        "vrdashboard",
+        "vrmonitor",
+        "vrstartup",
+        "vrwebhelper",
+        "vrcleanup"
+    ];
 
     private static (string StartupPath, string ServerPath)? TryResolveSteamVrPaths()
     {
