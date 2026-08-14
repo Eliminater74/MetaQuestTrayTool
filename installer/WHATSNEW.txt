@@ -1,10 +1,13 @@
-﻿Meta Quest Tray Tool 1.1.7 - What's new
+﻿Meta Quest Tray Tool 1.1.8 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.7] - 2026-08-14
+[1.1.8] - 2026-08-14
 
-Added
-- Changelog shown on GitHub Releases, in Setup before install, and in the in-app update prompt so you can review changes before updating.
+Docs
+- Note that SideQuest running on the headset can open a wireless ADB port for Connect / auto-reconnect.
+
+Fixed
+- Status no longer shows Air Link / PCVR session Active while the Quest is off or charging (ignore leftover RemoteDesktopCompanion; ignore sticky DeviceCache alternate / isUsingAirLink ghosts).
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

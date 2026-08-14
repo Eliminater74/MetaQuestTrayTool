@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.8] - 2026-08-14
+
 ### Docs
 - Note that SideQuest running on the headset can open a wireless ADB port for Connect / auto-reconnect.
 
@@ -70,7 +72,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.7...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.8...HEAD
+[1.1.8]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.8
 [1.1.7]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.7
 [1.1.6]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.6
 [1.1.5]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.5
