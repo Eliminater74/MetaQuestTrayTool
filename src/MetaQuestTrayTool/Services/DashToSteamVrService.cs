@@ -482,7 +482,9 @@ public sealed class DashToSteamVrService : IDisposable
             SyncSteamVrExitWatch();
 
             var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
-            var meta = status.MetaLinkStreaming;
+            // Companion alone must not mark Status as connected (it lingers while charging),
+            // but a freshly started companion during PreventDash Link is a real connect attempt.
+            var meta = status.MetaLinkStreaming || IsFreshPreventDashConnectAttempt();
 
             // Manual SteamVR start (or zombie relaunch) during PreventDash Link must still arm
             // the exit watch — otherwise SteamVR exit leaves a black void with no Dash / Quest Home.
@@ -587,6 +589,52 @@ public sealed class DashToSteamVrService : IDisposable
 
     private bool ShouldAutoStartSteamVrOnMetaLink() =>
         Settings.PreferPreventDashLaunch || IsPreventDashLaunchEnabled();
+
+    /// <summary>
+    /// RemoteDesktopCompanion often stays running while the Quest is off/charging — never use it
+    /// for Status. Only treat a <b>freshly started</b> companion as a PreventDash Link attempt.
+    /// </summary>
+    private bool IsFreshPreventDashConnectAttempt()
+    {
+        if (!ShouldAutoStartSteamVrOnMetaLink() || IsSteamVrSessionHealthy())
+        {
+            return false;
+        }
+
+        return IsProcessStartedWithin("RemoteDesktopCompanion", TimeSpan.FromMinutes(2));
+    }
+
+    private static bool IsProcessStartedWithin(string processName, TimeSpan maxAge)
+    {
+        try
+        {
+            var cutoff = DateTime.Now - maxAge;
+            foreach (var process in Process.GetProcessesByName(processName))
+            {
+                try
+                {
+                    if (process.StartTime >= cutoff)
+                    {
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // access denied / exited
+                }
+                finally
+                {
+                    process.Dispose();
+                }
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+
+        return false;
+    }
 
     /// <summary>If Meta Link is already active, run Dash→SteamVR now; otherwise wait for connect poll.</summary>
     private string TryStartSteamVrAfterPreventDash(string reason)

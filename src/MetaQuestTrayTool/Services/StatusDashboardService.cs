@@ -102,7 +102,9 @@ public sealed class StatusDashboardService
             Chip("Link / stream",
                 DescribeLinkKind(link),
                 string.IsNullOrWhiteSpace(link.Detail) ? link.InfoBanner : link.Detail,
-                link.SessionActive ? StatusChipKind.On : StatusChipKind.Off),
+                link.MetaLinkStreaming || link.SteamVrRunning || link.VirtualDesktopRunning
+                    ? StatusChipKind.On
+                    : StatusChipKind.Off),
 
             Chip("SteamVR process",
                 link.SteamVrRunning || steamVr.IsRunning ? "Yes" : "No",

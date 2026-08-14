@@ -94,10 +94,6 @@ public sealed class LinkConnectionProbeService
         var virtualDesktop = IsProcessRunning("VirtualDesktop.Streamer")
                              || IsProcessRunning("VirtualDesktop.Server")
                              || IsProcessRunning("VirtualDesktop.Service");
-        // Meta's Link remote-desktop helper — present during Quest Link / Air Link connect attempts
-        // (including PreventDashLaunch, when DeviceCache often stays inoperable / audio never switches).
-        var metaRemoteDesktop = !steamVr && !virtualDesktop
-                                && IsProcessRunning("RemoteDesktopCompanion");
         var usb = IsOculusUsbPresent();
         var metaHmd = includeEnumHmd && MetaHmdReported();
         var cache = ReadHeadsetCache();
@@ -119,15 +115,14 @@ public sealed class LinkConnectionProbeService
         // that must not hide an active Steam Link / SteamVR or Virtual Desktop session.
         // EnumHmd / Link-audio alone are also weak while SteamVR or VD is up (same headset
         // endpoint after audio auto-switch).
-        var strongMeta = LooksLikeStrongMetaSession(
-            cache, metaHmd, audioLink, steamVr, virtualDesktop, metaRemoteDesktop);
-        var cacheMeta = LooksLikeActiveMetaSession(
-            cache, metaHmd, audioLink, steamVr, virtualDesktop, metaRemoteDesktop);
+        // RemoteDesktopCompanion is NOT used here — it often stays running while the Quest is
+        // off on the charger and would fake an Air Link session on Status.
+        var strongMeta = LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVr, virtualDesktop);
+        var cacheMeta = LooksLikeActiveMetaSession(cache, metaHmd, audioLink, steamVr, virtualDesktop);
 
         if (strongMeta)
         {
-            var streaming = LooksLikeStreamingMetaLink(
-                cache, audioLink, usb, steamVr, metaHmd, metaRemoteDesktop);
+            var streaming = LooksLikeStreamingMetaLink(cache, audioLink, usb, steamVr, metaHmd);
             return ClassifyMetaSession(
                 cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: streaming);
         }
@@ -177,18 +172,9 @@ public sealed class LinkConnectionProbeService
         // No Steam/VD — DeviceCache-only Meta (including auto-connect / broken) is fine to show.
         if (cacheMeta)
         {
-            var streaming = LooksLikeStreamingMetaLink(
-                cache, audioLink, usb, steamVr, metaHmd, metaRemoteDesktop);
+            var streaming = LooksLikeStreamingMetaLink(cache, audioLink, usb, steamVr, metaHmd);
             return ClassifyMetaSession(
                 cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: streaming);
-        }
-
-        // PreventDashLaunch: DeviceCache often stays "inoperable / not streaming" while the user is
-        // mid Air Link connect — RemoteDesktopCompanion is the reliable connect signal then.
-        if (metaRemoteDesktop && cache is not null)
-        {
-            return ClassifyMetaSession(
-                cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: true);
         }
 
         var brokenMeta = TryDescribeBrokenMetaSession(cache, usb, metaHmd, steamVr, virtualDesktop);
@@ -269,15 +255,9 @@ public sealed class LinkConnectionProbeService
         bool metaHmd,
         bool audioLink,
         bool steamVrRunning,
-        bool virtualDesktopRunning = false,
-        bool metaRemoteDesktop = false)
+        bool virtualDesktopRunning = false)
     {
         var competingRuntime = steamVrRunning || virtualDesktopRunning;
-
-        if (metaRemoteDesktop && !competingRuntime)
-        {
-            return true;
-        }
 
         // Link audio alone only wins when no competing SteamVR / VD session is up.
         if (audioLink && !competingRuntime)
@@ -304,7 +284,7 @@ public sealed class LinkConnectionProbeService
     /// <summary>
     /// Stricter than <see cref="LooksLikeStrongMetaSession"/> — excludes operable/primary DeviceCache
     /// ghosts and EnumHmd-only (OVRService sees the HMD while Quest is on Wi‑Fi but Link is not streaming).
-    /// Air Link: operable + (audio, connectionState, EnumHmd+primary, or RemoteDesktopCompanion).
+    /// Air Link: operable + (audio, connectionState, or EnumHmd+primary).
     /// Do not require audio alone — PreventDashLaunch never switches audio until streaming is true.
     /// While SteamVR is running, require RD connected so Steam Link + sticky Air Link / audio is not
     /// treated as a Meta stream (that would auto-start Dash→SteamVR and arm OVR-on-exit).
@@ -314,14 +294,8 @@ public sealed class LinkConnectionProbeService
         bool audioLink,
         bool usbPresent,
         bool steamVrRunning,
-        bool metaHmd = false,
-        bool metaRemoteDesktop = false)
+        bool metaHmd = false)
     {
-        if (metaRemoteDesktop && !steamVrRunning)
-        {
-            return true;
-        }
-
         if (cache is not null
             && string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
         {
@@ -354,8 +328,7 @@ public sealed class LinkConnectionProbeService
             }
 
             var powered = string.Equals(cache.PowerState, "active", StringComparison.OrdinalIgnoreCase);
-            var primary = string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase)
-                          || string.Equals(cache.PrimaryState, "alternate", StringComparison.OrdinalIgnoreCase);
+            var primary = string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase);
             return metaHmd && powered && primary;
         }
 
@@ -391,11 +364,9 @@ public sealed class LinkConnectionProbeService
         bool metaHmd,
         bool audioLink,
         bool steamVrRunning = false,
-        bool virtualDesktopRunning = false,
-        bool metaRemoteDesktop = false)
+        bool virtualDesktopRunning = false)
     {
-        if (LooksLikeStrongMetaSession(
-                cache, metaHmd, audioLink, steamVrRunning, virtualDesktopRunning, metaRemoteDesktop))
+        if (LooksLikeStrongMetaSession(cache, metaHmd, audioLink, steamVrRunning, virtualDesktopRunning))
         {
             return true;
         }
@@ -416,12 +387,11 @@ public sealed class LinkConnectionProbeService
             return true;
         }
 
-        // Air Link often keeps rdConnectionState=disconnected while connectionState lags;
-        // Meta still marks the headset primary/operable/active while streaming.
+        // Air Link can lag connectionState while truly streaming — require primary (not alternate)
+        // plus operable/active. "alternate" + sticky isUsingAirLink is common while charging / off.
         var operable = string.Equals(cache.OperationalState, "operable", StringComparison.OrdinalIgnoreCase);
         var powered = string.Equals(cache.PowerState, "active", StringComparison.OrdinalIgnoreCase);
-        var primary = string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase)
-                      || string.Equals(cache.PrimaryState, "alternate", StringComparison.OrdinalIgnoreCase);
+        var primary = string.Equals(cache.PrimaryState, "primary", StringComparison.OrdinalIgnoreCase);
         if (operable && powered && primary)
         {
             return true;
@@ -562,6 +532,7 @@ public sealed class LinkConnectionProbeService
             primary,
             $"connectionState={cache.ConnectionState ?? "—"}",
             $"rdConnectionState={cache.RdConnectionState ?? "—"}",
+            $"operationalState={cache.OperationalState ?? "—"}",
             $"primary={cache.PrimaryState ?? "—"}",
             $"power={cache.PowerState ?? "—"}",
             usb

@@ -11,6 +11,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 ### Docs
 - Note that SideQuest running on the headset can open a wireless ADB port for Connect / auto-reconnect.
 
+### Fixed
+- Status no longer shows Air Link / PCVR session Active while the Quest is off or charging (ignore leftover RemoteDesktopCompanion; ignore sticky DeviceCache `alternate` / `isUsingAirLink` ghosts).
+
 ## [1.1.7] - 2026-08-14
 
 ### Added
