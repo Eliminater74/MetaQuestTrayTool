@@ -46,7 +46,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.19) (latest) | [MetaQuestTrayTool-Setup-1.0.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.19/MetaQuestTrayTool-Setup-1.0.19.exe) |
+| [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.0) (latest) | [MetaQuestTrayTool-Setup-1.1.0.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.0/MetaQuestTrayTool-Setup-1.1.0.exe) |
+| [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.19) | [MetaQuestTrayTool-Setup-1.0.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.19/MetaQuestTrayTool-Setup-1.0.19.exe) |
 | [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.18) | [MetaQuestTrayTool-Setup-1.0.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.18/MetaQuestTrayTool-Setup-1.0.18.exe) |
 | [v1.0.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.17) | [MetaQuestTrayTool-Setup-1.0.17.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.17/MetaQuestTrayTool-Setup-1.0.17.exe) |
 | [v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.16) | [MetaQuestTrayTool-Setup-1.0.16.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.16/MetaQuestTrayTool-Setup-1.0.16.exe) |
@@ -170,7 +171,7 @@ These are different PCVR paths:
 
 ## What works now
 
-Release **[v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Fix: Check for updates no longer crashes from the tray when the settings window is closed. v1.0.18 fixed PreventDashLaunch auto-starting SteamVR on DeviceCache auto-connect ghost.
+Release **[v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Fixes: desktop audio restores when PCVR/SteamVR ends; PreventDashLaunch no longer auto-starts SteamVR on tray launch (EnumHmd ghost); update check works from tray without settings window open. v1.0.17–1.0.18 covered PreventDashLaunch-only SteamVR path and DeviceCache auto-connect.
 
 ### Shell & tray
 

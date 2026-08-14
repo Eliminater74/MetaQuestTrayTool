@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.0.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.0](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -223,8 +223,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Docs: Steam Link vs Quest Link; Meta Horizon Link startup investigation
 - [x] Fix PreventDashLaunch auto SteamVR on DeviceCache auto-connect ghost
 - [x] Fix Check for updates crash (null MessageBox owner from tray)
-- [x] Bump version to **1.0.19**
-- [x] Tag and publish **v1.0.19**
+- [x] Restore desktop audio when PCVR / SteamVR session ends
+- [x] Fix PreventDashLaunch auto SteamVR on tray start (EnumHmd-only ghost)
+- [x] Bump version to **1.1.0**
+- [x] Tag and publish **v1.1.0**
 
 ### Housekeeping (ongoing)
 

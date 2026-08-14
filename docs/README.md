@@ -5,10 +5,10 @@
 | [ODT-REGISTRY.md](ODT-REGISTRY.md) | Oculus Debug Tool registry keys vs CLI commands (from Meta binaries) |
 | [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
-| [../README.md](../README.md) | User guide, download, feature inventory (v1.0.19) |
+| [../README.md](../README.md) | User guide, download, feature inventory (v1.1.0) |
 | [../ROADMAP.md](../ROADMAP.md) | Current product summary, done phases, later / non-goals |
 | [../TODO.md](../TODO.md) | Remaining work + shipped checklist |
-| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.0.19) |
+| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.1.0) |
 | [../installer/README.md](../installer/README.md) | Build the Windows Setup.exe |
 
 Settings and profiles live in `%AppData%\MetaQuestTrayTool\` (`settings.json`, `profiles.json`, activity log).
