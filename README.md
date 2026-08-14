@@ -46,7 +46,8 @@ Direct asset links (same files GitHub counts for the Downloads badge):
 
 | Release | Installer |
 | --- | --- |
-| [v1.0.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.17) (latest) | [MetaQuestTrayTool-Setup-1.0.17.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.17/MetaQuestTrayTool-Setup-1.0.17.exe) |
+| [v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.18) (latest) | [MetaQuestTrayTool-Setup-1.0.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.18/MetaQuestTrayTool-Setup-1.0.18.exe) |
+| [v1.0.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.17) | [MetaQuestTrayTool-Setup-1.0.17.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.17/MetaQuestTrayTool-Setup-1.0.17.exe) |
 | [v1.0.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.16) | [MetaQuestTrayTool-Setup-1.0.16.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.16/MetaQuestTrayTool-Setup-1.0.16.exe) |
 | [v1.0.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.15) | [MetaQuestTrayTool-Setup-1.0.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.15/MetaQuestTrayTool-Setup-1.0.15.exe) |
 | [v1.0.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.0.14) | [MetaQuestTrayTool-Setup-1.0.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.0.14/MetaQuestTrayTool-Setup-1.0.14.exe) |
@@ -168,7 +169,7 @@ These are different PCVR paths:
 
 ## What works now
 
-Release **[v1.0.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **PreventDashLaunch-only** SteamVR over Link (registry blocks Dash — no Meta process killing). Optional **restart OVRService when SteamVR exits** so Quest Home returns. Docs clarify Steam Link vs Quest Link and Meta startup behavior. v1.0.16 added quieter idle watchers; v1.0.14–1.0.15 fixed shell height, OpenXR persist, and boot audio.
+Release **[v1.0.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. Fix: PreventDashLaunch no longer auto-starts SteamVR when the headset is on Wi‑Fi but Link is not streaming (DeviceCache auto-connect ghost). v1.0.17 added PreventDashLaunch-only SteamVR over Link and optional OVRService restart when SteamVR exits.
 
 ### Shell & tray
 
