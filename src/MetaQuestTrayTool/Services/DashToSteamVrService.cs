@@ -42,6 +42,11 @@ public sealed class DashToSteamVrService : IDisposable
     private int _waitingForFirstSteamVrPolls;
     private bool _restartingOvrAfterSteamVrExit;
 
+    private int _streamingConfirmPolls;
+
+    /// <summary>Require consecutive streaming probes before auto-launch (avoids one-off ghosts).</summary>
+    private const int StreamingConfirmPollsRequired = 2;
+
     /// <summary>Confirm SteamVR is really gone before restarting OVRService (avoids restart blips).</summary>
     private const int SteamVrExitConfirmPolls = 2;
 
@@ -491,6 +496,7 @@ public sealed class DashToSteamVrService : IDisposable
 
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
+                _streamingConfirmPolls = 0;
                 IdleCadence.Set(_sessionTimer, IdleCadence.Quiet);
                 return;
             }
@@ -499,11 +505,22 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 _wasMetaSession = true;
                 _ranThisMetaSession = false;
+                _streamingConfirmPolls = 0;
                 IdleCadence.Set(_sessionTimer, IdleCadence.Watching);
             }
 
             if (_ranThisMetaSession)
             {
+                return;
+            }
+
+            _streamingConfirmPolls++;
+            if (_streamingConfirmPolls < StreamingConfirmPollsRequired)
+            {
+                _app.Log.Info(
+                    $"Meta Link streaming suspected ({_streamingConfirmPolls}/{StreamingConfirmPollsRequired}) — "
+                    + $"{status.Detail ?? status.Summary}; waiting before auto SteamVR.");
+                IdleCadence.Set(_sessionTimer, IdleCadence.Watching);
                 return;
             }
 
@@ -524,6 +541,8 @@ public sealed class DashToSteamVrService : IDisposable
                     if (!again.MetaLinkStreaming)
                     {
                         _app.Log.Info("Auto Dash → SteamVR cancelled — Meta Link session no longer active.");
+                        _ranThisMetaSession = false;
+                        _streamingConfirmPolls = 0;
                         return;
                     }
 

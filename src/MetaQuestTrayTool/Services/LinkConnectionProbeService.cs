@@ -103,8 +103,9 @@ public sealed class LinkConnectionProbeService
 
         if (strongMeta)
         {
+            var streaming = LooksLikeStreamingMetaLink(cache, audioLink, usb, steamVr);
             return ClassifyMetaSession(
-                cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: true);
+                cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: streaming);
         }
 
         if (virtualDesktop)
@@ -152,7 +153,7 @@ public sealed class LinkConnectionProbeService
         // No Steam/VD — DeviceCache-only Meta (including auto-connect / broken) is fine to show.
         if (cacheMeta)
         {
-            var streaming = LooksLikeStreamingMetaLink(cache, metaHmd, audioLink, steamVr);
+            var streaming = LooksLikeStreamingMetaLink(cache, audioLink, usb, steamVr);
             return ClassifyMetaSession(
                 cache, usb, metaHmd, steamVr, virtualDesktop, sessionActive: true, metaLinkStreaming: streaming);
         }
@@ -260,39 +261,62 @@ public sealed class LinkConnectionProbeService
     /// <summary>
     /// Stricter than <see cref="LooksLikeStrongMetaSession"/> — excludes operable/primary DeviceCache
     /// ghosts and EnumHmd-only (OVRService sees the HMD while Quest is on Wi‑Fi but Link is not streaming).
+    /// Air Link requires Link audio on the headset; wired Link requires USB + connected cache (or rd/audio).
     /// </summary>
     private static bool LooksLikeStreamingMetaLink(
         HeadsetCacheEntry? cache,
-        bool metaHmd,
         bool audioLink,
+        bool usbPresent,
         bool steamVrRunning)
     {
-        _ = metaHmd;
         _ = steamVrRunning;
 
-        if (audioLink)
-        {
-            return true;
-        }
-
         if (cache is not null
-            && !string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase)
-            && LooksConnected(cache.RdConnectionState))
+            && string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        // Remote desktop stream — strongest Meta signal besides Link audio.
+        if (cache is not null && LooksConnected(cache.RdConnectionState))
         {
             return true;
         }
 
+        if (cache?.IsUsingAirLink == true)
+        {
+            // Air Link: require Meta to have routed audio to the headset — not stale isUsingAirLink
+            // or a permanent Oculus virtual default while the headset is only on Wi‑Fi.
+            return audioLink
+                   && cache is not null
+                   && string.Equals(cache.OperationalState, "operable", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (cache?.IsUsingAirLink == false
+            && cache is not null
+            && LooksConnected(cache.ConnectionState))
+        {
+            // Wired Link: USB present and/or live audio/rd (covers connect before audio switches).
+            return usbPresent || audioLink || LooksConnected(cache.RdConnectionState);
+        }
+
+        // Transport unknown — only trust rd or audio paired with a connected DeviceCache line.
+        if (audioLink && CacheShowsConnectedLine(cache))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool CacheShowsConnectedLine(HeadsetCacheEntry? cache)
+    {
         if (cache is null)
         {
             return false;
         }
 
-        if (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        return IsConnectedState(cache.ConnectionState, cache.RdConnectionState);
+        return LooksConnected(cache.ConnectionState) || LooksConnected(cache.RdConnectionState);
     }
 
     private static bool LooksLikeActiveMetaSession(
