@@ -1198,19 +1198,26 @@ public sealed class TrayIconHost : IDisposable
         }
     }
 
-    private void ShowShell()
+    public void ShowShell()
     {
-        if (_shell is null || !_shell.IsLoaded)
+        try
         {
-            _shell = new MainShellWindow();
-            _shell.Closed += (_, _) => _shell = null;
-        }
+            if (_shell is null || !_shell.IsLoaded)
+            {
+                _shell = new MainShellWindow();
+                _shell.Closed += (_, _) => _shell = null;
+            }
 
-        _shell.Show();
-        _shell.Activate();
-        _shell.WindowState = WindowState.Normal;
-        _shell.ShowPage("Status");
-        _shell.RefreshActivePage();
+            _shell.Show();
+            _shell.Activate();
+            _shell.WindowState = WindowState.Normal;
+            _shell.ShowPage("Status");
+            _shell.RefreshActivePage();
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn("Could not open settings window: " + ex.Message);
+        }
     }
 
     private void ShowAbout()

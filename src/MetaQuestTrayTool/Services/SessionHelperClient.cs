@@ -45,12 +45,19 @@ public static class SessionHelperClient
         }
 
         var drop = UnelevatedProcessLauncher.IsCurrentProcessElevated();
-        if (!UnelevatedProcessLauncher.TryStart(
+        var started = drop
+            ? UnelevatedProcessLauncher.TryStartHiddenUnelevated(
                 exe,
                 SessionHelperHost.Switch,
                 Path.GetDirectoryName(exe),
-                drop,
-                out var startDetail))
+                out var startDetail)
+            : UnelevatedProcessLauncher.TryStart(
+                exe,
+                SessionHelperHost.Switch,
+                Path.GetDirectoryName(exe),
+                dropElevation: false,
+                out startDetail);
+        if (!started)
         {
             return "Could not start session helper: " + startDetail;
         }

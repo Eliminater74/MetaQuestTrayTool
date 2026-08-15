@@ -45,6 +45,27 @@ public static class UnelevatedProcessLauncher
         string? arguments,
         string? workingDirectory,
         bool dropElevation,
+        out string detail) =>
+        TryStart(fileName, arguments, workingDirectory, dropElevation, hideWindow: false, allowExplorerFallback: true, out detail);
+
+    /// <summary>
+    /// Drop to the shell token only — never via explorer.exe (that would start a second
+    /// GUI copy of this app if used to launch our own exe).
+    /// </summary>
+    public static bool TryStartHiddenUnelevated(
+        string fileName,
+        string? arguments,
+        string? workingDirectory,
+        out string detail) =>
+        TryStart(fileName, arguments, workingDirectory, dropElevation: true, hideWindow: true, allowExplorerFallback: false, out detail);
+
+    private static bool TryStart(
+        string fileName,
+        string? arguments,
+        string? workingDirectory,
+        bool dropElevation,
+        bool hideWindow,
+        bool allowExplorerFallback,
         out string detail)
     {
         if (!dropElevation)
@@ -52,9 +73,15 @@ public static class UnelevatedProcessLauncher
             return TryStartDirect(fileName, arguments, workingDirectory, out detail);
         }
 
-        if (TryStartWithShellToken(fileName, arguments, workingDirectory, hideWindow: false, out detail))
+        if (TryStartWithShellToken(fileName, arguments, workingDirectory, hideWindow, out detail))
         {
             return true;
+        }
+
+        if (!allowExplorerFallback)
+        {
+            detail = "unelevated launch failed (" + detail + ")";
+            return false;
         }
 
         var tokenError = detail;
@@ -302,23 +329,31 @@ public static class UnelevatedProcessLauncher
                         creationFlags |= CreateNoWindow;
                     }
 
-                    if (!CreateProcessWithTokenW(
-                            primary,
-                            LogonWithProfile,
-                            fileName.EndsWith("cmd.exe", StringComparison.OrdinalIgnoreCase) ? null : fileName,
-                            command,
-                            creationFlags,
-                            IntPtr.Zero,
-                            string.IsNullOrWhiteSpace(workingDirectory) ? null : workingDirectory,
-                            ref startup,
-                            out var info))
+                    try
                     {
-                        detail = Win32("CreateProcessWithTokenW");
+                        if (!CreateProcessWithTokenW(
+                                primary,
+                                LogonWithProfile,
+                                fileName.EndsWith("cmd.exe", StringComparison.OrdinalIgnoreCase) ? null : fileName,
+                                command,
+                                creationFlags,
+                                IntPtr.Zero,
+                                string.IsNullOrWhiteSpace(workingDirectory) ? null : workingDirectory,
+                                ref startup,
+                                out var info))
+                        {
+                            detail = Win32("CreateProcessWithTokenW");
+                            return false;
+                        }
+
+                        CloseHandle(info.hThread);
+                        CloseHandle(info.hProcess);
+                    }
+                    catch (Exception ex)
+                    {
+                        detail = "CreateProcessWithTokenW threw: " + ex.Message;
                         return false;
                     }
-
-                    CloseHandle(info.hThread);
-                    CloseHandle(info.hProcess);
                     detail = "started via Explorer token (unelevated)";
                     return true;
                 }
@@ -369,9 +404,9 @@ public static class UnelevatedProcessLauncher
     private struct StartupInfo
     {
         public int cb;
-        public string? lpReserved;
-        public string? lpDesktop;
-        public string? lpTitle;
+        public IntPtr lpReserved;
+        public IntPtr lpDesktop;
+        public IntPtr lpTitle;
         public int dwX;
         public int dwY;
         public int dwXSize;

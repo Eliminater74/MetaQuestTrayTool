@@ -8,6 +8,11 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.12] - 2026-08-15
+
+### Fixed
+- v1.1.11 could crash or hang as soon as it started (session helper `CreateProcessWithTokenW` used a bad STARTUPINFO layout). The settings window and tray menu open again. Starting the helper no longer blocks the UI or launches a second copy via Explorer.
+
 ## [1.1.11] - 2026-08-15
 
 ### Fixed
@@ -104,7 +109,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.11...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.12...HEAD
+[1.1.12]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.12
 [1.1.11]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.11
 [1.1.10]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.10
 [1.1.9]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.9

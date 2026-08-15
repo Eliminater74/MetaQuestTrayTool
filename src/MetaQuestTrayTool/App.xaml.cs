@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Threading;
 using System.Windows;
 using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Services;
@@ -11,8 +14,12 @@ public partial class App : System.Windows.Application
 {
     public static string AppName => AppInfo.ProductName;
     private const string MutexName = @"Global\MetaQuestTrayTool.SingleInstance";
+    private const string ShowShellEventName = @"Local\MetaQuestTrayTool.ShowShell";
 
     private Mutex? _singleInstanceMutex;
+    private EventWaitHandle? _showShellEvent;
+    private CancellationTokenSource? _showShellCts;
+    private bool _pendingShowShell;
     private TrayIconHost? _tray;
     private ProcessWatcherService? _processWatcher;
     private AudioSwitchWatcher? _audioWatcher;
@@ -99,14 +106,12 @@ public partial class App : System.Windows.Application
         var restarting = e.Args.Any(arg => string.Equals(arg, "--restart", StringComparison.OrdinalIgnoreCase));
         if (!TryTakeSingleInstance(restarting, out _singleInstanceMutex))
         {
-            System.Windows.MessageBox.Show(
-                $"{AppName} is already running in the notification area (system tray).\n\nRight-click the headset icon to open settings or Exit.",
-                AppName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            RequestExistingInstanceToShow();
             Shutdown();
             return;
         }
+
+        ArmShowShellListener();
 
         DispatcherUnhandledException += (_, args) =>
         {
@@ -190,6 +195,11 @@ public partial class App : System.Windows.Application
 
         _tray = new TrayIconHost(this);
         _tray.Show();
+        if (_pendingShowShell)
+        {
+            _pendingShowShell = false;
+            _tray.ShowShell();
+        }
 
         _processWatcher = new ProcessWatcherService(this);
         _processWatcher.Start();
@@ -220,7 +230,19 @@ public partial class App : System.Windows.Application
         _dashToSteamVr.Start();
         if (UnelevatedProcessLauncher.IsCurrentProcessElevated())
         {
-            Log.Info(SessionHelperClient.EnsureRunning());
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    var message = SessionHelperClient.EnsureRunning();
+                    Dispatcher.BeginInvoke(() => Log.Info(message));
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.BeginInvoke(() =>
+                        Log.Warn("Session helper start failed: " + ex.Message));
+                }
+            });
             if (SessionHelperClient.IsSteamRunningElevated())
             {
                 Log.Info(
@@ -277,9 +299,90 @@ public partial class App : System.Windows.Application
         Log.Info("Reloaded feature watchers after settings change.");
     }
 
+    private static void RequestExistingInstanceToShow()
+    {
+        try
+        {
+            using var show = EventWaitHandle.OpenExisting(ShowShellEventName);
+            show.Set();
+        }
+        catch
+        {
+            // no running instance, or this process cannot signal it
+        }
+    }
+
+    private void ArmShowShellListener()
+    {
+        try
+        {
+            var security = new EventWaitHandleSecurity();
+            security.AddAccessRule(new EventWaitHandleAccessRule(
+                new SecurityIdentifier(WellKnownSidType.AuthenticatedUserSid, null),
+                EventWaitHandleRights.FullControl,
+                AccessControlType.Allow));
+            _showShellEvent = EventWaitHandleAcl.Create(
+                initialState: false,
+                EventResetMode.AutoReset,
+                ShowShellEventName,
+                out _,
+                security);
+        }
+        catch
+        {
+            _showShellEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ShowShellEventName);
+        }
+
+        _showShellCts = new CancellationTokenSource();
+        var token = _showShellCts.Token;
+        var handle = _showShellEvent;
+        _ = Task.Run(() =>
+        {
+            while (!token.IsCancellationRequested)
+            {
+                if (!handle.WaitOne(500))
+                {
+                    continue;
+                }
+
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (_tray is null)
+                    {
+                        _pendingShowShell = true;
+                        return;
+                    }
+
+                    try
+                    {
+                        _tray.ShowShell();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Could not open settings window: " + ex.Message);
+                    }
+                });
+            }
+        }, token);
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
         SessionHelperClient.RequestQuit();
+        try
+        {
+            _showShellCts?.Cancel();
+        }
+        catch
+        {
+            // exit path
+        }
+
+        _showShellCts?.Dispose();
+        _showShellCts = null;
+        _showShellEvent?.Dispose();
+        _showShellEvent = null;
+
         // Stop session watchers first so stopping OVRService does not fire exit toasts / audio restore races.
         _dashToSteamVr?.Dispose();
         _linkSessionWatcher?.Dispose();
