@@ -42,7 +42,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.8 — MetaQuestTrayTool-Setup-1.1.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.8/MetaQuestTrayTool-Setup-1.1.8.exe)
+**Latest:** [v1.1.9 — MetaQuestTrayTool-Setup-1.1.9.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.9/MetaQuestTrayTool-Setup-1.1.9.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -153,7 +153,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Recent highlights: in-app / Setup / GitHub release notes before you update; Status no longer shows Air Link active while the Quest is off charging; PreventDashLaunch SteamVR exit returns toward Quest Home; zombie SteamVR relaunch; SideQuest on-headset wireless ADB note; wiki + headset announcements + expanded voice.
+Release **[v1.1.9](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Recent highlights: PreventDashLaunch starts SteamVR on real Link without bouncing after exit; headset-only wireless ADB; library Launch keeps the profile until the game exits; settings.json is not overwritten when load fails; in-app / Setup / GitHub notes before you update.
 
 ### Shell & tray
 

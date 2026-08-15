@@ -8,8 +8,16 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.9] - 2026-08-15
+
 ### Fixed
-- PreventDashLaunch now notices Air Link / Quest Link within seconds and starts SteamVR (the delayed launch no longer cancels a real connect). When SteamVR exits, OVRService is held down so Link drops and Quest Home can return; auto SteamVR waits until Link is idle so it does not bounce back immediately.
+- PreventDashLaunch notices Air Link / Quest Link within seconds and starts SteamVR (the delayed launch no longer cancels a real connect). When SteamVR exits, OVRService is held down so Link drops and Quest Home can return.
+- Auto SteamVR no longer bounces back during that OVR drop: keep the idle latch while the service is down, require several idle polls, and cancel the restart if the tray exits.
+- EnumHmd, ADB, and OVRService waits no longer freeze the UI. Hung `adb.exe` is killed after a timeout.
+- The in-app updater stops the headset ADB watcher, waits until `adb.exe` is gone, then starts Setup.
+- Library Launch keeps the game profile armed until that process exits (Steam spawn delay included).
+- A corrupt `settings.json` is left on disk (try `.bak`) instead of being overwritten with defaults; saves are serialized under a lock.
+- DeviceCache must report exact `connected` (not a `connect` substring). A fresh `RemoteDesktopCompanion` process no longer auto-starts SteamVR while the Quest is charging.
 
 ### Added
 - Headset-only wireless ADB (on by default): drops phones/tablets that appear over the network; uncheck on the Headset page if you want other wireless ADB devices to stay connected. Quest tweaks still never run on non-headsets.
@@ -81,7 +89,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.8...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.9...HEAD
+[1.1.9]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.9
 [1.1.8]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.8
 [1.1.7]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.7
 [1.1.6]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.6
