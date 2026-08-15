@@ -123,6 +123,17 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void AnnounceDashToSteamVr() => AnnounceSteamVrStarting();
 
+    /// <summary>Spoken as soon as Link is confirmed and SteamVR is about to start (covers the settle wait).</summary>
+    public void AnnounceSteamVrComing()
+    {
+        Enqueue(
+            HeadsetAnnounceKind.DashToSteamVr,
+            "Please wait. Starting SteamVR.",
+            delayMs: 0,
+            allowWithoutLiveSession: true,
+            force: true);
+    }
+
     /// <summary>Speak in the Quest that SteamVR is starting (headset path, even if Status is not yet Active).</summary>
     public void AnnounceSteamVrStarting()
     {
@@ -135,9 +146,14 @@ public sealed class HeadsetAnnouncerService : IDisposable
             force: true);
     }
 
-    public void AnnounceSteamVrExit()
+    /// <summary>
+    /// Speak and wait before OVRService stop / desktop audio restore so the phrase is heard in the headset.
+    /// </summary>
+    public void AnnounceSteamVrExitBeforeOvrStop()
     {
-        Enqueue(HeadsetAnnounceKind.SteamVrExit, "SteamVR exited. Restarting Meta service.");
+        SpeakAndWait(
+            HeadsetAnnounceKind.SteamVrExit,
+            "SteamVR closed. Stopping Meta service for 10 seconds.");
     }
 
     public void AnnounceSteamLink(string phrase)
@@ -197,6 +213,90 @@ public sealed class HeadsetAnnouncerService : IDisposable
         });
     }
 
+    private void SpeakAndWait(HeadsetAnnounceKind kind, string phrase)
+    {
+        if (!ShouldAnnounce(kind))
+        {
+            return;
+        }
+
+        EnsureSynthesizer();
+        var synth = _synthesizer;
+        if (synth is null)
+        {
+            return;
+        }
+
+        void Run()
+        {
+            lock (_queueLock)
+            {
+                _queue.Clear();
+            }
+
+            try
+            {
+                _gapTimer?.Stop();
+                synth.SpeakAsyncCancelAll();
+                _speaking = true;
+                if (SpeakBlocking(phrase))
+                {
+                    _app.Log.Info("Headset announcer: " + phrase);
+                }
+            }
+            catch (Exception ex)
+            {
+                _app.Log.Warn("Headset announcer speak failed: " + ex.Message);
+            }
+            finally
+            {
+                _speaking = false;
+                try
+                {
+                    synth.SetOutputToDefaultAudioDevice();
+                }
+                catch
+                {
+                    // restore best-effort
+                }
+            }
+        }
+
+        if (_app.Dispatcher.CheckAccess())
+        {
+            Run();
+        }
+        else
+        {
+            _app.Dispatcher.Invoke(Run);
+        }
+    }
+
+    private bool SpeakBlocking(string phrase)
+    {
+        if (_synthesizer is null || string.IsNullOrWhiteSpace(phrase))
+        {
+            return false;
+        }
+
+        if (_app.Audio.IsCurrentPlaybackHeadset())
+        {
+            _synthesizer.SetOutputToDefaultAudioDevice();
+            _synthesizer.Speak(phrase);
+            return true;
+        }
+
+        var deviceId = ResolveHeadsetPlaybackId();
+        if (deviceId is null)
+        {
+            _app.Log.Info("Headset announcer skipped (no headset audio path): " + phrase);
+            return false;
+        }
+
+        SpeakViaWasapi(phrase, deviceId);
+        return true;
+    }
+
     private bool ShouldAnnounce(HeadsetAnnounceKind kind)
     {
         var settings = _app.Settings.Current.HeadsetAnnouncer;
@@ -207,7 +307,12 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         if (settings.QuietWhileGameProfileActive && _app.IsGameProfileActive)
         {
-            return kind is HeadsetAnnounceKind.SessionConnect or HeadsetAnnounceKind.SessionDisconnect;
+            if (kind is HeadsetAnnounceKind.SessionConnect or HeadsetAnnounceKind.SessionDisconnect)
+            {
+                return true;
+            }
+
+            return kind == HeadsetAnnounceKind.SteamVrExit && settings.DashToSteamVr;
         }
 
         return kind switch

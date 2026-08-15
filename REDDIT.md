@@ -103,7 +103,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Assign **Open Debug Tool** / **Open SteamVR Home** / recover / OpenXR / overlays / GPU preset in Configure
 - Voice: Windows speech — push-to-talk (**Ctrl+Shift+V** default) or always-on; mic picker; min confidence; custom phrases
 - New phrases: recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset
-- **Headset announcements** (Tray Tool): optional spoken status in the Quest on connect, profile apply, launch, Dash→SteamVR
+- **Headset announcements** (Tray Tool): spoken status in the Quest on connect, “Please wait. Starting SteamVR.”, “SteamVR closed. Stopping Meta service for 10 seconds.” (before OVR stops), profile apply, launch
 - Full list: wiki → HotKeys, voice, and headset announcements (`docs/VOICE-AND-HOTKEYS.md` in the repo)
 
 **OpenXR / audio / power**

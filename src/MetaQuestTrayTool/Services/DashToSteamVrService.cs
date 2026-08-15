@@ -219,7 +219,10 @@ public sealed class DashToSteamVrService : IDisposable
         ClearSteamVrExitIdleLatch();
         var parts = new List<string> { "PreventDashLaunch is on — Dash blocked via registry." };
 
-        _app.HeadsetAnnouncer.AnnounceSteamVrStarting();
+        if (!reason.StartsWith("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            _app.HeadsetAnnouncer.AnnounceSteamVrStarting();
+        }
 
         if (Settings.SwitchOpenXrToSteamVr)
         {
@@ -685,6 +688,7 @@ public sealed class DashToSteamVrService : IDisposable
                 ? "auto SteamVR (PreventDashLaunch)"
                 : "auto on Meta Link connect";
             _app.Log.Info($"Meta Link connected — {reason} in 2s…");
+            _app.HeadsetAnnouncer.AnnounceSteamVrComing();
             CancelPendingAutoLaunch();
             _pendingAutoLaunchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _pendingAutoLaunchTimer.Tick += OnPendingAutoLaunchTick;
@@ -891,6 +895,7 @@ public sealed class DashToSteamVrService : IDisposable
             _linkIdleConfirmPolls = 0;
             _ranThisMetaSession = true;
             _wasMetaSession = true;
+            _app.HeadsetAnnouncer.AnnounceSteamVrExitBeforeOvrStop();
             _app.AudioWatch?.NotifyPcvrSessionEnded("SteamVR exited — restoring desktop / fallback audio.");
             _ovrDropCts?.Dispose();
             _ovrDropCts = new CancellationTokenSource();
@@ -923,8 +928,6 @@ public sealed class DashToSteamVrService : IDisposable
                         {
                             _app.TrayNotify("SteamVR exit", summary);
                         }
-
-                        _app.HeadsetAnnouncer.AnnounceSteamVrExit();
                     });
                 }
                 catch (OperationCanceledException)

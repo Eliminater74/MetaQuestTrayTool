@@ -67,13 +67,13 @@ Spell out **A S W**, **H U D**, **steam v r**, **open x r**, **GPU**.
 
 Windows TTS on the Link / VR audio path so you **hear** what the tray is doing when you cannot see desktop balloons.
 
-Examples: “Connected. Air Link.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.” · “Starting SteamVR.”
+Examples: “Connected. Air Link.” · “Please wait. Starting SteamVR.” · “SteamVR closed. Stopping Meta service for 10 seconds.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.”
 
-Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect only mid-game.
+Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect plus the SteamVR-exit 10s wait (so Quest Home is not silent).
 
 **Spoken voice:** Auto prefers an English **female** Windows TTS voice (Microsoft Zira when installed). Choose any installed voice from the list. Voice-command confirmations use the same voice.
 
-Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tries to speak **“Starting SteamVR.”** in the headset when a Quest playback device is found.
+Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tries to speak **“Starting SteamVR.”** in the headset when a Quest playback device is found. Auto PreventDashLaunch also speaks **“Please wait. Starting SteamVR.”** as soon as Link is confirmed. Exit under PreventDashLaunch speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** *before* OVRService stops, while headset audio is still there.
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 

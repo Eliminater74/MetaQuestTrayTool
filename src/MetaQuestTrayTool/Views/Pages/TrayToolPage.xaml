@@ -68,7 +68,7 @@
 
       <TextBlock Text="Headset announcements" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="Spoken status in the Quest headset while PCVR is active — so you hear connect, profile apply, and launch even when desktop toasts are not visible."/>
+                 Text="Spoken status in the Quest headset while PCVR is active — so you hear connect, the wait before SteamVR, SteamVR exit, and the 10-second Meta service stop even when desktop toasts are not visible."/>
       <CheckBox x:Name="HeadsetAnnounceBox" Content="Speak status in headset"
                 ToolTip="Use Windows text-to-speech on the Link / VR audio path when a PCVR session is active."
                 Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
@@ -86,13 +86,13 @@
                   ToolTip="Example: Launching. Half-Life Alyx."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceDashBox" Content="SteamVR start and SteamVR exit"
-                  ToolTip="Example: Starting SteamVR. Spoken in the headset when you start SteamVR (button, hotkey, or voice) and when SteamVR exits under PreventDashLaunch."
+                  ToolTip="Please wait. Starting SteamVR. (on Link connect). SteamVR closed. Stopping Meta service for 10 seconds. (spoken in the headset before OVRService stops)."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceSteamLinkBox" Content="Steam Link OpenXR assist"
                   ToolTip="OpenXR nudge / restore during Steam Link sessions."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
-        <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (connect/disconnect only)"
-                  ToolTip="Reduce chatter mid-game — still announce session connect and disconnect."
+        <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (connect/disconnect + SteamVR exit wait)"
+                  ToolTip="Reduce chatter mid-game — still announce session connect, disconnect, and the 10-second Meta service stop after SteamVR closes."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <TextBlock Text="Spoken voice" Margin="0,10,0,4" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="HeadsetVoiceBox" MinWidth="320" MaxWidth="520" HorizontalAlignment="Left" Padding="6"

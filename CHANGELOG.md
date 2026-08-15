@@ -8,6 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Headset announcements cover the waits: **“Please wait. Starting SteamVR.”** when Link connects, and **“SteamVR closed. Stopping Meta service for 10 seconds.”** spoken in the Quest **before** OVRService stops (the old exit line ran after audio had already left the headset).
+
 ## [1.1.12] - 2026-08-15
 
 ### Fixed

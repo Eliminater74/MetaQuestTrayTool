@@ -206,7 +206,7 @@ Release **[v1.1.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - HotKeys: default **Ctrl+Numpad 0–9**; configure UI; assign Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
 - Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
-- **Headset announcements** (Tray Tool): optional TTS in the Quest on connect, profile apply, launch, Dash→SteamVR — when desktop toasts are not visible in-headset
+- **Headset announcements** (Tray Tool): TTS in the Quest on connect, the wait before SteamVR, SteamVR closed + 10s Meta service stop (spoken *before* OVR drops), profile apply, launch — when desktop toasts are not visible in-headset
 - In-app updates from GitHub `v*` (on start, schedule, or Check now) — shows **what's new** before you install; ADB stopped before Setup; Setup itself shows the changelog page
 - **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
 - Backup export/import from Advanced; Donate (PayPal); **quiet tray idle** — adaptive watcher cadence (~30–45s when unused, faster only in PCVR / armed features); timers stop when features are off; Status/Info pause when the shell is hidden to the tray; shared Link probe caches

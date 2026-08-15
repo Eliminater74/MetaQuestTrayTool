@@ -27,7 +27,7 @@ public sealed class HeadsetAnnouncerSettings
 
     /// <summary>
     /// When a game profile is active, skip profile/launch/Dash/Steam Link phrases —
-    /// still allow session connect/disconnect.
+    /// still allow session connect/disconnect and the SteamVR-exit 10s OVR wait.
     /// </summary>
     public bool QuietWhileGameProfileActive { get; set; } = true;
 
