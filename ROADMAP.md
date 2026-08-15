@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.10)
+## Current product (v1.1.11)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -98,7 +98,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.2 | Headset announcements (TTS status in Quest); expanded voice commands; fix false PreventDashLaunch SteamVR auto-start when not streaming |
 | v1.1.3 | GitHub Wiki user guide; ignore false Link session-end toast after PC wake |
 
-### Post v1.1.3 → v1.1.10
+### Post v1.1.3 → v1.1.11
 
 | Tag | Focus |
 | --- | --- |
@@ -109,6 +109,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.8 | SideQuest-on-headset ADB docs; Status idle while Quest off/charging |
 | v1.1.9 | PreventDash idle latch; UI/ADB hangs; updater ADB unlock; library profile arm; settings load durability; exact DeviceCache connected |
 | v1.1.10 | Start SteamVR from tray / Status / Ctrl+Shift+Num 0 / voice; headset speaks “Starting SteamVR.” |
+| v1.1.11 | Session helper (unelevated SteamVR unless Steam is already admin); OVRService 10s hold on SteamVR exit; headset TTS voice picker |
 
 ---
 

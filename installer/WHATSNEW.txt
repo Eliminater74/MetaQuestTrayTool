@@ -1,10 +1,15 @@
-﻿Meta Quest Tray Tool 1.1.10 - What's new
+﻿Meta Quest Tray Tool 1.1.11 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.10] - 2026-08-15
+[1.1.11] - 2026-08-15
+
+Fixed
+- Air Link no longer shows as Steam Link when leftover SteamVR processes are on the PC. A live DeviceCache Link stream wins, and PreventDash relaunches SteamVR so it attaches to this connect.
+- Exiting SteamVR fully stops OVRService, holds it down at least 10 seconds so Link drops to Quest Home, then starts it again (a quick restart kept Link up and bounced SteamVR).
+- SteamVR, Steam games, Horizon Link, Debug Tool, and other user launches go through a same-exe session helper (normal user). If Steam is already running as Administrator, SteamVR / steam:// skip the helper so they match that Steam instance.
 
 Added
-- Start SteamVR from the tray, Status, Service, Quest Link, Ctrl+Shift+Num 0, and voice (â€œstart steam v râ€ / â€œlaunch steam v râ€) without PreventDashLaunch. The headset speaks â€œStarting SteamVR.â€
+- Headset announcements have a spoken voice picker. Auto prefers an English female Windows TTS voice; pick any installed voice. Voice-command confirmations use the same choice.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

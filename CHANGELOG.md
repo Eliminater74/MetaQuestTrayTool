@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.11] - 2026-08-15
+
 ### Fixed
 - Air Link no longer shows as Steam Link when leftover SteamVR processes are on the PC. A live DeviceCache Link stream wins, and PreventDash relaunches SteamVR so it attaches to this connect.
 - Exiting SteamVR fully **stops** OVRService, holds it down **at least 10 seconds** so Link drops to Quest Home, then starts it again (a quick restart kept Link up and bounced SteamVR).
@@ -102,7 +104,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.10...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.11...HEAD
+[1.1.11]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.11
 [1.1.10]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.10
 [1.1.9]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.9
 [1.1.8]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.8

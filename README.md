@@ -42,7 +42,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.10 — MetaQuestTrayTool-Setup-1.1.10.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.10/MetaQuestTrayTool-Setup-1.1.10.exe)
+**Latest:** [v1.1.11 — MetaQuestTrayTool-Setup-1.1.11.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.11/MetaQuestTrayTool-Setup-1.1.11.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -153,7 +153,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.10](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Recent highlights: start SteamVR from tray / Status / **Ctrl+Shift+Num 0** / voice without PreventDashLaunch (headset says “Starting SteamVR.”); PreventDashLaunch auto-start without bounce; headset-only wireless ADB; library Launch keeps the profile until the game exits.
+Release **[v1.1.11](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Recent highlights: SteamVR launches unelevated via a session helper (skipped if Steam is already admin); SteamVR exit stops OVRService at least 10 seconds so Quest Home returns; headset announcement voice picker (female preferred).
 
 ### Shell & tray
 
