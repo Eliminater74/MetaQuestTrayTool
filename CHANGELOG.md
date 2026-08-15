@@ -13,6 +13,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Exiting SteamVR fully **stops** OVRService, holds it down **at least 10 seconds** so Link drops to Quest Home, then starts it again (a quick restart kept Link up and bounced SteamVR).
 - SteamVR, Steam games, Horizon Link, Debug Tool, and other user launches go through a same-exe **session helper** (normal user). If Steam is already running as Administrator, SteamVR / steam:// skip the helper so they match that Steam instance.
 
+### Added
+- Headset announcements have a **spoken voice** picker. Auto prefers an English female Windows TTS voice; pick any installed voice. Voice-command confirmations use the same choice.
+
 ## [1.1.10] - 2026-08-15
 
 ### Added

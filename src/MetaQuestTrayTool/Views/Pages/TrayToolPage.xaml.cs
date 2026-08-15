@@ -61,7 +61,40 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         AnnounceDashBox.IsChecked = announcer.DashToSteamVr;
         AnnounceSteamLinkBox.IsChecked = announcer.SteamLinkAssist;
         AnnounceQuietBox.IsChecked = announcer.QuietWhileGameProfileActive;
+        FillHeadsetVoiceBox(announcer.VoiceName);
         HeadsetAnnouncePanel.IsEnabled = announcer.Enabled;
+    }
+
+    private void FillHeadsetVoiceBox(string? voiceName)
+    {
+        HeadsetVoiceBox.Items.Clear();
+        HeadsetVoiceBox.Items.Add(new ComboBoxItem
+        {
+            Content = "Auto — prefer female (recommended)",
+            Tag = TtsVoiceCatalog.AutoVoiceName
+        });
+
+        foreach (var voice in TtsVoiceCatalog.ListEnabled())
+        {
+            HeadsetVoiceBox.Items.Add(new ComboBoxItem
+            {
+                Content = voice.Display,
+                Tag = voice.Name
+            });
+        }
+
+        var want = voiceName ?? TtsVoiceCatalog.AutoVoiceName;
+        foreach (ComboBoxItem item in HeadsetVoiceBox.Items)
+        {
+            if (item.Tag is string name
+                && name.Equals(want, StringComparison.OrdinalIgnoreCase))
+            {
+                HeadsetVoiceBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        HeadsetVoiceBox.SelectedIndex = 0;
     }
 
     private void SaveHeadsetAnnouncer()
@@ -75,8 +108,20 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         announcer.DashToSteamVr = AnnounceDashBox.IsChecked == true;
         announcer.SteamLinkAssist = AnnounceSteamLinkBox.IsChecked == true;
         announcer.QuietWhileGameProfileActive = AnnounceQuietBox.IsChecked == true;
+        announcer.VoiceName = HeadsetVoiceBox.SelectedItem is ComboBoxItem { Tag: string name }
+            ? name
+            : TtsVoiceCatalog.AutoVoiceName;
         App.Instance.Settings.Save();
         App.Instance.HeadsetAnnouncer.Reload();
+    }
+
+    private void HeadsetVoice_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        HeadsetAnnounce_Changed(sender, e);
+        if (!_loading && IsLoaded)
+        {
+            App.Instance.Voice.Reload();
+        }
     }
 
     private void HeadsetAnnounce_Changed(object sender, RoutedEventArgs e)

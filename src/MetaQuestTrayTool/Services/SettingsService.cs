@@ -215,6 +215,7 @@ public sealed class SettingsService
         Current.HotKeys ??= new HotKeySettings();
         Current.Voice ??= new VoiceSettings();
         Current.HeadsetAnnouncer ??= new HeadsetAnnouncerSettings();
+        Current.HeadsetAnnouncer.VoiceName ??= "";
         if (Current.HotKeys.Bindings.Count == 0)
         {
             Current.HotKeys.Bindings = HotKeySettings.CreateDefaultBindings();

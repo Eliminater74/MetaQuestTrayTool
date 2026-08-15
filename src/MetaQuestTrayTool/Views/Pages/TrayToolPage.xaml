@@ -94,9 +94,13 @@
         <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (connect/disconnect only)"
                   ToolTip="Reduce chatter mid-game — still announce session connect and disconnect."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <TextBlock Text="Spoken voice" Margin="0,10,0,4" Foreground="{DynamicResource AppMutedBrush}"/>
+        <ComboBox x:Name="HeadsetVoiceBox" MinWidth="320" MaxWidth="520" HorizontalAlignment="Left" Padding="6"
+                  SelectionChanged="HeadsetVoice_Changed"
+                  ToolTip="Windows text-to-speech voice in the headset. Auto prefers an English female voice (Zira when installed). Pick another installed voice if you want."/>
         <Button Content="Test in headset" Style="{StaticResource GhostButtonStyle}" Margin="0,8,0,0"
                 HorizontalAlignment="Left" Click="HeadsetAnnounceTest_Click"
-                ToolTip="Speak a test phrase on the VR audio path. Connect Link first for best results."/>
+                ToolTip="Speak a test phrase on the VR audio path with the selected voice. Connect Link first for best results."/>
       </StackPanel>
 
       <TextBlock Text="Theme" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,8"/>

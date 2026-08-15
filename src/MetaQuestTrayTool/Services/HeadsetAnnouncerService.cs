@@ -26,10 +26,19 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public HeadsetAnnouncerService(App app) => _app = app;
 
-    public string Status =>
-        _app.Settings.Current.HeadsetAnnouncer.Enabled
-            ? "Headset announcements on."
-            : "Headset announcements off.";
+    public string Status
+    {
+        get
+        {
+            if (!_app.Settings.Current.HeadsetAnnouncer.Enabled)
+            {
+                return "Headset announcements off.";
+            }
+
+            var voice = TtsVoiceCatalog.DescribeActive(_app.Settings.Current.HeadsetAnnouncer.VoiceName);
+            return "Headset announcements on (" + voice + ").";
+        }
+    }
 
     public void Reload()
     {
@@ -54,6 +63,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         try
         {
             _synthesizer = new SpeechSynthesizer { Rate = 0 };
+            TtsVoiceCatalog.Apply(_synthesizer, _app.Settings.Current.HeadsetAnnouncer.VoiceName);
         }
         catch (Exception ex)
         {
@@ -63,7 +73,11 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void TestSpeak()
     {
-        Enqueue(HeadsetAnnounceKind.SessionConnect, "Headset announcements test.", delayMs: 0, force: true);
+        Enqueue(
+            HeadsetAnnounceKind.SessionConnect,
+            "Headset announcements test. This is the selected voice.",
+            delayMs: 0,
+            force: true);
     }
 
     public void AnnounceSessionConnected(VrConnectionStatus status)

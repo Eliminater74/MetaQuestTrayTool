@@ -86,6 +86,7 @@ public sealed class VoiceCommandService : IDisposable
                 _synthesizer = new SpeechSynthesizer();
                 _synthesizer.SetOutputToDefaultAudioDevice();
                 _synthesizer.Rate = 1;
+                TtsVoiceCatalog.Apply(_synthesizer, _app.Settings.Current.HeadsetAnnouncer.VoiceName);
             }
             catch (Exception ex)
             {
