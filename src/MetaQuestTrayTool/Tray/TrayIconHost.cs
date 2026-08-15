@@ -1031,17 +1031,26 @@ public sealed class TrayIconHost : IDisposable
         menu.DropDownItems.Add(auto);
         menu.DropDownItems.Add(new ToolStripMenuItem("Apply to headset now", null, (_, _) =>
         {
-            try
+            Task.Run(() =>
             {
-                var result = _app.Headset.Apply(_app.Settings.Current.Headset);
-                _app.Log.Info(result);
-                Notify("Headset", result);
-            }
-            catch (Exception ex)
-            {
-                _app.Log.Warn(ex.Message);
-                Notify("Headset", ex.Message);
-            }
+                try
+                {
+                    var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+                    _app.Dispatcher.BeginInvoke(() =>
+                    {
+                        _app.Log.Info(result);
+                        Notify("Headset", result);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _app.Dispatcher.BeginInvoke(() =>
+                    {
+                        _app.Log.Warn(ex.Message);
+                        Notify("Headset", ex.Message);
+                    });
+                }
+            });
         }));
         menu.DropDownItems.Add(new ToolStripMenuItem("Status: Unknown") { Enabled = false, Name = "HeadsetStatus" });
         return menu;
@@ -1095,10 +1104,27 @@ public sealed class TrayIconHost : IDisposable
 
     private void RunServiceAction(Func<string> action)
     {
-        var result = action();
-        _app.Log.Info(result);
-        Notify("Oculus Service", result);
-        _shell?.RefreshActivePage();
+        Task.Run(() =>
+        {
+            try
+            {
+                var result = action();
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    _app.Log.Info(result);
+                    Notify("Oculus Service", result);
+                    _shell?.RefreshActivePage();
+                });
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    _app.Log.Warn(ex.Message);
+                    Notify("Oculus Service", ex.Message);
+                });
+            }
+        });
     }
 
     private void ToggleStartWithWindows(bool enabled)

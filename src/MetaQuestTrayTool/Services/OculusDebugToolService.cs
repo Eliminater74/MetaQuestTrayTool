@@ -175,7 +175,9 @@ public sealed class OculusDebugToolService
             };
         }
 
-        var commandFile = System.IO.Path.Combine(AppPaths.AppDataDirectory, "odt-commands.txt");
+        var commandFile = System.IO.Path.Combine(
+            AppPaths.AppDataDirectory,
+            $"odt-commands-{Guid.NewGuid():N}.txt");
         AppPaths.EnsureAppDataDirectory();
         File.WriteAllLines(commandFile, commands);
 
@@ -271,6 +273,17 @@ public sealed class OculusDebugToolService
                 Commands = commands,
                 Summary = $"Could not run OculusDebugToolCLI.exe: {ex.Message}"
             };
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(commandFile);
+            }
+            catch
+            {
+                // leftover temp file
+            }
         }
     }
 

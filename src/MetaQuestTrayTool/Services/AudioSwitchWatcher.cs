@@ -188,7 +188,7 @@ public sealed class AudioSwitchWatcher : IDisposable
     {
         try
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
             if (status.SteamVrRunning || status.VirtualDesktopRunning)
             {
                 return true;

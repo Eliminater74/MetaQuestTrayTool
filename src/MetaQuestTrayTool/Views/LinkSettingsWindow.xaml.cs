@@ -132,9 +132,27 @@ public partial class LinkSettingsWindow : Window
 
         if (restartService)
         {
-            var serviceResult = App.Instance.Oculus.Restart();
-            App.Instance.Log.Info(serviceResult);
-            LiveStatusText.Text = summary + " " + serviceResult;
+            LiveStatusText.Text = summary + " Restarting OVRService…";
+            Task.Run(() =>
+            {
+                try
+                {
+                    var serviceResult = App.Instance.Oculus.Restart();
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        App.Instance.Log.Info(serviceResult);
+                        LiveStatusText.Text = summary + " " + serviceResult;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        App.Instance.Log.Warn(ex.Message);
+                        LiveStatusText.Text = summary + " " + ex.Message;
+                    });
+                }
+            });
             return;
         }
 

@@ -102,7 +102,7 @@ public sealed class DashToSteamVrService : IDisposable
 
         try
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
             if (!IsPreventDashConnect(status) || !IsSteamVrSessionHealthy())
             {
                 return;
@@ -534,7 +534,7 @@ public sealed class DashToSteamVrService : IDisposable
 
             SyncSteamVrExitWatch();
 
-            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
             var meta = IsPreventDashConnect(status);
 
             // Manual SteamVR start (or zombie relaunch) during PreventDash Link must still arm
@@ -657,7 +657,7 @@ public sealed class DashToSteamVrService : IDisposable
         try
         {
             _app.LinkConnection.InvalidateCache();
-            var again = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var again = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
             if (!IsPreventDashConnect(again))
             {
                 _app.Log.Info("Auto Dash → SteamVR cancelled — Meta Link session no longer active.");
@@ -748,7 +748,7 @@ public sealed class DashToSteamVrService : IDisposable
     {
         try
         {
-            var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
             if (IsPreventDashConnect(status))
             {
                 return RunNow(reason);
@@ -955,14 +955,6 @@ public sealed class DashToSteamVrService : IDisposable
         if (IsSteamVrRuntimePresent())
         {
             notes.Add(StopSteamVrRuntime("zombie / invisible SteamVR (vrserver without compositor)"));
-            try
-            {
-                Thread.Sleep(1500);
-            }
-            catch
-            {
-                // ignore
-            }
         }
 
         var paths = TryResolveSteamVrPaths();
@@ -1063,6 +1055,15 @@ public sealed class DashToSteamVrService : IDisposable
                     {
                         // best-effort
                     }
+                }
+
+                try
+                {
+                    process.WaitForExit(1_500);
+                }
+                catch
+                {
+                    // already gone
                 }
                 finally
                 {

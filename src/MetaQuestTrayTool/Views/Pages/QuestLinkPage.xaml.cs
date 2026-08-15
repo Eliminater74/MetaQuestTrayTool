@@ -216,9 +216,28 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
 
         if (restartService)
         {
-            var serviceResult = App.Instance.Oculus.Restart();
-            App.Instance.Log.Info(serviceResult);
-            LiveStatusText.Text = (prefix ?? string.Empty) + summary + " " + serviceResult;
+            LiveStatusText.Text = (prefix ?? string.Empty) + summary + " Restarting OVRService…";
+            var prefixCopy = prefix;
+            Task.Run(() =>
+            {
+                try
+                {
+                    var serviceResult = App.Instance.Oculus.Restart();
+                    App.Instance.Dispatcher.BeginInvoke(() =>
+                    {
+                        App.Instance.Log.Info(serviceResult);
+                        LiveStatusText.Text = (prefixCopy ?? string.Empty) + summary + " " + serviceResult;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    App.Instance.Dispatcher.BeginInvoke(() =>
+                    {
+                        App.Instance.Log.Warn(ex.Message);
+                        LiveStatusText.Text = (prefixCopy ?? string.Empty) + summary + " " + ex.Message;
+                    });
+                }
+            });
         }
         else
         {

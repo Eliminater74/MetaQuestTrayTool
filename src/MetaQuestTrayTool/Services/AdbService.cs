@@ -924,9 +924,38 @@ public sealed class AdbService
         };
 
         process.Start();
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
-        process.WaitForExit(20_000);
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(20_000))
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // hung adb.exe
+            }
+
+            try
+            {
+                process.WaitForExit(3_000);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            throw new TimeoutException($"ADB timed out after 20s: adb {arguments}");
+        }
+
+        if (!Task.WaitAll([stdout, stderr], 3_000))
+        {
+            throw new TimeoutException($"ADB output read timed out: adb {arguments}");
+        }
+
+        var output = stdout.Result;
+        var error = stderr.Result;
         var combined = (output + Environment.NewLine + error).Trim();
         if (process.ExitCode != 0 && combined.Contains("error", StringComparison.OrdinalIgnoreCase))
         {

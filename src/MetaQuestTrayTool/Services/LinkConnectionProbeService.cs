@@ -242,7 +242,8 @@ public sealed class LinkConnectionProbeService
         };
     }
 
-    public VrSessionCapabilities GetCapabilities() => VrSessionCapabilities.From(Probe());
+    public VrSessionCapabilities GetCapabilities() =>
+        VrSessionCapabilities.From(Probe(includeEnumHmd: false));
 
     /// <summary>
     /// Live Meta Link stream signals that should beat SteamVR/VD process detection

@@ -19,7 +19,7 @@ public sealed class HotKeyCommandService
         return action switch
         {
             HotKeyAction.ApplyGlobal => ExecuteApplyGlobal(),
-            HotKeyAction.RestartOvrService => _app.Oculus.Restart(),
+            HotKeyAction.RestartOvrService => ExecuteRestartOvr(),
             HotKeyAction.AswOff => SetAsw(AswMode.Off),
             HotKeyAction.AswAuto => SetAsw(AswMode.Auto),
             HotKeyAction.AswClock45 => SetAsw(AswMode.Clock45),
@@ -77,6 +77,25 @@ public sealed class HotKeyCommandService
         }
 
         return summary;
+    }
+
+    private string ExecuteRestartOvr()
+    {
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                var result = _app.Oculus.Restart();
+                _app.Dispatcher.BeginInvoke(() => _app.Log.Info(result));
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.Log.Warn("OVRService restart failed: " + ex.Message));
+            }
+        });
+
+        return "Restarting OVRService…";
     }
 
     private string ExecuteApplyGpuPresets()

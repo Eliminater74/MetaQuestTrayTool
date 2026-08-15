@@ -155,20 +155,23 @@ public sealed class HeadsetWatchService : IDisposable
             return;
         }
 
-        // Apply + settings save must stay on the UI/settings thread path.
-        _app.Dispatcher.Invoke(() =>
+        try
         {
-            try
+            var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+            string? global = null;
+            if (!_app.IsGameProfileActive
+                && _app.Settings.Current.ApplyGlobalWhenHeadsetConnects)
             {
-                var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+                global = _app.ApplyGlobalBaseline(notify: connected);
+            }
+
+            _appliedForSerial = true;
+            _app.Dispatcher.BeginInvoke(() =>
+            {
                 _app.Settings.Save();
                 _app.Log.Info($"Applied headset ADB settings — {result}");
-                _appliedForSerial = true;
-
-                if (!_app.IsGameProfileActive
-                    && _app.Settings.Current.ApplyGlobalWhenHeadsetConnects)
+                if (!string.IsNullOrWhiteSpace(global))
                 {
-                    var global = _app.ApplyGlobalBaseline(notify: connected);
                     _app.Log.Info($"Applied global baseline on ADB connect — {global}");
                 }
 
@@ -176,14 +179,18 @@ public sealed class HeadsetWatchService : IDisposable
                 {
                     _app.TrayNotify("Headset", result);
                 }
-            }
-            catch (Exception ex)
+
+                ApplyCadence(headsetPresent: true);
+            });
+        }
+        catch (Exception ex)
+        {
+            _app.Dispatcher.BeginInvoke(() =>
             {
                 _app.Log.Warn($"Headset ADB: {ex.Message}");
-            }
-
-            ApplyCadence(headsetPresent: true);
-        });
+                ApplyCadence(headsetPresent: true);
+            });
+        }
     }
 
     private void MaybeAutoReconnectWireless()

@@ -165,8 +165,19 @@ public sealed class PowerWatchService : IDisposable
             }
 
             _app.Log.Info("System resumed from sleep — restarting OVRService.");
-            var result = _app.Oculus.Restart();
-            _app.Log.Info(result);
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = _app.Oculus.Restart();
+                    _app.Dispatcher.BeginInvoke(() => _app.Log.Info(result));
+                }
+                catch (Exception ex)
+                {
+                    _app.Dispatcher.BeginInvoke(() =>
+                        _app.Log.Warn("OVRService restart after sleep failed: " + ex.Message));
+                }
+            });
         });
     }
 }

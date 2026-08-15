@@ -205,21 +205,35 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         });
     }
 
-    private void WirelessTcpip_Click(object sender, RoutedEventArgs e)
+    private async void WirelessTcpip_Click(object sender, RoutedEventArgs e)
     {
         Persist_Changed(this, new RoutedEventArgs());
-        Run(() =>
+        try
         {
             var headset = App.Instance.Settings.Current.Headset;
-            var summary = App.Instance.Adb.EnableTcpipMode(headset.WirelessPort, out var suggested);
+            var (summary, suggested) = await Task.Run(() =>
+            {
+                var text = App.Instance.Adb.EnableTcpipMode(headset.WirelessPort, out var host);
+                return (text, host);
+            }).ConfigureAwait(true);
+
             if (!string.IsNullOrWhiteSpace(suggested))
             {
                 headset.WirelessHost = suggested;
                 WirelessHostBox.Text = suggested;
             }
 
-            return summary;
-        });
+            App.Instance.Log.Info(summary);
+            ResultText.Text = summary;
+            App.Instance.Settings.Save();
+            UpdateTrustBanner();
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            ResultText.Text = ex.Message;
+            UpdateTrustBanner();
+        }
     }
 
     private void Apply_Click(object sender, RoutedEventArgs e) =>
@@ -273,12 +287,12 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             : "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
     }
 
-    private void Run(Func<string> action)
+    private async void Run(Func<string> action)
     {
         try
         {
             Persist_Changed(this, new RoutedEventArgs());
-            var result = action();
+            var result = await Task.Run(action).ConfigureAwait(true);
             App.Instance.Log.Info(result);
             ResultText.Text = result;
             App.Instance.Settings.Save();

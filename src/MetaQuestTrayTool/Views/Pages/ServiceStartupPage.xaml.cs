@@ -404,10 +404,23 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
             MessageBoxImage.Information);
     }
 
-    private void Run(Func<string> action)
+    private async void Run(Func<string> action)
     {
-        var result = action();
-        App.Instance.Log.Info(result);
-        Refresh();
+        try
+        {
+            StartButton.IsEnabled = false;
+            StopButton.IsEnabled = false;
+            RestartButton.IsEnabled = false;
+            var result = await Task.Run(action).ConfigureAwait(true);
+            App.Instance.Log.Info(result);
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+        }
+        finally
+        {
+            Refresh();
+        }
     }
 }
