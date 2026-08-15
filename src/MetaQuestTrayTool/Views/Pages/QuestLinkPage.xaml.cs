@@ -172,6 +172,22 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         LiveStatusText.Text = summary;
     }
 
+    private async void StartSteamVr_Click(object sender, RoutedEventArgs e)
+    {
+        LiveStatusText.Text = "Starting SteamVR…";
+        try
+        {
+            var summary = await Task.Run(() =>
+                App.Instance.DashToSteamVr.StartSteamVrNow("Quest Link page")).ConfigureAwait(true);
+            LiveStatusText.Text = summary;
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            LiveStatusText.Text = ex.Message;
+        }
+    }
+
     private void ApplyPresetSave_Click(object sender, RoutedEventArgs e)
     {
         if (PresetBox.SelectedItem is not ComboBoxItem { Tag: LinkPreset preset })

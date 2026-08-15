@@ -8,6 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Start SteamVR from the tray, Status, Service, Quest Link, **Ctrl+Shift+Num 0**, and voice (“start steam v r” / “launch steam v r”) without PreventDashLaunch. The headset speaks “Starting SteamVR.”
+
 ## [1.1.9] - 2026-08-15
 
 ### Fixed

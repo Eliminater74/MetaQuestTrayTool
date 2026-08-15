@@ -14,6 +14,7 @@ public enum HotKeyAction
     OpenMetaLink,
     OpenDebugTool,
     DashToSteamVr,
+    StartSteamVr,
     OpenSteamVrHome,
     RecoverPcvr,
     RestoreDesktopAudio,

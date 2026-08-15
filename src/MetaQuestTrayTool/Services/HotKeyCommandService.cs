@@ -30,6 +30,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.OpenMetaLink => _app.Oculus.ShowMetaHorizonLink(),
             HotKeyAction.OpenDebugTool => _app.Oculus.ShowOculusDebugTool(),
             HotKeyAction.DashToSteamVr => _app.DashToSteamVr.RunNow("hotkey/voice"),
+            HotKeyAction.StartSteamVr => _app.DashToSteamVr.StartSteamVrNow("hotkey/voice"),
             HotKeyAction.OpenSteamVrHome => _app.SteamVrInstall.OpenSteamVrHome(),
             HotKeyAction.RecoverPcvr => _app.SessionRecover.Recover("hotkey/voice"),
             HotKeyAction.RestoreDesktopAudio => ExecuteRestoreDesktopAudio(),

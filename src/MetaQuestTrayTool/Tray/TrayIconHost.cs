@@ -159,6 +159,25 @@ public sealed class TrayIconHost : IDisposable
             _app.Log.Info(summary);
             Notify("Meta Horizon Link", summary);
         }));
+        menu.Items.Add(new ToolStripMenuItem("Start SteamVR", null, (_, _) =>
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var summary = _app.DashToSteamVr.StartSteamVrNow("tray menu");
+                    _app.Dispatcher.BeginInvoke(() => Notify("SteamVR", summary));
+                }
+                catch (Exception ex)
+                {
+                    _app.Dispatcher.BeginInvoke(() =>
+                    {
+                        _app.Log.Warn(ex.Message);
+                        Notify("SteamVR", ex.Message);
+                    });
+                }
+            });
+        }));
         menu.Items.Add(new ToolStripMenuItem("Open Oculus Debug Tool", null, (_, _) =>
         {
             var summary = _app.Oculus.ShowOculusDebugTool();

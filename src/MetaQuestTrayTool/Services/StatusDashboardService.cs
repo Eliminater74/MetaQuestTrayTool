@@ -48,7 +48,9 @@ public sealed class StatusDashboardService
                         ? StatusChipKind.On
                         : steamVr.Channel == SteamVrChannel.Beta
                             ? StatusChipKind.Warn
-                            : StatusChipKind.On)
+                            : StatusChipKind.Warn,
+                    steamVr.IsRunning ? null : "steamvr-start",
+                    steamVr.IsRunning ? null : "Start")
                 : Chip("SteamVR", "Not installed", "Required for most Steam PCVR games",
                     StatusChipKind.Fail, "steamvr-install", "Install"),
 
@@ -185,6 +187,7 @@ public sealed class StatusDashboardService
     public string RunAction(string actionId) => actionId switch
     {
         "steamvr-install" => _app.SteamVrInstall.OpenInstallPage(),
+        "steamvr-start" => _app.DashToSteamVr.StartSteamVrNow("Status chip"),
         "openxr-steamvr" => _app.OpenXr.Set(OpenXrRuntimeKind.SteamVr),
         "ovrservice" => _app.Oculus.Start(),
         _ => $"Unknown status action: {actionId}"

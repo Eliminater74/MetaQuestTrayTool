@@ -98,6 +98,12 @@ public partial class StatusPage : System.Windows.Controls.UserControl, IShellPag
             return;
         }
 
+        if (string.Equals(actionId, "steamvr-start", StringComparison.Ordinal))
+        {
+            _ = StartSteamVrFromChip();
+            return;
+        }
+
         try
         {
             var summary = App.Instance.StatusDashboard.RunAction(actionId);
@@ -109,6 +115,21 @@ public partial class StatusPage : System.Windows.Controls.UserControl, IShellPag
         {
             App.Instance.Log.Warn($"Status action failed: {ex.Message}");
             System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
+        }
+    }
+
+    private async Task StartSteamVrFromChip()
+    {
+        try
+        {
+            var summary = await Task.Run(() =>
+                App.Instance.DashToSteamVr.StartSteamVrNow("Status chip")).ConfigureAwait(true);
+            App.Instance.Log.Info($"Status action [steamvr-start]: {summary}");
+            Refresh();
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn($"Status action failed: {ex.Message}");
         }
     }
 

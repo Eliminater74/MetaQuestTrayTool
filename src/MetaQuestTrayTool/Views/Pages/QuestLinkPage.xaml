@@ -22,9 +22,11 @@
 
       <TextBlock Text="Air Link → SteamVR" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="Requires PreventDashLaunch on Service &amp; Startup. SteamVR over Link without killing Meta processes — Dash is blocked via registry only."/>
+                 Text="Start SteamVR any time from here, the tray, Ctrl+Shift+Num 0, or voice “start steam v r”. PreventDashLaunch (Service &amp; Startup) is only needed to block Dash and auto-start SteamVR on Link connect."/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-        <Button Content="Start SteamVR over Link" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
+        <Button Content="Start SteamVR" Style="{StaticResource AccentButtonStyle}" Click="StartSteamVr_Click"
+                ToolTip="Launch SteamVR now. Does not need PreventDashLaunch. Speaks Starting SteamVR in the headset."/>
+        <Button Content="Start SteamVR over Link" Style="{StaticResource GhostButtonStyle}" Click="DashToSteamVr_Click"
                 ToolTip="Requires PreventDashLaunch. Optionally switch OpenXR to SteamVR and launch SteamVR. Connect with Meta Link first. Hotkey: Ctrl+Num 0."/>
       </StackPanel>
 

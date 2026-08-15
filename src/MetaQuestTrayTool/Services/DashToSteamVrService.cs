@@ -216,6 +216,8 @@ public sealed class DashToSteamVrService : IDisposable
 
         var parts = new List<string> { "PreventDashLaunch is on — Dash blocked via registry." };
 
+        _app.HeadsetAnnouncer.AnnounceSteamVrStarting();
+
         if (Settings.SwitchOpenXrToSteamVr)
         {
             var openXr = _app.OpenXr.ReadActiveKind();
@@ -247,7 +249,46 @@ public sealed class DashToSteamVrService : IDisposable
             _app.TrayNotify("Dash → SteamVR", summary);
         }
 
-        _app.HeadsetAnnouncer.AnnounceDashToSteamVr();
+        return summary;
+    }
+
+    /// <summary>
+    /// Always launch SteamVR (no PreventDashLaunch required). Use when auto-start missed or you want
+    /// SteamVR by hand from the tray, Status, hotkey, or voice.
+    /// </summary>
+    public string StartSteamVrNow(string reason = "manual")
+    {
+        _app.HeadsetAnnouncer.AnnounceSteamVrStarting();
+
+        var parts = new List<string>();
+        if (Settings.SwitchOpenXrToSteamVr)
+        {
+            var openXr = _app.OpenXr.ReadActiveKind();
+            if (openXr != OpenXrRuntimeKind.SteamVr)
+            {
+                parts.Add(_app.OpenXr.Set(OpenXrRuntimeKind.SteamVr));
+            }
+        }
+
+        parts.Add(LaunchSteamVr());
+        var steamVrLaunchedOrRunning = IsSteamVrSessionHealthy()
+            || parts[^1].Contains("Started SteamVR", StringComparison.OrdinalIgnoreCase)
+            || parts[^1].Contains("already running", StringComparison.OrdinalIgnoreCase);
+
+        if (IsPreventDashLaunchEnabled()
+            && Settings.RestartOvrServiceWhenSteamVrExits
+            && steamVrLaunchedOrRunning)
+        {
+            ArmSteamVrExitWatch(sawRunning: IsProcessRunning("vrserver"));
+            parts.Add("Will restart OVRService when SteamVR exits.");
+        }
+
+        var summary = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
+        _app.Log.Info($"Start SteamVR ({reason}): {summary}");
+        if (_app.Settings.Current.ShowNotifications)
+        {
+            _app.TrayNotify("SteamVR", summary);
+        }
 
         return summary;
     }

@@ -85,8 +85,8 @@
         <CheckBox x:Name="AnnounceLaunchBox" Content="Game launch from library / profile"
                   ToolTip="Example: Launching. Half-Life Alyx."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
-        <CheckBox x:Name="AnnounceDashBox" Content="Dash → SteamVR and SteamVR exit"
-                  ToolTip="Example: Starting SteamVR."
+        <CheckBox x:Name="AnnounceDashBox" Content="SteamVR start and SteamVR exit"
+                  ToolTip="Example: Starting SteamVR. Spoken in the headset when you start SteamVR (button, hotkey, or voice) and when SteamVR exits under PreventDashLaunch."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceSteamLinkBox" Content="Steam Link OpenXR assist"
                   ToolTip="OpenXR nudge / restore during Steam Link sessions."

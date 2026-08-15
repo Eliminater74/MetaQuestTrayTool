@@ -116,6 +116,8 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
     private void Start_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Start);
     private void Stop_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Stop);
     private void Restart_Click(object sender, RoutedEventArgs e) => Run(App.Instance.Oculus.Restart);
+    private void StartSteamVr_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.DashToSteamVr.StartSteamVrNow("Service & Startup button"));
 
     private void OpenMetaLink_Click(object sender, RoutedEventArgs e)
     {

@@ -41,6 +41,16 @@ public sealed class HeadsetAnnouncerService : IDisposable
             return;
         }
 
+        EnsureSynthesizer();
+    }
+
+    private void EnsureSynthesizer()
+    {
+        if (_synthesizer is not null)
+        {
+            return;
+        }
+
         try
         {
             _synthesizer = new SpeechSynthesizer { Rate = 0 };
@@ -97,9 +107,18 @@ public sealed class HeadsetAnnouncerService : IDisposable
         Enqueue(HeadsetAnnounceKind.GameLaunch, $"Launching. {SanitizeName(gameName)}.");
     }
 
-    public void AnnounceDashToSteamVr()
+    public void AnnounceDashToSteamVr() => AnnounceSteamVrStarting();
+
+    /// <summary>Speak in the Quest that SteamVR is starting (headset path, even if Status is not yet Active).</summary>
+    public void AnnounceSteamVrStarting()
     {
-        Enqueue(HeadsetAnnounceKind.DashToSteamVr, "Starting SteamVR.");
+        EnsureSynthesizer();
+        Enqueue(
+            HeadsetAnnounceKind.DashToSteamVr,
+            "Starting SteamVR.",
+            delayMs: 0,
+            allowWithoutLiveSession: true,
+            force: true);
     }
 
     public void AnnounceSteamVrExit()
@@ -131,9 +150,9 @@ public sealed class HeadsetAnnouncerService : IDisposable
             return;
         }
 
-        if (_synthesizer is null && force)
+        if (_synthesizer is null)
         {
-            Reload();
+            EnsureSynthesizer();
         }
 
         if (_synthesizer is null)

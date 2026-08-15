@@ -19,7 +19,7 @@ public sealed class HeadsetAnnouncerSettings
     /// <summary>Launch from library / profile picker.</summary>
     public bool GameLaunch { get; set; } = true;
 
-    /// <summary>PreventDashLaunch → SteamVR and OVRService restart on SteamVR exit.</summary>
+    /// <summary>SteamVR start / PreventDashLaunch → SteamVR, and OVRService restart on SteamVR exit.</summary>
     public bool DashToSteamVr { get; set; } = true;
 
     /// <summary>Steam Link OpenXR nudge / restore (informational).</summary>

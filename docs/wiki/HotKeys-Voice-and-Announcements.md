@@ -20,6 +20,7 @@ Defaults use **Ctrl + Numpad**:
 | Ctrl+Num 8 | Cycle Performance HUD |
 | Ctrl+Num 9 | Open Meta Horizon Link |
 | Ctrl+Num 0 | Start SteamVR over Link (PreventDashLaunch) |
+| Ctrl+Shift+Num 0 | Start SteamVR |
 
 Also bindable (no default numpad): Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets.
 
@@ -48,7 +49,8 @@ Spell out **A S W**, **H U D**, **steam v r**, **open x r**, **GPU**.
 | toggle H U D / performance H U D | Cycle Perf HUD |
 | open meta link / open oculus client | Open Horizon Link |
 | open debug tool / launch debug tool | Oculus Debug Tool GUI |
-| dash to steam v r / start steam v r | PreventDashLaunch → SteamVR |
+| dash to steam v r / start steam v r over link | PreventDashLaunch → SteamVR |
+| start steam v r / launch steam v r | Start SteamVR |
 | steam v r home | Open SteamVR Home |
 | recover PCVR / recover link | Recover PCVR |
 | restore desktop audio / restore audio | Fallback speakers |
@@ -67,7 +69,9 @@ Windows TTS on the Link / VR audio path so you **hear** what the tray is doing w
 
 Examples: “Connected. Air Link.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.” · “Starting SteamVR.”
 
-Sub-toggles: connect, disconnect, profiles, launch, Dash→SteamVR, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect only mid-game.
+Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect only mid-game.
+
+Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tries to speak **“Starting SteamVR.”** in the headset when a Quest playback device is found.
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 

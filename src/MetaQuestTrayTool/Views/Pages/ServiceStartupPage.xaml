@@ -31,11 +31,13 @@
         <Button x:Name="RestartButton" Content="Restart" Style="{StaticResource GhostButtonStyle}" Click="Restart_Click"
                 ToolTip="Restart OVRService. Useful after registry changes (PreventDashLaunch, CoreChannel, Link settings)."/>
         <Button Content="Open Meta Horizon Link" Style="{StaticResource AccentButtonStyle}" Click="OpenMetaLink_Click"
-                ToolTip="Open or focus the Meta Quest Link PC app (oculus-client). Use this to connect Air Link / Link before SteamVR over Link."/>
+                ToolTip="Open or focus the Meta Quest Link PC app (oculus-client). Use this to connect Air Link / Link before SteamVR."/>
+        <Button Content="Start SteamVR" Style="{StaticResource AccentButtonStyle}" Click="StartSteamVr_Click"
+                ToolTip="Launch SteamVR now (vrstartup / steam://). Does not need PreventDashLaunch. Hotkey: Ctrl+Shift+Num 0. Voice: start steam v r. Speaks Starting SteamVR in the headset."/>
         <Button Content="Open Debug Tool" Style="{StaticResource GhostButtonStyle}" Click="OpenDebugTool_Click"
                 ToolTip="Launch Meta’s Oculus Debug Tool GUI (OculusDebugTool.exe) from Support\oculus-diagnostics — same as classic OTT. Prefer Connect with Link first; close/reopen if values look stale."/>
         <Button Content="Start SteamVR over Link" Style="{StaticResource AccentButtonStyle}" Click="DashToSteamVr_Click"
-                ToolTip="Requires PreventDashLaunch (registry). Optionally switch OpenXR to SteamVR and launch SteamVR (vrstartup.exe). Does not kill Meta processes. Hotkey: Ctrl+Num 0. Voice: dash to steam v r."/>
+                ToolTip="Requires PreventDashLaunch (registry). Optionally switch OpenXR to SteamVR and launch SteamVR. Does not kill Meta processes. Hotkey: Ctrl+Num 0. Voice: dash to steam v r."/>
       </StackPanel>
       <TextBlock x:Name="ServiceStatusText" Margin="0,0,0,8" FontWeight="SemiBold"/>
 
@@ -76,7 +78,7 @@
 
       <TextBlock Text="Air Link → SteamVR (PreventDashLaunch)" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="Steam-first PCVR over Meta Link uses the OculusKiller registry flag PreventDashLaunch=1 so Meta Dash never loads. This tool does not kill Meta processes (killing Client.exe or Dash causes freezes and respawns). Connect with Link, Apply PreventDashLaunch, then SteamVR auto-starts on Link connect. Hotkey: Ctrl+Num 0. Voice: “dash to steam v r”."/>
+                 Text="Steam-first PCVR over Meta Link uses the OculusKiller registry flag PreventDashLaunch=1 so Meta Dash never loads. This tool does not kill Meta processes (killing Client.exe or Dash causes freezes and respawns). Connect with Link, Apply PreventDashLaunch — SteamVR then auto-starts on Link connect. If it does not, use Start SteamVR (button / Ctrl+Shift+Num 0 / voice: start steam v r)."/>
       <CheckBox x:Name="DashOpenXrBox" Content="Also switch OpenXR to SteamVR when starting SteamVR over Link"
                 ToolTip="When SteamVR over Link runs, set HKLM OpenXR ActiveRuntime to SteamVR so OpenXR games (and many Steam titles) use SteamVR."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>

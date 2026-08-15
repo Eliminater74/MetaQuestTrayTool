@@ -243,6 +243,17 @@ public sealed class SettingsService
                 });
             }
 
+            if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.StartSteamVr))
+            {
+                Current.HotKeys.Bindings.Add(new HotKeyBinding
+                {
+                    Id = 0,
+                    Action = HotKeyAction.StartSteamVr,
+                    Modifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift,
+                    Key = "NumPad0"
+                });
+            }
+
             Current.HotKeys.EnsureBindingIds();
         }
 
