@@ -42,9 +42,9 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.3 — MetaQuestTrayTool-Setup-1.1.3.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.3/MetaQuestTrayTool-Setup-1.1.3.exe)
+**Latest:** [v1.1.8 — MetaQuestTrayTool-Setup-1.1.8.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.8/MetaQuestTrayTool-Setup-1.1.8.exe)
 
-Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset.
+Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
 **Past releases:** [all versions on GitHub](https://github.com/Eliminater74/MetaQuestTrayTool/releases) · **What's new:** [CHANGELOG.md](CHANGELOG.md)
 
@@ -130,7 +130,7 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 
 - Windows 10 / 11 (64-bit)
 - [Meta Quest PC app](https://www.meta.com/quest/setup/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
-- For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once, or Wireless debugging **Pair** + Connect). ADB is bundled — no Android Studio required
+- For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once, Wireless debugging **Pair** + Connect, or SideQuest running on the headset which can open port **5555**). ADB is bundled — no Android Studio required
 
 ### Steam Link vs Quest Link — do I need Meta on the PC?
 
@@ -151,7 +151,7 @@ These are different PCVR paths:
 
 ## What works now
 
-Release **[v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current. **Wiki** user guide + walkthrough; no false “Link session ended” toast after PC wake. v1.1.2 added headset announcements, expanded voice, and a tighter PreventDashLaunch streaming check.
+Release **[v1.1.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Recent highlights: in-app / Setup / GitHub release notes before you update; Status no longer shows Air Link active while the Quest is off charging; PreventDashLaunch SteamVR exit returns toward Quest Home; zombie SteamVR relaunch; SideQuest on-headset wireless ADB note; wiki + headset announcements + expanded voice.
 
 ### Shell & tray
 
@@ -195,7 +195,7 @@ Release **[v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 
 - Bundled Google platform-tools; CPU/GPU, texture size, refresh, FFR, chroma, capture; paste text / proximity / guardian helpers
 - Auto-apply on connect (props reset on Quest reboot)
-- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect
+- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect — SideQuest on the headset can also open an ADB port (often 5555)
 - Trusted VR headset serial only — phones / tablets / emulators ignored
 - Battery / charge / Wi‑Fi status via ADB dumpsys
 
@@ -204,7 +204,7 @@ Release **[v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 - HotKeys: default **Ctrl+Numpad 0–9**; configure UI; assign Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
 - Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
 - **Headset announcements** (Tray Tool): optional TTS in the Quest on connect, profile apply, launch, Dash→SteamVR — when desktop toasts are not visible in-headset
-- In-app updates from GitHub `v*` (on start, schedule, or Check now); ADB stopped before Setup
+- In-app updates from GitHub `v*` (on start, schedule, or Check now) — shows **what's new** before you install; ADB stopped before Setup; Setup itself shows the changelog page
 - **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
 - Backup export/import from Advanced; Donate (PayPal); **quiet tray idle** — adaptive watcher cadence (~30–45s when unused, faster only in PCVR / armed features); timers stop when features are off; Status/Info pause when the shell is hidden to the tray; shared Link probe caches
 

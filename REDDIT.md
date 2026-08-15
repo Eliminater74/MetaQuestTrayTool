@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.3](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```
-[PC] Meta Quest Tray Tool v1.1.3 — free modern OTT-style tray app for Quest Link / SteamVR (wiki, wake-toast fix, headset announcements, expanded voice, PreventDashLaunch→SteamVR, OVRService boot control)
+[PC] Meta Quest Tray Tool v1.1.8 — free modern OTT-style tray app for Quest Link / SteamVR (changelog before update, Status idle-while-charging fix, PreventDash→Quest Home, wiki, voice, announcements)
 ```
 
 ---
@@ -23,9 +23,10 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.3** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.8** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
+**Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
 **Wiki (install, pages, Dash→SteamVR, voice, troubleshooting):** https://github.com/Eliminater74/MetaQuestTrayTool/wiki  
 **Repo / screenshots / short demo:** https://github.com/Eliminater74/MetaQuestTrayTool
 
@@ -53,7 +54,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.3)
+### What works now (v1.1.8)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -206,5 +207,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.3) — Status board, global defaults + per-game auto apply/restore, Link + OpenXR, PreventDashLaunch→SteamVR + OVRService Manual-at-boot + headset announcements + expanded voice, Wireless ADB Pair, HotKeys/voice (needed in SteamVR — elevated tray can’t be clicked), PCVR Ready / recover, VR Tools. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki
+TL;DR: free modern OTT-inspired tray app (v1.1.8) — Status board, global defaults + per-game auto apply/restore, Link + OpenXR, PreventDashLaunch→SteamVR + OVRService Manual-at-boot + headset announcements + expanded voice + changelog before update, Wireless ADB Pair (incl. SideQuest on-headset), HotKeys/voice (needed in SteamVR — elevated tray can’t be clicked), PCVR Ready / recover, VR Tools. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```
