@@ -6,12 +6,12 @@
 | [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
 | [../CHANGELOG.md](../CHANGELOG.md) | What's new per release (also shown in Setup and the in-app updater) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
-| [../README.md](../README.md) | User guide, download, feature inventory (v1.1.12) |
+| [../README.md](../README.md) | User guide, download, feature inventory (v1.1.13) |
 | [wiki/](wiki/) | GitHub Wiki source (user guide, troubleshooting, videos) |
 | [GitHub Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) | Published wiki |
 | [../ROADMAP.md](../ROADMAP.md) | Current product summary, done phases, later / non-goals |
 | [../TODO.md](../TODO.md) | Remaining work + shipped checklist |
-| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.1.12) |
+| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.1.13) |
 | [../installer/README.md](../installer/README.md) | Build the Windows Setup.exe |
 
 Settings and profiles live in `%AppData%\MetaQuestTrayTool\` (`settings.json`, `profiles.json`, activity log).

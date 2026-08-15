@@ -1,10 +1,10 @@
-﻿Meta Quest Tray Tool 1.1.12 - What's new
+﻿Meta Quest Tray Tool 1.1.13 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.12] - 2026-08-15
+[1.1.13] - 2026-08-15
 
-Fixed
-- v1.1.11 could crash or hang as soon as it started (session helper CreateProcessWithTokenW used a bad STARTUPINFO layout). The settings window and tray menu open again. Starting the helper no longer blocks the UI or launches a second copy via Explorer.
+Added
+- Headset announcements cover the waits: "Please wait. Starting SteamVR." when Link connects, and "SteamVR closed. Stopping Meta service for 10 seconds." spoken in the Quest before OVRService stops (the old exit line ran after audio had already left the headset).
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

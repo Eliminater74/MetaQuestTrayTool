@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.13] - 2026-08-15
+
 ### Added
 - Headset announcements cover the waits: **“Please wait. Starting SteamVR.”** when Link connects, and **“SteamVR closed. Stopping Meta service for 10 seconds.”** spoken in the Quest **before** OVRService stops (the old exit line ran after audio had already left the headset).
 
@@ -112,7 +114,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.12...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.13...HEAD
+[1.1.13]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.13
 [1.1.12]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.12
 [1.1.11]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.11
 [1.1.10]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.10

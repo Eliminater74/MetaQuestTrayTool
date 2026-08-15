@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.12](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.12)
+## Current product (v1.1.13)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -111,6 +111,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.10 | Start SteamVR from tray / Status / Ctrl+Shift+Num 0 / voice; headset speaks “Starting SteamVR.” |
 | v1.1.11 | Session helper (unelevated SteamVR unless Steam is already admin); OVRService 10s hold on SteamVR exit; headset TTS voice picker |
 | v1.1.12 | Fix 1.1.11 crash on start (session helper STARTUPINFO); helper no longer blocks the UI or opens a second copy |
+| v1.1.13 | Headset wait cues: please-wait on Link connect; SteamVR closed + 10s OVR stop spoken before the service drops |
 
 ---
 
