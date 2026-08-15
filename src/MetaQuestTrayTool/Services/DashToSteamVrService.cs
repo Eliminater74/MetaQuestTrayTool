@@ -690,58 +690,10 @@ public sealed class DashToSteamVrService : IDisposable
         Settings.PreferPreventDashLaunch || IsPreventDashLaunchEnabled();
 
     /// <summary>
-    /// PreventDash connect: live Meta stream, or a freshly started Link companion.
-    /// Companion is not used for Status (it lingers while charging).
+    /// PreventDash connect: live Meta stream only. Companion is not used (it lingers while charging).
     /// </summary>
     private bool IsPreventDashConnect(VrConnectionStatus status) =>
-        !status.VirtualDesktopRunning
-        && (status.MetaLinkStreaming || IsFreshPreventDashConnectAttempt());
-
-    /// <summary>
-    /// RemoteDesktopCompanion often stays running while the Quest is off/charging — never use it
-    /// for Status. Only treat a <b>freshly started</b> companion as a PreventDash Link attempt.
-    /// </summary>
-    private bool IsFreshPreventDashConnectAttempt()
-    {
-        if (!ShouldAutoStartSteamVrOnMetaLink() || IsSteamVrSessionHealthy())
-        {
-            return false;
-        }
-
-        return IsProcessStartedWithin("RemoteDesktopCompanion", TimeSpan.FromMinutes(2));
-    }
-
-    private static bool IsProcessStartedWithin(string processName, TimeSpan maxAge)
-    {
-        try
-        {
-            var cutoff = DateTime.Now - maxAge;
-            foreach (var process in Process.GetProcessesByName(processName))
-            {
-                try
-                {
-                    if (process.StartTime >= cutoff)
-                    {
-                        return true;
-                    }
-                }
-                catch
-                {
-                    // access denied / exited
-                }
-                finally
-                {
-                    process.Dispose();
-                }
-            }
-        }
-        catch
-        {
-            // ignore
-        }
-
-        return false;
-    }
+        !status.VirtualDesktopRunning && status.MetaLinkStreaming;
 
     /// <summary>If Meta Link is already active, run Dash→SteamVR now; otherwise wait for connect poll.</summary>
     private string TryStartSteamVrAfterPreventDash(string reason)

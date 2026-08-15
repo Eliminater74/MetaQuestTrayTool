@@ -601,13 +601,7 @@ public sealed class LinkConnectionProbeService
 
     private static bool LooksConnected(string? state)
     {
-        if (string.IsNullOrWhiteSpace(state))
-        {
-            return false;
-        }
-
-        return state.Contains("connect", StringComparison.OrdinalIgnoreCase)
-               && !state.Contains("disconnect", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(state?.Trim(), "connected", StringComparison.OrdinalIgnoreCase);
     }
 
     private bool IsOculusUsbPresent()
