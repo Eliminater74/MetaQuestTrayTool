@@ -15,7 +15,10 @@ public sealed class ProcessWatcherService : IDisposable
     private readonly DispatcherTimer _timer;
     private string? _activeProcess;
     private string? _activeProfileName;
+    private bool _awaitingLaunchProcess;
+    private DateTime _armedAwaitingProcessUtc;
     private int _pollGate;
+    private static readonly TimeSpan LaunchProcessGrace = TimeSpan.FromSeconds(90);
 
     public ProcessWatcherService(App app)
     {
@@ -69,6 +72,26 @@ public sealed class ProcessWatcherService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Keep this profile latched until the launched process exits (Steam may take a while to spawn).
+    /// </summary>
+    public void ArmActiveProfile(GameProfile profile, string processName)
+    {
+        var name = ProfileService.NormalizeProcessName(processName);
+        if (name.Length == 0)
+        {
+            return;
+        }
+
+        _activeProcess = name;
+        _activeProfileName = profile.Name;
+        _awaitingLaunchProcess = true;
+        _armedAwaitingProcessUtc = DateTime.UtcNow;
+        Start();
+        ApplyCadence();
+        _app.Log.Info($"Library launch armed profile '{profile.Name}' for {name}.exe until it exits.");
+    }
+
     public void Dispose() => _timer.Stop();
 
     private void BeginPoll()
@@ -118,6 +141,13 @@ public sealed class ProcessWatcherService : IDisposable
         if (_activeProcess is not null)
         {
             if (IsProcessRunning(_activeProcess))
+            {
+                _awaitingLaunchProcess = false;
+                return;
+            }
+
+            if (_awaitingLaunchProcess
+                && DateTime.UtcNow - _armedAwaitingProcessUtc < LaunchProcessGrace)
             {
                 return;
             }
@@ -190,7 +220,18 @@ public sealed class ProcessWatcherService : IDisposable
     {
         try
         {
-            return Process.GetProcessesByName(processName).Length > 0;
+            var processes = Process.GetProcessesByName(processName);
+            try
+            {
+                return processes.Length > 0;
+            }
+            finally
+            {
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
+            }
         }
         catch
         {
@@ -217,6 +258,7 @@ public sealed class ProcessWatcherService : IDisposable
         var profileName = _activeProfileName ?? "profile";
         _activeProcess = null;
         _activeProfileName = null;
+        _awaitingLaunchProcess = false;
         var summary = _app.RestoreGlobalDefaults();
         _app.Log.Info($"{processName}.exe exited — restored global defaults after '{profileName}'. {summary}");
         Notify(

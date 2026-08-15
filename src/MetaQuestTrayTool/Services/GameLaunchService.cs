@@ -30,6 +30,11 @@ public sealed class GameLaunchService
             _app.Log.Info($"Armed profile '{profile.Name}' before launch: {applied}");
         }
 
+        if (profile is not null && !string.IsNullOrWhiteSpace(game.ProcessName))
+        {
+            _app.ProcessWatcher?.ArmActiveProfile(profile, game.ProcessName);
+        }
+
         var launch = StartGame(game);
         _app.TrayNotify("Launch", $"{game.Name}\n{launch}");
         _app.HeadsetAnnouncer.AnnounceGameLaunch(game.Name);
@@ -46,6 +51,11 @@ public sealed class GameLaunchService
         if (applyNow)
         {
             _app.ApplyProfile(profile);
+        }
+
+        if (!string.IsNullOrWhiteSpace(profile.ProcessName))
+        {
+            _app.ProcessWatcher?.ArmActiveProfile(profile, profile.ProcessName);
         }
 
         // Prefer Steam protocol when we have an AppId.

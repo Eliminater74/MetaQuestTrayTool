@@ -242,6 +242,15 @@ public partial class App : System.Windows.Application
         _audioWatcher?.SyncTimer();
         _powerWatcher?.SyncTimer();
         _headsetWatcher?.SyncWatch();
+        if (Settings.Current.AutoApplyProfiles)
+        {
+            _processWatcher?.Start();
+        }
+        else
+        {
+            _processWatcher?.Stop();
+        }
+
         DashToSteamVr.SyncSessionWatch();
         DashToSteamVr.SyncSteamVrExitWatch();
         Log.Info("Reloaded feature watchers after settings change.");
