@@ -34,7 +34,9 @@ Battery, charge, and Wi‑Fi show on Status / Info via `dumpsys` when ADB is up.
 | Needs | Developer Mode + pair/connect, tcpip, **or SideQuest on-headset ADB** | Meta Horizon Link |
 | Same Wi‑Fi | Yes | Yes |
 
-You can use Air Link **without** ADB. ADB is only for headset tweaks.
+You can use Air Link **without** ADB. ADB is only for headset tweaks (CPU/GPU, FFR, refresh, …).
+
+**Steam Link app:** there is **no** Meta Debug Tool / Link-registry path. ADB is the **only** way this tray can tweak the Quest itself. SS / ASW / bitrate still belong in Steam’s UI. See [[Quest-Link-vs-Steam-Link]].
 
 ### SideQuest on the headset
 

@@ -28,7 +28,7 @@ Run **as Administrator**. Use Restart as Administrator or the logon elevation ta
 
 - New Meta runtimes may reject `server:` ASW — Log will say so
 - Pixel density often needs a **new VR session**
-- Under Steam Link / VD, ODT is skipped on purpose
+- Under Steam Link / VD, ODT is skipped on purpose (no Meta command channel). Use Quest Link / Air Link for SS / ASW, or ADB only for headset CPU/GPU — see [[Quest-Link-vs-Steam-Link]]
 
 ## Link bitrate did not change
 

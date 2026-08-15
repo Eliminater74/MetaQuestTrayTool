@@ -8,7 +8,7 @@
     <StackPanel>
       <TextBlock Text="Game Settings" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Global defaults apply live as you change them — tool start, VR headset connect, and after a game exits. Turn on Auto-apply profiles so matching games swap in their own tweaks automatically."/>
+                 Text="SS / ASW / FOV need Quest Link or Air Link (Meta on the PC). They do nothing if you started the Steam Link app — that streamer skips them on purpose. Want SteamVR games with those tweaks? Use Link + PreventDashLaunch (Service &amp; Startup), not the Steam Link app. Headset CPU/GPU is a separate ADB path and works on either pipe. Global defaults apply live; turn on Auto-apply profiles for per-game overrides."/>
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 

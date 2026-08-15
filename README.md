@@ -6,7 +6,7 @@
 
 Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
 
-**User guide:** [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) (install, pages, Dash → SteamVR, voice, troubleshooting).
+**User guide:** [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) — start with [Quest Link vs Steam Link](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link) if you are unsure which app to launch on the headset.
 
 ### Preview
 
@@ -132,18 +132,20 @@ Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEY
 - [Meta Quest PC app](https://www.meta.com/quest/setup/) and/or [SteamVR](https://store.steampowered.com/app/250820/SteamVR/) for the features you use
 - For **Headset (ADB)**: Quest **Developer Mode** + USB debugging approval, **or** Wireless ADB (same Wi‑Fi; Enable tcpip once, Wireless debugging **Pair** + Connect, or SideQuest running on the headset which can open port **5555**). ADB is bundled — no Android Studio required
 
-### Steam Link vs Quest Link — do I need Meta on the PC?
+### Steam Link vs Quest Link — which one do I need?
 
-These are different PCVR paths:
+These are **two different PCVR pipes**. This tray can push far more over **Quest Link** than over the **Steam Link app**. Plain-English guide: [wiki — Quest Link vs Steam Link](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link).
 
-| Path | On the PC | On the Quest |
+| You start on the Quest… | What carries the picture | What this tray can change from the PC |
 | --- | --- | --- |
-| **Quest Link / Air Link** | Meta Horizon Link + `OVRService` (Meta’s PCVR runtime) | Link / Air Link to the PC |
-| **Steam Link only** | Steam only — **no Meta PC app required** | Steam Link app |
+| **Quest Link** or **Air Link** (Meta) | Meta Horizon Link + `OVRService` | **Full tweaks:** Game Settings SS / ASW / FOV, Quest Link bitrate / encode / sharpening, OpenXR, audio, power. Optional **PreventDashLaunch** so SteamVR games run *over Link* instead of Dash. Headset CPU/GPU still needs **ADB**. |
+| **Steam Link** (Steam app) | Steam only — **no Meta PC app required** | **Not** SS / ASW / FOV / Link bitrate (skipped on purpose — Steam owns the stream). OpenXR assist, audio, power, HotKeys still work. **Headset tweaks = ADB only.** Quality = Steam Link in the headset + SteamVR Video. |
 
-**Meta’s PC software is for Quest Link**, not for Steam Link. If you play PCVR **only** through Steam Link and never use Quest Link or Air Link, you can **uninstall Meta Horizon Link** and run 100% Steam — you do not need this tray tool’s Link-specific features (`OVRService`, Dash → SteamVR, Link registry, PreventDashLaunch, etc.).
+**Want SteamVR games *and* the full tray (OTT-style)?** Do **not** use the Steam Link app. Use **Quest Link / Air Link** + **PreventDashLaunch** on Service & Startup (Dash is blocked via registry — this tool does not kill Meta processes). That is the intended Steam-first path.
 
-**This tray tool targets Quest Link + SteamVR OpenXR** (Steam-first PCVR over Meta Link). It still helps some mixed setups (OpenXR assist while Steam Link is active, audio, power, HotKeys), but most Link pages and service control assume Meta is installed.
+**Steam Link app only (no Meta)?** You can uninstall Meta Horizon Link. Skip Quest Link, OVRService, and PreventDashLaunch. Use **Headset** (ADB) if you still want CPU / GPU / FFR on the Quest.
+
+**This tray tool targets Quest Link + SteamVR OpenXR.** Steam Link / Virtual Desktop sessions still get OpenXR assist, audio, power, and ADB; Game Settings / Quest Link pages will show they are skipped.
 
 **Meta Horizon Link at startup:** Meta usually opens because **`OVRService`** is a Windows service set to **Automatic** at install (not listed in Settings → Startup apps). **Service & Startup** can set **Manual** so the runtime does not start at boot — with clear notes on what that does and does not do. You must **Start** OVRService, open Meta Horizon Link, or enable **Start Oculus service when tool starts** before Quest Link PCVR. Meta updates may reset Automatic; the tray can re-apply Manual on launch. This does **not** block Meta when you deliberately start Link. Steam Link–only with no Quest Link: uninstall Meta PC software.
 
@@ -187,7 +189,7 @@ Release **[v1.1.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 
 - Switch ActiveRuntime Meta vs SteamVR (global + per-profile); apply preferred on start
 - **Steam Link assist**: force SteamVR OpenXR while Steam Link / SteamVR is active, restore preferred when it ends
-- Under Steam Link / VD, Meta Link registry + ODT are gated; ADB / OpenXR / power / audio still apply
+- Under Steam Link / VD, Meta Link registry + ODT are gated (there is no PC command path like Quest Link); ADB / OpenXR / power / audio still apply — [full comparison](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link)
 - Audio auto-switch when Link audio is active (does not steal speakers just because Meta virtual audio is installed); separate **communications** playback/recording pickers
 - Power plan auto-switch, USB selective suspend off, restart `OVRService` after sleep
 

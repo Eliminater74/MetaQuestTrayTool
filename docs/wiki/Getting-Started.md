@@ -36,16 +36,13 @@ After one Windows approval, a logon scheduled task starts the tray elevated so y
 5. **Headset** — Developer Mode + USB or Wireless ADB if you want CPU/GPU/refresh props.
 6. **Profiles** — optional per-game overrides.
 
-## Steam Link vs Quest Link
+## Steam Link vs Quest Link (read this first)
 
-These are different PCVR paths:
+**Read [[Quest-Link-vs-Steam-Link]]** — two pipes, not one.
 
-| Path | On the PC | On the Quest |
-| --- | --- | --- |
-| **Quest Link / Air Link** | Meta Horizon Link + `OVRService` | Link / Air Link |
-| **Steam Link only** | Steam only — **no Meta PC app required** | Steam Link app |
-
-This tray tool is built for **Quest Link + SteamVR OpenXR**. Steam Link–only users can uninstall Meta Horizon Link; you will not need OVRService, PreventDashLaunch, or Link registry pages.
+- **Full tweaks** (SS / ASW / FOV / Link bitrate) need **Quest Link or Air Link**. The Steam Link *app* cannot receive those commands. Headset CPU/GPU still needs [[Headset-ADB]] on either path.
+- **SteamVR games + those tweaks:** Quest Link / Air Link + [[Dash-to-SteamVR|PreventDashLaunch]] — do **not** start the Steam Link app.
+- **Steam Link app only:** Meta optional. This tray will skip Game Settings / Quest Link writes. Quality lives in Steam. ADB is the only way this tool can tweak the Quest itself.
 
 If you *do* use Quest Link, Meta often opens at Windows sign-in because **OVRService is Automatic** (it is not in Settings → Startup apps). See [[Service-and-Startup]].
 

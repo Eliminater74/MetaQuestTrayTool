@@ -2,6 +2,7 @@
 
 - [[Home]]
 - [[Getting-Started]]
+- [[Quest-Link-vs-Steam-Link]]
 - [[Shell-and-Tray]]
 - [[Game-Settings-and-Profiles]]
 - [[Quest-Link]]

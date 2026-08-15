@@ -30,7 +30,9 @@ Applied through `OculusDebugToolCLI.exe` (and optionally the GUI from tray / Ser
 
 **Cycle Perf HUD** from the tray or HotKeys. Newer Meta runtimes sometimes **reject** `server:` ASW CLI — check **Log**.
 
-While **Steam Link / Virtual Desktop** is the active streamer, Meta ODT + Link registry writes are **skipped** (those streamers own bitrate/SS). ADB, OpenXR, power, and audio still apply.
+While **Steam Link / Virtual Desktop** is the active streamer, Meta ODT + Link registry writes are **skipped** (those streamers own bitrate/SS). There is no way to send those without Quest Link / Air Link. ADB, OpenXR, power, and audio still apply. Full comparison: [[Quest-Link-vs-Steam-Link]].
+
+Want Steam games with SS / ASW / Link bitrate? Use Link + [[Dash-to-SteamVR]] — do not start the Steam Link app.
 
 ## Profiles
 

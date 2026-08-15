@@ -1,6 +1,6 @@
 # Dash → SteamVR (PreventDashLaunch)
 
-Play **SteamVR games over Quest Link / Air Link** without Meta Dash owning the session.
+Play **SteamVR games over Quest Link / Air Link** without Meta Dash owning the session. This is the path for **full tray tweaks + SteamVR**. If you instead open the **Steam Link** app, Game Settings SS/ASW and Quest Link bitrate **will not apply** — see [[Quest-Link-vs-Steam-Link]].
 
 This follows the [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKiller) **registry** approach. The tray does **not** kill `OculusClient`, `OculusDash`, or replace `OculusDash.exe` on disk.
 
@@ -37,6 +37,7 @@ Meta’s old Oculus Home / Homeless is gone. **Open SteamVR Home** (`steamtours`
 
 ## Related
 
+- [[Quest-Link-vs-Steam-Link]]
 - [[Service-and-Startup]]
 - [[Quest-Link]]
 - [[HotKeys-Voice-and-Announcements]]

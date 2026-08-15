@@ -1,6 +1,8 @@
 # Quest Link
 
-PCVR over **Meta Horizon Link** (wired USB or Air Link). Settings are written to:
+PCVR over **Meta Horizon Link** (wired USB or Air Link). These PC tweaks **do not work** if you launched the **Steam Link** app instead — see [[Quest-Link-vs-Steam-Link]].
+
+Settings are written to:
 
 `HKCU\Software\Oculus\RemoteHeadset`
 
@@ -37,10 +39,13 @@ The tray Status / Info probe also uses USB vendor IDs, Link audio, `rdConnection
 
 ## When Link settings are skipped
 
-If **Steam Link / SteamVR** or **Virtual Desktop** is the live streamer, Meta Link registry + ODT SS/ASW are gated. Change bitrate in Steam / VD instead.
+If **Steam Link / SteamVR** or **Virtual Desktop** is the live streamer, Meta Link registry + ODT SS/ASW are gated. Change bitrate in Steam / VD instead. Headset ADB still works if you want CPU/GPU/FFR.
+
+Want those Link sliders **and** SteamVR games? Use Link + [[Dash-to-SteamVR]], not the Steam Link app.
 
 ## Related
 
+- [[Quest-Link-vs-Steam-Link]]
 - [[Dash-to-SteamVR]]
 - [[Service-and-Startup]]
 - [[Troubleshooting]]

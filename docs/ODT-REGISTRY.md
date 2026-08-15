@@ -68,7 +68,7 @@ Headset entries include:
 
 The tray **Info** page probes this file, plus Oculus USB VIDs (`VID_2833` / `VID_2BEC`), `server:EnumHmd`, and SteamVR / Virtual Desktop processes for Steam Link / VD sessions. Meta often **auto-connects** when the headset wakes on Wi‑Fi (DeviceCache `connectionState=connected`) without launching the Link UI — and can stay `connected` + `inoperable` while **Steam Link** is the real streamer. The probe prefers live `vrserver` / VD processes unless a strong Meta signal is present (Link audio default or `rdConnectionState` connected). `EnumHmd` alone does **not** beat SteamVR (that false positive used to re-enable SS / Link applies under Steam Link).
 
-When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the tray automatically **skips** Meta Link registry writes and OculusDebugToolCLI (SS / ASW / FOV). Headset ADB, OpenXR, power, and audio still run — bitrate/codec for those streamers belongs in their own apps.
+When **Virtual Desktop** or **Steam Link / SteamVR** is the active streamer, the tray automatically **skips** Meta Link registry writes and OculusDebugToolCLI (SS / ASW / FOV). There is no equivalent command channel on those pipes — headset ADB, OpenXR, power, and audio still run. Bitrate/codec for those streamers belongs in their own apps. User-facing comparison: [Quest Link vs Steam Link](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link).
 
 ### PreventDashLaunch (OculusKiller registry alternative)
 

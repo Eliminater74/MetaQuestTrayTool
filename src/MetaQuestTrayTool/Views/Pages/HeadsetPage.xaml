@@ -8,7 +8,7 @@
     <StackPanel>
       <TextBlock Text="Headset" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="SideQuest-style tweaks over ADB for VR headsets only (Quest 2/3/3S/Pro, Samsung Galaxy XR, HTC Vive standalone, Pico, Steam Frame). Phones, tablets, and emulators are ignored and never receive commands. Meta does not keep these after a reboot — leave apply-on-connect on so the tray pushes them again in VR."/>
+                 Text="SideQuest-style ADB for a real VR headset (Quest 2/3/3S/Pro, etc.). Works on Quest Link and Steam Link — on the Steam Link app this is the only way this tray can tweak the headset (SS/ASW/bitrate still will not). Phones/tablets/emulators are ignored. Props reset on reboot — leave apply-on-connect on."/>
 
       <TextBlock x:Name="StatusText" Margin="0,0,0,4" FontWeight="SemiBold" TextWrapping="Wrap"/>
       <TextBlock x:Name="RuntimeText" Margin="0,0,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"

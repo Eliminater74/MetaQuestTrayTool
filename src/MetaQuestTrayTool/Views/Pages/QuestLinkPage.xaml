@@ -8,7 +8,7 @@
     <StackPanel>
       <TextBlock Text="Quest Link" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="These settings apply live as you change them. Written to HKCU\Software\Oculus\RemoteHeadset when Meta Link is available."/>
+                 Text="Quest Link / Air Link only — not the Steam Link app. Written to HKCU\Software\Oculus\RemoteHeadset. Bitrate/encode usually need a Link reconnect or Restart OVRService. SteamVR over Link: enable PreventDashLaunch on Service &amp; Startup (registry, no process killing)."/>
       <TextBlock x:Name="SessionBanner" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"
                  Foreground="{DynamicResource AppAccentBrush}" FontWeight="SemiBold"/>
 

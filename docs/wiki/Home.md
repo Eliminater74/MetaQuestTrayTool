@@ -25,10 +25,11 @@ More stills: [[Screenshots-and-Videos]]
 
 ## Start here
 
-1. [[Getting-Started|Install and first launch]]
-2. Set [[Game-Settings-and-Profiles|global defaults + per-game profiles]]
-3. Tune [[Quest-Link]] bitrate / encode, then [[Dash-to-SteamVR]] if you play Steam PCVR over Link
-4. Configure [[HotKeys-Voice-and-Announcements]] **before** you put the headset on
+1. **Pick your pipe** — [[Quest-Link-vs-Steam-Link]] (Quest Link vs the Steam Link app — they are not the same)
+2. [[Getting-Started|Install and first launch]]
+3. Set [[Game-Settings-and-Profiles|global defaults + per-game profiles]]
+4. Tune [[Quest-Link]] bitrate / encode, then [[Dash-to-SteamVR]] if you want SteamVR games **over Link** (full tweaks). Skip this if you only use the Steam Link app.
+5. Configure [[HotKeys-Voice-and-Announcements]] **before** you put the headset on
 
 **SteamVR cannot click an elevated tray menu.** Mid-session control is HotKeys, voice, and automation — not the tray icon.
 
@@ -65,6 +66,7 @@ Installer is **self-contained** (.NET 8 included). Settings live in `%AppData%\M
 ## Wiki map
 
 - [[Getting-Started]]
+- [[Quest-Link-vs-Steam-Link]]
 - [[Shell-and-Tray]]
 - [[Game-Settings-and-Profiles]]
 - [[Quest-Link]]
