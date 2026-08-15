@@ -27,7 +27,9 @@ public sealed class HeadsetWatchService : IDisposable
 
     public void Start() => SyncWatch();
 
-    public void Dispose() => _timer.Stop();
+    public void Stop() => _timer.Stop();
+
+    public void Dispose() => Stop();
 
     /// <summary>Stop ADB polling when apply-on-connect, wireless auto-reconnect, and headset-only sweep are all off.</summary>
     public void SyncWatch()

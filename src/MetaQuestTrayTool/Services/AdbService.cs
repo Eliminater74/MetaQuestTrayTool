@@ -89,6 +89,38 @@ public sealed class AdbService
         return string.Join(" ", parts);
     }
 
+    /// <summary>Wait until leftover <c>adb.exe</c> processes have actually exited (file locks).</summary>
+    public string WaitUntilProcessesExit(TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            Process[] leftover;
+            try
+            {
+                leftover = Process.GetProcessesByName("adb");
+            }
+            catch
+            {
+                return "adb.exe gone.";
+            }
+
+            if (leftover.Length == 0)
+            {
+                return "adb.exe gone.";
+            }
+
+            foreach (var process in leftover)
+            {
+                process.Dispose();
+            }
+
+            Thread.Sleep(100);
+        }
+
+        return "adb.exe still present after wait.";
+    }
+
     public IReadOnlyList<AdbDevice> ListDevices(bool force = false)
     {
         if (!force)

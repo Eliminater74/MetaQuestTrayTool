@@ -210,12 +210,23 @@ public sealed class UpdateService
             throw new FileNotFoundException("Installer not found.", installerPath);
         }
 
+        // Stop ADB polling first so a tray tick cannot spawn a new adb.exe after kill-server.
+        try
+        {
+            _app.HeadsetWatch?.Stop();
+        }
+        catch
+        {
+            // update path
+        }
+
         // ADB's background server holds platform-tools\adb.exe open even with no headset —
         // Inno then prompts to skip/retry that file on upgrade.
         try
         {
             var adb = _app.Adb.KillServerForUpdate();
-            _app.Log.Info("Pre-update ADB unlock: " + adb);
+            var wait = _app.Adb.WaitUntilProcessesExit(TimeSpan.FromSeconds(8));
+            _app.Log.Info("Pre-update ADB unlock: " + adb + " " + wait);
         }
         catch (Exception ex)
         {
@@ -230,18 +241,15 @@ public sealed class UpdateService
             WorkingDirectory = IOPath.GetDirectoryName(installerPath) ?? Environment.CurrentDirectory
         });
 
-        // Exit after the installer process has started so files are unlocked.
-        _app.Dispatcher.BeginInvoke(() =>
+        // Exit after the installer has started so Program Files can be overwritten.
+        try
         {
-            try
-            {
-                _app.Shutdown();
-            }
-            catch
-            {
-                Environment.Exit(0);
-            }
-        });
+            _app.Shutdown();
+        }
+        catch
+        {
+            Environment.Exit(0);
+        }
     }
 
     public async Task CheckInteractivelyAsync(Window? owner, bool quietIfUpToDate)
