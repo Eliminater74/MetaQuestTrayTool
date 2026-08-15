@@ -36,7 +36,9 @@ Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Stea
 
 ## Headset ADB not connecting
 
-Developer Mode + USB debugging **or** Wireless Pair. Same Wi‑Fi for wireless. Phones/emulators are ignored. Props reset on Quest reboot — leave apply-on-connect on.
+Developer Mode + USB debugging **or** Wireless Pair. Same Wi‑Fi for wireless. Phones/emulators never get Quest tweaks. Props reset on Quest reboot — leave apply-on-connect on.
+
+If a **phone** keeps disappearing from `adb devices`, **Headset-only wireless ADB** is on (default). Uncheck it on the Headset page to leave other wireless ADB devices connected.
 
 **SideQuest on the headset:** if SideQuest is running in VR, it may open an ADB port (often 5555). Use that LAN IP:port with **Connect** on the Headset page — see [[Headset-ADB]].
 

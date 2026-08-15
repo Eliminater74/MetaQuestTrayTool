@@ -104,6 +104,12 @@ public sealed class HeadsetSettings
     /// <summary>When no USB headset is present, periodically try <c>adb connect</c> to the saved host:port.</summary>
     public bool WirelessAutoReconnect { get; set; }
 
+    /// <summary>
+    /// Drop wireless ADB sessions that are not a VR headset (phones/tablets Adb mDNS-discovers on the LAN).
+    /// USB devices are left listed; commands still never run on them.
+    /// </summary>
+    public bool HeadsetOnlyWirelessAdb { get; set; } = true;
+
     public string? WirelessEndpoint
     {
         get

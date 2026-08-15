@@ -195,7 +195,8 @@ Release **[v1.1.8](https://github.com/Eliminater74/MetaQuestTrayTool/releases/la
 
 - Bundled Google platform-tools; CPU/GPU, texture size, refresh, FFR, chroma, capture; paste text / proximity / guardian helpers
 - Auto-apply on connect (props reset on Quest reboot)
-- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect — SideQuest on the headset can also open an ADB port (often 5555)
+- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect (saved IP only — no LAN scan) — SideQuest on the headset can also open an ADB port (often 5555)
+- **Headset-only wireless ADB** (on by default): disconnect phones/tablets that show up over the network; uncheck on Headset if you want other ADB devices to stay connected. Tweaks still never run on non-headsets
 - Trusted VR headset serial only — phones / tablets / emulators ignored
 - Battery / charge / Wi‑Fi status via ADB dumpsys
 

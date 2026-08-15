@@ -86,6 +86,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
         WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
         WirelessAutoBox.IsChecked = headset.WirelessAutoReconnect;
+        HeadsetOnlyWirelessBox.IsChecked = headset.HeadsetOnlyWirelessAdb;
         _loading = false;
 
         // ADB identity is slow — don't block the first paint of this page.
@@ -132,6 +133,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         }
 
         headset.WirelessAutoReconnect = WirelessAutoBox.IsChecked == true;
+        headset.HeadsetOnlyWirelessAdb = HeadsetOnlyWirelessBox.IsChecked == true;
         App.Instance.Settings.Save();
         App.Instance.HeadsetWatch?.SyncWatch();
     }
@@ -159,7 +161,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
             WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
             WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            return App.Instance.Adb.ConnectWireless(headset.WirelessHost!, headset.WirelessPort);
+            return App.Instance.Adb.ConnectWirelessHeadset(headset.WirelessHost!, headset.WirelessPort, headset);
         });
     }
 

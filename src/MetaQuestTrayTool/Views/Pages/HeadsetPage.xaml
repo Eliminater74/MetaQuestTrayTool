@@ -60,7 +60,12 @@
       </StackPanel>
       <CheckBox x:Name="WirelessAutoBox" Content="Auto-reconnect wireless ADB when no headset is listed"
                 Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
-                ToolTip="Every ~30s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off. Use after SideQuest/tcpip/Wireless debugging has opened a port once."/>
+                ToolTip="Every ~45s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off. Use after SideQuest/tcpip/Wireless debugging has opened a port once. Does not scan the LAN for other ADB devices."/>
+      <CheckBox x:Name="HeadsetOnlyWirelessBox" Content="Headset-only wireless ADB"
+                Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,4"
+                ToolTip="On by default. Drops wireless ADB sessions that are not a VR headset (phones/tablets ADB finds on the LAN, including mDNS). Uncheck to leave other wireless ADB devices connected. USB gadgets stay listed either way. Quest tweaks still never run on non-headsets."/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="24,0,0,8"
+                 Text="On by default so auto-connect cannot latch onto a phone. Uncheck if you want other wireless ADB devices (phones, tablets, Fire TV, etc.) to stay connected — commands still only apply to a VR headset."/>
 
       <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <Grid>

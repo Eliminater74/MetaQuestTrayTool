@@ -213,6 +213,31 @@ public sealed class AdbService
     }
 
     /// <summary>
+    /// Connect, then (when headset-only is on) drop the session if it is a phone/tablet/emulator
+    /// and disconnect other non-headset wireless devices ADB already listed.
+    /// </summary>
+    public string ConnectWirelessHeadset(string host, int port, HeadsetSettings settings)
+    {
+        var summary = ConnectWireless(host, port);
+        if (settings.HeadsetOnlyWirelessAdb)
+        {
+            var rejected = RejectNonHeadsetWireless(FormatEndpoint(host, port));
+            if (rejected is not null)
+            {
+                throw new InvalidOperationException(rejected);
+            }
+
+            var swept = SweepNonHeadsetWireless(settings);
+            if (!string.IsNullOrWhiteSpace(swept))
+            {
+                summary = $"{summary} {swept}";
+            }
+        }
+
+        return summary;
+    }
+
+    /// <summary>
     /// Quest Wireless debugging: <c>adb pair host:pairingPort code</c>.
     /// Pairing port + 6-digit code come from Pair device with pairing code; then use Connect with the connect port.
     /// </summary>
@@ -319,14 +344,105 @@ public sealed class AdbService
         try
         {
             var host = settings.WirelessHost!.Trim();
-            var summary = ConnectWireless(host, settings.WirelessPort);
-            return summary;
+            return ConnectWirelessHeadset(host, settings.WirelessPort, settings);
         }
         catch (Exception ex)
         {
             return $"Wireless auto-reconnect: {ex.Message}";
         }
     }
+
+    /// <summary>
+    /// Disconnect wireless (IP:port) sessions that are not a VR headset.
+    /// Does not touch USB devices. Leaves the saved endpoint alone while it is still unauthorized
+    /// (Quest waiting for the debugging prompt).
+    /// </summary>
+    public string? SweepNonHeadsetWireless(HeadsetSettings settings)
+    {
+        if (!settings.HeadsetOnlyWirelessAdb)
+        {
+            return null;
+        }
+
+        var kept = settings.WirelessEndpoint;
+        var dropped = new List<string>();
+        foreach (var device in ListDevices(force: true))
+        {
+            if (!LooksLikeWirelessSerial(device.Serial))
+            {
+                continue;
+            }
+
+            var (isVr, probe) = Classify(device);
+            if (isVr)
+            {
+                continue;
+            }
+
+            if (device.NeedsAuthorization && SameWirelessEndpoint(device.Serial, kept))
+            {
+                continue;
+            }
+
+            try
+            {
+                Run($"disconnect {device.Serial}");
+                dropped.Add(VrHeadsetClassifier.DescribeIgnored(device, probe));
+            }
+            catch
+            {
+                // Best-effort — ADB may already have dropped the session.
+            }
+        }
+
+        if (dropped.Count == 0)
+        {
+            return null;
+        }
+
+        InvalidateDeviceCache();
+        return dropped.Count == 1
+            ? $"Disconnected wireless ADB that is not a VR headset: {dropped[0]}"
+            : $"Disconnected {dropped.Count} wireless ADB devices that are not VR headsets.";
+    }
+
+    private string? RejectNonHeadsetWireless(string endpoint)
+    {
+        var device = ListDevices(force: true)
+            .FirstOrDefault(item => SameWirelessEndpoint(item.Serial, endpoint));
+        if (device is null)
+        {
+            return null;
+        }
+
+        if (device.NeedsAuthorization)
+        {
+            return null;
+        }
+
+        var (isVr, probe) = Classify(device);
+        if (isVr)
+        {
+            return null;
+        }
+
+        try
+        {
+            Run($"disconnect {device.Serial}");
+        }
+        catch
+        {
+            // still report
+        }
+
+        InvalidateDeviceCache();
+        return $"Disconnected {endpoint} — {VrHeadsetClassifier.DescribeIgnored(device, probe)} "
+               + "Wireless ADB stays headset-only; phones, tablets, and emulators are dropped.";
+    }
+
+    private static bool SameWirelessEndpoint(string serial, string? endpoint) =>
+        !string.IsNullOrWhiteSpace(endpoint)
+        && string.Equals(serial.Trim(), endpoint.Trim(), StringComparison.OrdinalIgnoreCase);
 
     public AdbDevice? FindUsbHeadset()
     {
@@ -381,7 +497,9 @@ public sealed class AdbService
     {
         var devices = ListDevices();
         return devices.FirstOrDefault(device => Classify(device).IsVr)
+               // USB only: an unauthorized wireless phone must not be treated as a Quest.
                ?? devices.FirstOrDefault(device => device.NeedsAuthorization
+                                                 && !LooksLikeWirelessSerial(device.Serial)
                                                  && !VrHeadsetClassifier.IsObviousEmulator(device));
     }
 

@@ -8,6 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Headset-only wireless ADB (on by default): drops phones/tablets that appear over the network; uncheck on the Headset page if you want other wireless ADB devices to stay connected. Quest tweaks still never run on non-headsets.
+
 ## [1.1.8] - 2026-08-14
 
 ### Docs

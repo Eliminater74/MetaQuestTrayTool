@@ -115,6 +115,7 @@ public static class SystemInfoService
         text.AppendLine($"  Build: {headset.BuildDisplay ?? "—"}");
         text.AppendLine($"  Fingerprint: {headset.Fingerprint ?? "—"}");
         text.AppendLine($"  Trusted serial: {app.Settings.Current.Headset.TrustedSerial ?? "(none yet)"}");
+        text.AppendLine($"  Headset-only wireless ADB: {app.Settings.Current.Headset.HeadsetOnlyWirelessAdb}");
         text.AppendLine($"  Trust required: {app.Settings.Current.Headset.RequireTrustedHeadset}");
         text.AppendLine($"  This device trusted: {headset.IsTrusted}");
         text.AppendLine($"  Rogue / blocked: {headset.IsRogue}");

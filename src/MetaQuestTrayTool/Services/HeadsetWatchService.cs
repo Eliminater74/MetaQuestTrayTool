@@ -13,6 +13,7 @@ public sealed class HeadsetWatchService : IDisposable
     private string? _lastSerial;
     private bool _appliedForSerial;
     private string? _lastIgnoredMessage;
+    private string? _lastSweepMessage;
     private DateTime _lastWirelessAttemptUtc = DateTime.MinValue;
     private static readonly TimeSpan WirelessRetryInterval = TimeSpan.FromSeconds(45);
     private int _pollGate;
@@ -28,17 +29,19 @@ public sealed class HeadsetWatchService : IDisposable
 
     public void Dispose() => _timer.Stop();
 
-    /// <summary>Stop ADB polling when apply-on-connect and wireless auto-reconnect are both off.</summary>
+    /// <summary>Stop ADB polling when apply-on-connect, wireless auto-reconnect, and headset-only sweep are all off.</summary>
     public void SyncWatch()
     {
         var settings = _app.Settings.Current.Headset;
-        var needsWatch = settings.ApplyWhenHeadsetConnects || settings.WirelessAutoReconnect;
+        var needsWatch = settings.ApplyWhenHeadsetConnects
+                         || settings.WirelessAutoReconnect
+                         || settings.HeadsetOnlyWirelessAdb;
         if (!needsWatch)
         {
             if (_timer.IsEnabled)
             {
                 _timer.Stop();
-                _app.Log.Info("Headset ADB watcher paused (auto-apply and wireless reconnect off).");
+                _app.Log.Info("Headset ADB watcher paused (auto-apply, wireless reconnect, and headset-only sweep off).");
             }
 
             return;
@@ -87,13 +90,16 @@ public sealed class HeadsetWatchService : IDisposable
     private void Poll()
     {
         var settings = _app.Settings.Current.Headset;
-        if (!settings.ApplyWhenHeadsetConnects && !settings.WirelessAutoReconnect)
+        if (!settings.ApplyWhenHeadsetConnects
+            && !settings.WirelessAutoReconnect
+            && !settings.HeadsetOnlyWirelessAdb)
         {
             _app.Dispatcher.BeginInvoke(SyncWatch);
             return;
         }
 
         MaybeAutoReconnectWireless();
+        MaybeSweepNonHeadsetWireless();
 
         var quest = _app.Adb.FindQuest();
         var serial = quest?.IsReady == true ? quest.Serial : null;
@@ -211,10 +217,30 @@ public sealed class HeadsetWatchService : IDisposable
         {
             _app.Log.Info(summary);
         }
-        else if (summary.Contains("auto-reconnect", StringComparison.OrdinalIgnoreCase))
+        else if (summary.Contains("auto-reconnect", StringComparison.OrdinalIgnoreCase)
+                 || summary.Contains("not a VR headset", StringComparison.OrdinalIgnoreCase))
         {
-            // Soft fail — don't spam WARN every 30s while headset is off.
+            // Soft fail — don't spam WARN every 30s while headset is off or a phone is on the LAN.
             _app.Log.Info(summary);
         }
+    }
+
+    private void MaybeSweepNonHeadsetWireless()
+    {
+        var settings = _app.Settings.Current.Headset;
+        if (!settings.HeadsetOnlyWirelessAdb)
+        {
+            return;
+        }
+
+        var summary = _app.Adb.SweepNonHeadsetWireless(settings);
+        if (string.IsNullOrWhiteSpace(summary)
+            || string.Equals(summary, _lastSweepMessage, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _lastSweepMessage = summary;
+        _app.Log.Info(summary);
     }
 }

@@ -13,9 +13,10 @@ SideQuest-style props via **bundled Google platform-tools**. Not the same as Air
 3. Or **Wireless debugging**: Pair (pairing port + code), then Connect (IP:connect port).
 4. **Enable tcpip** over USB once if you prefer `adb connect` without pairing every time.
 5. **SideQuest on the headset** can also open an ADB port while it is running — use the headset LAN IP and that port (often **5555**) with **Connect**. No USB pair step required for that session.
-6. Optional **auto-reconnect** to the saved wireless endpoint.
+6. Optional **auto-reconnect** to the saved wireless endpoint (that host:port only — the tray does **not** scan the LAN for random ADB devices).
+7. **Headset-only wireless ADB** is **on by default**: if a phone/tablet shows up on wireless ADB (or you Connect the wrong IP), that session is dropped. **Uncheck** it if you want other gadgets to stay connected. USB phones are never disconnected. Quest tweaks still never run on non-headsets.
 
-Only **real VR headsets** are trusted. Phones, tablets, and emulators are ignored.
+Only **real VR headsets** are trusted. Phones, tablets, and emulators never receive headset commands.
 
 ## What you can set
 
