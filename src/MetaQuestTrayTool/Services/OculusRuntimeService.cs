@@ -214,7 +214,12 @@ public sealed class OculusRuntimeService
             return $"{ServiceName} was not found.";
         }
 
-        var settle = settleDelay ?? TimeSpan.FromSeconds(8);
+        var settle = settleDelay.GetValueOrDefault(TimeSpan.FromSeconds(10));
+        if (settle < TimeSpan.FromSeconds(10))
+        {
+            settle = TimeSpan.FromSeconds(10);
+        }
+
         var parts = new List<string>();
 
         if (IsServiceRunning)
@@ -229,6 +234,13 @@ public sealed class OculusRuntimeService
         else
         {
             parts.Add($"{ServiceName} already stopped.");
+        }
+
+        Refresh(force: true);
+        if (IsServiceRunning)
+        {
+            parts.Add($"{ServiceName} did not stop; cannot hold it down for Link drop.");
+            return string.Join(" ", parts);
         }
 
         var remaining = settle;

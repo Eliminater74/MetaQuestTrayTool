@@ -85,9 +85,8 @@ public sealed class LinkConnectionProbeService
 
     private VrConnectionStatus ProbeCore(bool includeEnumHmd, bool includeAudioLink)
     {
-        // Quest Steam Link runs full SteamVR (vrserver + compositor). A lone vrserver without
-        // compositor is often a zombie / invisible session — do not treat it as a live SteamVR
-        // runtime (that would hide Meta Link + block PreventDash relaunch).
+        // Live Meta Link must beat leftover SteamVR processes. Otherwise a previous vrserver
+        // session is labeled "Steam Link" and PreventDash never starts SteamVR on Air Link.
         var steamVr = (IsProcessRunning("vrserver")
                        && (IsProcessRunning("vrcompositor") || IsProcessRunning("vrdashboard")))
                       || (IsProcessRunning("vrmonitor") && IsProcessRunning("vrcompositor"));
@@ -156,7 +155,7 @@ public sealed class LinkConnectionProbeService
                 Kind = VrConnectionKind.SteamLinkOrSteamVr,
                 Summary = "SteamVR session (Steam Link / SteamVR)",
                 Detail = staleMeta
-                    ? "SteamVR running — Meta DeviceCache may still show auto-connect/inoperable (normal; Steam Link is active)"
+                    ? "SteamVR running — Meta DeviceCache is idle/inoperable (Steam Link app, or leftover SteamVR)"
                     : "vrserver running without an active Meta Link session",
                 SessionActive = true,
                 UsbHeadsetPresent = usb,
@@ -260,6 +259,13 @@ public sealed class LinkConnectionProbeService
     {
         var competingRuntime = steamVrRunning || virtualDesktopRunning;
 
+        // Real Air Link / wired Link stream — even if leftover vrserver is still on the PC.
+        // Steam Link's DeviceCache is typically inoperable/disconnected, not operable+connected.
+        if (!virtualDesktopRunning && LooksLikeLiveMetaLinkStream(cache))
+        {
+            return true;
+        }
+
         // Link audio alone only wins when no competing SteamVR / VD session is up.
         if (audioLink && !competingRuntime)
         {
@@ -287,8 +293,8 @@ public sealed class LinkConnectionProbeService
     /// ghosts and EnumHmd-only (OVRService sees the HMD while Quest is on Wi‑Fi but Link is not streaming).
     /// Air Link: operable + (audio, connectionState, or EnumHmd+primary).
     /// Do not require audio alone — PreventDashLaunch never switches audio until streaming is true.
-    /// While SteamVR is running, require RD connected so Steam Link + sticky Air Link / audio is not
-    /// treated as a Meta stream (that would auto-start Dash→SteamVR and arm OVR-on-exit).
+    /// While leftover SteamVR is running, still treat operable+connected DeviceCache as Meta Link
+    /// (PreventDash over Air Link). Steam Link usually leaves DeviceCache inoperable.
     /// </summary>
     private static bool LooksLikeStreamingMetaLink(
         HeadsetCacheEntry? cache,
@@ -305,7 +311,9 @@ public sealed class LinkConnectionProbeService
 
         if (steamVrRunning)
         {
-            return cache is not null && LooksConnected(cache.RdConnectionState);
+            // Leftover SteamVR must not hide a live Air Link / Quest Link stream.
+            return LooksLikeLiveMetaLinkStream(cache)
+                   || (cache is not null && LooksConnected(cache.RdConnectionState));
         }
 
         // Remote desktop stream — strongest Meta signal besides Link audio.
@@ -348,6 +356,38 @@ public sealed class LinkConnectionProbeService
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// DeviceCache says Meta Link is actually streaming — not Wi‑Fi auto-connect / charging ghosts.
+    /// Steam Link usually leaves operationalState=inoperable while vrserver runs.
+    /// </summary>
+    private static bool LooksLikeLiveMetaLinkStream(HeadsetCacheEntry? cache)
+    {
+        if (cache is null)
+        {
+            return false;
+        }
+
+        if (string.Equals(cache.OperationalState, "inoperable", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var line = LooksConnected(cache.ConnectionState) || LooksConnected(cache.RdConnectionState);
+        if (!line)
+        {
+            return false;
+        }
+
+        if (cache.IsUsingAirLink == true)
+        {
+            return string.Equals(cache.OperationalState, "operable", StringComparison.OrdinalIgnoreCase)
+                   || LooksConnected(cache.RdConnectionState);
+        }
+
+        return string.Equals(cache.OperationalState, "operable", StringComparison.OrdinalIgnoreCase)
+               || LooksConnected(cache.RdConnectionState);
     }
 
     private static bool CacheShowsConnectedLine(HeadsetCacheEntry? cache)

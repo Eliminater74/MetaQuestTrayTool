@@ -19,9 +19,9 @@ This follows the [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKi
 
 Connect with **Meta Link / Air Link**. After a confirmed live stream (not Wi‑Fi auto-connect), the tray auto-starts SteamVR within a few seconds.
 
-When you **exit SteamVR**, the tray stops **OVRService** for several seconds so Link fully disconnects (Quest Home), then starts the service again. It will **not** immediately auto-start SteamVR on that bounce — the next *new* Link connect will.
+When you **exit SteamVR**, the tray **stops OVRService**, keeps it down **at least 10 seconds** so Link fully disconnects (Quest Home), then starts the service again. It does not leave OVR stopped. SteamVR is launched through a **normal-user session helper** so it does not inherit the tray's Administrator token.
 
-Manual: tray / **Ctrl+Num 0** / voice **dash to steam v r**.
+Manual: tray / **Ctrl+Shift+Num 0** / voice **start steam v r**. PreventDash: **Ctrl+Num 0** / **dash to steam v r**.
 
 ## What “live stream” means
 

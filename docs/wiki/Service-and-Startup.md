@@ -47,6 +47,8 @@ If Meta will not open after Manual: the service is probably stopped. Start OVRSe
 
 **Run with Administrator rights at logon** uses a scheduled task with highest privileges (a Windows service cannot show a tray icon). One UAC, then silent elevated starts.
 
+The elevated tray starts a **session helper** at your normal user token (`--session-helper`) so SteamVR / Steam games do not run as Administrator. A Windows Service cannot do that (Session 0).
+
 SteamVR cannot click that tray — use HotKeys / voice.
 
 ## Related

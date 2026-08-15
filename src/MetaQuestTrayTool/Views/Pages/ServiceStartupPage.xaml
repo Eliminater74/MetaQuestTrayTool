@@ -89,8 +89,8 @@
                 ToolTip="Optional precaution from OculusKiller: when you turn PreventDashLaunch on, also set CoreChannel to NO_UPDATES so Meta updates do not overwrite runtime/Dash tweaks. Your previous channel is remembered for Restore. Off by default — you stay on PublicTest/LIVE unless you opt in."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <CheckBox x:Name="RestartOvrOnSteamVrExitBox"
-                Content="When SteamVR exits, restart OVRService (drops Link → return to Quest Home)"
-                ToolTip="Required with PreventDashLaunch (turned on automatically): after vrserver exits, stop OVRService for a few seconds so Air Link / Quest Link drops and the headset returns to Quest Home, then start the service again. Without this you stay stuck in Link with no Dash."
+                Content="When SteamVR exits, stop OVRService 10s then start it (Quest Home)"
+                ToolTip="Required with PreventDashLaunch (turned on automatically): after SteamVR exits, fully stop OVRService and keep it down at least 10 seconds so Air Link / Quest Link drops and the headset returns to Quest Home, then start the service again. A quick restart keeps Link up and can relaunch SteamVR. Without this you stay stuck in Link with no Dash."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
         <Button Content="Apply PreventDashLaunch + restart OVRService (+ SteamVR if linked)" Style="{StaticResource GhostButtonStyle}"

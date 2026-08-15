@@ -99,37 +99,36 @@ public sealed class SteamVrInstallService
 
         if (!info.IsRunning)
         {
-            try
+            SessionHelperClient.EnsureRunning();
+            if (!SessionHelperClient.TryStartSteamVr(out var steamVr)
+                && !UnelevatedProcessLauncher.TryStartUri(
+                    "steam://run/250820",
+                    UnelevatedProcessLauncher.IsCurrentProcessElevated(),
+                    out steamVr))
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "steam://run/250820",
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                return $"Could not start SteamVR before Home: {ex.Message}";
+                return $"Could not start SteamVR before Home: {steamVr}";
             }
 
-            // Give vrserver a moment before Home attaches.
             Thread.Sleep(2500);
         }
 
-        try
+        SessionHelperClient.EnsureRunning();
+        if (SessionHelperClient.TryStartExe(tours, arguments: null, Path.GetDirectoryName(tours), out _))
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = tours,
-                WorkingDirectory = Path.GetDirectoryName(tours)!,
-                UseShellExecute = true
-            });
             return "Launched SteamVR Home (steamtours). Put the headset on if it does not appear.";
         }
-        catch (Exception ex)
+
+        if (UnelevatedProcessLauncher.TryStart(
+                tours,
+                arguments: null,
+                Path.GetDirectoryName(tours),
+                UnelevatedProcessLauncher.IsCurrentProcessElevated(),
+                out var toursDetail))
         {
-            return $"Could not launch SteamVR Home: {ex.Message}";
+            return "Launched SteamVR Home (steamtours). Put the headset on if it does not appear.";
         }
+
+        return $"Could not launch SteamVR Home: {toursDetail}";
     }
 
     private SteamVrInstallInfo ProbeCore()

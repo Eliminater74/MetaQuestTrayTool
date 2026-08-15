@@ -59,6 +59,9 @@ public sealed class DashToSteamVrService : IDisposable
     /// <summary>Need several idle polls after OVR drop before the next connect can auto-start SteamVR.</summary>
     private const int LinkIdleConfirmPollsRequired = 3;
 
+    /// <summary>Stop OVRService this long so Air Link fully drops to Quest Home (restart is too fast).</summary>
+    private static readonly TimeSpan OvrHoldForLinkDrop = TimeSpan.FromSeconds(10);
+
     /// <summary>Give vrstartup a few minutes to spawn vrserver before disarming.</summary>
     private const int MaxWaitForSteamVrPolls = 36;
 
@@ -146,8 +149,7 @@ public sealed class DashToSteamVrService : IDisposable
             _sessionTimer.Stop();
             _wasMetaSession = false;
             _ranThisMetaSession = false;
-            _awaitingLinkIdleAfterSteamVrExit = false;
-            _linkIdleConfirmPolls = 0;
+            ClearSteamVrExitIdleLatch();
         }
     }
 
@@ -203,7 +205,7 @@ public sealed class DashToSteamVrService : IDisposable
     }
 
     /// <summary>Manual / hotkey / voice entry point.</summary>
-    public string RunNow(string reason = "manual")
+    public string RunNow(string reason = "manual", bool restartSteamVrIfRunning = false)
     {
         if (!IsPreventDashLaunchEnabled())
         {
@@ -214,6 +216,7 @@ public sealed class DashToSteamVrService : IDisposable
             return msg;
         }
 
+        ClearSteamVrExitIdleLatch();
         var parts = new List<string> { "PreventDashLaunch is on — Dash blocked via registry." };
 
         _app.HeadsetAnnouncer.AnnounceSteamVrStarting();
@@ -231,7 +234,7 @@ public sealed class DashToSteamVrService : IDisposable
             }
         }
 
-        parts.Add(LaunchSteamVr());
+        parts.Add(LaunchSteamVr(restartIfRunning: restartSteamVrIfRunning));
         var steamVrLaunchedOrRunning = IsSteamVrSessionHealthy()
             || parts[^1].Contains("Started SteamVR", StringComparison.OrdinalIgnoreCase)
             || parts[^1].Contains("already running", StringComparison.OrdinalIgnoreCase);
@@ -258,6 +261,7 @@ public sealed class DashToSteamVrService : IDisposable
     /// </summary>
     public string StartSteamVrNow(string reason = "manual")
     {
+        ClearSteamVrExitIdleLatch();
         _app.HeadsetAnnouncer.AnnounceSteamVrStarting();
 
         var parts = new List<string>();
@@ -566,8 +570,7 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
-                _awaitingLinkIdleAfterSteamVrExit = false;
-                _linkIdleConfirmPolls = 0;
+                ClearSteamVrExitIdleLatch();
                 SyncSessionWatch();
                 SyncSteamVrExitWatch();
                 return;
@@ -599,6 +602,16 @@ public sealed class DashToSteamVrService : IDisposable
                     return;
                 }
 
+                if (IsSteamVrRuntimePresent())
+                {
+                    StopSteamVrRuntime(
+                        "Steam respawned SteamVR after you exited — holding off until Quest Home");
+                    _ranThisMetaSession = true;
+                    _wasMetaSession = true;
+                    _linkIdleConfirmPolls = 0;
+                    return;
+                }
+
                 if (meta)
                 {
                     _ranThisMetaSession = true;
@@ -615,12 +628,11 @@ public sealed class DashToSteamVrService : IDisposable
                     return;
                 }
 
-                _awaitingLinkIdleAfterSteamVrExit = false;
-                _linkIdleConfirmPolls = 0;
+                ClearSteamVrExitIdleLatch();
                 _ranThisMetaSession = false;
                 _wasMetaSession = false;
                 _app.Log.Info(
-                    "Meta Link stayed idle after SteamVR exit — next Air Link / Quest Link connect will auto-start SteamVR.");
+                    "Quest Home confirmed after SteamVR exit — next Air Link / Quest Link connect will auto-start SteamVR.");
             }
 
             if (!meta)
@@ -652,13 +664,8 @@ public sealed class DashToSteamVrService : IDisposable
 
             if (IsSteamVrSessionHealthy())
             {
-                _ranThisMetaSession = true;
-                if (Settings.RestartOvrServiceWhenSteamVrExits)
-                {
-                    ArmSteamVrExitWatch(sawRunning: true);
-                }
-
-                return;
+                _app.Log.Info(
+                    "SteamVR processes are still running at this Link connect — will restart them so they attach to this session.");
             }
 
             _streamingConfirmPolls++;
@@ -707,7 +714,7 @@ public sealed class DashToSteamVrService : IDisposable
                 return;
             }
 
-            RunNow(reason);
+            RunNow(reason, restartSteamVrIfRunning: true);
         }
         catch (Exception ex)
         {
@@ -781,10 +788,16 @@ public sealed class DashToSteamVrService : IDisposable
         {
             _steamVrExitWatch.Start();
             _app.Log.Info(
-                "SteamVR exit watch armed — will restart OVRService when SteamVR ends so Quest Home can return.");
+                "SteamVR exit watch armed — will stop OVRService for 10s when SteamVR ends so Quest Home can return.");
         }
 
         IdleCadence.Set(_steamVrExitWatch, IdleCadence.Active);
+    }
+
+    private void ClearSteamVrExitIdleLatch()
+    {
+        _awaitingLinkIdleAfterSteamVrExit = false;
+        _linkIdleConfirmPolls = 0;
     }
 
     private void StopSteamVrExitWatch(bool resetSaw)
@@ -892,11 +905,11 @@ public sealed class DashToSteamVrService : IDisposable
                         return;
                     }
 
-                    // Hold OVRService down long enough for Air Link / Quest Link to drop.
-                    var result = _app.Oculus.RestartForLinkDrop(TimeSpan.FromSeconds(8), token);
+                    // Stop OVRService completely, wait for Air Link to fall off, then start again.
+                    var result = _app.Oculus.RestartForLinkDrop(OvrHoldForLinkDrop, token);
                     _app.LinkConnection.InvalidateCache();
                     var summary =
-                        "SteamVR exited — restarted OVRService so Meta Link can drop and Quest Home can return. "
+                        "SteamVR exited — stopped OVRService for 10s so Link can drop to Quest Home, then started it again. "
                         + result;
                     if (token.IsCancellationRequested)
                     {
@@ -937,71 +950,54 @@ public sealed class DashToSteamVrService : IDisposable
         }
     }
 
-    private string LaunchSteamVr()
+    private string LaunchSteamVr(bool restartIfRunning = false)
     {
-        if (IsSteamVrSessionHealthy())
+        if (IsSteamVrSessionHealthy() && !restartIfRunning)
         {
             return "SteamVR already running (vrserver + compositor).";
         }
 
         var notes = new List<string>();
-        if (IsSteamVrRuntimePresent())
+        if (IsSteamVrRuntimePresent() || (restartIfRunning && IsSteamVrSessionHealthy()))
         {
-            notes.Add(StopSteamVrRuntime("zombie / invisible SteamVR (vrserver without compositor)"));
+            notes.Add(StopSteamVrRuntime(
+                restartIfRunning
+                    ? "restart so SteamVR attaches to this Link session"
+                    : "zombie / invisible SteamVR (vrserver without compositor)"));
+        }
+
+        notes.Add(SessionHelperClient.EnsureRunning());
+        if (SessionHelperClient.TryStartSteamVr(out var helperDetail))
+        {
+            notes.Add("Started SteamVR via session helper (normal user). " + helperDetail);
+            return string.Join(" ", notes);
+        }
+
+        var drop = UnelevatedProcessLauncher.IsCurrentProcessElevated();
+        if (UnelevatedProcessLauncher.TryStartUri("steam://run/250820", drop, out var uriDetail))
+        {
+            notes.Add(
+                $"Session helper unavailable ({helperDetail}); started SteamVR unelevated via steam://run/250820. "
+                + uriDetail);
+            return string.Join(" ", notes);
         }
 
         var paths = TryResolveSteamVrPaths();
-        if (paths is null)
+        if (paths is not null
+            && SessionHelperClient.TryStartExe(
+                paths.Value.StartupPath,
+                arguments: null,
+                Path.GetDirectoryName(paths.Value.StartupPath),
+                out var exeDetail))
         {
-            // steam:// still works when openvrpaths is missing after a bad exit.
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "steam://run/250820",
-                    UseShellExecute = true
-                });
-                notes.Add("Started SteamVR (steam://run/250820).");
-                return string.Join(" ", notes);
-            }
-            catch (Exception ex)
-            {
-                notes.Add(
-                    "Could not find SteamVR (openvrpaths.vrpath / vrstartup.exe). "
-                    + $"steam:// launch failed: {ex.Message}");
-                return string.Join(" ", notes);
-            }
-        }
-
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = paths.Value.StartupPath,
-                WorkingDirectory = Path.GetDirectoryName(paths.Value.StartupPath) ?? Environment.CurrentDirectory,
-                UseShellExecute = true
-            });
-            notes.Add($"Started SteamVR ({Path.GetFileName(paths.Value.StartupPath)}).");
+            notes.Add($"Started SteamVR via session helper ({Path.GetFileName(paths.Value.StartupPath)}). " + exeDetail);
             return string.Join(" ", notes);
         }
-        catch (Exception ex)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "steam://run/250820",
-                    UseShellExecute = true
-                });
-                notes.Add($"vrstartup failed ({ex.Message}); started SteamVR via steam://run/250820.");
-                return string.Join(" ", notes);
-            }
-            catch (Exception steamEx)
-            {
-                notes.Add($"Could not start SteamVR: {ex.Message}; steam:// also failed: {steamEx.Message}");
-                return string.Join(" ", notes);
-            }
-        }
+
+        notes.Add(
+            "Could not start SteamVR without Administrator. "
+            + $"Helper: {helperDetail}; steam://: {uriDetail}.");
+        return string.Join(" ", notes);
     }
 
     /// <summary>

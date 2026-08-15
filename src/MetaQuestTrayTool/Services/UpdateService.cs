@@ -233,6 +233,15 @@ public sealed class UpdateService
             _app.Log.Warn($"Pre-update ADB unlock failed: {ex.Message}");
         }
 
+        try
+        {
+            SessionHelperClient.RequestQuit();
+        }
+        catch
+        {
+            // helper is best-effort so Setup can overwrite the exe
+        }
+
         _app.Log.Info($"Launching updater: {installerPath}");
         Process.Start(new ProcessStartInfo
         {

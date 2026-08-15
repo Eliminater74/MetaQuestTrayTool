@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using MetaQuestTrayTool.Models;
 
@@ -147,7 +146,7 @@ public sealed class GameLaunchService
         return profile;
     }
 
-    private static string StartGame(LibraryGame game)
+    private string StartGame(LibraryGame game)
     {
         if (game.Platform == GamePlatform.Steam && !string.IsNullOrWhiteSpace(game.AppId))
         {
@@ -171,22 +170,40 @@ public sealed class GameLaunchService
             $"No launch method for '{game.Name}'. Steam needs an AppId; Meta needs InstallPath + LaunchFile.");
     }
 
-    private static void StartSteam(string appId)
+    private void StartSteam(string appId)
     {
-        Process.Start(new ProcessStartInfo
+        var uri = $"steam://run/{appId}";
+        SessionHelperClient.EnsureRunning();
+        if (SessionHelperClient.TryStartUri(uri, out _))
         {
-            FileName = $"steam://run/{appId}",
-            UseShellExecute = true
-        });
+            return;
+        }
+
+        if (!UnelevatedProcessLauncher.TryStartUri(
+                uri,
+                UnelevatedProcessLauncher.IsCurrentProcessElevated(),
+                out var detail))
+        {
+            throw new InvalidOperationException("Could not start Steam title: " + detail);
+        }
     }
 
-    private static void StartExe(string exe, string workingDirectory)
+    private void StartExe(string exe, string workingDirectory)
     {
-        Process.Start(new ProcessStartInfo
+        SessionHelperClient.EnsureRunning();
+        if (SessionHelperClient.TryStartExe(exe, arguments: null, workingDirectory, out _))
         {
-            FileName = exe,
-            WorkingDirectory = workingDirectory,
-            UseShellExecute = true
-        });
+            return;
+        }
+
+        if (!UnelevatedProcessLauncher.TryStart(
+                exe,
+                arguments: null,
+                workingDirectory,
+                UnelevatedProcessLauncher.IsCurrentProcessElevated(),
+                out var detail))
+        {
+            throw new InvalidOperationException("Could not start game: " + detail);
+        }
     }
 }

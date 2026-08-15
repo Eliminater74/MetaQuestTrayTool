@@ -89,6 +89,13 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
+        if (SessionHelperHost.IsHelperProcess(e.Args))
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            SessionHelperHost.Attach(this);
+            return;
+        }
+
         var restarting = e.Args.Any(arg => string.Equals(arg, "--restart", StringComparison.OrdinalIgnoreCase));
         if (!TryTakeSingleInstance(restarting, out _singleInstanceMutex))
         {
@@ -211,6 +218,7 @@ public partial class App : System.Windows.Application
 
         _dashToSteamVr = DashToSteamVr;
         _dashToSteamVr.Start();
+        Log.Info(SessionHelperClient.EnsureRunning());
 
         if (Settings.Current.Tray.CheckForUpdatesOnStart)
         {
@@ -263,6 +271,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SessionHelperClient.RequestQuit();
         // Stop session watchers first so stopping OVRService does not fire exit toasts / audio restore races.
         _dashToSteamVr?.Dispose();
         _linkSessionWatcher?.Dispose();
