@@ -206,7 +206,7 @@ public sealed class OculusRuntimeService
     /// Used after SteamVR exits under PreventDashLaunch (no Dash) so the headset can return to Quest Home
     /// instead of a black void.
     /// </summary>
-    public string RestartForLinkDrop(TimeSpan? settleDelay = null)
+    public string RestartForLinkDrop(TimeSpan? settleDelay = null, CancellationToken cancellationToken = default)
     {
         Refresh();
         if (!ServiceExists)
@@ -231,14 +231,16 @@ public sealed class OculusRuntimeService
             parts.Add($"{ServiceName} already stopped.");
         }
 
-        try
+        var remaining = settle;
+        while (remaining > TimeSpan.Zero)
         {
-            Thread.Sleep(settle);
+            cancellationToken.ThrowIfCancellationRequested();
+            var slice = remaining > TimeSpan.FromMilliseconds(200) ? TimeSpan.FromMilliseconds(200) : remaining;
+            Thread.Sleep(slice);
+            remaining -= slice;
         }
-        catch
-        {
-            // ignore
-        }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         parts.Add(Start());
         parts.Add($"Held {ServiceName} stopped {(int)settle.TotalSeconds}s so Link can drop for Quest Home.");

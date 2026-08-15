@@ -43,8 +43,10 @@ public sealed class DashToSteamVrService : IDisposable
     private bool _sawHealthySteamVr;
     private int _steamVrGonePolls;
     private int _waitingForFirstSteamVrPolls;
-    private bool _restartingOvrAfterSteamVrExit;
+    private volatile bool _restartingOvrAfterSteamVrExit;
     private bool _awaitingLinkIdleAfterSteamVrExit;
+    private int _linkIdleConfirmPolls;
+    private CancellationTokenSource? _ovrDropCts;
 
     private int _streamingConfirmPolls;
 
@@ -53,6 +55,9 @@ public sealed class DashToSteamVrService : IDisposable
 
     /// <summary>Confirm SteamVR is really gone before restarting OVRService (avoids restart blips).</summary>
     private const int SteamVrExitConfirmPolls = 2;
+
+    /// <summary>Need several idle polls after OVR drop before the next connect can auto-start SteamVR.</summary>
+    private const int LinkIdleConfirmPollsRequired = 3;
 
     /// <summary>Give vrstartup a few minutes to spawn vrserver before disarming.</summary>
     private const int MaxWaitForSteamVrPolls = 36;
@@ -142,6 +147,7 @@ public sealed class DashToSteamVrService : IDisposable
             _wasMetaSession = false;
             _ranThisMetaSession = false;
             _awaitingLinkIdleAfterSteamVrExit = false;
+            _linkIdleConfirmPolls = 0;
         }
     }
 
@@ -179,8 +185,21 @@ public sealed class DashToSteamVrService : IDisposable
     public void Dispose()
     {
         CancelPendingAutoLaunch();
+        CancelOvrDrop();
         _sessionTimer.Stop();
         _steamVrExitWatch.Stop();
+    }
+
+    private void CancelOvrDrop()
+    {
+        try
+        {
+            _ovrDropCts?.Cancel();
+        }
+        catch
+        {
+            // dispose path
+        }
     }
 
     /// <summary>Manual / hotkey / voice entry point.</summary>
@@ -507,6 +526,7 @@ public sealed class DashToSteamVrService : IDisposable
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
                 _awaitingLinkIdleAfterSteamVrExit = false;
+                _linkIdleConfirmPolls = 0;
                 SyncSessionWatch();
                 SyncSteamVrExitWatch();
                 return;
@@ -528,19 +548,38 @@ public sealed class DashToSteamVrService : IDisposable
 
             if (_awaitingLinkIdleAfterSteamVrExit)
             {
+                IdleCadence.Set(_sessionTimer, IdleCadence.Active);
+                // Service still down — ignore DeviceCache blips; do not arm the next SteamVR launch.
+                if (_restartingOvrAfterSteamVrExit)
+                {
+                    _ranThisMetaSession = true;
+                    _wasMetaSession = true;
+                    _linkIdleConfirmPolls = 0;
+                    return;
+                }
+
                 if (meta)
                 {
                     _ranThisMetaSession = true;
                     _wasMetaSession = true;
-                    IdleCadence.Set(_sessionTimer, IdleCadence.Active);
+                    _linkIdleConfirmPolls = 0;
+                    return;
+                }
+
+                _linkIdleConfirmPolls++;
+                if (_linkIdleConfirmPolls < LinkIdleConfirmPollsRequired)
+                {
+                    _app.Log.Info(
+                        $"Meta Link idle suspected after SteamVR exit ({_linkIdleConfirmPolls}/{LinkIdleConfirmPollsRequired}).");
                     return;
                 }
 
                 _awaitingLinkIdleAfterSteamVrExit = false;
+                _linkIdleConfirmPolls = 0;
                 _ranThisMetaSession = false;
                 _wasMetaSession = false;
                 _app.Log.Info(
-                    "Meta Link idle after SteamVR exit — next Air Link / Quest Link connect will auto-start SteamVR.");
+                    "Meta Link stayed idle after SteamVR exit — next Air Link / Quest Link connect will auto-start SteamVR.");
             }
 
             if (!meta)
@@ -838,22 +877,39 @@ public sealed class DashToSteamVrService : IDisposable
                 return;
             }
 
+            CancelPendingAutoLaunch();
+
             _restartingOvrAfterSteamVrExit = true;
             StopSteamVrExitWatch(resetSaw: true);
             _awaitingLinkIdleAfterSteamVrExit = true;
+            _linkIdleConfirmPolls = 0;
             _ranThisMetaSession = true;
             _wasMetaSession = true;
             _app.AudioWatch?.NotifyPcvrSessionEnded("SteamVR exited — restoring desktop / fallback audio.");
+            _ovrDropCts?.Dispose();
+            _ovrDropCts = new CancellationTokenSource();
+            var token = _ovrDropCts.Token;
+            _app.LinkConnection.InvalidateCache();
             Task.Run(() =>
             {
                 try
                 {
-                    // Hold OVRService down long enough for Air Link / Quest Link to drop; instant
-                    // restart often leaves PreventDash users on a black void with no Dash / Quest Home.
-                    var result = _app.Oculus.RestartForLinkDrop(TimeSpan.FromSeconds(8));
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    // Hold OVRService down long enough for Air Link / Quest Link to drop.
+                    var result = _app.Oculus.RestartForLinkDrop(TimeSpan.FromSeconds(8), token);
+                    _app.LinkConnection.InvalidateCache();
                     var summary =
                         "SteamVR exited — restarted OVRService so Meta Link can drop and Quest Home can return. "
                         + result;
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     _app.Dispatcher.BeginInvoke(() =>
                     {
                         _app.Log.Info(summary);
@@ -865,6 +921,10 @@ public sealed class DashToSteamVrService : IDisposable
                         _app.HeadsetAnnouncer.AnnounceSteamVrExit();
                     });
                 }
+                catch (OperationCanceledException)
+                {
+                    // tray exiting
+                }
                 catch (Exception ex)
                 {
                     _app.Dispatcher.BeginInvoke(() =>
@@ -874,7 +934,7 @@ public sealed class DashToSteamVrService : IDisposable
                 {
                     _restartingOvrAfterSteamVrExit = false;
                 }
-            });
+            }, token);
         }
         catch (Exception ex)
         {
