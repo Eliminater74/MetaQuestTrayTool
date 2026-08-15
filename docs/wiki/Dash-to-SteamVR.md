@@ -17,7 +17,9 @@ This follows the [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKi
 4. Optional: **Restart OVRService when SteamVR exits** so Link can drop and Quest Home can return.
 5. Optional: **CoreChannel** `LIVE` / `PublicTest` / `NO_UPDATES`.
 
-Connect with **Meta Link / Air Link**. After a confirmed live stream (not Wi‑Fi auto-connect), the tray auto-starts SteamVR.
+Connect with **Meta Link / Air Link**. After a confirmed live stream (not Wi‑Fi auto-connect), the tray auto-starts SteamVR within a few seconds.
+
+When you **exit SteamVR**, the tray stops **OVRService** for several seconds so Link fully disconnects (Quest Home), then starts the service again. It will **not** immediately auto-start SteamVR on that bounce — the next *new* Link connect will.
 
 Manual: tray / **Ctrl+Num 0** / voice **dash to steam v r**.
 

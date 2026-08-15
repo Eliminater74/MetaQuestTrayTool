@@ -214,7 +214,7 @@ public sealed class OculusRuntimeService
             return $"{ServiceName} was not found.";
         }
 
-        var settle = settleDelay ?? TimeSpan.FromSeconds(5);
+        var settle = settleDelay ?? TimeSpan.FromSeconds(8);
         var parts = new List<string>();
 
         if (IsServiceRunning)

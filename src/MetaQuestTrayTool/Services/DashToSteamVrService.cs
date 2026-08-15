@@ -44,6 +44,7 @@ public sealed class DashToSteamVrService : IDisposable
     private int _steamVrGonePolls;
     private int _waitingForFirstSteamVrPolls;
     private bool _restartingOvrAfterSteamVrExit;
+    private bool _awaitingLinkIdleAfterSteamVrExit;
 
     private int _streamingConfirmPolls;
 
@@ -69,14 +70,23 @@ public sealed class DashToSteamVrService : IDisposable
 
     public void Start()
     {
+        if (ShouldAutoStartSteamVrOnMetaLink() && !Settings.RestartOvrServiceWhenSteamVrExits)
+        {
+            Settings.RestartOvrServiceWhenSteamVrExits = true;
+            _app.Settings.Save();
+            _app.Log.Info(
+                "PreventDashLaunch is on — enabled SteamVR-exit OVRService drop so Link can disconnect for Quest Home.");
+        }
+
         ArmSessionBaselineFromCurrentProbe();
         SyncSessionWatch();
         SyncSteamVrExitWatch();
     }
 
     /// <summary>
-    /// If Link already looks active when the tray starts, do not treat that as a fresh connect
-    /// (avoids launching SteamVR on every app/update restart while OVRService is up).
+    /// If Link is already streaming <b>and</b> SteamVR is healthy at tray start, do not treat that
+    /// as a fresh connect (avoids launching SteamVR again on every app/update restart).
+    /// If Link is up without SteamVR, PollAuto will still start it (PreventDash black-void case).
     /// </summary>
     private void ArmSessionBaselineFromCurrentProbe()
     {
@@ -88,15 +98,20 @@ public sealed class DashToSteamVrService : IDisposable
         try
         {
             var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
-            if (!status.MetaLinkStreaming)
+            if (!IsPreventDashConnect(status) || !IsSteamVrSessionHealthy())
             {
                 return;
             }
 
             _wasMetaSession = true;
             _ranThisMetaSession = true;
+            if (Settings.RestartOvrServiceWhenSteamVrExits)
+            {
+                ArmSteamVrExitWatch(sawRunning: true);
+            }
+
             _app.Log.Info(
-                "Meta Link already streaming at tray start — auto SteamVR armed for the next connect only.");
+                "Meta Link + SteamVR already running at tray start — will drop OVRService when SteamVR exits.");
         }
         catch (Exception ex)
         {
@@ -118,25 +133,35 @@ public sealed class DashToSteamVrService : IDisposable
                 PollAuto();
             }
 
-            IdleCadence.Set(_sessionTimer, _wasMetaSession ? IdleCadence.Watching : IdleCadence.Quiet);
+            // PreventDash must notice Air Link within seconds, not the idle 30s Quiet cadence.
+            IdleCadence.Set(_sessionTimer, IdleCadence.Active);
         }
         else
         {
             _sessionTimer.Stop();
             _wasMetaSession = false;
             _ranThisMetaSession = false;
+            _awaitingLinkIdleAfterSteamVrExit = false;
         }
     }
 
     /// <summary>
-    /// Keep SteamVR-exit → OVRService watch only if we armed it from Dash→SteamVR (RunNow).
-    /// Do not latch onto Steam Link / unrelated SteamVR sessions at tray start.
+    /// SteamVR-exit → OVRService drop. Armed from Dash→SteamVR (RunNow) and whenever PreventDash
+    /// is on and SteamVR is running (manual start / leftover processes).
     /// </summary>
     public void SyncSteamVrExitWatch()
     {
         if (!Settings.RestartOvrServiceWhenSteamVrExits)
         {
             StopSteamVrExitWatch(resetSaw: true);
+            return;
+        }
+
+        // PreventDash + leftover/manual SteamVR must still drop Link on exit (black void otherwise).
+        if (ShouldAutoStartSteamVrOnMetaLink()
+            && (IsSteamVrSessionHealthy() || IsProcessRunning("vrserver") || IsProcessRunning("vrstartup")))
+        {
+            ArmSteamVrExitWatch(sawRunning: IsProcessRunning("vrserver") || IsSteamVrSessionHealthy());
             return;
         }
 
@@ -419,8 +444,15 @@ public sealed class DashToSteamVrService : IDisposable
             }
 
             Settings.PreferPreventDashLaunch = enabled;
+            if (enabled)
+            {
+                // Without this, exiting SteamVR leaves PreventDash users stuck in Link with no Dash.
+                Settings.RestartOvrServiceWhenSteamVrExits = true;
+            }
+
             _app.Settings.Save();
             SyncSessionWatch();
+            SyncSteamVrExitWatch();
 
             var message = enabled
                 ? "PreventDashLaunch set to 1 — Meta should not launch Dash."
@@ -474,6 +506,7 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
+                _awaitingLinkIdleAfterSteamVrExit = false;
                 SyncSessionWatch();
                 SyncSteamVrExitWatch();
                 return;
@@ -482,9 +515,7 @@ public sealed class DashToSteamVrService : IDisposable
             SyncSteamVrExitWatch();
 
             var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
-            // Companion alone must not mark Status as connected (it lingers while charging),
-            // but a freshly started companion during PreventDash Link is a real connect attempt.
-            var meta = status.MetaLinkStreaming || IsFreshPreventDashConnectAttempt();
+            var meta = IsPreventDashConnect(status);
 
             // Manual SteamVR start (or zombie relaunch) during PreventDash Link must still arm
             // the exit watch — otherwise SteamVR exit leaves a black void with no Dash / Quest Home.
@@ -493,6 +524,23 @@ public sealed class DashToSteamVrService : IDisposable
                 && (IsSteamVrSessionHealthy() || IsProcessRunning("vrserver")))
             {
                 ArmSteamVrExitWatch(sawRunning: true);
+            }
+
+            if (_awaitingLinkIdleAfterSteamVrExit)
+            {
+                if (meta)
+                {
+                    _ranThisMetaSession = true;
+                    _wasMetaSession = true;
+                    IdleCadence.Set(_sessionTimer, IdleCadence.Active);
+                    return;
+                }
+
+                _awaitingLinkIdleAfterSteamVrExit = false;
+                _ranThisMetaSession = false;
+                _wasMetaSession = false;
+                _app.Log.Info(
+                    "Meta Link idle after SteamVR exit — next Air Link / Quest Link connect will auto-start SteamVR.");
             }
 
             if (!meta)
@@ -505,7 +553,7 @@ public sealed class DashToSteamVrService : IDisposable
                 _wasMetaSession = false;
                 _ranThisMetaSession = false;
                 _streamingConfirmPolls = 0;
-                IdleCadence.Set(_sessionTimer, IdleCadence.Quiet);
+                IdleCadence.Set(_sessionTimer, IdleCadence.Active);
                 return;
             }
 
@@ -514,7 +562,7 @@ public sealed class DashToSteamVrService : IDisposable
                 _wasMetaSession = true;
                 _ranThisMetaSession = false;
                 _streamingConfirmPolls = 0;
-                IdleCadence.Set(_sessionTimer, IdleCadence.Watching);
+                IdleCadence.Set(_sessionTimer, IdleCadence.Active);
             }
 
             if (_ranThisMetaSession)
@@ -522,24 +570,36 @@ public sealed class DashToSteamVrService : IDisposable
                 return;
             }
 
-            _streamingConfirmPolls++;
-            if (_streamingConfirmPolls < StreamingConfirmPollsRequired)
+            if (IsSteamVrSessionHealthy())
             {
-                _app.Log.Info(
-                    $"Meta Link streaming suspected ({_streamingConfirmPolls}/{StreamingConfirmPollsRequired}) — "
-                    + $"{status.Detail ?? status.Summary}; waiting before auto SteamVR.");
-                IdleCadence.Set(_sessionTimer, IdleCadence.Watching);
+                _ranThisMetaSession = true;
+                if (Settings.RestartOvrServiceWhenSteamVrExits)
+                {
+                    ArmSteamVrExitWatch(sawRunning: true);
+                }
+
                 return;
             }
 
-            // Give Link a moment to settle after connect before killing Dash / starting SteamVR.
+            _streamingConfirmPolls++;
+            var confirmNeeded = status.MetaLinkStreaming ? 1 : StreamingConfirmPollsRequired;
+            if (_streamingConfirmPolls < confirmNeeded)
+            {
+                _app.Log.Info(
+                    $"Meta Link streaming suspected ({_streamingConfirmPolls}/{confirmNeeded}) — "
+                    + $"{status.Detail ?? status.Summary}; waiting before auto SteamVR.");
+                IdleCadence.Set(_sessionTimer, IdleCadence.Active);
+                return;
+            }
+
+            // Give Link a moment to settle after connect before starting SteamVR.
             _ranThisMetaSession = true;
             var reason = IsPreventDashLaunchEnabled() || Settings.PreferPreventDashLaunch
                 ? "auto SteamVR (PreventDashLaunch)"
                 : "auto on Meta Link connect";
-            _app.Log.Info($"Meta Link connected — {reason} in 3s…");
+            _app.Log.Info($"Meta Link connected — {reason} in 2s…");
             CancelPendingAutoLaunch();
-            _pendingAutoLaunchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _pendingAutoLaunchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _pendingAutoLaunchTimer.Tick += OnPendingAutoLaunchTick;
             _pendingAutoLaunchTimer.Tag = reason;
             _pendingAutoLaunchTimer.Start();
@@ -557,9 +617,9 @@ public sealed class DashToSteamVrService : IDisposable
         CancelPendingAutoLaunch();
         try
         {
-            // Re-check still on Meta Link (user may have switched to Steam Link).
+            _app.LinkConnection.InvalidateCache();
             var again = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
-            if (!again.MetaLinkStreaming)
+            if (!IsPreventDashConnect(again))
             {
                 _app.Log.Info("Auto Dash → SteamVR cancelled — Meta Link session no longer active.");
                 _ranThisMetaSession = false;
@@ -589,6 +649,14 @@ public sealed class DashToSteamVrService : IDisposable
 
     private bool ShouldAutoStartSteamVrOnMetaLink() =>
         Settings.PreferPreventDashLaunch || IsPreventDashLaunchEnabled();
+
+    /// <summary>
+    /// PreventDash connect: live Meta stream, or a freshly started Link companion.
+    /// Companion is not used for Status (it lingers while charging).
+    /// </summary>
+    private bool IsPreventDashConnect(VrConnectionStatus status) =>
+        !status.VirtualDesktopRunning
+        && (status.MetaLinkStreaming || IsFreshPreventDashConnectAttempt());
 
     /// <summary>
     /// RemoteDesktopCompanion often stays running while the Quest is off/charging — never use it
@@ -642,8 +710,7 @@ public sealed class DashToSteamVrService : IDisposable
         try
         {
             var status = _app.LinkConnection.Probe(includeEnumHmd: true, includeAudioLink: true);
-            var meta = status.MetaLinkStreaming;
-            if (meta)
+            if (IsPreventDashConnect(status))
             {
                 return RunNow(reason);
             }
@@ -773,27 +840,41 @@ public sealed class DashToSteamVrService : IDisposable
 
             _restartingOvrAfterSteamVrExit = true;
             StopSteamVrExitWatch(resetSaw: true);
+            _awaitingLinkIdleAfterSteamVrExit = true;
+            _ranThisMetaSession = true;
+            _wasMetaSession = true;
             _app.AudioWatch?.NotifyPcvrSessionEnded("SteamVR exited — restoring desktop / fallback audio.");
-            try
+            Task.Run(() =>
             {
-                // Hold OVRService down long enough for Air Link to drop; instant restart often
-                // leaves PreventDash users on a black void with no Dash / Quest Home.
-                var result = _app.Oculus.RestartForLinkDrop(TimeSpan.FromSeconds(5));
-                var summary =
-                    "SteamVR exited — restarted OVRService so Meta Link can drop and Quest Home can return. "
-                    + result;
-                _app.Log.Info(summary);
-                if (_app.Settings.Current.ShowNotifications)
+                try
                 {
-                    _app.TrayNotify("SteamVR exit", summary);
-                }
+                    // Hold OVRService down long enough for Air Link / Quest Link to drop; instant
+                    // restart often leaves PreventDash users on a black void with no Dash / Quest Home.
+                    var result = _app.Oculus.RestartForLinkDrop(TimeSpan.FromSeconds(8));
+                    var summary =
+                        "SteamVR exited — restarted OVRService so Meta Link can drop and Quest Home can return. "
+                        + result;
+                    _app.Dispatcher.BeginInvoke(() =>
+                    {
+                        _app.Log.Info(summary);
+                        if (_app.Settings.Current.ShowNotifications)
+                        {
+                            _app.TrayNotify("SteamVR exit", summary);
+                        }
 
-                _app.HeadsetAnnouncer.AnnounceSteamVrExit();
-            }
-            finally
-            {
-                _restartingOvrAfterSteamVrExit = false;
-            }
+                        _app.HeadsetAnnouncer.AnnounceSteamVrExit();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _app.Dispatcher.BeginInvoke(() =>
+                        _app.Log.Warn("SteamVR exit watch failed: " + ex.Message));
+                }
+                finally
+                {
+                    _restartingOvrAfterSteamVrExit = false;
+                }
+            });
         }
         catch (Exception ex)
         {

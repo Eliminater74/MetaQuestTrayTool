@@ -211,6 +211,8 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         _loading = true;
         PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
                                    || App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch;
+        RestartOvrOnSteamVrExitBox.IsChecked =
+            App.Instance.Settings.Current.DashToSteamVr.RestartOvrServiceWhenSteamVrExits;
         _loading = false;
 
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch() + " " + summary;
@@ -226,6 +228,8 @@ public partial class ServiceStartupPage : System.Windows.Controls.UserControl, I
         _loading = true;
         PreventDashBox.IsChecked = App.Instance.DashToSteamVr.IsPreventDashLaunchEnabled()
                                    || App.Instance.Settings.Current.DashToSteamVr.PreferPreventDashLaunch;
+        RestartOvrOnSteamVrExitBox.IsChecked =
+            App.Instance.Settings.Current.DashToSteamVr.RestartOvrServiceWhenSteamVrExits;
         _loading = false;
         PreventDashStatusText.Text = App.Instance.DashToSteamVr.DescribePreventDashLaunch();
         CoreChannelStatusText.Text = App.Instance.DashToSteamVr.DescribeCoreChannel();

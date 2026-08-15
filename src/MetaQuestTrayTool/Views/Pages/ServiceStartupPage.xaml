@@ -88,7 +88,7 @@
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <CheckBox x:Name="RestartOvrOnSteamVrExitBox"
                 Content="When SteamVR exits, restart OVRService (drops Link → return to Quest Home)"
-                ToolTip="Recommended with PreventDashLaunch: without Dash, exiting SteamVR leaves you stuck in Link. After vrserver exits (debounced), restart OVRService once so Link breaks and the headset can go back to Quest Home. Does not kill Meta apps."
+                ToolTip="Required with PreventDashLaunch (turned on automatically): after vrserver exits, stop OVRService for a few seconds so Air Link / Quest Link drops and the headset returns to Quest Home, then start the service again. Without this you stay stuck in Link with no Dash."
                 Checked="PersistDash_Changed" Unchecked="PersistDash_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
         <Button Content="Apply PreventDashLaunch + restart OVRService (+ SteamVR if linked)" Style="{StaticResource GhostButtonStyle}"
