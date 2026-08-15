@@ -19,22 +19,44 @@ public sealed class ProfileStore
 
     public static string ProfilesFile { get; } = Path.Combine(AppPaths.AppDataDirectory, "profiles.json");
 
+    public bool LastLoadFailed { get; private set; }
+
     public List<GameProfile> Load()
     {
+        LastLoadFailed = false;
         AppPaths.EnsureAppDataDirectory();
         if (!File.Exists(ProfilesFile))
         {
             return [];
         }
 
+        if (TryRead(ProfilesFile, out var profiles))
+        {
+            return profiles;
+        }
+
+        var backup = ProfilesFile + ".bak";
+        if (File.Exists(backup) && TryRead(backup, out profiles))
+        {
+            return profiles;
+        }
+
+        LastLoadFailed = true;
+        return [];
+    }
+
+    private static bool TryRead(string path, out List<GameProfile> profiles)
+    {
+        profiles = [];
         try
         {
-            var json = File.ReadAllText(ProfilesFile);
-            return JsonSerializer.Deserialize<List<GameProfile>>(json, JsonOptions) ?? [];
+            var json = File.ReadAllText(path);
+            profiles = JsonSerializer.Deserialize<List<GameProfile>>(json, JsonOptions) ?? [];
+            return true;
         }
         catch
         {
-            return [];
+            return false;
         }
     }
 
@@ -42,6 +64,20 @@ public sealed class ProfileStore
     {
         AppPaths.EnsureAppDataDirectory();
         var json = JsonSerializer.Serialize(profiles, JsonOptions);
-        File.WriteAllText(ProfilesFile, json);
+        var temp = ProfilesFile + ".tmp";
+        File.WriteAllText(temp, json);
+        if (File.Exists(ProfilesFile))
+        {
+            try
+            {
+                File.Copy(ProfilesFile, ProfilesFile + ".bak", overwrite: true);
+            }
+            catch
+            {
+                // backup is best-effort
+            }
+        }
+
+        File.Move(temp, ProfilesFile, overwrite: true);
     }
 }

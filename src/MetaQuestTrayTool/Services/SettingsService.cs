@@ -15,47 +15,145 @@ public sealed class SettingsService
     };
 
     private readonly ProfileStore _profileStore = new();
+    private readonly object _saveLock = new();
+    private bool _preserveCorruptSettingsFile;
+    private bool _preserveCorruptProfilesFile;
 
     public AppSettings Current { get; private set; } = new();
 
+    /// <summary>True when settings.json (and .bak) could not be read — the file is left on disk.</summary>
+    public bool UsedFallbackSettings { get; private set; }
+
     public void Load()
     {
-        AppPaths.EnsureAppDataDirectory();
-        List<GameProfile>? legacyProfiles = null;
-
-        if (File.Exists(AppPaths.SettingsFile))
+        lock (_saveLock)
         {
-            if (!TryLoadSettingsFile(AppPaths.SettingsFile, ref legacyProfiles))
-            {
-                var backup = AppPaths.SettingsFile + ".bak";
-                if (File.Exists(backup))
-                {
-                    TryLoadSettingsFile(backup, ref legacyProfiles);
-                }
+            AppPaths.EnsureAppDataDirectory();
+            List<GameProfile>? legacyProfiles = null;
+            UsedFallbackSettings = false;
+            _preserveCorruptSettingsFile = false;
+            _preserveCorruptProfilesFile = false;
 
-                Current ??= new AppSettings();
+            if (File.Exists(AppPaths.SettingsFile))
+            {
+                if (!TryLoadSettingsFile(AppPaths.SettingsFile, ref legacyProfiles))
+                {
+                    var backup = AppPaths.SettingsFile + ".bak";
+                    if (!File.Exists(backup) || !TryLoadSettingsFile(backup, ref legacyProfiles))
+                    {
+                        UsedFallbackSettings = true;
+                        _preserveCorruptSettingsFile = true;
+                        Current = new AppSettings();
+                    }
+                }
+            }
+
+            var storedProfiles = _profileStore.Load();
+            if (_profileStore.LastLoadFailed)
+            {
+                _preserveCorruptProfilesFile = true;
+            }
+            else if (storedProfiles.Count > 0)
+            {
+                Current.Profiles = storedProfiles;
+            }
+            else if (legacyProfiles is { Count: > 0 })
+            {
+                Current.Profiles = legacyProfiles;
+            }
+
+            EnsureGlobalDefaults();
+            if (!_preserveCorruptSettingsFile)
+            {
+                SaveUnlocked();
             }
         }
-
-        var storedProfiles = _profileStore.Load();
-        if (storedProfiles.Count > 0)
-        {
-            Current.Profiles = storedProfiles;
-        }
-        else if (legacyProfiles is { Count: > 0 })
-        {
-            Current.Profiles = legacyProfiles;
-            _profileStore.Save(Current.Profiles);
-        }
-
-        EnsureGlobalDefaults();
-        Save();
     }
 
     public void Save()
     {
+        lock (_saveLock)
+        {
+            if (_preserveCorruptSettingsFile)
+            {
+                return;
+            }
+
+            SaveUnlocked();
+        }
+    }
+
+    public void ResetKeepingProfiles()
+    {
+        lock (_saveLock)
+        {
+            var profiles = Current.Profiles.ToList();
+            Current = new AppSettings { Profiles = profiles };
+            _preserveCorruptSettingsFile = false;
+            UsedFallbackSettings = false;
+            EnsureGlobalDefaults();
+            SaveUnlocked();
+        }
+    }
+
+    public void Export(string path)
+    {
+        lock (_saveLock)
+        {
+            var backup = new SettingsBackupFile
+            {
+                App = AppInfo.ProductName,
+                Version = AppInfo.Version,
+                ExportedAt = DateTimeOffset.Now,
+                Settings = Current
+            };
+            var json = JsonSerializer.Serialize(backup, JsonOptions);
+            File.WriteAllText(path, json);
+        }
+    }
+
+    public void Import(string path)
+    {
+        var json = File.ReadAllText(path);
+        AppSettings? settings = null;
+        try
+        {
+            var backup = JsonSerializer.Deserialize<SettingsBackupFile>(json, JsonOptions);
+            if (backup?.Settings is not null)
+            {
+                settings = backup.Settings;
+            }
+        }
+        catch
+        {
+            // fall through to raw settings.json
+        }
+
+        settings ??= JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
+        lock (_saveLock)
+        {
+            Current = settings ?? throw new InvalidOperationException("The backup file could not be read.");
+            _preserveCorruptSettingsFile = false;
+            _preserveCorruptProfilesFile = false;
+            UsedFallbackSettings = false;
+            _profileStore.Save(Current.Profiles);
+            SaveUnlocked();
+        }
+    }
+
+    private void SaveUnlocked()
+    {
         AppPaths.EnsureAppDataDirectory();
-        _profileStore.Save(Current.Profiles);
+        if (!_preserveCorruptProfilesFile)
+        {
+            _profileStore.Save(Current.Profiles);
+        }
+
+        if (_preserveCorruptSettingsFile)
+        {
+            return;
+        }
+
         var json = JsonSerializer.Serialize(Current, JsonOptions);
         var path = AppPaths.SettingsFile;
         var temp = path + ".tmp";
@@ -88,49 +186,6 @@ public sealed class SettingsService
         {
             return false;
         }
-    }
-
-    public void ResetKeepingProfiles()
-    {
-        var profiles = Current.Profiles.ToList();
-        Current = new AppSettings { Profiles = profiles };
-        Save();
-    }
-
-    public void Export(string path)
-    {
-        var backup = new SettingsBackupFile
-        {
-            App = AppInfo.ProductName,
-            Version = AppInfo.Version,
-            ExportedAt = DateTimeOffset.Now,
-            Settings = Current
-        };
-        var json = JsonSerializer.Serialize(backup, JsonOptions);
-        File.WriteAllText(path, json);
-    }
-
-    public void Import(string path)
-    {
-        var json = File.ReadAllText(path);
-        AppSettings? settings = null;
-        try
-        {
-            var backup = JsonSerializer.Deserialize<SettingsBackupFile>(json, JsonOptions);
-            if (backup?.Settings is not null)
-            {
-                settings = backup.Settings;
-            }
-        }
-        catch
-        {
-            // fall through to raw settings.json
-        }
-
-        settings ??= JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
-        Current = settings ?? throw new InvalidOperationException("The backup file could not be read.");
-        _profileStore.Save(Current.Profiles);
-        Save();
     }
 
     private static List<GameProfile>? TryReadLegacyProfiles(string json)

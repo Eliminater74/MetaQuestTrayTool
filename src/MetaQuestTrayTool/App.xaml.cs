@@ -115,6 +115,11 @@ public partial class App : System.Windows.Application
         Settings.Load();
         ThemeService.Apply(Settings.Current.Tray.Theme);
         Log.Info($"{AppName} {GetVersion()} started.");
+        if (Settings.UsedFallbackSettings)
+        {
+            Log.Warn(
+                "settings.json could not be read (left on disk). Using session defaults until you Reset or Import — Save will not overwrite the corrupt file.");
+        }
 
         if (StartupRegistration.TryEnterHandsFreeMode(
                 Settings.Current,
