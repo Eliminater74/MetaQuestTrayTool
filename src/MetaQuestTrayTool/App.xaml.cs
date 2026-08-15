@@ -218,7 +218,15 @@ public partial class App : System.Windows.Application
 
         _dashToSteamVr = DashToSteamVr;
         _dashToSteamVr.Start();
-        Log.Info(SessionHelperClient.EnsureRunning());
+        if (UnelevatedProcessLauncher.IsCurrentProcessElevated())
+        {
+            Log.Info(SessionHelperClient.EnsureRunning());
+            if (SessionHelperClient.IsSteamRunningElevated())
+            {
+                Log.Info(
+                    "Steam is running as Administrator — SteamVR / steam:// will skip the helper so they match that Steam.");
+            }
+        }
 
         if (Settings.Current.Tray.CheckForUpdatesOnStart)
         {

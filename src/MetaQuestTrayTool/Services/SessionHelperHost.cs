@@ -9,7 +9,8 @@ namespace MetaQuestTrayTool.Services;
 
 /// <summary>
 /// Same-exe helper that stays at the logged-on user's integrity (not Administrator).
-/// The elevated tray talks to it over a named pipe to start Steam / SteamVR / games.
+/// The elevated tray talks to it over a named pipe to start Steam / SteamVR / games / any other user program.
+/// Steam-family launches can skip this helper when steam.exe is already elevated.
 /// A Windows Service cannot do this — Session 0 cannot launch the user's SteamVR session.
 /// </summary>
 public static class SessionHelperHost

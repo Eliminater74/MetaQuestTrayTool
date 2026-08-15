@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace MetaQuestTrayTool.Services;
 
 public static class UrlLaunchService
@@ -12,10 +10,9 @@ public static class UrlLaunchService
             throw new ArgumentException("URL must start with http:// or https://.", nameof(url));
         }
 
-        Process.Start(new ProcessStartInfo
+        if (!SessionHelperClient.TryLaunchUri(url, out var detail))
         {
-            FileName = url,
-            UseShellExecute = true
-        });
+            throw new InvalidOperationException("Could not open URL: " + detail);
+        }
     }
 }

@@ -97,6 +97,13 @@ public static class UnelevatedProcessLauncher
         return false;
     }
 
+    /// <summary>
+    /// True when a process with this name exists and its token is elevated.
+    /// False if it is not running, or the token could not be read.
+    /// </summary>
+    public static bool TryGetNamedProcessElevated(string processName, out bool elevated) =>
+        TryIsNamedProcessElevated(processName, out elevated);
+
     private static bool TryIsNamedProcessElevated(string processName, out bool elevated)
     {
         elevated = false;

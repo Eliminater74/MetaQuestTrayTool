@@ -4,17 +4,36 @@ using System.Text;
 
 namespace MetaQuestTrayTool.Services;
 
-/// <summary>Elevated tray client for <see cref="SessionHelperHost"/>.</summary>
+/// <summary>
+/// Elevated tray client for <see cref="SessionHelperHost"/>. Starts any user-facing
+/// program (SteamVR, Steam games, Horizon Link, Debug Tool, browsers, folders) as the
+/// logged-on user. Steam-family launches skip the helper when <c>steam.exe</c> is already
+/// elevated so SteamVR matches that Steam instance.
+/// </summary>
 public static class SessionHelperClient
 {
-    public static bool TryPing(out string detail)
+    public static bool IsSteamRunningElevated() =>
+        UnelevatedProcessLauncher.TryGetNamedProcessElevated("steam", out var elevated) && elevated;
+
+    /// <summary>
+    /// Use the helper when the tray is elevated, except SteamVR / steam:// when Steam
+    /// itself is already running as Administrator.
+    /// </summary>
+    public static bool ShouldUseHelper(bool steamFamily)
     {
-        return TrySend("PING", out detail);
+        if (!UnelevatedProcessLauncher.IsCurrentProcessElevated())
+        {
+            return false;
+        }
+
+        return !(steamFamily && IsSteamRunningElevated());
     }
+
+    public static bool TryPing(out string detail) => TrySend("PING", out detail);
 
     public static string EnsureRunning()
     {
-        if (TryPing(out var ping) && ping.StartsWith("OK", StringComparison.OrdinalIgnoreCase))
+        if (TryPing(out _))
         {
             return "Session helper already running (normal user).";
         }
@@ -39,35 +58,101 @@ public static class SessionHelperClient
         for (var i = 0; i < 15; i++)
         {
             Thread.Sleep(200);
-            if (TryPing(out ping) && ping.StartsWith("OK", StringComparison.OrdinalIgnoreCase))
+            if (TryPing(out _))
             {
                 return "Started session helper (normal user, " + startDetail + ").";
             }
         }
 
+        TryPing(out var ping);
         return "Session helper started but did not answer (" + startDetail + " / " + ping + ").";
     }
 
-    public static bool TryStartSteamVr(out string detail)
+    public static bool TryLaunchSteamVr(out string detail) =>
+        TryLaunchUri("steam://run/250820", out detail);
+
+    public static bool TryLaunchUri(string uri, out string detail)
     {
-        return TrySend("STEAMVR", out detail);
+        ArgumentException.ThrowIfNullOrWhiteSpace(uri);
+        return TryLaunch(LooksLikeSteamFamily(uri: uri), helperCommand: "URI\t" + uri, fileName: uri, arguments: null, workingDirectory: null, out detail);
     }
 
-    public static bool TryStartUri(string uri, out string detail)
+    public static bool TryLaunchExe(
+        string path,
+        string? arguments,
+        string? workingDirectory,
+        out string detail)
     {
-        return TrySend("URI\t" + uri, out detail);
-    }
-
-    public static bool TryStartExe(string path, string? arguments, string? workingDirectory, out string detail)
-    {
-        return TrySend(
-            "EXE\t" + path + "\t" + (arguments ?? string.Empty) + "\t" + (workingDirectory ?? string.Empty),
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        return TryLaunch(
+            LooksLikeSteamFamily(exePath: path),
+            helperCommand: "EXE\t" + path + "\t" + (arguments ?? string.Empty) + "\t" + (workingDirectory ?? string.Empty),
+            fileName: path,
+            arguments: arguments,
+            workingDirectory: workingDirectory,
             out detail);
     }
 
-    public static void RequestQuit()
+    public static void RequestQuit() => TrySend("QUIT", out _);
+
+    private static bool TryLaunch(
+        bool steamFamily,
+        string helperCommand,
+        string fileName,
+        string? arguments,
+        string? workingDirectory,
+        out string detail)
     {
-        TrySend("QUIT", out _);
+        if (!ShouldUseHelper(steamFamily))
+        {
+            var skipped = steamFamily && IsSteamRunningElevated()
+                ? "helper skipped — Steam is already elevated"
+                : "started in this process";
+            var drop = false;
+            var ok = fileName.Contains("://", StringComparison.Ordinal)
+                ? UnelevatedProcessLauncher.TryStartUri(fileName, drop, out var launched)
+                : UnelevatedProcessLauncher.TryStart(fileName, arguments, workingDirectory, drop, out launched);
+            detail = ok ? skipped + " (" + launched + ")" : launched;
+            return ok;
+        }
+
+        var helper = EnsureRunning();
+        if (TrySend(helperCommand, out var helperDetail))
+        {
+            detail = "session helper (normal user). " + helper + " " + helperDetail;
+            return true;
+        }
+
+        var dropFallback = UnelevatedProcessLauncher.IsCurrentProcessElevated();
+        var fallbackOk = fileName.Contains("://", StringComparison.Ordinal)
+            ? UnelevatedProcessLauncher.TryStartUri(fileName, dropFallback, out var fallback)
+            : UnelevatedProcessLauncher.TryStart(fileName, arguments, workingDirectory, dropFallback, out fallback);
+        detail = fallbackOk
+            ? "helper send failed (" + helperDetail + "); started unelevated. " + fallback
+            : "helper: " + helperDetail + "; direct: " + fallback;
+        return fallbackOk;
+    }
+
+    internal static bool LooksLikeSteamFamily(string? uri = null, string? exePath = null)
+    {
+        if (!string.IsNullOrWhiteSpace(uri)
+            && uri.StartsWith("steam:", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(exePath))
+        {
+            return false;
+        }
+
+        var name = Path.GetFileName(exePath);
+        return name.Equals("vrstartup.exe", StringComparison.OrdinalIgnoreCase)
+               || name.Equals("steamtours.exe", StringComparison.OrdinalIgnoreCase)
+               || name.Equals("vrserver.exe", StringComparison.OrdinalIgnoreCase)
+               || name.Equals("vrmonitor.exe", StringComparison.OrdinalIgnoreCase)
+               || name.Equals("vrdashboard.exe", StringComparison.OrdinalIgnoreCase)
+               || name.Equals("steam.exe", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TrySend(string command, out string detail)

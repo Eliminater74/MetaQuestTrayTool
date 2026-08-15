@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Services;
@@ -53,11 +53,8 @@ public partial class LogWindowPage : System.Windows.Controls.UserControl, IShell
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
         AppPaths.EnsureAppDataDirectory();
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = AppPaths.AppDataDirectory,
-            UseShellExecute = true
-        });
+        var explorer = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
+        SessionHelperClient.TryLaunchExe(explorer, "\"" + AppPaths.AppDataDirectory + "\"", workingDirectory: null, out _);
     }
 
     private void OnLogAdded(object? sender, Models.LogEntry e) => ScrollToEnd();

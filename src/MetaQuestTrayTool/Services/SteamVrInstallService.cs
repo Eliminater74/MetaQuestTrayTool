@@ -53,20 +53,19 @@ public sealed class SteamVrInstallService
 
     public string OpenInstallPage()
     {
-        try
+        if (SessionHelperClient.TryLaunchUri(SteamInstallUri, out _))
         {
-            // Prefer Steam client URI so install starts immediately when Steam is present.
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = SteamInstallUri,
-                UseShellExecute = true
-            });
             return "Opened Steam to install SteamVR (app 250820). If Steam did not open, use the Store link from VR Tools.";
         }
-        catch
+
+        try
         {
             UrlLaunchService.Open(StoreUrl);
             return "Opened the SteamVR Store page in your browser.";
+        }
+        catch (Exception ex)
+        {
+            return "Could not open SteamVR install: " + ex.Message;
         }
     }
 
@@ -99,12 +98,7 @@ public sealed class SteamVrInstallService
 
         if (!info.IsRunning)
         {
-            SessionHelperClient.EnsureRunning();
-            if (!SessionHelperClient.TryStartSteamVr(out var steamVr)
-                && !UnelevatedProcessLauncher.TryStartUri(
-                    "steam://run/250820",
-                    UnelevatedProcessLauncher.IsCurrentProcessElevated(),
-                    out steamVr))
+            if (!SessionHelperClient.TryLaunchSteamVr(out var steamVr))
             {
                 return $"Could not start SteamVR before Home: {steamVr}";
             }
@@ -112,18 +106,7 @@ public sealed class SteamVrInstallService
             Thread.Sleep(2500);
         }
 
-        SessionHelperClient.EnsureRunning();
-        if (SessionHelperClient.TryStartExe(tours, arguments: null, Path.GetDirectoryName(tours), out _))
-        {
-            return "Launched SteamVR Home (steamtours). Put the headset on if it does not appear.";
-        }
-
-        if (UnelevatedProcessLauncher.TryStart(
-                tours,
-                arguments: null,
-                Path.GetDirectoryName(tours),
-                UnelevatedProcessLauncher.IsCurrentProcessElevated(),
-                out var toursDetail))
+        if (SessionHelperClient.TryLaunchExe(tours, arguments: null, Path.GetDirectoryName(tours), out var toursDetail))
         {
             return "Launched SteamVR Home (steamtours). Put the headset on if it does not appear.";
         }

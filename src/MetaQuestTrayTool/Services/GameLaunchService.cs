@@ -173,16 +173,7 @@ public sealed class GameLaunchService
     private void StartSteam(string appId)
     {
         var uri = $"steam://run/{appId}";
-        SessionHelperClient.EnsureRunning();
-        if (SessionHelperClient.TryStartUri(uri, out _))
-        {
-            return;
-        }
-
-        if (!UnelevatedProcessLauncher.TryStartUri(
-                uri,
-                UnelevatedProcessLauncher.IsCurrentProcessElevated(),
-                out var detail))
+        if (!SessionHelperClient.TryLaunchUri(uri, out var detail))
         {
             throw new InvalidOperationException("Could not start Steam title: " + detail);
         }
@@ -190,18 +181,7 @@ public sealed class GameLaunchService
 
     private void StartExe(string exe, string workingDirectory)
     {
-        SessionHelperClient.EnsureRunning();
-        if (SessionHelperClient.TryStartExe(exe, arguments: null, workingDirectory, out _))
-        {
-            return;
-        }
-
-        if (!UnelevatedProcessLauncher.TryStart(
-                exe,
-                arguments: null,
-                workingDirectory,
-                UnelevatedProcessLauncher.IsCurrentProcessElevated(),
-                out var detail))
+        if (!SessionHelperClient.TryLaunchExe(exe, arguments: null, workingDirectory, out var detail))
         {
             throw new InvalidOperationException("Could not start game: " + detail);
         }

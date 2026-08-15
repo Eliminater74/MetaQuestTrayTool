@@ -11,7 +11,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 ### Fixed
 - Air Link no longer shows as Steam Link when leftover SteamVR processes are on the PC. A live DeviceCache Link stream wins, and PreventDash relaunches SteamVR so it attaches to this connect.
 - Exiting SteamVR fully **stops** OVRService, holds it down **at least 10 seconds** so Link drops to Quest Home, then starts it again (a quick restart kept Link up and bounced SteamVR).
-- SteamVR is started as a normal user through a same-exe session helper so the elevated tray does not launch vrstartup as Administrator.
+- SteamVR, Steam games, Horizon Link, Debug Tool, and other user launches go through a same-exe **session helper** (normal user). If Steam is already running as Administrator, SteamVR / steam:// skip the helper so they match that Steam instance.
 
 ## [1.1.10] - 2026-08-15
 

@@ -966,37 +966,25 @@ public sealed class DashToSteamVrService : IDisposable
                     : "zombie / invisible SteamVR (vrserver without compositor)"));
         }
 
-        notes.Add(SessionHelperClient.EnsureRunning());
-        if (SessionHelperClient.TryStartSteamVr(out var helperDetail))
+        if (SessionHelperClient.TryLaunchSteamVr(out var started))
         {
-            notes.Add("Started SteamVR via session helper (normal user). " + helperDetail);
-            return string.Join(" ", notes);
-        }
-
-        var drop = UnelevatedProcessLauncher.IsCurrentProcessElevated();
-        if (UnelevatedProcessLauncher.TryStartUri("steam://run/250820", drop, out var uriDetail))
-        {
-            notes.Add(
-                $"Session helper unavailable ({helperDetail}); started SteamVR unelevated via steam://run/250820. "
-                + uriDetail);
+            notes.Add("Started SteamVR. " + started);
             return string.Join(" ", notes);
         }
 
         var paths = TryResolveSteamVrPaths();
         if (paths is not null
-            && SessionHelperClient.TryStartExe(
+            && SessionHelperClient.TryLaunchExe(
                 paths.Value.StartupPath,
                 arguments: null,
                 Path.GetDirectoryName(paths.Value.StartupPath),
                 out var exeDetail))
         {
-            notes.Add($"Started SteamVR via session helper ({Path.GetFileName(paths.Value.StartupPath)}). " + exeDetail);
+            notes.Add($"Started SteamVR ({Path.GetFileName(paths.Value.StartupPath)}). " + exeDetail);
             return string.Join(" ", notes);
         }
 
-        notes.Add(
-            "Could not start SteamVR without Administrator. "
-            + $"Helper: {helperDetail}; steam://: {uriDetail}.");
+        notes.Add("Could not start SteamVR: " + started);
         return string.Join(" ", notes);
     }
 

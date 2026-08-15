@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace MetaQuestTrayTool.Services;
 
 public static class DonateService
@@ -17,10 +15,14 @@ public static class DonateService
             return;
         }
 
-        Process.Start(new ProcessStartInfo
+        if (!SessionHelperClient.TryLaunchUri(AppInfo.DonateUrl, out var detail))
         {
-            FileName = AppInfo.DonateUrl,
-            UseShellExecute = true
-        });
+            System.Windows.MessageBox.Show(
+                owner,
+                $"Could not open the donate page.\n\n{detail}",
+                AppInfo.ProductName,
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+        }
     }
 }

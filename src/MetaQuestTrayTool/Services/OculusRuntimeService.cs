@@ -277,20 +277,16 @@ public sealed class OculusRuntimeService
             return "Brought Meta Horizon Link to the foreground.";
         }
 
-        try
+        if (SessionHelperClient.TryLaunchExe(
+                clientPath,
+                arguments: null,
+                Path.GetDirectoryName(clientPath) ?? InstallPath ?? Environment.CurrentDirectory,
+                out var detail))
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = clientPath,
-                WorkingDirectory = Path.GetDirectoryName(clientPath) ?? InstallPath ?? Environment.CurrentDirectory,
-                UseShellExecute = true
-            });
-            return $"Opened Meta Horizon Link ({Path.GetFileName(clientPath)}).";
+            return $"Opened Meta Horizon Link ({Path.GetFileName(clientPath)}). {detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Could not open Meta Horizon Link: {ex.Message}";
-        }
+
+        return $"Could not open Meta Horizon Link: {detail}";
     }
 
     /// <summary>
@@ -311,20 +307,16 @@ public sealed class OculusRuntimeService
             return "Brought Oculus Debug Tool to the foreground.";
         }
 
-        try
+        if (SessionHelperClient.TryLaunchExe(
+                guiPath,
+                arguments: null,
+                Path.GetDirectoryName(guiPath) ?? InstallPath ?? Environment.CurrentDirectory,
+                out var detail))
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = guiPath,
-                WorkingDirectory = Path.GetDirectoryName(guiPath) ?? InstallPath ?? Environment.CurrentDirectory,
-                UseShellExecute = true
-            });
-            return $"Opened Oculus Debug Tool ({Path.GetFileName(guiPath)}).";
+            return $"Opened Oculus Debug Tool ({Path.GetFileName(guiPath)}). {detail}";
         }
-        catch (Exception ex)
-        {
-            return $"Could not open Oculus Debug Tool: {ex.Message}";
-        }
+
+        return $"Could not open Oculus Debug Tool: {detail}";
     }
 
     public string? ResolveClientExePath()
