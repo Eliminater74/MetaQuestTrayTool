@@ -42,7 +42,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.13 — MetaQuestTrayTool-Setup-1.1.13.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.13/MetaQuestTrayTool-Setup-1.1.13.exe)
+**Latest:** [v1.1.14 — MetaQuestTrayTool-Setup-1.1.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.14/MetaQuestTrayTool-Setup-1.1.14.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -153,7 +153,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Headset wait cues: “Please wait. Starting SteamVR.” on Link connect, and “SteamVR closed. Stopping Meta service for 10 seconds.” before OVR drops. **v1.1.11 crashed on start**; 1.1.12 fixed that. Also: unelevated SteamVR helper, 10s OVR drop, headset voice picker.
+Release **[v1.1.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Tray **Pause ADB** (until resume or 2 hours) and **VR headsets only** toggle so phones/TVs can use ADB without quitting. Also: headset wait cues, unelevated SteamVR helper, 10s OVR drop, voice picker. **v1.1.11 crashed on start**; 1.1.12+ fixed that.
 
 ### Shell & tray
 
@@ -198,7 +198,8 @@ Release **[v1.1.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Bundled Google platform-tools; CPU/GPU, texture size, refresh, FFR, chroma, capture; paste text / proximity / guardian helpers
 - Auto-apply on connect (props reset on Quest reboot)
 - **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect (saved IP only — no LAN scan) — SideQuest on the headset can also open an ADB port (often 5555)
-- **Headset-only wireless ADB** (on by default): disconnect phones/tablets that show up over the network; uncheck on Headset if you want other ADB devices to stay connected. Tweaks still never run on non-headsets
+- **VR headsets only** (on by default; Headset page + tray → Headset (ADB)): disconnect phones/tablets/TVs that show up over wireless ADB; uncheck to leave any ADB device connected. Tweaks still never run on non-headsets
+- **Pause ADB** (tray → Headset (ADB)): stop polling / reconnect / disconnect until you resume, or for 2 hours — use while debugging a phone or TV without quitting the tray
 - Trusted VR headset serial only — phones / tablets / emulators ignored
 - Battery / charge / Wi‑Fi status via ADB dumpsys
 

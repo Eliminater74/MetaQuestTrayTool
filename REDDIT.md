@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```
-[PC] Meta Quest Tray Tool v1.1.13 — free modern OTT-style tray app for Quest Link / SteamVR (headset wait cues, unelevated SteamVR helper)
+[PC] Meta Quest Tray Tool v1.1.14 — free modern OTT-style tray app for Quest Link / SteamVR (Pause ADB, VR-headsets-only toggle)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.13** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.14** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,7 +54,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.13)
+### What works now (v1.1.14)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -119,7 +119,8 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - CPU/GPU, texture size, refresh, FFR, chroma, capture; paste / proximity / guardian helpers
 - Auto-apply on connect (resets on Quest reboot)
 - **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip, auto-reconnect
-- Trusted VR headset only — phones / tablets / emulators ignored
+- **VR headsets only** (default on; tray + Headset page): drop phone/TV wireless ADB — uncheck to allow any device
+- **Pause ADB** (tray): until you resume, or for 2 hours — other gadgets can use ADB without quitting
 - Battery / charge / Wi‑Fi via ADB
 
 **Updates / tools / donate**
@@ -207,5 +208,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.13) — headset wait cues (please-wait on connect, 10s Meta stop spoken before OVR drops), unelevated SteamVR via session helper, Quest Home after SteamVR exit, headset TTS voice picker, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.14) — Pause ADB / VR-headsets-only so phones and TVs keep ADB, headset wait cues, unelevated SteamVR helper, Quest Home after SteamVR exit, TTS voice picker, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

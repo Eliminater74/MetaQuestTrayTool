@@ -14,7 +14,7 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |
 | **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI. |
 | **Quest Link** | RemoteHeadset bitrate, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets. |
-| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect. |
+| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, **VR headsets only**, **Pause ADB**. |
 | **VR Tools** | Curated third-party links (overlays, wireless PCVR, tracking, essentials). |
 | **Info** | PCVR Ready checklist, Recover PCVR, session probe, system dump. |
 | **Donate / About** | PayPal + version / credits. |
@@ -27,7 +27,7 @@ Typical actions:
 
 - Open Settings, Meta Horizon Link, Oculus Debug Tool
 - Start SteamVR over Link, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
-- Game Settings, Profiles, Quest Link, OpenXR, Audio, Power, Headset
+- Game Settings, Profiles, Quest Link, OpenXR, Audio, Power, Headset (ADB: VR headsets only / Pause / Resume)
 - Start / stop / restart **OVRService**
 - Check for updates, VR Tools, Donate, Exit
 

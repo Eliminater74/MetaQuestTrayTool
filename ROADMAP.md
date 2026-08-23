@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.13](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.13)
+## Current product (v1.1.14)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -19,7 +19,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
 | Link / Dash | RemoteHeadset Link settings + presets, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
-| Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial |
+| Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
 | Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU), headset announcements, automation |
 | Updates / polish | In-app GitHub updates, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate |
 
@@ -112,6 +112,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.11 | Session helper (unelevated SteamVR unless Steam is already admin); OVRService 10s hold on SteamVR exit; headset TTS voice picker |
 | v1.1.12 | Fix 1.1.11 crash on start (session helper STARTUPINFO); helper no longer blocks the UI or opens a second copy |
 | v1.1.13 | Headset wait cues: please-wait on Link connect; SteamVR closed + 10s OVR stop spoken before the service drops |
+| v1.1.14 | Tray Pause ADB (until resume / 2h) + VR-headsets-only toggle; pause expire/tooltip/sweep races fixed |
 
 ---
 

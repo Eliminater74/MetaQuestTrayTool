@@ -8,8 +8,15 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.14] - 2026-08-23
+
 ### Added
 - Tray **Headset (ADB)** menu: **VR headsets only** toggle (on = drop phone/TV wireless ADB; off = allow any device), plus **Pause ADB until I resume** / **Pause ADB for 2 hours** / **Resume** so other ADB gadgets work without quitting the tray.
+
+### Fixed
+- Timed ADB pause now restarts the watcher when it expires (reading pause status no longer clears the flag without SyncWatch).
+- Tray menu sync no longer fires spurious save/balloon events when opening Headset checks.
+- Tray tooltip refreshes when ADB pause ends; in-flight polls and manual wireless connect no longer sweep phones/TVs while ADB is paused.
 
 ## [1.1.13] - 2026-08-15
 
@@ -117,7 +124,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.13...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.14...HEAD
+[1.1.14]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.14
 [1.1.13]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.13
 [1.1.12]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.12
 [1.1.11]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.11

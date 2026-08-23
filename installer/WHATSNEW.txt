@@ -1,10 +1,15 @@
-﻿Meta Quest Tray Tool 1.1.13 - What's new
+﻿Meta Quest Tray Tool 1.1.14 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.13] - 2026-08-15
+[1.1.14] - 2026-08-23
 
 Added
-- Headset announcements cover the waits: "Please wait. Starting SteamVR." when Link connects, and "SteamVR closed. Stopping Meta service for 10 seconds." spoken in the Quest before OVRService stops (the old exit line ran after audio had already left the headset).
+- Tray Headset (ADB) menu: VR headsets only toggle (on = drop phone/TV wireless ADB; off = allow any device), plus Pause ADB until I resume / Pause ADB for 2 hours / Resume so other ADB gadgets work without quitting the tray.
+
+Fixed
+- Timed ADB pause now restarts the watcher when it expires (reading pause status no longer clears the flag without SyncWatch).
+- Tray menu sync no longer fires spurious save/balloon events when opening Headset checks.
+- Tray tooltip refreshes when ADB pause ends; in-flight polls and manual wireless connect no longer sweep phones/TVs while ADB is paused.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
