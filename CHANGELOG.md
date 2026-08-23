@@ -8,6 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Tray **Headset (ADB)** menu: **VR headsets only** toggle (on = drop phone/TV wireless ADB; off = allow any device), plus **Pause ADB until I resume** / **Pause ADB for 2 hours** / **Resume** so other ADB gadgets work without quitting the tray.
+
 ## [1.1.13] - 2026-08-15
 
 ### Added

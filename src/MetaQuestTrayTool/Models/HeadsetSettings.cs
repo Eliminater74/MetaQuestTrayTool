@@ -110,6 +110,17 @@ public sealed class HeadsetSettings
     /// </summary>
     public bool HeadsetOnlyWirelessAdb { get; set; } = true;
 
+    /// <summary>
+    /// When true, the headset ADB watcher does not poll, auto-reconnect, or disconnect other devices.
+    /// Use while debugging a phone/TV/Fire Stick so this tray does not steal the ADB session.
+    /// </summary>
+    public bool AdbWatcherPaused { get; set; }
+
+    /// <summary>
+    /// UTC end of a timed pause. Null means pause until you Resume (while <see cref="AdbWatcherPaused"/> is true).
+    /// </summary>
+    public DateTime? AdbWatcherPausedUntilUtc { get; set; }
+
     public string? WirelessEndpoint
     {
         get

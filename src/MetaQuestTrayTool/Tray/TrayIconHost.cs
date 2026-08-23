@@ -383,10 +383,27 @@ public sealed class TrayIconHost : IDisposable
             : null;
 
         // NotifyIcon.Text max is 63 chars on Windows.
-        var tip = profile is null
-            ? $"{ready} · {pcvr}\n{openXr}"
-            : $"{profile} · {pcvr}\n{openXr}";
+        string tip;
+        if (_app.HeadsetWatch?.IsPaused == true)
+        {
+            tip = "ADB paused · other devices OK";
+        }
+        else
+        {
+            tip = profile is null
+                ? $"{ready} · {pcvr}\n{openXr}"
+                : $"{profile} · {pcvr}\n{openXr}";
+        }
+
         _notifyIcon.Text = tip.Length <= 63 ? tip : tip[..63];
+    }
+
+    private void RefreshTooltip()
+    {
+        if (_menu is not null)
+        {
+            RefreshDynamicItems(_menu);
+        }
     }
 
 
@@ -1036,6 +1053,31 @@ public sealed class TrayIconHost : IDisposable
         }));
         menu.DropDownItems.Add(new ToolStripSeparator());
 
+        var headsetOnly = new ToolStripMenuItem("VR headsets only (drop phone / TV ADB)")
+        {
+            Name = "HeadsetOnlyWirelessAdb",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.Headset.HeadsetOnlyWirelessAdb,
+            ToolTipText =
+                "On: disconnect wireless ADB that is not a VR headset (phones, tablets, Fire TV, etc.). "
+                + "Off: leave any wireless ADB device connected — Quest tweaks still never run on non-headsets."
+        };
+        headsetOnly.CheckedChanged += (_, _) =>
+        {
+            _app.Settings.Current.Headset.HeadsetOnlyWirelessAdb = headsetOnly.Checked;
+            _app.Settings.Save();
+            _app.HeadsetWatch?.SyncWatch();
+            _app.Log.Info(headsetOnly.Checked
+                ? "Headset-only wireless ADB on — non-VR wireless sessions will be dropped."
+                : "Headset-only wireless ADB off — other wireless ADB devices can stay connected.");
+            Notify(
+                "ADB",
+                headsetOnly.Checked
+                    ? "VR headsets only — other wireless ADB devices will be disconnected."
+                    : "Any wireless ADB device allowed — phones / TVs will not be dropped.");
+        };
+        menu.DropDownItems.Add(headsetOnly);
+
         var auto = new ToolStripMenuItem("Apply when headset connects")
         {
             Name = "HeadsetApplyOnConnect",
@@ -1046,6 +1088,7 @@ public sealed class TrayIconHost : IDisposable
         {
             _app.Settings.Current.Headset.ApplyWhenHeadsetConnects = auto.Checked;
             _app.Settings.Save();
+            _app.HeadsetWatch?.SyncWatch();
         };
         menu.DropDownItems.Add(auto);
         menu.DropDownItems.Add(new ToolStripMenuItem("Apply to headset now", null, (_, _) =>
@@ -1071,20 +1114,79 @@ public sealed class TrayIconHost : IDisposable
                 }
             });
         }));
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        menu.DropDownItems.Add(new ToolStripMenuItem("Pause ADB until I resume", null, (_, _) =>
+        {
+            _app.HeadsetWatch?.Pause();
+            RefreshTooltip();
+        })
+        {
+            Name = "HeadsetAdbPause",
+            ToolTipText =
+                "Stop ADB polling / reconnect / disconnect while you use a phone, TV, or other ADB device. Tray stays running."
+        });
+        menu.DropDownItems.Add(new ToolStripMenuItem("Pause ADB for 2 hours", null, (_, _) =>
+        {
+            _app.HeadsetWatch?.Pause(HeadsetWatchService.DefaultTimedPause);
+            RefreshTooltip();
+        })
+        {
+            Name = "HeadsetAdbPause2h",
+            ToolTipText = "Same as pause, then auto-resume after 2 hours."
+        });
+        menu.DropDownItems.Add(new ToolStripMenuItem("Resume ADB", null, (_, _) =>
+        {
+            _app.HeadsetWatch?.Resume();
+            RefreshTooltip();
+        })
+        {
+            Name = "HeadsetAdbResume",
+            ToolTipText = "Turn headset ADB watching back on."
+        });
+
         menu.DropDownItems.Add(new ToolStripMenuItem("Status: Unknown") { Enabled = false, Name = "HeadsetStatus" });
         return menu;
     }
 
     private void SyncHeadsetChecks(ContextMenuStrip root)
     {
+        var headset = _app.Settings.Current.Headset;
+        var paused = _app.HeadsetWatch?.IsPaused == true;
+
+        if (FindItem(root.Items, "HeadsetOnlyWirelessAdb") is ToolStripMenuItem headsetOnly)
+        {
+            headsetOnly.Checked = headset.HeadsetOnlyWirelessAdb;
+            headsetOnly.Enabled = !paused;
+        }
+
         if (FindItem(root.Items, "HeadsetApplyOnConnect") is ToolStripMenuItem auto)
         {
-            auto.Checked = _app.Settings.Current.Headset.ApplyWhenHeadsetConnects;
+            auto.Checked = headset.ApplyWhenHeadsetConnects;
+            auto.Enabled = !paused;
+        }
+
+        if (FindItem(root.Items, "HeadsetAdbPause") is ToolStripMenuItem pause)
+        {
+            pause.Enabled = !paused;
+        }
+
+        if (FindItem(root.Items, "HeadsetAdbPause2h") is ToolStripMenuItem pause2h)
+        {
+            pause2h.Enabled = !paused;
+        }
+
+        if (FindItem(root.Items, "HeadsetAdbResume") is ToolStripMenuItem resume)
+        {
+            resume.Enabled = paused;
         }
 
         if (FindItem(root.Items, "HeadsetStatus") is ToolStripMenuItem status)
         {
-            status.Text = _app.Adb.DescribeStatus();
+            var pauseText = _app.HeadsetWatch?.PauseStatusText;
+            status.Text = !string.IsNullOrWhiteSpace(pauseText)
+                ? pauseText
+                : _app.Adb.DescribeStatus();
         }
     }
 

@@ -61,11 +61,11 @@
       <CheckBox x:Name="WirelessAutoBox" Content="Auto-reconnect wireless ADB when no headset is listed"
                 Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
                 ToolTip="Every ~45s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off. Use after SideQuest/tcpip/Wireless debugging has opened a port once. Does not scan the LAN for other ADB devices."/>
-      <CheckBox x:Name="HeadsetOnlyWirelessBox" Content="Headset-only wireless ADB"
+      <CheckBox x:Name="HeadsetOnlyWirelessBox" Content="VR headsets only (disconnect phone / TV / tablet wireless ADB)"
                 Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,4"
-                ToolTip="On by default. Drops wireless ADB sessions that are not a VR headset (phones/tablets ADB finds on the LAN, including mDNS). Uncheck to leave other wireless ADB devices connected. USB gadgets stay listed either way. Quest tweaks still never run on non-headsets."/>
+                ToolTip="On by default. Drops wireless ADB sessions that are not a VR headset (phones, tablets, Fire TV, etc.). Uncheck to allow any wireless ADB device to stay connected. USB gadgets stay listed either way. Quest tweaks still never run on non-headsets. Also available from the tray → Headset (ADB) menu."/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="24,0,0,8"
-                 Text="On by default so auto-connect cannot latch onto a phone. Uncheck if you want other wireless ADB devices (phones, tablets, Fire TV, etc.) to stay connected — commands still only apply to a VR headset."/>
+                 Text="On by default so auto-connect cannot latch onto a phone or TV. Uncheck (or use tray → Headset ADB) when you need other wireless ADB devices. Pause ADB in the tray if you want the watcher fully off for a while without quitting."/>
 
       <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <Grid>

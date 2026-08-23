@@ -8,8 +8,11 @@ namespace MetaQuestTrayTool.Services;
 /// </summary>
 public sealed class HeadsetWatchService : IDisposable
 {
+    public static readonly TimeSpan DefaultTimedPause = TimeSpan.FromHours(2);
+
     private readonly App _app;
     private readonly DispatcherTimer _timer;
+    private readonly DispatcherTimer _resumeTimer;
     private string? _lastSerial;
     private bool _appliedForSerial;
     private string? _lastIgnoredMessage;
@@ -23,18 +26,113 @@ public sealed class HeadsetWatchService : IDisposable
         _app = app;
         _timer = new DispatcherTimer { Interval = IdleCadence.HeavyIdle };
         _timer.Tick += (_, _) => BeginPoll();
+        _resumeTimer = new DispatcherTimer();
+        _resumeTimer.Tick += (_, _) => OnResumeTimerTick();
     }
 
     public void Start() => SyncWatch();
 
-    public void Stop() => _timer.Stop();
+    public void Stop()
+    {
+        _timer.Stop();
+        _resumeTimer.Stop();
+    }
 
     public void Dispose() => Stop();
 
-    /// <summary>Stop ADB polling when apply-on-connect, wireless auto-reconnect, and headset-only sweep are all off.</summary>
-    public void SyncWatch()
+    /// <summary>True while the ADB watcher is paused (indefinite or until a deadline).</summary>
+    public bool IsPaused
+    {
+        get
+        {
+            ExpireTimedPauseIfNeeded();
+            return _app.Settings.Current.Headset.AdbWatcherPaused;
+        }
+    }
+
+    /// <summary>Human status for tray / Status page (empty when not paused).</summary>
+    public string PauseStatusText
+    {
+        get
+        {
+            if (!IsPaused)
+            {
+                return string.Empty;
+            }
+
+            var until = _app.Settings.Current.Headset.AdbWatcherPausedUntilUtc;
+            if (until is null)
+            {
+                return "ADB paused until you resume (other devices safe).";
+            }
+
+            var local = until.Value.ToLocalTime();
+            return $"ADB paused until {local:t} ({local:MMM d}) — other devices safe.";
+        }
+    }
+
+    /// <summary>
+    /// Stop polling / auto-reconnect / headset-only disconnect so phones, TVs, etc. can use ADB.
+    /// Pass <paramref name="duration"/> for a timed pause (e.g. 2 hours); null = until Resume.
+    /// </summary>
+    public void Pause(TimeSpan? duration = null, bool notify = true)
     {
         var settings = _app.Settings.Current.Headset;
+        settings.AdbWatcherPaused = true;
+        settings.AdbWatcherPausedUntilUtc = duration is { } d && d > TimeSpan.Zero
+            ? DateTime.UtcNow.Add(d)
+            : null;
+        _app.Settings.Save();
+        SyncWatch();
+
+        var message = settings.AdbWatcherPausedUntilUtc is { } until
+            ? $"ADB paused until {until.ToLocalTime():t}. Phones / TVs can use ADB without this tray disconnecting them."
+            : "ADB paused until you resume. Phones / TVs can use ADB without this tray disconnecting them.";
+        _app.Log.Info(message);
+        if (notify)
+        {
+            _app.TrayNotify("ADB paused", message);
+        }
+    }
+
+    /// <summary>Resume headset ADB watching (apply / reconnect / headset-only sweep).</summary>
+    public void Resume(bool notify = true)
+    {
+        var settings = _app.Settings.Current.Headset;
+        if (!settings.AdbWatcherPaused && settings.AdbWatcherPausedUntilUtc is null)
+        {
+            return;
+        }
+
+        settings.AdbWatcherPaused = false;
+        settings.AdbWatcherPausedUntilUtc = null;
+        _app.Settings.Save();
+        SyncWatch();
+        _app.Log.Info("Headset ADB watcher resumed.");
+        if (notify)
+        {
+            _app.TrayNotify("ADB resumed", "Headset ADB watching is on again.");
+        }
+    }
+
+    /// <summary>Stop ADB polling when paused, or when apply-on-connect, wireless auto-reconnect, and headset-only sweep are all off.</summary>
+    public void SyncWatch()
+    {
+        ExpireTimedPauseIfNeeded();
+        ArmResumeTimer();
+
+        var settings = _app.Settings.Current.Headset;
+        if (settings.AdbWatcherPaused)
+        {
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+                _app.Log.Info("Headset ADB watcher paused — will not poll, reconnect, or disconnect other devices.");
+            }
+
+            return;
+        }
+
         var needsWatch = settings.ApplyWhenHeadsetConnects
                          || settings.WirelessAutoReconnect
                          || settings.HeadsetOnlyWirelessAdb;
@@ -57,6 +155,52 @@ public sealed class HeadsetWatchService : IDisposable
         }
 
         ApplyCadence(_lastSerial is not null);
+    }
+
+    private void ExpireTimedPauseIfNeeded()
+    {
+        var settings = _app.Settings.Current.Headset;
+        if (!settings.AdbWatcherPaused || settings.AdbWatcherPausedUntilUtc is not { } until)
+        {
+            return;
+        }
+
+        if (DateTime.UtcNow < until)
+        {
+            return;
+        }
+
+        settings.AdbWatcherPaused = false;
+        settings.AdbWatcherPausedUntilUtc = null;
+        _app.Settings.Save();
+        _app.Log.Info("Timed ADB pause ended — headset watcher will resume.");
+        _app.TrayNotify("ADB resumed", "Timed pause ended. Headset ADB watching is on again.");
+    }
+
+    private void ArmResumeTimer()
+    {
+        _resumeTimer.Stop();
+        var settings = _app.Settings.Current.Headset;
+        if (!settings.AdbWatcherPaused || settings.AdbWatcherPausedUntilUtc is not { } until)
+        {
+            return;
+        }
+
+        var remaining = until - DateTime.UtcNow;
+        if (remaining <= TimeSpan.Zero)
+        {
+            return;
+        }
+
+        // DispatcherTimer max practical interval is fine for a few hours.
+        _resumeTimer.Interval = remaining > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : remaining;
+        _resumeTimer.Start();
+    }
+
+    private void OnResumeTimerTick()
+    {
+        _resumeTimer.Stop();
+        SyncWatch();
     }
 
     private void ApplyCadence(bool headsetPresent)
@@ -92,9 +236,10 @@ public sealed class HeadsetWatchService : IDisposable
     private void Poll()
     {
         var settings = _app.Settings.Current.Headset;
-        if (!settings.ApplyWhenHeadsetConnects
-            && !settings.WirelessAutoReconnect
-            && !settings.HeadsetOnlyWirelessAdb)
+        if (settings.AdbWatcherPaused
+            || (!settings.ApplyWhenHeadsetConnects
+                && !settings.WirelessAutoReconnect
+                && !settings.HeadsetOnlyWirelessAdb))
         {
             _app.Dispatcher.BeginInvoke(SyncWatch);
             return;
