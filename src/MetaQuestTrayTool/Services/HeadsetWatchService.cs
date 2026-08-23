@@ -40,13 +40,28 @@ public sealed class HeadsetWatchService : IDisposable
 
     public void Dispose() => Stop();
 
-    /// <summary>True while the ADB watcher is paused (indefinite or until a deadline).</summary>
+    /// <summary>
+    /// True while the ADB watcher is paused (indefinite or until a deadline).
+    /// Does not expire the pause — only <see cref="SyncWatch"/> does, so the poll timer restarts.
+    /// </summary>
     public bool IsPaused
     {
         get
         {
-            ExpireTimedPauseIfNeeded();
-            return _app.Settings.Current.Headset.AdbWatcherPaused;
+            var settings = _app.Settings.Current.Headset;
+            if (!settings.AdbWatcherPaused)
+            {
+                return false;
+            }
+
+            if (settings.AdbWatcherPausedUntilUtc is { } until && DateTime.UtcNow >= until)
+            {
+                // Deadline passed but SyncWatch has not run yet — schedule resume on the UI thread.
+                _app.Dispatcher.BeginInvoke(SyncWatch);
+                return false;
+            }
+
+            return true;
         }
     }
 
@@ -118,7 +133,7 @@ public sealed class HeadsetWatchService : IDisposable
     /// <summary>Stop ADB polling when paused, or when apply-on-connect, wireless auto-reconnect, and headset-only sweep are all off.</summary>
     public void SyncWatch()
     {
-        ExpireTimedPauseIfNeeded();
+        var timedPauseEnded = ExpireTimedPauseIfNeeded();
         ArmResumeTimer();
 
         var settings = _app.Settings.Current.Headset;
@@ -130,6 +145,7 @@ public sealed class HeadsetWatchService : IDisposable
                 _app.Log.Info("Headset ADB watcher paused — will not poll, reconnect, or disconnect other devices.");
             }
 
+            _app.RefreshTrayUi();
             return;
         }
 
@@ -144,30 +160,35 @@ public sealed class HeadsetWatchService : IDisposable
                 _app.Log.Info("Headset ADB watcher paused (auto-apply, wireless reconnect, and headset-only sweep off).");
             }
 
+            _app.RefreshTrayUi();
             return;
         }
 
         if (!_timer.IsEnabled)
         {
             _timer.Start();
-            _app.Log.Info("Headset ADB watcher started.");
+            _app.Log.Info(timedPauseEnded
+                ? "Headset ADB watcher resumed after timed pause."
+                : "Headset ADB watcher started.");
             BeginPoll();
         }
 
         ApplyCadence(_lastSerial is not null);
+        _app.RefreshTrayUi();
     }
 
-    private void ExpireTimedPauseIfNeeded()
+    /// <summary>Clears an expired timed pause. Returns true when pause flags were cleared.</summary>
+    private bool ExpireTimedPauseIfNeeded()
     {
         var settings = _app.Settings.Current.Headset;
         if (!settings.AdbWatcherPaused || settings.AdbWatcherPausedUntilUtc is not { } until)
         {
-            return;
+            return false;
         }
 
         if (DateTime.UtcNow < until)
         {
-            return;
+            return false;
         }
 
         settings.AdbWatcherPaused = false;
@@ -175,6 +196,7 @@ public sealed class HeadsetWatchService : IDisposable
         _app.Settings.Save();
         _app.Log.Info("Timed ADB pause ended — headset watcher will resume.");
         _app.TrayNotify("ADB resumed", "Timed pause ended. Headset ADB watching is on again.");
+        return true;
     }
 
     private void ArmResumeTimer()
@@ -245,8 +267,28 @@ public sealed class HeadsetWatchService : IDisposable
             return;
         }
 
+        // Re-check pause after the gate — Pause may have landed while this poll was queued.
+        if (_app.Settings.Current.Headset.AdbWatcherPaused)
+        {
+            _app.Dispatcher.BeginInvoke(SyncWatch);
+            return;
+        }
+
         MaybeAutoReconnectWireless();
+
+        if (_app.Settings.Current.Headset.AdbWatcherPaused)
+        {
+            _app.Dispatcher.BeginInvoke(SyncWatch);
+            return;
+        }
+
         MaybeSweepNonHeadsetWireless();
+
+        if (_app.Settings.Current.Headset.AdbWatcherPaused)
+        {
+            _app.Dispatcher.BeginInvoke(SyncWatch);
+            return;
+        }
 
         var quest = _app.Adb.FindQuest();
         var serial = quest?.IsReady == true ? quest.Serial : null;
@@ -343,7 +385,9 @@ public sealed class HeadsetWatchService : IDisposable
     private void MaybeAutoReconnectWireless()
     {
         var settings = _app.Settings.Current.Headset;
-        if (!settings.WirelessAutoReconnect || settings.WirelessEndpoint is null)
+        if (settings.AdbWatcherPaused
+            || !settings.WirelessAutoReconnect
+            || settings.WirelessEndpoint is null)
         {
             return;
         }
@@ -382,7 +426,7 @@ public sealed class HeadsetWatchService : IDisposable
     private void MaybeSweepNonHeadsetWireless()
     {
         var settings = _app.Settings.Current.Headset;
-        if (!settings.HeadsetOnlyWirelessAdb)
+        if (!settings.HeadsetOnlyWirelessAdb || settings.AdbWatcherPaused)
         {
             return;
         }

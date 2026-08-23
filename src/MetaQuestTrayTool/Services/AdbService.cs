@@ -259,10 +259,14 @@ public sealed class AdbService
                 throw new InvalidOperationException(rejected);
             }
 
-            var swept = SweepNonHeadsetWireless(settings);
-            if (!string.IsNullOrWhiteSpace(swept))
+            // While ADB is paused for other devices, do not disconnect phones/TVs already on the bus.
+            if (!settings.AdbWatcherPaused)
             {
-                summary = $"{summary} {swept}";
+                var swept = SweepNonHeadsetWireless(settings);
+                if (!string.IsNullOrWhiteSpace(swept))
+                {
+                    summary = $"{summary} {swept}";
+                }
             }
         }
 

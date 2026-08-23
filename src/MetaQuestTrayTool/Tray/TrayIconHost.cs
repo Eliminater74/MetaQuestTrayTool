@@ -13,6 +13,7 @@ public sealed class TrayIconHost : IDisposable
     private readonly NotifyIcon _notifyIcon;
     private ContextMenuStrip? _menu;
     private bool _syncingStartup;
+    private bool _syncingMenu;
     private Icon? _icon;
     private MainShellWindow? _shell;
     private AboutWindow? _about;
@@ -405,6 +406,9 @@ public sealed class TrayIconHost : IDisposable
             RefreshDynamicItems(_menu);
         }
     }
+
+    /// <summary>Called from services after ADB pause/resume so the tooltip stays accurate.</summary>
+    public void RefreshUi() => RefreshTooltip();
 
 
     private ToolStripMenuItem BuildGameSettingsMenu()
@@ -1064,6 +1068,11 @@ public sealed class TrayIconHost : IDisposable
         };
         headsetOnly.CheckedChanged += (_, _) =>
         {
+            if (_syncingMenu)
+            {
+                return;
+            }
+
             _app.Settings.Current.Headset.HeadsetOnlyWirelessAdb = headsetOnly.Checked;
             _app.Settings.Save();
             _app.HeadsetWatch?.SyncWatch();
@@ -1086,6 +1095,11 @@ public sealed class TrayIconHost : IDisposable
         };
         auto.CheckedChanged += (_, _) =>
         {
+            if (_syncingMenu)
+            {
+                return;
+            }
+
             _app.Settings.Current.Headset.ApplyWhenHeadsetConnects = auto.Checked;
             _app.Settings.Save();
             _app.HeadsetWatch?.SyncWatch();
@@ -1154,16 +1168,24 @@ public sealed class TrayIconHost : IDisposable
         var headset = _app.Settings.Current.Headset;
         var paused = _app.HeadsetWatch?.IsPaused == true;
 
-        if (FindItem(root.Items, "HeadsetOnlyWirelessAdb") is ToolStripMenuItem headsetOnly)
+        _syncingMenu = true;
+        try
         {
-            headsetOnly.Checked = headset.HeadsetOnlyWirelessAdb;
-            headsetOnly.Enabled = !paused;
-        }
+            if (FindItem(root.Items, "HeadsetOnlyWirelessAdb") is ToolStripMenuItem headsetOnly)
+            {
+                headsetOnly.Checked = headset.HeadsetOnlyWirelessAdb;
+                headsetOnly.Enabled = !paused;
+            }
 
-        if (FindItem(root.Items, "HeadsetApplyOnConnect") is ToolStripMenuItem auto)
+            if (FindItem(root.Items, "HeadsetApplyOnConnect") is ToolStripMenuItem auto)
+            {
+                auto.Checked = headset.ApplyWhenHeadsetConnects;
+                auto.Enabled = !paused;
+            }
+        }
+        finally
         {
-            auto.Checked = headset.ApplyWhenHeadsetConnects;
-            auto.Enabled = !paused;
+            _syncingMenu = false;
         }
 
         if (FindItem(root.Items, "HeadsetAdbPause") is ToolStripMenuItem pause)

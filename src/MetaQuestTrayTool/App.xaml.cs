@@ -273,6 +273,9 @@ public partial class App : System.Windows.Application
 
     public void NotifyStillRunningInTray() => _tray?.NotifyStillRunning();
 
+    /// <summary>Refresh tray tooltip / menu pause state (e.g. after timed ADB resume).</summary>
+    public void RefreshTrayUi() => _tray?.RefreshUi();
+
     /// <summary>
     /// Re-bind timers / listeners after settings reset or import so watchers match disk state.
     /// </summary>
