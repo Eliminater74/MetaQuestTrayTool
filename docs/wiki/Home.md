@@ -12,13 +12,15 @@ Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OT
 
 | Video | What it shows |
 | --- | --- |
-| [Walkthrough (Aug 2026)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/walkthrough-2026-08-13.mp4) | Full shell walkthrough (newer recording) |
-| [Short demo](https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4) | Quick preview from the README |
+| [Walkthrough (25 Aug 2025, v1.1.18)](https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4) | Full shell walkthrough — Status, pages, profiles, VR Tools |
+| [Earlier walkthrough (13 Aug 2026)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/walkthrough-2026-08-13.mp4) | Previous recording (pre–Status / VR Tools stills) |
 
-More stills: [[Screenshots-and-Videos]]
+**Screenshot gallery:** [[Screenshots-and-Videos]] · [docs/media](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/media/README.md)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/01-game-settings.png" alt="Game Settings" width="720"/>
+  <a href="https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4">
+    <img src="https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/00-status.png" alt="Status dashboard" width="720"/>
+  </a>
 </p>
 
 ---

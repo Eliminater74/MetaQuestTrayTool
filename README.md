@@ -10,17 +10,20 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 
 ### Preview
 
-[Watch a short walkthrough (MP4)](docs/media/demo.mp4)
+**Demo video (Aug 2025, v1.1.18):** [Watch walkthrough (MP4)](docs/media/demo.mp4) · **[Screenshot gallery](docs/media/README.md)** · **[Wiki gallery](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos)
 
 <p align="center">
-  <img src="docs/media/01-game-settings.png" alt="Game Settings" width="720"/>
+  <a href="docs/media/demo.mp4">
+    <img src="docs/media/00-status.png" alt="Status dashboard — PCVR Ready, SteamVR, OpenXR, session chips" width="720"/>
+  </a>
 </p>
 
 <details>
-<summary>More screenshots (shell pages)</summary>
+<summary>More screenshots (shell pages + dialogs)</summary>
 
 | Page | Preview |
 | --- | --- |
+| Status | ![Status](docs/media/00-status.png) |
 | Game Settings | ![Game Settings](docs/media/01-game-settings.png) |
 | Game Settings (custom CLI / ADB) | ![Game Settings custom commands](docs/media/02-game-settings-custom-commands.png) |
 | Tray Tool | ![Tray Tool](docs/media/03-tray-tool.png) |
@@ -33,8 +36,12 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 | Headset (performance) | ![Headset performance](docs/media/10-headset-performance.png) |
 | Info | ![Info](docs/media/11-info.png) |
 | About | ![About](docs/media/12-about.png) |
+| VR Tools | ![VR Tools](docs/media/16-vr-tools.png) |
+| Steam & Meta library | ![Steam and Meta library](docs/media/13-steam-meta-library.png) |
+| Profiles | ![Profiles](docs/media/14-profiles.png) |
+| Audio switching | ![Audio switching](docs/media/15-audio-switching.png) |
 
-_Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages not captured yet).
+All stills captured **25 Aug 2025** on **v1.1.18** (Pure Black theme). Full list: [docs/media/README.md](docs/media/README.md).
 
 </details>
 

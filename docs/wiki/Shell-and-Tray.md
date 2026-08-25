@@ -19,7 +19,11 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | **Info** | PCVR Ready checklist, Recover PCVR, session probe, system dump. |
 | **Donate / About** | PayPal + version / credits. |
 
+![Status dashboard](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/00-status.png)
+
 ![Tray Tool page](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/03-tray-tool.png)
+
+![VR Tools links](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/16-vr-tools.png)
 
 ## Tray menu (right-click)
 

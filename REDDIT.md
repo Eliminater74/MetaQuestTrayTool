@@ -63,7 +63,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Hands-free elevated start (one UAC, then silent elevated at logon)
 - Refreshed neon VR headset icon/logo (tray, About, settings sidebar)
 - Durable `settings.json` / `profiles.json` (flush + `.bak`/`.bak2` restore after power loss)
-- Screenshots + demo in the repo README; **full walkthrough video + user guide:** https://github.com/Eliminater74/MetaQuestTrayTool/wiki
+- Fresh **v1.1.18 screenshots + walkthrough video** in the repo README; **full gallery + user guide:** https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos
 
 **Status & SteamVR**
 - Live Status chips (PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, session type, ADB, battery/Wi‑Fi, profile, HotKeys/Voice, Dash→SteamVR, GPU, audio)
