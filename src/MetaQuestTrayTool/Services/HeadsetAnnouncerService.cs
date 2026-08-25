@@ -16,6 +16,8 @@ public sealed class HeadsetAnnouncerService : IDisposable
 {
     private const int GapBetweenMessagesMs = 1200;
     private const int DisconnectDelayMs = 350;
+    /// <summary>Minimum wait after Link connect so Meta virtual audio is up before the first phrase.</summary>
+    private const int ConnectDelayFloorMs = 2200;
 
     private readonly App _app;
     private readonly object _queueLock = new();
@@ -82,15 +84,54 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void AnnounceSessionConnected(VrConnectionStatus status)
     {
-        var phrase = status.Kind switch
+        var phrase = BuildConnectPhrase(status);
+        var settings = _app.Settings.Current.HeadsetAnnouncer;
+        var connectDelay = Math.Clamp(
+            Math.Max(settings.ConnectDelayMs, settings.DelayMs),
+            ConnectDelayFloorMs,
+            8000);
+        Enqueue(HeadsetAnnounceKind.SessionConnect, phrase, delayMs: connectDelay);
+    }
+
+    /// <summary>True when the session-connect phrase already tells the user SteamVR is starting.</summary>
+    public bool ConnectPhraseCoversSteamVrStart(VrConnectionStatus status)
+    {
+        if (!ShouldAnnounce(HeadsetAnnounceKind.SessionConnect))
         {
-            VrConnectionKind.MetaAirLink => "Connected. Air Link.",
-            VrConnectionKind.MetaWiredLink => "Connected. Wired Link.",
-            VrConnectionKind.SteamLinkOrSteamVr => "Connected. Steam Link.",
+            return false;
+        }
+
+        return status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink
+               && PcvrSetup.GetMode(_app) == PcvrSetupMode.SteamVrOverMetaLink;
+    }
+
+    private string BuildConnectPhrase(VrConnectionStatus status)
+    {
+        var linkLabel = status.Kind switch
+        {
+            VrConnectionKind.MetaAirLink => "Air Link",
+            VrConnectionKind.MetaWiredLink => "Wired Link",
+            VrConnectionKind.SteamLinkOrSteamVr => "Steam Link",
+            VrConnectionKind.VirtualDesktop => "Virtual Desktop",
+            _ => "PCVR"
+        };
+
+        if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink)
+        {
+            if (PcvrSetup.GetMode(_app) == PcvrSetupMode.SteamVrOverMetaLink)
+            {
+                return $"Connected. {linkLabel}. Now starting SteamVR.";
+            }
+
+            return $"Connected. {linkLabel}. Meta Horizon will load.";
+        }
+
+        return status.Kind switch
+        {
+            VrConnectionKind.SteamLinkOrSteamVr => "Connected. Steam Link. SteamVR session.",
             VrConnectionKind.VirtualDesktop => "Connected. Virtual Desktop.",
             _ => "Connected."
         };
-        Enqueue(HeadsetAnnounceKind.SessionConnect, phrase);
     }
 
     public void AnnounceSessionDisconnected(VrConnectionKind? previous)
@@ -123,9 +164,14 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void AnnounceDashToSteamVr() => AnnounceSteamVrStarting();
 
-    /// <summary>Spoken as soon as Link is confirmed and SteamVR is about to start (covers the settle wait).</summary>
-    public void AnnounceSteamVrComing()
+    /// <summary>Spoken before auto SteamVR launch when connect did not already announce it.</summary>
+    public void AnnounceSteamVrComing(VrConnectionStatus? status = null)
     {
+        if (status is not null && ConnectPhraseCoversSteamVrStart(status))
+        {
+            return;
+        }
+
         Enqueue(
             HeadsetAnnounceKind.DashToSteamVr,
             "Please wait. Starting SteamVR.",
@@ -134,13 +180,13 @@ public sealed class HeadsetAnnouncerService : IDisposable
             force: true);
     }
 
-    /// <summary>Speak in the Quest that SteamVR is starting (headset path, even if Status is not yet Active).</summary>
+    /// <summary>Speak in the Quest that SteamVR is starting (manual tray / hotkey / voice).</summary>
     public void AnnounceSteamVrStarting()
     {
         EnsureSynthesizer();
         Enqueue(
             HeadsetAnnounceKind.DashToSteamVr,
-            "Starting SteamVR.",
+            "Starting SteamVR now.",
             delayMs: Math.Max(400, _app.Settings.Current.HeadsetAnnouncer.DelayMs / 2),
             allowWithoutLiveSession: true,
             force: true);

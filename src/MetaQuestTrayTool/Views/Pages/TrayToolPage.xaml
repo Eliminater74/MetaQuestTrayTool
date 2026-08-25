@@ -74,7 +74,7 @@
                 Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
       <StackPanel x:Name="HeadsetAnnouncePanel" Margin="28,0,0,8">
         <CheckBox x:Name="AnnounceConnectBox" Content="Session connect (Air Link, wired Link, Steam Link, VD)"
-                  ToolTip="Example: Connected. Air Link."
+                  ToolTip="Example: Connected. Air Link. Now starting SteamVR — or Meta Horizon will load when Dash is enabled."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceDisconnectBox" Content="Session disconnect"
                   ToolTip="Example: Air Link session ended."

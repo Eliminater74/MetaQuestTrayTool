@@ -700,7 +700,7 @@ public sealed class DashToSteamVrService : IDisposable
                 ? "auto SteamVR (PreventDashLaunch)"
                 : "auto on Meta Link connect";
             _app.Log.Info($"Meta Link connected — {reason} in 2s…");
-            _app.HeadsetAnnouncer.AnnounceSteamVrComing();
+            _app.HeadsetAnnouncer.AnnounceSteamVrComing(status);
             CancelPendingAutoLaunch();
             _pendingAutoLaunchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             _pendingAutoLaunchTimer.Tick += OnPendingAutoLaunchTick;

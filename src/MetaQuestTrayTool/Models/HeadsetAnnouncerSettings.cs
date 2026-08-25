@@ -34,6 +34,9 @@ public sealed class HeadsetAnnouncerSettings
     /// <summary>Wait for Link audio / auto-switch before speaking (milliseconds).</summary>
     public int DelayMs { get; set; } = 900;
 
+    /// <summary>Extra wait after Link connect before the first spoken phrase (milliseconds).</summary>
+    public int ConnectDelayMs { get; set; } = 2200;
+
     /// <summary>
     /// Windows TTS voice name. Empty = auto, preferring an English female voice (Zira when present).
     /// </summary>
@@ -50,6 +53,7 @@ public sealed class HeadsetAnnouncerSettings
         SteamLinkAssist = SteamLinkAssist,
         QuietWhileGameProfileActive = QuietWhileGameProfileActive,
         DelayMs = DelayMs,
+        ConnectDelayMs = ConnectDelayMs,
         VoiceName = VoiceName
     };
 }
