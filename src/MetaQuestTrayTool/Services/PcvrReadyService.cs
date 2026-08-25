@@ -132,31 +132,10 @@ public sealed class PcvrReadyService
 
     private PcvrReadyItem CheckOpenXrPreferred()
     {
-        var preferred = _app.Settings.Current.OpenXr.PreferredRuntime;
-        if (preferred is OpenXrRuntimeKind.Inherit)
-        {
-            preferred = OpenXrRuntimeKind.Meta;
-        }
-
         var active = _app.OpenXr.ReadActiveKind();
-        var preferredLabel = OpenXrRuntimeService.Label(preferred);
-        var activeLabel = OpenXrRuntimeService.Label(active);
-
-        if (active == preferred)
-        {
-            var steamNote = preferred == OpenXrRuntimeKind.SteamVr
-                ? " SteamVR OpenXR is active (good for Steam PCVR)."
-                : " Tip: set Preferred to SteamVR if most games are SteamVR OpenXR titles.";
-            return Item("openxr", "OpenXR runtime",
-                $"Active matches preferred ({activeLabel}).{steamNote}",
-                preferred == OpenXrRuntimeKind.SteamVr ? PcvrReadyLevel.Ok : PcvrReadyLevel.Warn,
-                preferred == OpenXrRuntimeKind.SteamVr ? null : "Prefer SteamVR",
-                canFix: preferred != OpenXrRuntimeKind.SteamVr);
-        }
-
-        return Item("openxr", "OpenXR runtime",
-            $"Active is {activeLabel}; preferred is {preferredLabel}.",
-            PcvrReadyLevel.Fail, "Apply preferred", canFix: true);
+        var alignment = PcvrSetup.EvaluateOpenXr(_app, active);
+        return Item("openxr", "OpenXR runtime", alignment.Detail, alignment.Level,
+            alignment.FixLabel, alignment.CanFix);
     }
 
     private PcvrReadyItem CheckSteamVrInstalled()
@@ -340,20 +319,10 @@ public sealed class PcvrReadyService
 
     private string FixOpenXrPreferred()
     {
+        var target = PcvrSetup.ExpectedOpenXr(_app);
         var settings = _app.Settings.Current.OpenXr;
-        // Steam-first: if they clicked fix from the Meta-preferred warn, switch preferred to SteamVR.
-        if (settings.PreferredRuntime != OpenXrRuntimeKind.SteamVr
-            && _app.OpenXr.ReadActiveKind() == settings.PreferredRuntime)
-        {
-            settings.PreferredRuntime = OpenXrRuntimeKind.SteamVr;
-            settings.ApplyOnStart = true;
-            _app.Settings.Save();
-        }
-
-        var target = settings.PreferredRuntime is OpenXrRuntimeKind.SteamVr or OpenXrRuntimeKind.Meta
-            ? settings.PreferredRuntime
-            : OpenXrRuntimeKind.SteamVr;
         settings.PreferredRuntime = target;
+        settings.ApplyOnStart = true;
         _app.Settings.Save();
         return _app.OpenXr.Set(target);
     }

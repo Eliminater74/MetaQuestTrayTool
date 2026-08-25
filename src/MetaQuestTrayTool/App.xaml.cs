@@ -181,6 +181,12 @@ public partial class App : System.Windows.Application
         Log.Info(Adb.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
+        var openXrAlign = PcvrSetup.SyncSavedOpenXrToSetup(this);
+        if (!string.IsNullOrWhiteSpace(openXrAlign))
+        {
+            Log.Info(openXrAlign);
+        }
+
         var bootPref = Oculus.EnsurePreferredBootStartMode(Settings.Current.Service.PreferManualOvrServiceAtBoot);
         if (!string.IsNullOrWhiteSpace(bootPref))
         {

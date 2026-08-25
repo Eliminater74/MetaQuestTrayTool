@@ -16,6 +16,9 @@ public sealed class StatusDashboardService
         var link = _app.LinkConnection.Probe(includeEnumHmd: false);
         var steamVr = _app.SteamVrInstall.Probe();
         var openXr = _app.OpenXr.ReadActiveKind();
+        var openXrAlignment = PcvrSetup.EvaluateOpenXr(_app, openXr);
+        var setupMode = PcvrSetup.GetMode(_app);
+        var openXrPath = _app.OpenXr.ReadActivePath();
         var headset = _app.Headset.ReadIdentity(_app.Settings.Current.Headset);
         var runtime = headset.IsReady
             ? _app.Adb.ReadRuntimeStatus(headset.AdbSerial ?? headset.Serial ?? string.Empty)
@@ -68,19 +71,21 @@ public sealed class StatusDashboardService
                         : StatusChipKind.On),
 
             Chip("OpenXR",
-                OpenXrRuntimeService.Label(openXr),
-                _app.OpenXr.ReadActivePath() ?? "No ActiveRuntime set",
-                openXr == OpenXrRuntimeKind.SteamVr
-                    ? StatusChipKind.On
-                    : openXr == OpenXrRuntimeKind.Meta
-                        ? StatusChipKind.Warn
-                        : StatusChipKind.Fail,
-                openXr != OpenXrRuntimeKind.SteamVr && _app.OpenXr.IsAvailable(OpenXrRuntimeKind.SteamVr)
-                    ? "openxr-steamvr"
+                openXr.HasValue ? OpenXrRuntimeService.Label(openXr) : "Not set",
+                openXrAlignment.Detail
+                + (string.IsNullOrWhiteSpace(openXrPath) ? "" : Environment.NewLine + openXrPath),
+                PcvrSetup.ChipKindFor(openXrAlignment.Level),
+                openXrAlignment.CanFix && _app.OpenXr.IsAvailable(PcvrSetup.ExpectedOpenXr(_app))
+                    ? "openxr-expected"
                     : null,
-                openXr != OpenXrRuntimeKind.SteamVr && _app.OpenXr.IsAvailable(OpenXrRuntimeKind.SteamVr)
-                    ? "SteamVR"
-                    : null),
+                openXrAlignment.FixLabel),
+
+            Chip("PCVR setup",
+                PcvrSetup.ModeLabel(setupMode),
+                setupMode == PcvrSetupMode.SteamVrOverMetaLink
+                    ? "PreventDashLaunch blocks Dash; SteamVR + SteamVR OpenXR on Meta Link connect"
+                    : "Meta Dash / Meta OpenXR — enable PreventDash on Service & Startup for Steam-only Link",
+                setupMode == PcvrSetupMode.SteamVrOverMetaLink ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("OVRService",
                 _app.Oculus.ServiceStatus,
@@ -189,9 +194,20 @@ public sealed class StatusDashboardService
         "steamvr-install" => _app.SteamVrInstall.OpenInstallPage(),
         "steamvr-start" => _app.DashToSteamVr.StartSteamVrNow("Status chip"),
         "openxr-steamvr" => _app.OpenXr.Set(OpenXrRuntimeKind.SteamVr),
+        "openxr-expected" => FixOpenXrForSetup(),
         "ovrservice" => _app.Oculus.Start(),
         _ => $"Unknown status action: {actionId}"
     };
+
+    private string FixOpenXrForSetup()
+    {
+        var target = PcvrSetup.ExpectedOpenXr(_app);
+        var settings = _app.Settings.Current.OpenXr;
+        settings.PreferredRuntime = target;
+        settings.ApplyOnStart = true;
+        _app.Settings.Save();
+        return _app.OpenXr.Set(target);
+    }
 
     private static StatusChipVm Chip(
         string title,

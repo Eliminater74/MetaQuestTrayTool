@@ -235,6 +235,8 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 parts.Add("OpenXR already SteamVR.");
             }
+
+            PcvrSetup.SyncSavedOpenXrToSetup(_app);
         }
 
         parts.Add(LaunchSteamVr(restartIfRunning: restartSteamVrIfRunning));
@@ -275,6 +277,8 @@ public sealed class DashToSteamVrService : IDisposable
             {
                 parts.Add(_app.OpenXr.Set(OpenXrRuntimeKind.SteamVr));
             }
+
+            PcvrSetup.SyncSavedOpenXrToSetup(_app);
         }
 
         parts.Add(LaunchSteamVr());
@@ -520,6 +524,14 @@ public sealed class DashToSteamVrService : IDisposable
             _app.Settings.Save();
             SyncSessionWatch();
             SyncSteamVrExitWatch();
+            if (enabled)
+            {
+                var aligned = PcvrSetup.SyncSavedOpenXrToSetup(_app);
+                if (!string.IsNullOrWhiteSpace(aligned))
+                {
+                    _app.Log.Info(aligned);
+                }
+            }
 
             var message = enabled
                 ? "PreventDashLaunch set to 1 — Meta should not launch Dash."
