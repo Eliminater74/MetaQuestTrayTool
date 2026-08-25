@@ -91,4 +91,7 @@ public sealed class AppSettings
         set => _customCommands = value ?? new();
     }
     public List<GameProfile> Profiles { get; set; } = [];
+
+    /// <summary>UTC time of the last successful save — used to detect truncated/corrupt files after power loss.</summary>
+    public DateTimeOffset? LastSavedUtc { get; set; }
 }

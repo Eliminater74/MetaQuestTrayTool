@@ -42,7 +42,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.15 — MetaQuestTrayTool-Setup-1.1.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.15/MetaQuestTrayTool-Setup-1.1.15.exe)
+**Latest:** [v1.1.16 — MetaQuestTrayTool-Setup-1.1.16.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.16/MetaQuestTrayTool-Setup-1.1.16.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -153,7 +153,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Headset TTS works again when Audio has no VR playback saved (targets Meta Virtual Audio on Link). Pause ADB / VR-headsets-only from the tray. Also: wait cues, unelevated SteamVR helper, 10s OVR drop.
+Release **[v1.1.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Settings survive power loss (durable save + `.bak`/`.bak2` restore). Headset TTS, Pause ADB / VR-headsets-only, wait cues, unelevated SteamVR helper, 10s OVR drop.
 
 ### Shell & tray
 
@@ -161,7 +161,7 @@ Release **[v1.1.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - OTT-style sidebar: **Status** (default), Game Settings, Tray Tool, Power Options, Service & Startup, Log Window, Advanced, Quest Link, Headset, **VR Tools**, Info — plus Donate / About
 - Hover tooltips; close-to-tray; start minimized; hide from Alt+Tab; single-instance
 - **Hands-free Administrator mode** (on by default): one Windows approval, then elevated at logon so OpenXR / OVRService / profiles never need UAC in-headset. **SteamVR cannot click that elevated tray** (Air Link → SteamVR included) — use HotKeys, voice, and automation mid-session
-- Settings in `%AppData%\MetaQuestTrayTool\settings.json` (profiles in `profiles.json`)
+- Settings in `%AppData%\MetaQuestTrayTool\settings.json` (profiles in `profiles.json`) — durable flush + `.bak`/`.bak2` so a power cut does not wipe your options
 
 ### Status & SteamVR awareness
 

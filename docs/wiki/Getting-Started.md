@@ -8,6 +8,8 @@
 
 Settings are stored in `%AppData%\MetaQuestTrayTool\` (`settings.json`, `profiles.json`, logs). Uninstall does **not** delete them.
 
+Saves are flushed to disk and rotated through `.bak` / `.bak2`. If a sudden power loss leaves a damaged file, **v1.1.16+** restores the last good backup automatically (you may see a one-time warning).
+
 ## Find the tray icon
 
 The app lives in the **notification area** (system tray), not as a full-time taskbar window.

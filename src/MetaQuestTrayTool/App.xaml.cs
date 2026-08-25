@@ -127,10 +127,30 @@ public partial class App : System.Windows.Application
         Settings.Load();
         ThemeService.Apply(Settings.Current.Tray.Theme);
         Log.Info($"{AppName} {GetVersion()} started.");
-        if (Settings.UsedFallbackSettings)
+        if (Settings.RestoredFromBackup)
         {
             Log.Warn(
-                "settings.json could not be read (left on disk). Using session defaults until you Reset or Import — Save will not overwrite the corrupt file.");
+                "settings.json was missing, corrupt, or truncated (often after a power loss). Restored from settings.json.bak — your options should be back. Saves work normally again.");
+            try
+            {
+                System.Windows.MessageBox.Show(
+                    "Your settings file was damaged (this often happens after a sudden power loss).\n\n" +
+                    "The tray restored the last good backup from:\n" +
+                    AppPaths.SettingsFile + ".bak\n\n" +
+                    "Please glance over Settings to confirm everything looks right.",
+                    AppName,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            catch
+            {
+                // MessageBox must never block startup permanently.
+            }
+        }
+        else if (Settings.UsedFallbackSettings)
+        {
+            Log.Warn(
+                "settings.json could not be read and no usable backup was found. Using built-in defaults — changing options and quitting will create a fresh settings file.");
         }
 
         if (StartupRegistration.TryEnterHandsFreeMode(

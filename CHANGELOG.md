@@ -8,6 +8,12 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.16] - 2026-08-25
+
+### Fixed
+- After a sudden power loss or forced restart, a half-written `settings.json` / `profiles.json` no longer silently resets everything — and re-checking options now actually saves again.
+- Settings/profile writes flush to disk (write-through), keep `.bak` + `.bak2`, refuse to promote a truncated file over a healthy backup, auto-restore from backup when the primary looks corrupt/empty, and show a warning if a restore happened.
+
 ## [1.1.15] - 2026-08-25
 
 ### Fixed
@@ -130,7 +136,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.15...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.16...HEAD
+[1.1.16]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.16
 [1.1.15]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.15
 [1.1.14]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.14
 [1.1.13]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.13

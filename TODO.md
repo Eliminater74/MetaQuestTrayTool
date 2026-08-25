@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -239,6 +239,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Fix false Link session-end toast after PC wake
 - [x] Bump version to **1.1.3**
 - [x] Tag and publish **v1.1.3**
+- [x] Durable settings/profiles (write-through, `.bak`/`.bak2`, auto-restore after power-loss truncate; saves work after corrupt load)
+- [x] Bump version to **1.1.16**
+- [x] Tag and publish **v1.1.16**
 
 ### Housekeeping (ongoing)
 

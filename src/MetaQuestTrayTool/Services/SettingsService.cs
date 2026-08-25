@@ -16,13 +16,14 @@ public sealed class SettingsService
 
     private readonly ProfileStore _profileStore = new();
     private readonly object _saveLock = new();
-    private bool _preserveCorruptSettingsFile;
-    private bool _preserveCorruptProfilesFile;
 
     public AppSettings Current { get; private set; } = new();
 
-    /// <summary>True when settings.json (and .bak) could not be read — the file is left on disk.</summary>
+    /// <summary>True when settings.json could not be used as-is (defaults or a backup were used).</summary>
     public bool UsedFallbackSettings { get; private set; }
+
+    /// <summary>True when the loaded settings came from settings.json.bak or .bak2.</summary>
+    public bool RestoredFromBackup { get; private set; }
 
     public void Load()
     {
@@ -31,29 +32,62 @@ public sealed class SettingsService
             AppPaths.EnsureAppDataDirectory();
             List<GameProfile>? legacyProfiles = null;
             UsedFallbackSettings = false;
-            _preserveCorruptSettingsFile = false;
-            _preserveCorruptProfilesFile = false;
+            RestoredFromBackup = false;
 
-            if (File.Exists(AppPaths.SettingsFile))
+            var primary = AppPaths.SettingsFile;
+            var bak = primary + ".bak";
+            var bak2 = primary + ".bak2";
+
+            var primaryOk = TryLoadSettingsFile(primary, out var primarySettings, out var primaryLen, ref legacyProfiles);
+            var bakOk = TryLoadSettingsFile(bak, out var bakSettings, out var bakLen, ref legacyProfiles);
+            var bak2Ok = TryLoadSettingsFile(bak2, out var bak2Settings, out var bak2Len, ref legacyProfiles);
+
+            if (primaryOk &&
+                !IsTruncatedRelativeTo(primaryLen, bakLen) &&
+                !IsTruncatedRelativeTo(primaryLen, bak2Len))
             {
-                if (!TryLoadSettingsFile(AppPaths.SettingsFile, ref legacyProfiles))
-                {
-                    var backup = AppPaths.SettingsFile + ".bak";
-                    if (!File.Exists(backup) || !TryLoadSettingsFile(backup, ref legacyProfiles))
-                    {
-                        UsedFallbackSettings = true;
-                        _preserveCorruptSettingsFile = true;
-                        Current = new AppSettings();
-                    }
-                }
+                Current = primarySettings!;
             }
+            else if (TryPickBackup(
+                         primaryOk,
+                         primaryLen,
+                         bakOk,
+                         bakSettings,
+                         bakLen,
+                         bak2Ok,
+                         bak2Settings,
+                         bak2Len,
+                         out var recovered,
+                         out var recoveredPath))
+            {
+                Current = recovered!;
+                RestoredFromBackup = true;
+                UsedFallbackSettings = true;
+                QuarantineFile(primary);
+                // Persist recovered settings so the next start uses a healthy primary file.
+            }
+            else if (primaryOk)
+            {
+                // Parsed but looked truncated and no usable backup — keep what we have.
+                Current = primarySettings!;
+                UsedFallbackSettings = true;
+            }
+            else if (File.Exists(primary))
+            {
+                UsedFallbackSettings = true;
+                QuarantineFile(primary);
+                Current = new AppSettings();
+            }
+            // else: first run — Current stays as new AppSettings()
 
             var storedProfiles = _profileStore.Load();
-            if (_profileStore.LastLoadFailed)
+            if (_profileStore.RestoredFromBackup)
             {
-                _preserveCorruptProfilesFile = true;
+                UsedFallbackSettings = true;
+                RestoredFromBackup = true;
             }
-            else if (storedProfiles.Count > 0)
+
+            if (storedProfiles.Count > 0)
             {
                 Current.Profiles = storedProfiles;
             }
@@ -63,10 +97,8 @@ public sealed class SettingsService
             }
 
             EnsureGlobalDefaults();
-            if (!_preserveCorruptSettingsFile)
-            {
-                SaveUnlocked();
-            }
+            // Always allow saves after load — never leave the user stuck with checkboxes that do not persist.
+            SaveUnlocked();
         }
     }
 
@@ -74,11 +106,6 @@ public sealed class SettingsService
     {
         lock (_saveLock)
         {
-            if (_preserveCorruptSettingsFile)
-            {
-                return;
-            }
-
             SaveUnlocked();
         }
     }
@@ -89,8 +116,8 @@ public sealed class SettingsService
         {
             var profiles = Current.Profiles.ToList();
             Current = new AppSettings { Profiles = profiles };
-            _preserveCorruptSettingsFile = false;
             UsedFallbackSettings = false;
+            RestoredFromBackup = false;
             EnsureGlobalDefaults();
             SaveUnlocked();
         }
@@ -133,9 +160,8 @@ public sealed class SettingsService
         lock (_saveLock)
         {
             Current = settings ?? throw new InvalidOperationException("The backup file could not be read.");
-            _preserveCorruptSettingsFile = false;
-            _preserveCorruptProfilesFile = false;
             UsedFallbackSettings = false;
+            RestoredFromBackup = false;
             _profileStore.Save(Current.Profiles);
             SaveUnlocked();
         }
@@ -144,43 +170,102 @@ public sealed class SettingsService
     private void SaveUnlocked()
     {
         AppPaths.EnsureAppDataDirectory();
-        if (!_preserveCorruptProfilesFile)
-        {
-            _profileStore.Save(Current.Profiles);
-        }
+        _profileStore.Save(Current.Profiles);
 
-        if (_preserveCorruptSettingsFile)
-        {
-            return;
-        }
-
+        Current.LastSavedUtc = DateTimeOffset.UtcNow;
         var json = JsonSerializer.Serialize(Current, JsonOptions);
         var path = AppPaths.SettingsFile;
-        var temp = path + ".tmp";
-        File.WriteAllText(temp, json);
-        if (File.Exists(path))
-        {
-            try
-            {
-                File.Copy(path, path + ".bak", overwrite: true);
-            }
-            catch
-            {
-                // backup is best-effort
-            }
-        }
-
-        File.Move(temp, path, overwrite: true);
+        RotateBackups(path, path + ".bak", path + ".bak2");
+        WriteDurable(path, json);
     }
 
-    private bool TryLoadSettingsFile(string path, ref List<GameProfile>? legacyProfiles)
+    private static bool TryPickBackup(
+        bool primaryOk,
+        long primaryLen,
+        bool bakOk,
+        AppSettings? bakSettings,
+        long bakLen,
+        bool bak2Ok,
+        AppSettings? bak2Settings,
+        long bak2Len,
+        out AppSettings? recovered,
+        out string recoveredPath)
     {
+        recovered = null;
+        recoveredPath = "";
+
+        var preferBackup = !primaryOk ||
+                           IsTruncatedRelativeTo(primaryLen, bakLen) ||
+                           IsTruncatedRelativeTo(primaryLen, bak2Len);
+        if (!preferBackup)
+        {
+            return false;
+        }
+
+        if (bakOk && bak2Ok)
+        {
+            if (bakLen >= bak2Len)
+            {
+                recovered = bakSettings;
+                recoveredPath = "settings.json.bak";
+                return true;
+            }
+
+            recovered = bak2Settings;
+            recoveredPath = "settings.json.bak2";
+            return true;
+        }
+
+        if (bakOk)
+        {
+            recovered = bakSettings;
+            recoveredPath = "settings.json.bak";
+            return true;
+        }
+
+        if (bak2Ok)
+        {
+            recovered = bak2Settings;
+            recoveredPath = "settings.json.bak2";
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsTruncatedRelativeTo(long fileLen, long otherLen) =>
+        otherLen >= 500 && fileLen < Math.Max(80, otherLen / 2);
+
+    private static bool TryLoadSettingsFile(
+        string path,
+        out AppSettings? settings,
+        out long length,
+        ref List<GameProfile>? legacyProfiles)
+    {
+        settings = null;
+        length = 0;
         try
         {
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            length = new FileInfo(path).Length;
+            if (length < 20)
+            {
+                return false;
+            }
+
             var json = File.ReadAllText(path);
-            legacyProfiles = TryReadLegacyProfiles(json);
-            Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-            return true;
+            if (string.IsNullOrWhiteSpace(json) || json.Trim() is "{" or "{}")
+            {
+                return false;
+            }
+
+            legacyProfiles ??= TryReadLegacyProfiles(json);
+            settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
+            return settings is not null;
         }
         catch
         {
@@ -193,7 +278,8 @@ public sealed class SettingsService
         try
         {
             using var doc = JsonDocument.Parse(json);
-            if (!doc.RootElement.TryGetProperty("Profiles", out var profilesElement))
+            if (!doc.RootElement.TryGetProperty("Profiles", out var profilesElement) &&
+                !doc.RootElement.TryGetProperty("profiles", out profilesElement))
             {
                 return null;
             }
@@ -203,6 +289,97 @@ public sealed class SettingsService
         catch
         {
             return null;
+        }
+    }
+
+    private static void RotateBackups(string path, string bak, string bak2)
+    {
+        try
+        {
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            var len = new FileInfo(path).Length;
+            if (len < 20)
+            {
+                return;
+            }
+
+            if (File.Exists(bak))
+            {
+                var bakLen = new FileInfo(bak).Length;
+                if (bakLen >= 500 && len < bakLen / 2)
+                {
+                    // Keep the healthier backup; do not promote a truncated primary over it.
+                    return;
+                }
+
+                File.Copy(bak, bak2, overwrite: true);
+            }
+
+            File.Copy(path, bak, overwrite: true);
+        }
+        catch
+        {
+            // backup is best-effort
+        }
+    }
+
+    /// <summary>Write then flush to disk so a power cut cannot leave a half-written JSON file.</summary>
+    internal static void WriteDurable(string path, string contents)
+    {
+        var dir = Path.GetDirectoryName(path)!;
+        Directory.CreateDirectory(dir);
+        var tmp = path + ".tmp";
+
+        using (var fs = new FileStream(
+                   tmp,
+                   FileMode.Create,
+                   FileAccess.Write,
+                   FileShare.None,
+                   bufferSize: 4096,
+                   FileOptions.WriteThrough))
+        using (var writer = new StreamWriter(fs))
+        {
+            writer.Write(contents);
+            writer.Flush();
+            fs.Flush(flushToDisk: true);
+        }
+
+        if (File.Exists(path))
+        {
+            File.Replace(tmp, path, destinationBackupFileName: null, ignoreMetadataErrors: true);
+        }
+        else
+        {
+            File.Move(tmp, path);
+        }
+    }
+
+    private static void QuarantineFile(string path)
+    {
+        try
+        {
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            var dest = path + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            File.Move(path, dest, overwrite: true);
+        }
+        catch
+        {
+            try
+            {
+                File.Delete(path);
+            }
+            catch
+            {
+                // ignore
+            }
         }
     }
 

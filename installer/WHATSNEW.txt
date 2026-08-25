@@ -1,11 +1,11 @@
-Meta Quest Tray Tool 1.1.15 - What's new
+Meta Quest Tray Tool 1.1.16 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.15] - 2026-08-25
+[1.1.16] - 2026-08-25
 
 Fixed
-- Headset TTS (Speak status in headset) works again when Audio has no VR playback device saved: announcements target Meta/Oculus Virtual Audio while Link/SteamVR is live, retry briefly after connect, and no longer log a false success when speech was skipped.
-- Audio auto-switch no longer flaps desktop to headset every ~10s when VR devices were unset (that loop also silenced announcements). Disconnect phrases speak before speakers are restored.
+- After a sudden power loss or forced restart, a half-written settings.json / profiles.json no longer silently resets everything — and re-checking options now actually saves again.
+- Settings/profile writes flush to disk (write-through), keep .bak + .bak2, refuse to promote a truncated file over a healthy backup, auto-restore from backup when the primary looks corrupt/empty, and show a warning if a restore happened.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
