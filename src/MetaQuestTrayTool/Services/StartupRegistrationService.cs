@@ -116,6 +116,7 @@ public sealed class StartupRegistrationService
         }
 
         log("Requesting Administrator once so the tray can run hands-free after the headset is on.");
+        log("The non-elevated copy will close in a moment — an elevated copy will take over (this is normal, not a crash).");
         try
         {
             RestartElevated();

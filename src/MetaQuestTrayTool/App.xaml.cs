@@ -113,6 +113,18 @@ public partial class App : System.Windows.Application
 
         ArmShowShellListener();
 
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            var ex = args.ExceptionObject as Exception;
+            Log.Error("Fatal unhandled exception — process will exit.", ex);
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            Log.Error("Unobserved background task exception.", args.Exception);
+            args.SetObserved();
+        };
+
         DispatcherUnhandledException += (_, args) =>
         {
             Log.Error("Unhandled UI exception.", args.Exception);
@@ -391,6 +403,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        Log.Info($"Meta Quest Tray Tool exiting (code {e.ApplicationExitCode}).");
         SessionHelperClient.RequestQuit();
         try
         {

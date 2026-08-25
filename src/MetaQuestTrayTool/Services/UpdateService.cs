@@ -243,6 +243,7 @@ public sealed class UpdateService
         }
 
         _app.Log.Info($"Launching updater: {installerPath}");
+        _app.Log.Info("Shutting down for in-place update — the installer will restart the tray when it finishes.");
         Process.Start(new ProcessStartInfo
         {
             FileName = installerPath,
