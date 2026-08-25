@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -246,6 +246,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Exit/unhandled-exception logging for crash diagnosis
 - [x] Bump version to **1.1.17**
 - [x] Tag and publish **v1.1.17**
+- [x] Setup-aware PCVR Ready / Status OpenXR checks
+- [x] Informed connect TTS (SteamVR vs Meta Horizon) + Link audio delay
+- [x] Bump version to **1.1.18**
+- [x] Tag and publish **v1.1.18**
 
 ### Housekeeping (ongoing)
 

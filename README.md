@@ -42,7 +42,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.17 — MetaQuestTrayTool-Setup-1.1.17.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.17/MetaQuestTrayTool-Setup-1.1.17.exe)
+**Latest:** [v1.1.18 — MetaQuestTrayTool-Setup-1.1.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.18/MetaQuestTrayTool-Setup-1.1.18.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -153,7 +153,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Refreshed neon icon/logo, crash-exit logging, settings survive power loss, Headset TTS, Pause ADB / VR-headsets-only.
+Release **[v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Informed connect TTS (SteamVR vs Meta Horizon), setup-aware PCVR Ready, neon icon, settings survive power loss.
 
 ### Shell & tray
 

@@ -8,6 +8,15 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.18] - 2026-08-25
+
+### Added
+- Headset connect announcements wait for Link audio (~2.2s) and explain what happens next: **“Connected. Air Link. Now starting SteamVR.”** on PreventDash path, or **“Meta Horizon will load.”** when Dash is allowed.
+- Duplicate “Please wait. Starting SteamVR.” is skipped when the connect line already covered auto-start.
+
+### Fixed
+- PCVR Ready / Status judge OpenXR against your **setup path** (PreventDash → SteamVR vs Meta Link / Dash), not a stale saved Meta preference — plus a **PCVR setup** chip on Status.
+
 ## [1.1.17] - 2026-08-25
 
 ### Added
@@ -144,7 +153,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.17...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.18...HEAD
+[1.1.18]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.18
 [1.1.17]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.17
 [1.1.16]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.16
 [1.1.15]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.15

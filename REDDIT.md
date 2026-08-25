@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```
-[PC] Meta Quest Tray Tool v1.1.17 — free modern OTT-style tray app for Quest Link / SteamVR (neon icon + settings survive power loss)
+[PC] Meta Quest Tray Tool v1.1.18 — free modern OTT-style tray app for Quest Link / SteamVR (neon icon + settings survive power loss)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.17** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.18** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,7 +54,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.17)
+### What works now (v1.1.18)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -105,7 +105,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Assign **Open Debug Tool** / **Open SteamVR Home** / recover / OpenXR / overlays / GPU preset in Configure
 - Voice: Windows speech — push-to-talk (**Ctrl+Shift+V** default) or always-on; mic picker; min confidence; custom phrases
 - New phrases: recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset
-- **Headset announcements** (Tray Tool): spoken status in the Quest on connect, “Please wait. Starting SteamVR.”, “SteamVR closed. Stopping Meta service for 10 seconds.” (before OVR stops), profile apply, launch
+- **Headset announcements** (Tray Tool): spoken status in the Quest — connect waits for Link audio then says **“Connected. Air Link. Now starting SteamVR.”** (PreventDash) or **“Meta Horizon will load.”** (Dash path); SteamVR exit wait; profile apply; launch
 - Full list: wiki → HotKeys, voice, and headset announcements (`docs/VOICE-AND-HOTKEYS.md` in the repo)
 
 **OpenXR / audio / power**
@@ -210,5 +210,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.17) — neon icon, settings survive power loss, Pause ADB / VR-headsets-only so phones and TVs keep ADB, headset wait cues, unelevated SteamVR helper, Quest Home after SteamVR exit, TTS voice picker, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.18) — neon icon, settings survive power loss, Pause ADB / VR-headsets-only so phones and TVs keep ADB, headset wait cues, unelevated SteamVR helper, Quest Home after SteamVR exit, TTS voice picker, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

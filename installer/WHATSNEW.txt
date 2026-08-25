@@ -1,13 +1,13 @@
-Meta Quest Tray Tool 1.1.17 - What's new
+Meta Quest Tray Tool 1.1.18 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.17] - 2026-08-25
+[1.1.18] - 2026-08-25
 
 Added
-- New neon VR headset icon and logo — larger, higher-contrast tray icon plus refreshed About dialog and settings sidebar branding.
+- Headset connect speech waits for Link audio and explains what happens next: Now starting SteamVR on PreventDash path, or Meta Horizon will load when Dash is allowed.
 
 Fixed
-- Better crash diagnosis: intentional exits and unhandled exceptions are logged to app.log so silent shutdowns are easier to trace.
+- PCVR Ready / Status use your setup path (PreventDash to SteamVR vs Meta Link / Dash), not a stale Meta OpenXR preference.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

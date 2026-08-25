@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.17)
+## Current product (v1.1.18)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -116,6 +116,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.15 | Headset TTS fixed when VR playback unset; stop audio auto-switch flap that silenced announcements |
 | v1.1.16 | Durable settings/profile save + .bak/.bak2 restore after power-loss truncated JSON; saves work again after corrupt load |
 | v1.1.17 | Neon VR icon/logo (tray + About + sidebar); exit/unhandled-exception logging for crash diagnosis |
+| v1.1.18 | Setup-aware PCVR Ready; informed connect TTS (SteamVR vs Meta Horizon) with Link audio delay |
 
 ---
 

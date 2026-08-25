@@ -115,7 +115,7 @@ Use **Test listen once** in Configure to try without leaving the window.
 
 Windows TTS on the Link / VR audio path so you **hear** what the tray is doing when you cannot see desktop balloons.
 
-Examples: “Connected. Air Link.” · “Please wait. Starting SteamVR.” · “SteamVR closed. Stopping Meta service for 10 seconds.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.”
+Examples: “Connected. Air Link. Now starting SteamVR.” · “Connected. Air Link. Meta Horizon will load.” · “SteamVR closed. Stopping Meta service for 10 seconds.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.”
 
 Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect plus the SteamVR-exit 10s wait (so Quest Home is not silent).
 
