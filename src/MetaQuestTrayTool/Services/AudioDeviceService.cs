@@ -256,16 +256,31 @@ public sealed class AudioDeviceService
     public string ApplyVrDevices(AudioSwitchSettings settings)
     {
         var messages = new List<string>();
+        var playbackId = settings.VrPlaybackDeviceId;
 
-        if (!string.IsNullOrWhiteSpace(settings.VrPlaybackDeviceId))
+        // When the user never picked a VR playback device, use Meta/Oculus virtual (or the
+        // current headset default) so auto-switch and headset TTS have a real endpoint.
+        if (string.IsNullOrWhiteSpace(playbackId))
         {
-            if (!IsDeviceActive(settings.VrPlaybackDeviceId))
+            var playback = ListDevices(AudioDeviceKind.Playback, force: true);
+            var auto = playback.FirstOrDefault(device => device.IsDefaultMultimedia && LooksLikeHeadset(device))
+                       ?? playback.FirstOrDefault(IsPersistentVirtualHeadsetDriver);
+            if (auto is not null)
+            {
+                playbackId = auto.Id;
+                messages.Add($"Using headset playback '{auto.Name}' (no VR device was saved on Audio settings).");
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(playbackId))
+        {
+            if (!IsDeviceActive(playbackId))
             {
                 messages.Add("VR playback device is not active yet (headset may still be connecting).");
             }
             else
             {
-                messages.Add(SetDefault(settings.VrPlaybackDeviceId, includeCommunications: false));
+                messages.Add(SetDefault(playbackId, includeCommunications: false));
             }
         }
 
@@ -279,7 +294,7 @@ public sealed class AudioDeviceService
 
         if (settings.AlsoSetCommunicationsRole)
         {
-            var commPlayback = settings.VrCommunicationsPlaybackDeviceId ?? settings.VrPlaybackDeviceId;
+            var commPlayback = settings.VrCommunicationsPlaybackDeviceId ?? playbackId ?? settings.VrPlaybackDeviceId;
             var commRecording = settings.VrCommunicationsRecordingDeviceId ?? settings.VrRecordingDeviceId;
             if (!string.IsNullOrWhiteSpace(commPlayback) && IsDeviceActive(commPlayback))
             {

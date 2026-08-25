@@ -129,7 +129,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         Enqueue(
             HeadsetAnnounceKind.DashToSteamVr,
             "Please wait. Starting SteamVR.",
-            delayMs: 0,
+            delayMs: Math.Max(400, _app.Settings.Current.HeadsetAnnouncer.DelayMs / 2),
             allowWithoutLiveSession: true,
             force: true);
     }
@@ -141,7 +141,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         Enqueue(
             HeadsetAnnounceKind.DashToSteamVr,
             "Starting SteamVR.",
-            delayMs: 0,
+            delayMs: Math.Max(400, _app.Settings.Current.HeadsetAnnouncer.DelayMs / 2),
             allowWithoutLiveSession: true,
             force: true);
     }
@@ -198,8 +198,32 @@ public sealed class HeadsetAnnouncerService : IDisposable
                 await Task.Delay(delay).ConfigureAwait(false);
             }
 
-            if (!force && !CanSpeakToHeadset(allowWithoutLiveSession))
+            // Give Meta a moment to create/default the virtual audio endpoint after Link connect.
+            for (var attempt = 0; attempt < 4; attempt++)
             {
+                if (force || CanSpeakToHeadset(allowWithoutLiveSession))
+                {
+                    if (force && ResolveHeadsetPlaybackId() is null && !_app.Audio.IsCurrentPlaybackHeadset())
+                    {
+                        if (attempt < 3)
+                        {
+                            await Task.Delay(400).ConfigureAwait(false);
+                            continue;
+                        }
+
+                        _app.Log.Info($"Headset announcer skipped (no headset audio path): {phrase}");
+                        return;
+                    }
+
+                    break;
+                }
+
+                if (attempt < 3)
+                {
+                    await Task.Delay(400).ConfigureAwait(false);
+                    continue;
+                }
+
                 _app.Log.Info($"Headset announcer skipped (no headset audio path): {phrase}");
                 return;
             }
@@ -374,8 +398,10 @@ public sealed class HeadsetAnnouncerService : IDisposable
         _speaking = true;
         try
         {
-            SpeakNow(next);
-            _app.Log.Info($"Headset announcer: {next}");
+            if (SpeakNow(next))
+            {
+                _app.Log.Info($"Headset announcer: {next}");
+            }
         }
         catch (Exception ex)
         {
@@ -385,13 +411,13 @@ public sealed class HeadsetAnnouncerService : IDisposable
         }
     }
 
-    private void SpeakNow(string phrase)
+    private bool SpeakNow(string phrase)
     {
         if (_synthesizer is null || string.IsNullOrWhiteSpace(phrase))
         {
             _speaking = false;
             BeginDrainQueue();
-            return;
+            return false;
         }
 
         if (_app.Audio.IsCurrentPlaybackHeadset())
@@ -400,15 +426,16 @@ public sealed class HeadsetAnnouncerService : IDisposable
             _synthesizer.SpeakCompleted += OnSpeakCompleted;
             _synthesizer.SpeakAsyncCancelAll();
             _synthesizer.SpeakAsync(phrase);
-            return;
+            return true;
         }
 
         var deviceId = ResolveHeadsetPlaybackId();
         if (deviceId is null)
         {
+            _app.Log.Info("Headset announcer skipped (no headset audio path): " + phrase);
             _speaking = false;
             BeginDrainQueue();
-            return;
+            return false;
         }
 
         _ = Task.Run(() =>
@@ -426,6 +453,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
                 _app.Dispatcher.BeginInvoke(ScheduleNextAfterGap);
             }
         });
+        return true;
     }
 
     private void OnSpeakCompleted(object? sender, SpeakCompletedEventArgs e)
@@ -456,27 +484,45 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     private void SpeakViaWasapi(string phrase, string deviceId)
     {
-        using var ms = new MemoryStream();
-        _synthesizer!.SetOutputToWaveStream(ms);
-        _synthesizer.Speak(phrase);
-        ms.Position = 0;
-
-        using var enumerator = new MMDeviceEnumerator();
-        using var device = enumerator.GetDevice(deviceId);
-        using var reader = new WaveFileReader(ms);
-        using var output = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
-        output.Init(reader);
-        output.Play();
-        while (output.PlaybackState == PlaybackState.Playing)
+        try
         {
-            Thread.Sleep(50);
+            using var ms = new MemoryStream();
+            _synthesizer!.SetOutputToWaveStream(ms);
+            _synthesizer.Speak(phrase);
+            ms.Position = 0;
+
+            using var enumerator = new MMDeviceEnumerator();
+            using var device = enumerator.GetDevice(deviceId);
+            using var reader = new WaveFileReader(ms);
+            using var output = new WasapiOut(device, AudioClientShareMode.Shared, true, 200);
+            output.Init(reader);
+            output.Play();
+            while (output.PlaybackState == PlaybackState.Playing)
+            {
+                Thread.Sleep(50);
+            }
+        }
+        finally
+        {
+            try
+            {
+                _synthesizer?.SetOutputToDefaultAudioDevice();
+            }
+            catch
+            {
+                // restore best-effort so later SpeakAsync still works
+            }
         }
     }
 
+    /// <summary>
+    /// Resolve a playback endpoint the Quest can hear. Meta Virtual Audio is always listed;
+    /// prefer it when Link/SteamVR is live or when it is already Windows default.
+    /// </summary>
     private string? ResolveHeadsetPlaybackId()
     {
         var audio = _app.Settings.Current.Audio;
-        var playback = _app.Audio.ListDevices(AudioDeviceKind.Playback);
+        var playback = _app.Audio.ListDevices(AudioDeviceKind.Playback, force: true);
 
         if (!string.IsNullOrWhiteSpace(audio.VrPlaybackDeviceId))
         {
@@ -488,10 +534,47 @@ public sealed class HeadsetAnnouncerService : IDisposable
             }
         }
 
-        var headset = playback.FirstOrDefault(device =>
-            _app.Audio.LooksLikeHeadset(device)
-            && (!_app.Audio.IsPersistentVirtualHeadsetDriver(device) || device.IsDefaultMultimedia));
-        return headset?.Id;
+        var headsets = playback.Where(device => _app.Audio.LooksLikeHeadset(device)).ToList();
+        if (headsets.Count == 0)
+        {
+            return null;
+        }
+
+        // Prefer whatever Windows is already sending to the HMD.
+        var asDefault = headsets.FirstOrDefault(device => device.IsDefaultMultimedia);
+        if (asDefault is not null)
+        {
+            return asDefault.Id;
+        }
+
+        var sessionLive = false;
+        try
+        {
+            var status = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true);
+            sessionLive = status.SessionActive || status.MetaLinkStreaming
+                          || status.SteamVrRunning || status.VirtualDesktopRunning;
+        }
+        catch
+        {
+            // probe best-effort
+        }
+
+        // Removable headset endpoints (rare for Quest) — presence is enough.
+        var removable = headsets.FirstOrDefault(device => !_app.Audio.IsPersistentVirtualHeadsetDriver(device));
+        if (removable is not null)
+        {
+            return removable.Id;
+        }
+
+        // Meta/Oculus virtual: use when a PCVR session is up so WASAPI can reach the HMD
+        // even before Windows has finished flipping the default (or if auto-switch has no VR id set).
+        if (sessionLive)
+        {
+            return headsets.FirstOrDefault(device => _app.Audio.IsPersistentVirtualHeadsetDriver(device))?.Id
+                   ?? headsets[0].Id;
+        }
+
+        return null;
     }
 
     private static string SanitizeName(string name)

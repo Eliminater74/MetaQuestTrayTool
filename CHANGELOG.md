@@ -8,6 +8,12 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.15] - 2026-08-25
+
+### Fixed
+- Headset TTS (“Speak status in headset”) works again when Audio has no VR playback device saved: announcements target Meta/Oculus Virtual Audio while Link/SteamVR is live, retry briefly after connect, and no longer log a false success when speech was skipped.
+- Audio auto-switch no longer flaps desktop ↔ headset every ~10s when VR devices were unset (that loop also silenced announcements). Disconnect phrases speak before speakers are restored.
+
 ## [1.1.14] - 2026-08-23
 
 ### Added
@@ -124,7 +130,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.14...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.15...HEAD
+[1.1.15]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.15
 [1.1.14]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.14
 [1.1.13]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.13
 [1.1.12]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.12

@@ -42,7 +42,7 @@ _Status_ and _VR Tools_ pages shipped in v1.0.12+ (screenshots for those pages n
 
 ## Download
 
-**Latest:** [v1.1.14 — MetaQuestTrayTool-Setup-1.1.14.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.14/MetaQuestTrayTool-Setup-1.1.14.exe)
+**Latest:** [v1.1.15 — MetaQuestTrayTool-Setup-1.1.15.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.15/MetaQuestTrayTool-Setup-1.1.15.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -153,7 +153,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Tray **Pause ADB** (until resume or 2 hours) and **VR headsets only** toggle so phones/TVs can use ADB without quitting. Also: headset wait cues, unelevated SteamVR helper, 10s OVR drop, voice picker. **v1.1.11 crashed on start**; 1.1.12+ fixed that.
+Release **[v1.1.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Headset TTS works again when Audio has no VR playback saved (targets Meta Virtual Audio on Link). Pause ADB / VR-headsets-only from the tray. Also: wait cues, unelevated SteamVR helper, 10s OVR drop.
 
 ### Shell & tray
 

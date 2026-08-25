@@ -187,15 +187,16 @@ public sealed class LinkSessionWatchService : IDisposable
         {
             _app.Log.Info($"{ended} — Meta DeviceCache still shows auto-connect (headset on Wi‑Fi).");
             _app.SessionRecover.NotifySessionEnded(previousActive, ended);
-            _app.AudioWatch?.NotifyPcvrSessionEnded($"{ended} — restoring desktop / fallback audio.");
+            // Speak while headset audio may still be default — restore speakers after.
             _app.HeadsetAnnouncer.AnnounceSessionDisconnected(previousActive);
+            _app.AudioWatch?.NotifyPcvrSessionEnded($"{ended} — restoring desktop / fallback audio.");
             return;
         }
 
         _app.Log.Info($"{ended} — {status.InfoBanner}");
         _app.SessionRecover.NotifySessionEnded(previousActive, ended);
-        _app.AudioWatch?.NotifyPcvrSessionEnded($"{ended} — restoring desktop / fallback audio.");
         _app.HeadsetAnnouncer.AnnounceSessionDisconnected(previousActive);
+        _app.AudioWatch?.NotifyPcvrSessionEnded($"{ended} — restoring desktop / fallback audio.");
     }
 
     private void LogConnected(VrConnectionStatus status)

@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.14](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.15](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.14)
+## Current product (v1.1.15)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -113,6 +113,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.12 | Fix 1.1.11 crash on start (session helper STARTUPINFO); helper no longer blocks the UI or opens a second copy |
 | v1.1.13 | Headset wait cues: please-wait on Link connect; SteamVR closed + 10s OVR stop spoken before the service drops |
 | v1.1.14 | Tray Pause ADB (until resume / 2h) + VR-headsets-only toggle; pause expire/tooltip/sweep races fixed |
+| v1.1.15 | Headset TTS fixed when VR playback unset; stop audio auto-switch flap that silenced announcements |
 
 ---
 

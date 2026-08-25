@@ -120,7 +120,14 @@ public sealed class AudioSwitchWatcher : IDisposable
             // Rising edge only — leftover Meta virtual / sticky DeviceCache at boot is ignored.
             var hardwareStarted = hardware && !_baselineHardware;
             var headsetAudioStarted = headsetAudio && !_baselineHeadsetAudio;
-            if (hardwareStarted || headsetAudioStarted)
+            // Meta virtual becoming default alone used to latch with empty VR device IDs, then
+            // immediately restore (no live stream yet) in a loop — that killed headset TTS.
+            var liveStream = IsLivePcvrStream();
+            var hasVrTargets = !string.IsNullOrWhiteSpace(settings.VrPlaybackDeviceId)
+                               || !string.IsNullOrWhiteSpace(settings.VrRecordingDeviceId)
+                               || _app.Audio.ListDevices(AudioDeviceKind.Playback)
+                                   .Any(_app.Audio.IsPersistentVirtualHeadsetDriver);
+            if (hardwareStarted || (headsetAudioStarted && (liveStream || hasVrTargets)))
             {
                 SwitchToVr(hardwareStarted
                     ? "PCVR session started."
@@ -149,6 +156,28 @@ public sealed class AudioSwitchWatcher : IDisposable
             _deadSessionHits = 0;
             SyncTimer();
             return;
+        }
+
+        // Link often flips Meta virtual as default a few seconds before SteamVR / streaming
+        // looks "alive". Stay latched while headset audio is still the Windows default.
+        if (_app.Audio.IsCurrentPlaybackHeadset() && IsLivePcvrStream() == false)
+        {
+            var stillLink = false;
+            try
+            {
+                stillLink = _app.LinkConnection.Probe(includeEnumHmd: false, includeAudioLink: true).SessionActive;
+            }
+            catch
+            {
+                // ignore
+            }
+
+            if (stillLink || _app.Audio.IsLinkAudioSessionActive(settings))
+            {
+                _deadSessionHits = 0;
+                SyncTimer();
+                return;
+            }
         }
 
         _deadSessionHits++;
@@ -227,6 +256,13 @@ public sealed class AudioSwitchWatcher : IDisposable
         }
 
         var result = _app.Audio.ApplyVrDevices(audio);
+        if (result.Contains("No VR audio devices", StringComparison.OrdinalIgnoreCase))
+        {
+            // Do not latch — otherwise we restore desktop immediately and flap forever.
+            _app.Log.Info($"{reason} Could not switch to VR audio ({result}). Will retry when Link/SteamVR is live.");
+            return;
+        }
+
         _vrDevicesApplied = true;
         _deadSessionHits = 0;
         _baselineHardware = true;

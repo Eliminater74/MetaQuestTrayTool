@@ -149,7 +149,8 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         }
 
         App.Instance.HeadsetAnnouncer.TestSpeak();
-        StatusText.Text = "Test phrase queued — connect Link first if you hear nothing.";
+        StatusText.Text =
+            "Test phrase queued — connect Link (or set Audio → VR playback to Oculus/Meta Virtual Audio) if you hear nothing.";
     }
 
     private void Theme_Changed(object sender, SelectionChangedEventArgs e)
