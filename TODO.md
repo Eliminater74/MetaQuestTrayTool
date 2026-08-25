@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.16](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.17](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -242,6 +242,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Durable settings/profiles (write-through, `.bak`/`.bak2`, auto-restore after power-loss truncate; saves work after corrupt load)
 - [x] Bump version to **1.1.16**
 - [x] Tag and publish **v1.1.16**
+- [x] Neon VR icon/logo (tray, About, sidebar) + `scripts/build-icons.ps1`
+- [x] Exit/unhandled-exception logging for crash diagnosis
+- [x] Bump version to **1.1.17**
+- [x] Tag and publish **v1.1.17**
 
 ### Housekeeping (ongoing)
 

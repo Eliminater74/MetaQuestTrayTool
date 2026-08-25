@@ -8,6 +8,14 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.17] - 2026-08-25
+
+### Added
+- New neon VR headset icon and logo — larger, higher-contrast tray icon (16–256px) plus refreshed About dialog and settings sidebar branding. Master artwork lives in `assets/`; run `scripts/build-icons.ps1` to regenerate `App.ico`.
+
+### Fixed
+- Better crash diagnosis: log intentional exits (update, elevation handoff), exit codes, and fatal/unhandled background exceptions in `app.log`.
+
 ## [1.1.16] - 2026-08-25
 
 ### Fixed
@@ -136,7 +144,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.16...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.17...HEAD
+[1.1.17]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.17
 [1.1.16]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.16
 [1.1.15]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.15
 [1.1.14]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.14

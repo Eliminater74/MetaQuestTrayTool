@@ -2,8 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="About"
-        Height="440"
-        Width="500"
+        Height="480"
+        Width="520"
+        Icon="pack://application:,,,/Resources/Icons/App.ico"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackgroundBrush}"
@@ -20,12 +21,26 @@
     </StackPanel>
 
     <StackPanel>
-      <TextBlock x:Name="TitleText"
-                 FontSize="22"
-                 FontWeight="SemiBold"
-                 Foreground="{DynamicResource AppAccentBrush}"/>
-      <TextBlock x:Name="AuthorText" Margin="0,6,0,0" FontWeight="SemiBold"/>
-      <TextBlock x:Name="VersionText" Margin="0,4,0,16" Foreground="{DynamicResource AppMutedBrush}"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <Border Width="72" Height="72"
+                CornerRadius="14"
+                Background="{DynamicResource AppSidebarBrush}"
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1">
+          <Image Source="pack://application:,,,/Resources/Icons/app-icon.png"
+                 Width="68" Height="68"
+                 RenderOptions.BitmapScalingMode="HighQuality"
+                 SnapsToDevicePixels="True"/>
+        </Border>
+        <StackPanel Margin="16,8,0,0" VerticalAlignment="Center">
+          <TextBlock x:Name="TitleText"
+                     FontSize="22"
+                     FontWeight="SemiBold"
+                     Foreground="{DynamicResource AppAccentBrush}"/>
+          <TextBlock x:Name="AuthorText" Margin="0,6,0,0" FontWeight="SemiBold"/>
+          <TextBlock x:Name="VersionText" Margin="0,4,0,0" Foreground="{DynamicResource AppMutedBrush}"/>
+        </StackPanel>
+      </StackPanel>
       <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
                  Text="A new Windows-only rewrite inspired by ApollyonVR's Oculus Tray Tool. Clean C# — not a decompiled port of the old VB.NET app."/>
       <TextBlock x:Name="DonateBlurbText"

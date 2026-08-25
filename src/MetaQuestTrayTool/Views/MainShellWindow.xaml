@@ -6,6 +6,7 @@
         Width="980"
         MinHeight="700"
         MinWidth="860"
+        Icon="pack://application:,,,/Resources/Icons/App.ico"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}"
@@ -53,16 +54,28 @@
                       Margin="0,16,0,0"
                       CanContentScroll="False">
           <StackPanel>
-            <TextBlock Text="META QUEST"
-                       Margin="18,0,0,2"
-                       FontSize="11"
-                       FontWeight="Bold"
-                       Foreground="{DynamicResource AppMutedBrush}"/>
-            <TextBlock Text="Tray Tool"
-                       Margin="18,0,0,16"
-                       FontSize="18"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource AppAccentBrush}"/>
+            <StackPanel Orientation="Horizontal" Margin="16,0,0,12">
+              <Border Width="56" Height="56"
+                      CornerRadius="12"
+                      Background="{DynamicResource AppBackgroundBrush}"
+                      BorderBrush="{DynamicResource AppBorderBrush}"
+                      BorderThickness="1">
+                <Image Source="pack://application:,,,/Resources/Icons/app-icon.png"
+                       Width="52" Height="52"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       SnapsToDevicePixels="True"/>
+              </Border>
+              <StackPanel Margin="12,4,0,0" VerticalAlignment="Center">
+                <TextBlock Text="META QUEST"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AppMutedBrush}"/>
+                <TextBlock Text="Tray Tool"
+                           FontSize="17"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AppAccentBrush}"/>
+              </StackPanel>
+            </StackPanel>
 
             <RadioButton x:Name="NavStatus" Content="Status" Style="{StaticResource NavButtonStyle}"
                          GroupName="ShellNav" Checked="Nav_Checked" Tag="Status"
