@@ -160,6 +160,7 @@ public sealed class SettingsService
         lock (_saveLock)
         {
             Current = settings ?? throw new InvalidOperationException("The backup file could not be read.");
+            EnsureGlobalDefaults();
             UsedFallbackSettings = false;
             RestoredFromBackup = false;
             _profileStore.Save(Current.Profiles);
@@ -367,8 +368,15 @@ public sealed class SettingsService
                 return;
             }
 
-            var dest = path + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            File.Move(path, dest, overwrite: true);
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fff");
+            var dest = path + ".corrupt-" + stamp;
+            var suffix = 1;
+            while (File.Exists(dest))
+            {
+                dest = path + ".corrupt-" + stamp + "-" + suffix++;
+            }
+
+            File.Move(path, dest);
         }
         catch
         {
@@ -385,13 +393,31 @@ public sealed class SettingsService
 
     private void EnsureGlobalDefaults()
     {
+        Current.Tray ??= new TrayToolSettings();
+        Current.Voice ??= new VoiceSettings();
+        Current.Service ??= new ServiceStartupSettings();
         Current.DefaultGameSettings ??= new GameSettings();
         Current.LinkSettings ??= new LinkSettings();
         Current.OpenXr ??= new OpenXrSettings();
         Current.DashToSteamVr ??= new DashToSteamVrSettings();
         Current.HotKeys ??= new HotKeySettings();
-        Current.Voice ??= new VoiceSettings();
         Current.HeadsetAnnouncer ??= new HeadsetAnnouncerSettings();
+        Current.Audio ??= new AudioSwitchSettings { AutoSwitchEnabled = true };
+        Current.Power ??= new PowerSettings();
+        Current.Headset ??= new HeadsetSettings();
+        Current.CustomCommands ??= new CustomCommandSet();
+        Current.Profiles ??= [];
+        Current.ProfileIgnoreProcesses ??= [];
+        Current.OverlayCloseProcesses ??= [];
+        foreach (var profile in Current.Profiles)
+        {
+            profile.Name ??= string.Empty;
+            profile.ProcessName ??= string.Empty;
+            profile.Settings ??= new GameSettings();
+            profile.Link ??= new LinkProfileOverrides();
+            profile.CustomCommands ??= new CustomCommandSet();
+            profile.ExperimentalMsfsVrHotkey ??= "Ctrl+Tab";
+        }
         Current.HeadsetAnnouncer.VoiceName ??= "";
         if (Current.HotKeys.Bindings.Count == 0)
         {

@@ -9,13 +9,15 @@ namespace MetaQuestTrayTool.Views;
 public partial class ProfileEditorWindow : Window
 {
     private static readonly string[] Priorities = ["Normal", "AboveNormal", "High"];
+    private readonly GameProfile _originalProfile;
 
     public GameProfile Profile { get; }
 
     public ProfileEditorWindow(GameProfile profile)
     {
         InitializeComponent();
-        Profile = profile;
+        _originalProfile = profile;
+        Profile = profile.Clone();
 
         foreach (var value in GameSettings.SuperSamplingPresets)
         {
@@ -298,6 +300,7 @@ public partial class ProfileEditorWindow : Window
         Profile.Comments = string.IsNullOrWhiteSpace(CommentsBox.Text) ? null : CommentsBox.Text.Trim();
         Profile.CustomCommands.SetCliFromText(CliCommandsBox.Text);
         Profile.CustomCommands.SetAdbFromText(AdbCommandsBox.Text);
+        _originalProfile.CopyFrom(Profile);
         DialogResult = true;
     }
 

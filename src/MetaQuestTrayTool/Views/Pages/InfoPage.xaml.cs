@@ -60,16 +60,27 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         RefreshBanners(includeAdb: true);
         RefreshReadyChecklist();
         ReportBox.Text = "Building report…";
-        Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
-        {
-            if (!IsLoaded)
-            {
-                return;
-            }
+        _ = LoadFullReportAsync();
+    }
 
-            ReportBox.Text = SystemInfoService.BuildReport(includeEnumHmd: false);
-            _fullReportLoaded = true;
-        });
+    private async Task LoadFullReportAsync()
+    {
+        try
+        {
+            var report = await Task.Run(() => SystemInfoService.BuildReport(includeEnumHmd: false));
+            if (IsLoaded)
+            {
+                ReportBox.Text = report;
+                _fullReportLoaded = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (IsLoaded)
+            {
+                ReportBox.Text = "Could not build report: " + ex.Message;
+            }
+        }
     }
 
     private void RefreshReadyChecklist()

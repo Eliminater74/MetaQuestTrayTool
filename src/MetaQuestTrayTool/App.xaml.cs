@@ -803,6 +803,11 @@ public partial class App : System.Windows.Application
 
     private string TryApplyCustomAdb(IReadOnlyList<string> commands)
     {
+        if (commands.Count == 0)
+        {
+            return string.Empty;
+        }
+
         try
         {
             var quest = Headset.ReadIdentity(Settings.Current.Headset);
@@ -813,6 +818,11 @@ public partial class App : System.Windows.Application
                     : quest.IsRogue
                         ? "Custom ADB skipped (untrusted headset)."
                         : "Custom ADB skipped (no VR headset).";
+            }
+
+            if (Settings.Current.Headset.RequireTrustedHeadset && !quest.IsTrusted)
+            {
+                return "Custom ADB skipped (trust this headset first, or disable the trusted-headset requirement).";
             }
 
             return CustomCommands.ApplyAdb(commands, quest.AdbSerial);

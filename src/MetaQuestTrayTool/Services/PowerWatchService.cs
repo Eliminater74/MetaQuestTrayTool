@@ -9,6 +9,7 @@ public sealed class PowerWatchService : IDisposable
     private readonly DispatcherTimer _timer;
     private bool? _wasRunning;
     private bool _vrPlanActive;
+    private PowerPlanService.UsbSelectiveSuspendState? _usbSuspendBaseline;
 
     public PowerWatchService(App app)
     {
@@ -30,6 +31,10 @@ public sealed class PowerWatchService : IDisposable
     {
         _timer.Stop();
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+        if (_vrPlanActive)
+        {
+            Restore("Power watcher stopped — restoring desktop power state.");
+        }
     }
 
     /// <summary>Start/stop the poll timer from settings changes (wake resume still uses SystemEvents).</summary>
@@ -51,6 +56,10 @@ public sealed class PowerWatchService : IDisposable
         {
             _timer.Stop();
             _wasRunning = null;
+            if (_vrPlanActive)
+            {
+                Restore("Automatic power switching disabled — restoring desktop power state.");
+            }
         }
     }
 
@@ -128,6 +137,11 @@ public sealed class PowerWatchService : IDisposable
     private void ApplyVr(string reason)
     {
         var settings = _app.Settings.Current.Power;
+        if (settings.DisableUsbSelectiveSuspendWhileRunning && _usbSuspendBaseline is null)
+        {
+            _usbSuspendBaseline = _app.Power.CaptureUsbSelectiveSuspend();
+        }
+
         var planResult = _app.Power.ApplyVrPlan(settings);
         _app.Settings.Save();
         _vrPlanActive = true;
@@ -142,8 +156,10 @@ public sealed class PowerWatchService : IDisposable
     private void Restore(string reason)
     {
         var result = _app.Power.RestoreFallbackPlan(_app.Settings.Current.Power);
+        var usbResult = _app.Power.RestoreUsbSelectiveSuspend(_usbSuspendBaseline);
+        _usbSuspendBaseline = null;
         _vrPlanActive = false;
-        _app.Log.Info($"{reason} {result}");
+        _app.Log.Info($"{reason} {result} {usbResult}");
     }
 
     private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)

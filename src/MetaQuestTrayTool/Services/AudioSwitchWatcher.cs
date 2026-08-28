@@ -34,7 +34,14 @@ public sealed class AudioSwitchWatcher : IDisposable
 
     public void Start() => SyncTimer();
 
-    public void Dispose() => _timer.Stop();
+    public void Dispose()
+    {
+        _timer.Stop();
+        if (_vrDevicesApplied)
+        {
+            RestoreFallback("Audio watcher stopped — restoring desktop / fallback audio.");
+        }
+    }
 
     /// <summary>Start/stop from settings changes (tray / audio window).</summary>
     public void SyncTimer()
@@ -52,8 +59,12 @@ public sealed class AudioSwitchWatcher : IDisposable
         else
         {
             _timer.Stop();
+            if (_vrDevicesApplied)
+            {
+                RestoreFallback("Audio switching disabled — restoring desktop / fallback audio.");
+            }
+
             _armed = false;
-            _vrDevicesApplied = false;
             _deadSessionHits = 0;
         }
     }
@@ -61,7 +72,7 @@ public sealed class AudioSwitchWatcher : IDisposable
     /// <summary>Immediate restore when Link / SteamVR session drop is detected elsewhere.</summary>
     public void NotifyPcvrSessionEnded(string reason)
     {
-        if (!_app.Settings.Current.Audio.AutoSwitchEnabled || !_vrDevicesApplied)
+        if (!_vrDevicesApplied)
         {
             return;
         }

@@ -38,4 +38,49 @@ public sealed class GameProfile
         get => _customCommands;
         set => _customCommands = value ?? new();
     }
+
+    public GameProfile Clone() => new()
+    {
+        Name = Name,
+        ProcessName = ProcessName,
+        Platform = Platform,
+        Scope = Scope,
+        AppId = AppId,
+        InstallPath = InstallPath,
+        LaunchFile = LaunchFile,
+        LaunchArguments = LaunchArguments,
+        ExperimentalMsfsVr = ExperimentalMsfsVr,
+        ExperimentalMsfsVrAutoToggle = ExperimentalMsfsVrAutoToggle,
+        ExperimentalMsfsVrToggleDelaySeconds = ExperimentalMsfsVrToggleDelaySeconds,
+        ExperimentalMsfsVrHotkey = ExperimentalMsfsVrHotkey,
+        Settings = Settings?.Clone() ?? new(),
+        Link = Link?.Clone() ?? new(),
+        OpenXrRuntime = OpenXrRuntime,
+        CpuPriority = CpuPriority,
+        Comments = Comments,
+        CustomCommands = CustomCommands?.Clone() ?? new()
+    };
+
+    public void CopyFrom(GameProfile other)
+    {
+        var copy = other.Clone();
+        Name = copy.Name;
+        ProcessName = copy.ProcessName;
+        Platform = copy.Platform;
+        Scope = copy.Scope;
+        AppId = copy.AppId;
+        InstallPath = copy.InstallPath;
+        LaunchFile = copy.LaunchFile;
+        LaunchArguments = copy.LaunchArguments;
+        ExperimentalMsfsVr = copy.ExperimentalMsfsVr;
+        ExperimentalMsfsVrAutoToggle = copy.ExperimentalMsfsVrAutoToggle;
+        ExperimentalMsfsVrToggleDelaySeconds = copy.ExperimentalMsfsVrToggleDelaySeconds;
+        ExperimentalMsfsVrHotkey = copy.ExperimentalMsfsVrHotkey;
+        Settings = copy.Settings;
+        Link = copy.Link;
+        OpenXrRuntime = copy.OpenXrRuntime;
+        CpuPriority = copy.CpuPriority;
+        Comments = copy.Comments;
+        CustomCommands = copy.CustomCommands;
+    }
 }

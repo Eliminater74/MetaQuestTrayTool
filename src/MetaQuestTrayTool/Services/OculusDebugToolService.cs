@@ -148,12 +148,14 @@ public sealed class OculusDebugToolService
         }
 
         var result = RunCommands(commands, timeoutMs: 15_000);
-        if (result.CliFound && result.Started)
+        if (result.Succeeded)
         {
             LastApplied = settings.Clone();
-            result.Summary = result.LooksRejected
-                ? "Debug Tool ran, but Meta rejected one or more commands. Check the log — newer runtimes often block server: ASW commands."
-                : $"Applied {settings.Describe()}.";
+            result.Summary = $"Applied {settings.Describe()}.";
+        }
+        else if (result.LooksRejected)
+        {
+            result.Summary = "Debug Tool ran, but Meta rejected one or more commands. Check the log — newer runtimes often block server: ASW commands.";
         }
 
         LastResult = result;
@@ -244,6 +246,7 @@ public sealed class OculusDebugToolService
                 {
                     CliFound = true,
                     Started = true,
+                    TimedOut = true,
                     Commands = commands,
                     Output = output.ToString(),
                     Error = error.ToString(),
@@ -251,6 +254,8 @@ public sealed class OculusDebugToolService
                 };
             }
 
+            // Complete asynchronous output callbacks before evaluating the command result.
+            process.WaitForExit();
             var combined = output + Environment.NewLine + error;
             return new DebugToolApplyResult
             {
@@ -261,7 +266,9 @@ public sealed class OculusDebugToolService
                 Output = output.ToString().Trim(),
                 Error = error.ToString().Trim(),
                 LooksRejected = LooksRejected(combined),
-                Summary = "OculusDebugToolCLI finished."
+                Summary = process.ExitCode == 0
+                    ? "OculusDebugToolCLI finished."
+                    : $"OculusDebugToolCLI failed with exit code {process.ExitCode}."
             };
         }
         catch (Exception ex)

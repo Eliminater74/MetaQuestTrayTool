@@ -43,26 +43,13 @@ public sealed class AdbService
     }
 
     /// <summary>
-    /// Stops the ADB server and force-kills leftover <c>adb.exe</c> processes so Setup can
-    /// replace <c>platform-tools</c> (the server often keeps files locked even with no headset).
+    /// Stops this app's ADB server and only terminates matching bundled ADB processes so Setup
+    /// can replace platform-tools without disrupting Android Studio, SideQuest, or other ADB clients.
     /// </summary>
     public string KillServerForUpdate()
     {
         Refresh();
         var parts = new List<string>();
-
-        if (IsAvailable)
-        {
-            try
-            {
-                Run("kill-server");
-                parts.Add("adb kill-server ok.");
-            }
-            catch (Exception ex)
-            {
-                parts.Add($"adb kill-server: {ex.Message}");
-            }
-        }
 
         var killed = 0;
         foreach (var process in Process.GetProcessesByName("adb"))
@@ -71,6 +58,11 @@ public sealed class AdbService
             {
                 using (process)
                 {
+                    if (!IsOwnedProcess(process))
+                    {
+                        continue;
+                    }
+
                     process.Kill(entireProcessTree: true);
                     process.WaitForExit(5000);
                     killed++;
@@ -83,13 +75,13 @@ public sealed class AdbService
         }
 
         parts.Add(killed == 0
-            ? "No adb.exe processes left."
-            : $"Killed {killed} adb.exe process(es).");
+            ? "No bundled adb.exe processes left (shared ADB server was left untouched)."
+            : $"Killed {killed} bundled adb.exe process(es); shared ADB server was left untouched.");
         InvalidateDeviceCache();
         return string.Join(" ", parts);
     }
 
-    /// <summary>Wait until leftover <c>adb.exe</c> processes have actually exited (file locks).</summary>
+    /// <summary>Wait until this app's bundled ADB processes have actually exited (file locks).</summary>
     public string WaitUntilProcessesExit(TimeSpan timeout)
     {
         var deadline = DateTime.UtcNow + timeout;
@@ -105,20 +97,21 @@ public sealed class AdbService
                 return "adb.exe gone.";
             }
 
-            if (leftover.Length == 0)
-            {
-                return "adb.exe gone.";
-            }
-
+            var owned = leftover.Where(IsOwnedProcess).ToArray();
             foreach (var process in leftover)
             {
                 process.Dispose();
             }
 
+            if (owned.Length == 0)
+            {
+                return "Bundled adb.exe gone.";
+            }
+
             Thread.Sleep(100);
         }
 
-        return "adb.exe still present after wait.";
+        return "Bundled adb.exe still present after wait.";
     }
 
     public IReadOnlyList<AdbDevice> ListDevices(bool force = false)
@@ -959,7 +952,10 @@ public sealed class AdbService
             }
         };
 
-        process.Start();
+        if (!process.Start())
+        {
+            throw new InvalidOperationException("ADB process could not be started.");
+        }
         var stdout = process.StandardOutput.ReadToEndAsync();
         var stderr = process.StandardError.ReadToEndAsync();
         if (!process.WaitForExit(20_000))
@@ -993,11 +989,36 @@ public sealed class AdbService
         var output = stdout.Result;
         var error = stderr.Result;
         var combined = (output + Environment.NewLine + error).Trim();
-        if (process.ExitCode != 0 && combined.Contains("error", StringComparison.OrdinalIgnoreCase))
+        if (process.ExitCode != 0)
         {
-            throw new InvalidOperationException(combined);
+            throw new InvalidOperationException(
+                string.IsNullOrWhiteSpace(combined)
+                    ? $"ADB exited with code {process.ExitCode}: adb {arguments}"
+                    : $"ADB exited with code {process.ExitCode}: {combined}");
         }
 
         return combined;
+    }
+
+    private bool IsOwnedProcess(Process process)
+    {
+        if (!IsAvailable || string.IsNullOrWhiteSpace(AdbPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            var executable = process.MainModule?.FileName;
+            return executable is not null
+                && string.Equals(
+                    Path.GetFullPath(executable),
+                    Path.GetFullPath(AdbPath),
+                    StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

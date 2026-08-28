@@ -78,14 +78,6 @@ public sealed class DashToSteamVrService : IDisposable
 
     public void Start()
     {
-        if (ShouldAutoStartSteamVrOnMetaLink() && !Settings.RestartOvrServiceWhenSteamVrExits)
-        {
-            Settings.RestartOvrServiceWhenSteamVrExits = true;
-            _app.Settings.Save();
-            _app.Log.Info(
-                "PreventDashLaunch is on — enabled SteamVR-exit OVRService drop so Link can disconnect for Quest Home.");
-        }
-
         ArmSessionBaselineFromCurrentProbe();
         SyncSessionWatch();
         SyncSteamVrExitWatch();
@@ -515,11 +507,6 @@ public sealed class DashToSteamVrService : IDisposable
             }
 
             Settings.PreferPreventDashLaunch = enabled;
-            if (enabled)
-            {
-                // Without this, exiting SteamVR leaves PreventDash users stuck in Link with no Dash.
-                Settings.RestartOvrServiceWhenSteamVrExits = true;
-            }
 
             _app.Settings.Save();
             SyncSessionWatch();

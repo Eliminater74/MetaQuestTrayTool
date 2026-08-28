@@ -4,10 +4,13 @@ public sealed class DebugToolApplyResult
 {
     public bool CliFound { get; init; }
     public bool Started { get; init; }
+    public bool TimedOut { get; init; }
     public int ExitCode { get; init; } = -1;
     public IReadOnlyList<string> Commands { get; init; } = [];
     public string Output { get; init; } = string.Empty;
     public string Error { get; init; } = string.Empty;
     public bool LooksRejected { get; init; }
     public string Summary { get; set; } = string.Empty;
+    public bool Succeeded =>
+        CliFound && Started && !TimedOut && ExitCode == 0 && !LooksRejected;
 }

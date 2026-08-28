@@ -200,8 +200,15 @@ public sealed class ProfileStore
                 return;
             }
 
-            var dest = path + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            File.Move(path, dest, overwrite: true);
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fff");
+            var dest = path + ".corrupt-" + stamp;
+            var suffix = 1;
+            while (File.Exists(dest))
+            {
+                dest = path + ".corrupt-" + stamp + "-" + suffix++;
+            }
+
+            File.Move(path, dest);
         }
         catch
         {

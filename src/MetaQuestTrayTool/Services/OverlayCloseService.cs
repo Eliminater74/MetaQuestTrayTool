@@ -40,6 +40,7 @@ public sealed class OverlayCloseService
         }
 
         var closed = new List<string>();
+        var forced = new List<string>();
         foreach (var name in targets)
         {
             try
@@ -53,7 +54,8 @@ public sealed class OverlayCloseService
                             process.CloseMainWindow();
                             if (!process.WaitForExit(1500))
                             {
-                                process.Kill(entireProcessTree: true);
+                                process.Kill(entireProcessTree: false);
+                                forced.Add(name);
                             }
 
                             closed.Add(name);
@@ -62,7 +64,8 @@ public sealed class OverlayCloseService
                         {
                             try
                             {
-                                process.Kill(entireProcessTree: true);
+                                process.Kill(entireProcessTree: false);
+                                forced.Add(name);
                                 closed.Add(name);
                             }
                             catch
@@ -85,7 +88,11 @@ public sealed class OverlayCloseService
         }
 
         var unique = closed.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
-        var summary = $"Closed overlays on {reason}: {string.Join(", ", unique)}.";
+        var forcedUnique = forced.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+        var forcedSummary = forcedUnique.Count == 0
+            ? string.Empty
+            : $" Forced termination was required for: {string.Join(", ", forcedUnique)}; child processes were left running.";
+        var summary = $"Closed overlays on {reason}: {string.Join(", ", unique)}.{forcedSummary}";
         _app.Log.Info(summary);
         return summary;
     }

@@ -6,6 +6,8 @@ namespace MetaQuestTrayTool.Services;
 
 public sealed class PowerPlanService
 {
+    public sealed record UsbSelectiveSuspendState(int? AcValue, int? DcValue);
+
     private static readonly Regex PlanLine = new(
         @"\s*([0-9a-fA-F-]{36})\s+\((.+?)\)(\s+\*)?\s*$",
         RegexOptions.Compiled);
@@ -83,21 +85,78 @@ public sealed class PowerPlanService
 
     public string SetUsbSelectiveSuspend(bool enabled)
     {
-        // AC and DC indexes for USB selective suspend under the active scheme.
-        var value = enabled ? "1" : "0";
+        return SetUsbSelectiveSuspend(new UsbSelectiveSuspendState(
+            enabled ? 1 : 0,
+            enabled ? 1 : 0), restoring: false);
+    }
+
+    public UsbSelectiveSuspendState? CaptureUsbSelectiveSuspend()
+    {
         try
         {
-            RunPowerCfg($"/SETACVALUEINDEX SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 {value}");
-            RunPowerCfg($"/SETDCVALUEINDEX SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 {value}");
+            var output = RunPowerCfg(
+                "/query SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 " +
+                "48e6b7a6-50f5-4782-a5d4-53bb8f07e226");
+            var ac = ParsePowerIndex(output, "Current AC Power Setting Index");
+            var dc = ParsePowerIndex(output, "Current DC Power Setting Index");
+            return ac is null && dc is null ? null : new UsbSelectiveSuspendState(ac, dc);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public string RestoreUsbSelectiveSuspend(UsbSelectiveSuspendState? state)
+    {
+        if (state is null)
+        {
+            return "USB selective suspend baseline was not captured.";
+        }
+
+        return SetUsbSelectiveSuspend(state, restoring: true);
+    }
+
+    private string SetUsbSelectiveSuspend(UsbSelectiveSuspendState state, bool restoring)
+    {
+        try
+        {
+            if (state.AcValue is int ac)
+            {
+                RunPowerCfg($"/SETACVALUEINDEX SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 {ac}");
+            }
+
+            if (state.DcValue is int dc)
+            {
+                RunPowerCfg($"/SETDCVALUEINDEX SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 {dc}");
+            }
+
             RunPowerCfg("/SETACTIVE SCHEME_CURRENT");
-            return enabled
-                ? "USB selective suspend enabled for the active plan."
-                : "USB selective suspend disabled for the active plan.";
+            return restoring
+                ? $"USB selective suspend restored (AC={state.AcValue?.ToString() ?? "unknown"}, DC={state.DcValue?.ToString() ?? "unknown"})."
+                : state.AcValue == 1
+                    ? "USB selective suspend enabled for the active plan."
+                    : "USB selective suspend disabled for the active plan.";
         }
         catch (Exception ex)
         {
             return $"Could not change USB selective suspend: {ex.Message}";
         }
+    }
+
+    private static int? ParsePowerIndex(string output, string label)
+    {
+        var line = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault(item => item.Contains(label, StringComparison.OrdinalIgnoreCase));
+        if (line is null)
+        {
+            return null;
+        }
+
+        var match = Regex.Match(line, @"0x([0-9a-fA-F]+)");
+        return match.Success && int.TryParse(match.Groups[1].Value, System.Globalization.NumberStyles.HexNumber, null, out var value)
+            ? value
+            : null;
     }
 
     private static string RunPowerCfg(string arguments)

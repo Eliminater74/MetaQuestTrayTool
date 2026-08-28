@@ -14,6 +14,12 @@ public sealed class CustomCommandSet
     public void SetCliFromText(string? text) => CliCommands = ParseLines(text);
     public void SetAdbFromText(string? text) => AdbCommands = ParseLines(text);
 
+    public CustomCommandSet Clone() => new()
+    {
+        CliCommands = [.. CliCommands],
+        AdbCommands = [.. AdbCommands]
+    };
+
     public static List<string> ParseLines(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))

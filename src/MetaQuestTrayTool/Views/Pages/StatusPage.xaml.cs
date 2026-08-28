@@ -51,9 +51,24 @@ public partial class StatusPage : System.Windows.Controls.UserControl, IShellPag
         }
     }
 
-    public void Refresh()
+    public async void Refresh()
     {
-        var chips = App.Instance.StatusDashboard.BuildChips();
+        IReadOnlyList<StatusChipVm> chips;
+        try
+        {
+            chips = await Task.Run(() => App.Instance.StatusDashboard.BuildChips());
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn("Status refresh failed: " + ex.Message);
+            return;
+        }
+
+        if (!IsLoaded)
+        {
+            return;
+        }
+
         _chips.Clear();
         foreach (var chip in chips)
         {

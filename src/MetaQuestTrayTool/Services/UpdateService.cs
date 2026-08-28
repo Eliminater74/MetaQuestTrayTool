@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Windows;
 using MetaQuestTrayTool.Models;
@@ -18,6 +19,8 @@ public sealed class UpdateCheckResult
     public string? ReleaseNotes { get; init; }
     public string? InstallerFileName { get; init; }
     public Uri? InstallerDownloadUrl { get; init; }
+    public string? InstallerSha256 { get; init; }
+    public long? InstallerSize { get; init; }
     public string? Error { get; init; }
 
     public bool Succeeded => Error is null && LatestVersion is not null;
@@ -79,6 +82,16 @@ public sealed class UpdateService
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
             var root = doc.RootElement;
             var tag = root.TryGetProperty("tag_name", out var tagEl) ? tagEl.GetString() : null;
+            if (tag is null || !System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v\d+\.\d+\.\d+$"))
+            {
+                return new UpdateCheckResult
+                {
+                    CurrentVersion = current,
+                    TagName = tag,
+                    Error = "Latest GitHub release has an invalid version tag (expected v1.0.1 style)."
+                };
+            }
+
             var latest = ParseVersion(tag);
             if (latest is null)
             {
@@ -99,9 +112,8 @@ public sealed class UpdateService
                 foreach (var asset in assets.EnumerateArray())
                 {
                     var name = asset.TryGetProperty("name", out var nameEl) ? nameEl.GetString() : null;
-                    if (string.IsNullOrWhiteSpace(name)
-                        || !name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-                        || !name.Contains("Setup", StringComparison.OrdinalIgnoreCase))
+                    var expectedName = $"MetaQuestTrayTool-Setup-{latest.Major}.{latest.Minor}.{latest.Build}.exe";
+                    if (!string.Equals(name, expectedName, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -114,9 +126,46 @@ public sealed class UpdateService
                         continue;
                     }
 
+                    if (!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+                        || !string.Equals(uri.Host, "github.com", StringComparison.OrdinalIgnoreCase)
+                        || !uri.AbsolutePath.Contains($"/{Owner}/{Repo}/releases/download/{tag}/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     fileName = name;
                     downloadUrl = uri;
-                    break;
+                    var digest = asset.TryGetProperty("digest", out var digestEl)
+                        ? digestEl.GetString()
+                        : null;
+                    var size = asset.TryGetProperty("size", out var sizeEl) && sizeEl.TryGetInt64(out var assetSize)
+                        ? assetSize
+                        : (long?)null;
+                    if (!TryGetSha256(digest, out var sha256) || size is null or <= 0)
+                    {
+                        return new UpdateCheckResult
+                        {
+                            CurrentVersion = current,
+                            LatestVersion = latest,
+                            TagName = tag,
+                            ReleaseHtmlUrl = htmlUrl,
+                            ReleaseNotes = releaseNotes,
+                            Error = $"Release {tag} does not provide a usable installer digest or size."
+                        };
+                    }
+
+                    return new UpdateCheckResult
+                    {
+                        CurrentVersion = current,
+                        LatestVersion = latest,
+                        TagName = tag,
+                        ReleaseHtmlUrl = htmlUrl,
+                        ReleaseNotes = releaseNotes,
+                        InstallerFileName = fileName,
+                        InstallerDownloadUrl = downloadUrl,
+                        InstallerSha256 = sha256,
+                        InstallerSize = size
+                    };
                 }
             }
 
@@ -168,6 +217,22 @@ public sealed class UpdateService
             throw new InvalidOperationException("No installer download URL.");
         }
 
+        if (update.LatestVersion is null
+            || !string.Equals(
+                update.InstallerFileName,
+                $"MetaQuestTrayTool-Setup-{update.LatestVersion.Major}.{update.LatestVersion.Minor}.{update.LatestVersion.Build}.exe",
+                StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(update.InstallerFileName, IOPath.GetFileName(update.InstallerFileName), StringComparison.Ordinal)
+            || update.InstallerDownloadUrl.Scheme != Uri.UriSchemeHttps
+            || !string.Equals(update.InstallerDownloadUrl.Host, "github.com", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(update.TagName)
+            || !update.InstallerDownloadUrl.AbsolutePath.Contains(
+                $"/{Owner}/{Repo}/releases/download/{update.TagName}/",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Installer metadata is not a trusted GitHub release asset.");
+        }
+
         var folder = IOPath.Combine(IOPath.GetTempPath(), "MetaQuestTrayTool-Updates");
         Directory.CreateDirectory(folder);
         var path = IOPath.Combine(folder, update.InstallerFileName);
@@ -177,6 +242,16 @@ public sealed class UpdateService
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
+        if (update.InstallerSize is null or <= 0 or > 300_000_000)
+        {
+            throw new InvalidOperationException("Installer size is missing or exceeds the safety limit.");
+        }
+
+        var contentLength = response.Content.Headers.ContentLength;
+        if (contentLength is not null && contentLength != update.InstallerSize)
+        {
+            throw new InvalidOperationException("Installer size changed after the release was checked.");
+        }
 
         await using var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         await using var output = new FileStream(
@@ -190,11 +265,51 @@ public sealed class UpdateService
         var buffer = new byte[81920];
         long total = 0;
         int read;
-        while ((read = await input.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false)) > 0)
+        try
         {
-            await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
-            total += read;
-            progress?.Report(total);
+            while ((read = await input.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false)) > 0)
+            {
+                total += read;
+                if (total > update.InstallerSize.Value)
+                {
+                    throw new InvalidOperationException("Downloaded installer is larger than the release metadata.");
+                }
+
+                await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+                progress?.Report(total);
+            }
+        }
+        catch
+        {
+            output.Dispose();
+            try
+            {
+                File.Delete(path);
+            }
+            catch
+            {
+                // best effort cleanup of an incomplete download
+            }
+
+            throw;
+        }
+
+        if (total != update.InstallerSize.Value)
+        {
+            output.Dispose();
+            File.Delete(path);
+            throw new InvalidOperationException("Downloaded installer size does not match GitHub metadata.");
+        }
+
+        await output.DisposeAsync();
+        await using var hashFile = new FileStream(
+            path, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
+        var actualHash = Convert.ToHexString(
+            await SHA256.HashDataAsync(hashFile, cancellationToken)).ToLowerInvariant();
+        if (!string.Equals(actualHash, update.InstallerSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            File.Delete(path);
+            throw new InvalidOperationException("Installer integrity check failed (SHA-256 does not match GitHub).");
         }
 
         return path;
@@ -505,6 +620,13 @@ public sealed class UpdateService
             trimmed = trimmed[1..];
         }
 
+        if (!System.Text.RegularExpressions.Regex.IsMatch(
+                trimmed,
+                @"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$"))
+        {
+            return null;
+        }
+
         // Strip pre-release suffix: 1.0.1-beta
         var dash = trimmed.IndexOf('-');
         if (dash >= 0)
@@ -513,6 +635,26 @@ public sealed class UpdateService
         }
 
         return Version.TryParse(trimmed, out var version) ? version : null;
+    }
+
+    private static bool TryGetSha256(string? digest, out string sha256)
+    {
+        sha256 = string.Empty;
+        if (string.IsNullOrWhiteSpace(digest))
+        {
+            return false;
+        }
+
+        var value = digest.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase)
+            ? digest["sha256:".Length..]
+            : digest;
+        if (value.Length != 64 || !value.All(Uri.IsHexDigit))
+        {
+            return false;
+        }
+
+        sha256 = value.ToLowerInvariant();
+        return true;
     }
 
     private static string Truncate(string text)
