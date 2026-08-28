@@ -231,7 +231,7 @@ public sealed class VoiceCommandService : IDisposable
             var summary = _commands.Execute(action);
             var label = HotKeyCatalog.DescribeAction(action);
             _app.Log.Info($"Voice \"{text}\" ({confidence:P0}) → {label}: {summary}");
-            if (!HeadsetAnnouncerHandles(action))
+            if (!HeadsetAnnouncerHandles(action, summary))
             {
                 Speak(label);
             }
@@ -247,18 +247,21 @@ public sealed class VoiceCommandService : IDisposable
         }
     }
 
-    private bool HeadsetAnnouncerHandles(HotKeyAction action)
-    {
-        var settings = _app.Settings.Current.HeadsetAnnouncer;
-        if (!settings.Enabled)
+    private bool HeadsetAnnouncerHandles(HotKeyAction action, string summary) =>
+        action switch
         {
-            return false;
-        }
-
-        return action is HotKeyAction.DashToSteamVr or HotKeyAction.StartSteamVr
-            ? settings.DashToSteamVr
-            : action != HotKeyAction.VoicePushToTalk && settings.ActionResults;
-    }
+            HotKeyAction.VoicePushToTalk => false,
+            HotKeyAction.DashToSteamVr when summary.Contains(
+                "PreventDashLaunch is off", StringComparison.OrdinalIgnoreCase) => false,
+            HotKeyAction.DashToSteamVr or HotKeyAction.StartSteamVr =>
+                _app.HeadsetAnnouncer.CanAccept(
+                    HeadsetAnnounceKind.DashToSteamVr,
+                    allowWithoutLiveSession: true,
+                    force: true),
+            HotKeyAction.RecoverPcvr =>
+                _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.Recovery, allowWithoutLiveSession: true),
+            _ => _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.ActionResult)
+        };
 
     private void ApplyPreferredMic(bool forContinuous)
     {

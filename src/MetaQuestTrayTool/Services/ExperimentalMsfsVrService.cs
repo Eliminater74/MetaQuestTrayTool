@@ -15,14 +15,17 @@ public sealed class ExperimentalMsfsVrService : IDisposable
     private readonly App _app;
     private readonly object _gate = new();
     private CancellationTokenSource? _toggleCts;
+    private HashSet<int> _launchBaselineProcessIds = [];
 
     public ExperimentalMsfsVrService(App app) => _app = app;
 
-    public string Prepare(GameProfile profile)
+    public ExperimentalMsfsPreparationResult Prepare(GameProfile profile)
     {
+        CancelScheduledToggle();
+
         if (!IsMsfs2024(profile))
         {
-            return "Experimental MSFS VR launch ignored — use it only with FlightSimulator2024.";
+            return new(false, "Experimental MSFS VR launch ignored — use it only with FlightSimulator2024.");
         }
 
         var setup = PcvrSetup.GetMode(_app);
@@ -38,7 +41,27 @@ public sealed class ExperimentalMsfsVrService : IDisposable
             ? "SteamVR over Meta Link prepared. " + result
             : "Meta Horizon Link prepared. " + result;
         _app.Log.Info(summary);
-        return summary;
+        var succeeded = !LooksLikeFailure(summary);
+        if (succeeded)
+        {
+            lock (_gate)
+            {
+                _launchBaselineProcessIds = SnapshotProcessIds(profile.ProcessName);
+            }
+        }
+
+        return new(succeeded, summary);
+    }
+
+    public void CancelScheduledToggle()
+    {
+        lock (_gate)
+        {
+            _toggleCts?.Cancel();
+            _toggleCts?.Dispose();
+            _toggleCts = null;
+            _launchBaselineProcessIds = [];
+        }
     }
 
     public void ScheduleToggle(GameProfile profile)
@@ -51,12 +74,15 @@ public sealed class ExperimentalMsfsVrService : IDisposable
         }
 
         CancellationTokenSource cts;
+        HashSet<int> baseline;
         lock (_gate)
         {
             _toggleCts?.Cancel();
             _toggleCts?.Dispose();
             _toggleCts = new CancellationTokenSource();
             cts = _toggleCts;
+            baseline = [.. _launchBaselineProcessIds];
+            _launchBaselineProcessIds = [];
         }
 
         var delay = Math.Clamp(profile.ExperimentalMsfsVrToggleDelaySeconds, 5, 600);
@@ -65,11 +91,12 @@ public sealed class ExperimentalMsfsVrService : IDisposable
         {
             try
             {
-                var window = await WaitForMainWindowAsync(
+                var target = await WaitForMainWindowAsync(
                     profile.ProcessName,
+                    baseline,
                     TimeSpan.FromSeconds(120),
                     cts.Token).ConfigureAwait(false);
-                if (window is null)
+                if (target is null)
                 {
                     _ = _app.Dispatcher.BeginInvoke(() =>
                         _app.HeadsetAnnouncer.AnnounceExperimentalMsfsVr(
@@ -78,7 +105,7 @@ public sealed class ExperimentalMsfsVrService : IDisposable
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delay), cts.Token).ConfigureAwait(false);
-                if (!IsProcessRunning(profile.ProcessName))
+                if (!IsTargetWindowCurrent(target.Value))
                 {
                     _ = _app.Dispatcher.BeginInvoke(() =>
                         _app.HeadsetAnnouncer.AnnounceExperimentalMsfsVr(
@@ -94,7 +121,7 @@ public sealed class ExperimentalMsfsVrService : IDisposable
                     return;
                 }
 
-                if (!SetForegroundWindow(window.Value))
+                if (!SetForegroundWindow(target.Value.Handle))
                 {
                     _ = _app.Dispatcher.BeginInvoke(() =>
                         _app.HeadsetAnnouncer.AnnounceExperimentalMsfsVr(
@@ -103,6 +130,14 @@ public sealed class ExperimentalMsfsVrService : IDisposable
                 }
 
                 await Task.Delay(250, cts.Token).ConfigureAwait(false);
+                if (!IsTargetWindowCurrent(target.Value))
+                {
+                    _ = _app.Dispatcher.BeginInvoke(() =>
+                        _app.HeadsetAnnouncer.AnnounceExperimentalMsfsVr(
+                            "MSFS was no longer the active target. VR toggle was not sent."));
+                    return;
+                }
+
                 if (!SendHotkey(modifier, key))
                 {
                     _ = _app.Dispatcher.BeginInvoke(() =>
@@ -131,20 +166,16 @@ public sealed class ExperimentalMsfsVrService : IDisposable
 
     public void Dispose()
     {
-        lock (_gate)
-        {
-            _toggleCts?.Cancel();
-            _toggleCts?.Dispose();
-            _toggleCts = null;
-        }
+        CancelScheduledToggle();
     }
 
     public static bool IsMsfs2024(GameProfile profile) =>
         ProfileService.NormalizeProcessName(profile.ProcessName)
             .Equals(MsfsProcessName, StringComparison.OrdinalIgnoreCase);
 
-    private static async Task<nint?> WaitForMainWindowAsync(
+    private static async Task<ProcessWindowTarget?> WaitForMainWindowAsync(
         string processName,
+        IReadOnlySet<int> baselineProcessIds,
         TimeSpan timeout,
         CancellationToken cancellationToken)
     {
@@ -161,10 +192,15 @@ public sealed class ExperimentalMsfsVrService : IDisposable
             {
                 using (process)
                 {
+                    if (baselineProcessIds.Contains(process.Id))
+                    {
+                        continue;
+                    }
+
                     process.Refresh();
                     if (process.MainWindowHandle != IntPtr.Zero)
                     {
-                        return process.MainWindowHandle;
+                        return new ProcessWindowTarget(process.Id, process.MainWindowHandle);
                     }
                 }
             }
@@ -175,28 +211,53 @@ public sealed class ExperimentalMsfsVrService : IDisposable
         return null;
     }
 
-    private static bool IsProcessRunning(string processName)
+    private static HashSet<int> SnapshotProcessIds(string processName)
+    {
+        var ids = new HashSet<int>();
+        try
+        {
+            foreach (var process in Process.GetProcessesByName(ProfileService.NormalizeProcessName(processName)))
+            {
+                using (process)
+                {
+                    ids.Add(process.Id);
+                }
+            }
+        }
+        catch
+        {
+            // A missing process is the normal pre-launch state.
+        }
+
+        return ids;
+    }
+
+    private static bool IsTargetWindowCurrent(ProcessWindowTarget target)
     {
         try
         {
-            var processes = Process.GetProcessesByName(ProfileService.NormalizeProcessName(processName));
-            try
+            using var process = Process.GetProcessById(target.ProcessId);
+            process.Refresh();
+            if (process.HasExited || process.MainWindowHandle != target.Handle)
             {
-                return processes.Length > 0;
+                return false;
             }
-            finally
-            {
-                foreach (var process in processes)
-                {
-                    process.Dispose();
-                }
-            }
+
+            _ = GetWindowThreadProcessId(target.Handle, out var owner);
+            return owner == target.ProcessId;
         }
         catch
         {
             return false;
         }
     }
+
+    private static bool LooksLikeFailure(string summary) =>
+        summary.Contains("could not", StringComparison.OrdinalIgnoreCase)
+        || summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
+        || summary.Contains("failed", StringComparison.OrdinalIgnoreCase)
+        || summary.Contains("needs Administrator", StringComparison.OrdinalIgnoreCase)
+        || summary.Contains("was not found", StringComparison.OrdinalIgnoreCase);
 
     private static bool TryParseHotkey(string? value, out ushort modifier, out ushort key)
     {
@@ -251,6 +312,9 @@ public sealed class ExperimentalMsfsVrService : IDisposable
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint numberOfInputs, NativeInput[] inputs, int size);
 
@@ -277,4 +341,8 @@ public sealed class ExperimentalMsfsVrService : IDisposable
         public uint Time;
         public IntPtr ExtraInfo;
     }
+
+    private readonly record struct ProcessWindowTarget(int ProcessId, nint Handle);
 }
+
+public readonly record struct ExperimentalMsfsPreparationResult(bool Succeeded, string Summary);

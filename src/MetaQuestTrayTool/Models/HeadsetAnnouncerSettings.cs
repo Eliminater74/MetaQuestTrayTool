@@ -37,6 +37,9 @@ public sealed class HeadsetAnnouncerSettings
     /// <summary>PCVR recovery results.</summary>
     public bool Recovery { get; set; } = true;
 
+    /// <summary>Experimental launch automation results, including MSFS 2024 VR toggles.</summary>
+    public bool Experimental { get; set; } = true;
+
     /// <summary>
     /// When a game profile is active, skip lower-priority action chatter —
     /// still allow session connect/disconnect, profile apply/restore, and the
@@ -68,6 +71,7 @@ public sealed class HeadsetAnnouncerSettings
         Audio = Audio,
         Headset = Headset,
         Recovery = Recovery,
+        Experimental = Experimental,
         QuietWhileGameProfileActive = QuietWhileGameProfileActive,
         DelayMs = DelayMs,
         ConnectDelayMs = ConnectDelayMs,

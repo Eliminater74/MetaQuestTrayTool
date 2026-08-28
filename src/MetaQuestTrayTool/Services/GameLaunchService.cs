@@ -13,6 +13,7 @@ public sealed class GameLaunchService
     public string LaunchLibraryGame(LibraryGame game, bool ensureProfile = true, bool applyNow = true)
     {
         ArgumentNullException.ThrowIfNull(game);
+        _app.ExperimentalMsfsVr.CancelScheduledToggle();
 
         GameProfile? profile = null;
         if (ensureProfile && !string.IsNullOrWhiteSpace(game.ProcessName))
@@ -25,6 +26,14 @@ public sealed class GameLaunchService
 
         try
         {
+            if (profile is not null && !string.IsNullOrWhiteSpace(game.ProcessName)
+                && (_app.ProcessWatcher is null
+                    || !_app.ProcessWatcher.ArmActiveProfile(profile, game.ProcessName)))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot launch '{game.Name}' while another game profile is active. Close the active game first.");
+            }
+
             if (applyNow && profile is not null)
             {
                 var applied = _app.ApplyProfile(profile);
@@ -33,12 +42,11 @@ public sealed class GameLaunchService
 
             if (profile?.ExperimentalMsfsVr == true)
             {
-                _app.ExperimentalMsfsVr.Prepare(profile);
-            }
-
-            if (profile is not null && !string.IsNullOrWhiteSpace(game.ProcessName))
-            {
-                _app.ProcessWatcher?.ArmActiveProfile(profile, game.ProcessName);
+                var preparation = _app.ExperimentalMsfsVr.Prepare(profile);
+                if (!preparation.Succeeded)
+                {
+                    throw new InvalidOperationException(preparation.Summary);
+                }
             }
 
             var launch = StartGame(game, EffectiveLaunchArguments(profile));
@@ -64,6 +72,7 @@ public sealed class GameLaunchService
     public string LaunchProfile(GameProfile profile, bool applyNow = true)
     {
         ArgumentNullException.ThrowIfNull(profile);
+        _app.ExperimentalMsfsVr.CancelScheduledToggle();
 
         _app.Settings.Current.AutoApplyProfiles = true;
         _app.Settings.Save();
@@ -71,6 +80,14 @@ public sealed class GameLaunchService
         var delegatedToLibrary = false;
         try
         {
+            if (!string.IsNullOrWhiteSpace(profile.ProcessName)
+                && (_app.ProcessWatcher is null
+                    || !_app.ProcessWatcher.ArmActiveProfile(profile, profile.ProcessName)))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot launch '{profile.Name}' while another game profile is active. Close the active game first.");
+            }
+
             if (applyNow)
             {
                 _app.ApplyProfile(profile);
@@ -78,12 +95,11 @@ public sealed class GameLaunchService
 
             if (profile.ExperimentalMsfsVr)
             {
-                _app.ExperimentalMsfsVr.Prepare(profile);
-            }
-
-            if (!string.IsNullOrWhiteSpace(profile.ProcessName))
-            {
-                _app.ProcessWatcher?.ArmActiveProfile(profile, profile.ProcessName);
+                var preparation = _app.ExperimentalMsfsVr.Prepare(profile);
+                if (!preparation.Succeeded)
+                {
+                    throw new InvalidOperationException(preparation.Summary);
+                }
             }
 
             // Prefer Steam protocol when we have an AppId.
@@ -103,20 +119,21 @@ public sealed class GameLaunchService
 
             if (!string.IsNullOrWhiteSpace(profile.InstallPath) && !string.IsNullOrWhiteSpace(profile.LaunchFile))
             {
-                var exe = Path.Combine(profile.InstallPath!, profile.LaunchFile!);
-                if (File.Exists(exe))
+                if (!TryResolveLaunchExecutable(profile.InstallPath, profile.LaunchFile, out var exe, out var pathError))
                 {
-                    StartExe(exe, profile.InstallPath!, EffectiveLaunchArguments(profile));
-                    var msg = $"Launched {profile.Name} ({exe}). Profile armed.";
-                    _app.Log.Info(msg);
-                    _app.TrayNotify("Launch", msg);
-                    _app.HeadsetAnnouncer.AnnounceGameLaunch(
-                        profile.Name,
-                        profile.Name,
-                        DescribePlatform(profile.Platform));
-                    _app.ExperimentalMsfsVr.ScheduleToggle(profile);
-                    return msg;
+                    throw new InvalidOperationException(pathError);
                 }
+
+                StartExe(exe, profile.InstallPath!, EffectiveLaunchArguments(profile));
+                var msg = $"Launched {profile.Name} ({exe}). Profile armed.";
+                _app.Log.Info(msg);
+                _app.TrayNotify("Launch", msg);
+                _app.HeadsetAnnouncer.AnnounceGameLaunch(
+                    profile.Name,
+                    profile.Name,
+                    DescribePlatform(profile.Platform));
+                _app.ExperimentalMsfsVr.ScheduleToggle(profile);
+                return msg;
             }
 
             // Resolve from live library by AppId / process name.
@@ -205,10 +222,9 @@ public sealed class GameLaunchService
 
         if (!string.IsNullOrWhiteSpace(game.InstallPath) && !string.IsNullOrWhiteSpace(game.LaunchFile))
         {
-            var exe = Path.Combine(game.InstallPath!, game.LaunchFile!);
-            if (!File.Exists(exe))
+            if (!TryResolveLaunchExecutable(game.InstallPath, game.LaunchFile, out var exe, out var pathError))
             {
-                throw new FileNotFoundException($"Launch file not found: {exe}");
+                throw new InvalidOperationException(pathError);
             }
 
             StartExe(exe, game.InstallPath!, launchArguments);
@@ -270,4 +286,59 @@ public sealed class GameLaunchService
             .Replace('\r', ' ')
             .Replace('\n', ' ')
             .Trim();
+
+    private static bool TryResolveLaunchExecutable(
+        string? installPath,
+        string? launchFile,
+        out string executable,
+        out string error)
+    {
+        executable = string.Empty;
+        error = "Install path and launch file are required.";
+        if (string.IsNullOrWhiteSpace(installPath) || string.IsNullOrWhiteSpace(launchFile))
+        {
+            return false;
+        }
+
+        var relativeFile = launchFile.Trim();
+        if (Path.IsPathRooted(relativeFile))
+        {
+            error = "Launch file must be a relative .exe under the install path.";
+            return false;
+        }
+
+        try
+        {
+            var root = Path.GetFullPath(installPath.Trim())
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                + Path.DirectorySeparatorChar;
+            var candidate = Path.GetFullPath(Path.Combine(root, relativeFile));
+            if (!candidate.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+            {
+                error = "Launch file must stay inside the install path.";
+                return false;
+            }
+
+            if (!string.Equals(Path.GetExtension(candidate), ".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                error = "Launch file must be an .exe under the install path.";
+                return false;
+            }
+
+            if (!File.Exists(candidate))
+            {
+                error = $"Launch file not found: {candidate}";
+                return false;
+            }
+
+            executable = candidate;
+            error = string.Empty;
+            return true;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException)
+        {
+            error = "Launch file path is invalid: " + ex.Message;
+            return false;
+        }
+    }
 }

@@ -64,6 +64,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         AnnounceAudioBox.IsChecked = announcer.Audio;
         AnnounceHeadsetBox.IsChecked = announcer.Headset;
         AnnounceRecoveryBox.IsChecked = announcer.Recovery;
+        AnnounceExperimentalBox.IsChecked = announcer.Experimental;
         AnnounceQuietBox.IsChecked = announcer.QuietWhileGameProfileActive;
         FillHeadsetVoiceBox(announcer.VoiceName);
         HeadsetAnnouncePanel.IsEnabled = announcer.Enabled;
@@ -115,6 +116,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         announcer.Audio = AnnounceAudioBox.IsChecked == true;
         announcer.Headset = AnnounceHeadsetBox.IsChecked == true;
         announcer.Recovery = AnnounceRecoveryBox.IsChecked == true;
+        announcer.Experimental = AnnounceExperimentalBox.IsChecked == true;
         announcer.QuietWhileGameProfileActive = AnnounceQuietBox.IsChecked == true;
         announcer.VoiceName = HeadsetVoiceBox.SelectedItem is ComboBoxItem { Tag: string name }
             ? name

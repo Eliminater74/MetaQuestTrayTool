@@ -21,6 +21,9 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     private readonly App _app;
     private readonly object _queueLock = new();
+    private readonly object _synthLock = new();
+    private readonly HashSet<SpeechSynthesizer> _activeSynthesizers = [];
+    private readonly HashSet<SpeechSynthesizer> _retiredSynthesizers = [];
     private readonly Queue<QueuedAnnouncement> _queue = new();
     private CancellationTokenSource _lifetimeCts = new();
     private SpeechSynthesizer? _synthesizer;
@@ -48,8 +51,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
     public void Reload()
     {
         CancelPendingAnnouncements();
-        _synthesizer?.Dispose();
-        _synthesizer = null;
+        RetireCurrentSynthesizer();
 
         if (!_app.Settings.Current.HeadsetAnnouncer.Enabled)
         {
@@ -61,15 +63,28 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     private void EnsureSynthesizer()
     {
-        if (_synthesizer is not null)
+        lock (_synthLock)
         {
-            return;
+            if (_synthesizer is not null)
+            {
+                return;
+            }
         }
 
         try
         {
-            _synthesizer = new SpeechSynthesizer { Rate = 0 };
-            TtsVoiceCatalog.Apply(_synthesizer, _app.Settings.Current.HeadsetAnnouncer.VoiceName);
+            var synthesizer = new SpeechSynthesizer { Rate = 0 };
+            TtsVoiceCatalog.Apply(synthesizer, _app.Settings.Current.HeadsetAnnouncer.VoiceName);
+            lock (_synthLock)
+            {
+                if (_synthesizer is null)
+                {
+                    _synthesizer = synthesizer;
+                    return;
+                }
+            }
+
+            synthesizer.Dispose();
         }
         catch (Exception ex)
         {
@@ -361,8 +376,26 @@ public sealed class HeadsetAnnouncerService : IDisposable
         _disposed = true;
         CancelPendingAnnouncements();
         _gapTimer?.Stop();
-        _synthesizer?.Dispose();
-        _synthesizer = null;
+        RetireCurrentSynthesizer();
+    }
+
+    public bool CanAccept(
+        HeadsetAnnounceKind kind,
+        bool allowWithoutLiveSession = false,
+        bool force = false)
+    {
+        if (_disposed || (!force && !ShouldAnnounce(kind)))
+        {
+            return false;
+        }
+
+        if (!HasCurrentSynthesizer())
+        {
+            EnsureSynthesizer();
+        }
+
+        return HasCurrentSynthesizer()
+               && (allowWithoutLiveSession || CanSpeakToHeadset(allowWithoutLiveSession));
     }
 
     private void Enqueue(
@@ -383,12 +416,12 @@ public sealed class HeadsetAnnouncerService : IDisposable
             return;
         }
 
-        if (_synthesizer is null)
+        if (!HasCurrentSynthesizer())
         {
             EnsureSynthesizer();
         }
 
-        if (_synthesizer is null)
+        if (!HasCurrentSynthesizer())
         {
             return;
         }
@@ -521,8 +554,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         }
 
         EnsureSynthesizer();
-        var synth = _synthesizer;
-        if (synth is null)
+        if (!TryAcquireSynthesizer(out var synth))
         {
             return;
         }
@@ -540,7 +572,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
                 _gapTimer?.Stop();
                 synth.SpeakAsyncCancelAll();
                 _speaking = true;
-                if (SpeakBlocking(phrase))
+                if (SpeakBlocking(synth, phrase))
                 {
                     _app.Log.Info("Headset announcer: " + phrase);
                 }
@@ -552,14 +584,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
             finally
             {
                 _speaking = false;
-                try
-                {
-                    synth.SetOutputToDefaultAudioDevice();
-                }
-                catch
-                {
-                    // restore best-effort
-                }
+                ReleaseSynthesizer(synth);
             }
         }
 
@@ -573,17 +598,17 @@ public sealed class HeadsetAnnouncerService : IDisposable
         }
     }
 
-    private bool SpeakBlocking(string phrase)
+    private bool SpeakBlocking(SpeechSynthesizer synth, string phrase)
     {
-        if (_synthesizer is null || string.IsNullOrWhiteSpace(phrase))
+        if (string.IsNullOrWhiteSpace(phrase))
         {
             return false;
         }
 
         if (_app.Audio.IsCurrentPlaybackHeadset())
         {
-            _synthesizer.SetOutputToDefaultAudioDevice();
-            _synthesizer.Speak(phrase);
+            synth.SetOutputToDefaultAudioDevice();
+            synth.Speak(phrase);
             return true;
         }
 
@@ -594,7 +619,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
             return false;
         }
 
-        SpeakViaWasapi(phrase, deviceId);
+        SpeakViaWasapi(synth, phrase, deviceId);
         return true;
     }
 
@@ -633,7 +658,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
             HeadsetAnnounceKind.Audio => settings.Audio,
             HeadsetAnnounceKind.Headset => settings.Headset,
             HeadsetAnnounceKind.Recovery => settings.Recovery,
-            HeadsetAnnounceKind.Experimental => settings.GameLaunch,
+            HeadsetAnnounceKind.Experimental => settings.Experimental,
             _ => false
         };
     }
@@ -703,7 +728,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     private bool SpeakNow(string phrase, string? playbackDeviceId = null)
     {
-        if (_synthesizer is null || string.IsNullOrWhiteSpace(phrase))
+        if (string.IsNullOrWhiteSpace(phrase) || !TryAcquireSynthesizer(out var synth))
         {
             _speaking = false;
             BeginDrainQueue();
@@ -712,23 +737,39 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         if (!string.IsNullOrWhiteSpace(playbackDeviceId))
         {
-            SpeakViaWasapi(phrase, playbackDeviceId);
-            return true;
+            try
+            {
+                SpeakViaWasapi(synth, phrase, playbackDeviceId);
+                return true;
+            }
+            finally
+            {
+                ReleaseSynthesizer(synth);
+            }
         }
 
         if (_app.Audio.IsCurrentPlaybackHeadset())
         {
-            _synthesizer.SetOutputToDefaultAudioDevice();
-            _synthesizer.SpeakCompleted += OnSpeakCompleted;
-            _synthesizer.SpeakAsyncCancelAll();
-            _synthesizer.SpeakAsync(phrase);
-            return true;
+            try
+            {
+                synth.SetOutputToDefaultAudioDevice();
+                synth.SpeakCompleted += OnSpeakCompleted;
+                synth.SpeakAsyncCancelAll();
+                synth.SpeakAsync(phrase);
+                return true;
+            }
+            catch
+            {
+                ReleaseSynthesizer(synth);
+                throw;
+            }
         }
 
         var deviceId = ResolveHeadsetPlaybackId();
         if (deviceId is null)
         {
             _app.Log.Info("Headset announcer skipped (no headset audio path): " + phrase);
+            ReleaseSynthesizer(synth);
             _speaking = false;
             BeginDrainQueue();
             return false;
@@ -738,7 +779,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         {
             try
             {
-                SpeakViaWasapi(phrase, deviceId);
+                SpeakViaWasapi(synth, phrase, deviceId);
             }
             catch (Exception ex)
             {
@@ -746,17 +787,99 @@ public sealed class HeadsetAnnouncerService : IDisposable
             }
             finally
             {
-                _app.Dispatcher.BeginInvoke(ScheduleNextAfterGap);
+                ReleaseSynthesizer(synth);
+                _ = _app.Dispatcher.BeginInvoke(ScheduleNextAfterGap);
             }
         });
         return true;
     }
 
+    private bool HasCurrentSynthesizer()
+    {
+        lock (_synthLock)
+        {
+            return _synthesizer is not null;
+        }
+    }
+
+    private bool TryAcquireSynthesizer(out SpeechSynthesizer synthesizer)
+    {
+        lock (_synthLock)
+        {
+            if (_synthesizer is null)
+            {
+                synthesizer = null!;
+                return false;
+            }
+
+            synthesizer = _synthesizer;
+            _activeSynthesizers.Add(synthesizer);
+            return true;
+        }
+    }
+
+    private void ReleaseSynthesizer(SpeechSynthesizer synthesizer)
+    {
+        var dispose = false;
+        lock (_synthLock)
+        {
+            _activeSynthesizers.Remove(synthesizer);
+            dispose = _retiredSynthesizers.Remove(synthesizer);
+        }
+
+        if (dispose)
+        {
+            synthesizer.Dispose();
+        }
+    }
+
+    private void RetireCurrentSynthesizer()
+    {
+        SpeechSynthesizer? synthesizer;
+        var dispose = false;
+        lock (_synthLock)
+        {
+            synthesizer = _synthesizer;
+            _synthesizer = null;
+            if (synthesizer is not null)
+            {
+                if (_activeSynthesizers.Contains(synthesizer))
+                {
+                    _retiredSynthesizers.Add(synthesizer);
+                }
+                else
+                {
+                    dispose = true;
+                }
+            }
+        }
+
+        if (synthesizer is null)
+        {
+            return;
+        }
+
+        try
+        {
+            synthesizer.SpeakAsyncCancelAll();
+        }
+        catch
+        {
+            // The synthesizer may already be completing during reload/shutdown.
+        }
+
+        if (dispose)
+        {
+            synthesizer.Dispose();
+        }
+    }
+
     private void OnSpeakCompleted(object? sender, SpeakCompletedEventArgs e)
     {
-        if (_synthesizer is not null)
+        if (sender is SpeechSynthesizer synth)
         {
-            _synthesizer.SpeakCompleted -= OnSpeakCompleted;
+            synth.SpeakCompleted -= OnSpeakCompleted;
+            ReleaseSynthesizer(synth);
         }
 
         ScheduleNextAfterGap();
@@ -778,13 +901,13 @@ public sealed class HeadsetAnnouncerService : IDisposable
         BeginDrainQueue();
     }
 
-    private void SpeakViaWasapi(string phrase, string deviceId)
+    private void SpeakViaWasapi(SpeechSynthesizer synth, string phrase, string deviceId)
     {
         try
         {
             using var ms = new MemoryStream();
-            _synthesizer!.SetOutputToWaveStream(ms);
-            _synthesizer.Speak(phrase);
+            synth.SetOutputToWaveStream(ms);
+            synth.Speak(phrase);
             ms.Position = 0;
 
             using var enumerator = new MMDeviceEnumerator();
@@ -802,7 +925,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         {
             try
             {
-                _synthesizer?.SetOutputToDefaultAudioDevice();
+                synth.SetOutputToDefaultAudioDevice();
             }
             catch
             {
@@ -908,7 +1031,10 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         var failure = text.Contains("failed", StringComparison.OrdinalIgnoreCase)
                       || text.Contains("could not", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("cannot", StringComparison.OrdinalIgnoreCase)
                       || text.Contains("not found", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("live value is still", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("no ActiveRuntime", StringComparison.OrdinalIgnoreCase)
                       || text.Contains("error", StringComparison.OrdinalIgnoreCase)
                       || text.Contains("rejected", StringComparison.OrdinalIgnoreCase)
                       || text.Contains("timed out", StringComparison.OrdinalIgnoreCase)

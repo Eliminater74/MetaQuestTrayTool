@@ -81,7 +81,13 @@ public static class SessionHelperClient
     public static bool TryLaunchUri(string uri, out string detail)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(uri);
-        return TryLaunch(LooksLikeSteamFamily(uri: uri), helperCommand: "URI\t" + uri, fileName: uri, arguments: null, workingDirectory: null, out detail);
+        return TryLaunch(
+            LooksLikeSteamFamily(uri: uri),
+            helperCommand: "URI64\t" + Encode(uri),
+            fileName: uri,
+            arguments: null,
+            workingDirectory: null,
+            out detail);
     }
 
     public static bool TryLaunchExe(
@@ -93,7 +99,10 @@ public static class SessionHelperClient
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         return TryLaunch(
             LooksLikeSteamFamily(exePath: path),
-            helperCommand: "EXE\t" + path + "\t" + (arguments ?? string.Empty) + "\t" + (workingDirectory ?? string.Empty),
+            helperCommand: "EXE64\t"
+                           + Encode(path) + "\t"
+                           + Encode(arguments) + "\t"
+                           + Encode(workingDirectory),
             fileName: path,
             arguments: arguments,
             workingDirectory: workingDirectory,
@@ -194,4 +203,7 @@ public static class SessionHelperClient
             return false;
         }
     }
+
+    private static string Encode(string? value) =>
+        Convert.ToBase64String(Encoding.UTF8.GetBytes(value ?? string.Empty));
 }

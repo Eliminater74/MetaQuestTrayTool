@@ -75,12 +75,45 @@ public sealed class ProcessWatcherService : IDisposable
     /// <summary>
     /// Keep this profile latched until the launched process exits (Steam may take a while to spawn).
     /// </summary>
-    public void ArmActiveProfile(GameProfile profile, string processName)
+    public bool ArmActiveProfile(GameProfile profile, string processName)
     {
         var name = ProfileService.NormalizeProcessName(processName);
         if (name.Length == 0)
         {
-            return;
+            return false;
+        }
+
+        if (_activeProcess is not null)
+        {
+            if (_awaitingLaunchProcess
+                && string.Equals(_activeProcess, name, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(_activeProfileName, profile.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (_awaitingLaunchProcess
+                || string.Equals(_activeProcess, name, StringComparison.OrdinalIgnoreCase)
+                || IsProcessRunning(_activeProcess))
+            {
+                _app.Log.Warn(
+                    $"Cannot arm profile '{profile.Name}' for {name}.exe while '{_activeProfileName ?? _activeProcess}' is active.");
+                return false;
+            }
+
+            // The previous process ended between polls. Restore its baseline before
+            // replacing the stale watcher state with this launch.
+            try
+            {
+                _app.RestoreGlobalDefaults();
+            }
+            catch (Exception ex)
+            {
+                _app.Log.Warn($"Could not restore stale profile before a new launch: {ex.Message}");
+            }
+
+            _activeProcess = null;
+            _activeProfileName = null;
         }
 
         _activeProcess = name;
@@ -90,6 +123,7 @@ public sealed class ProcessWatcherService : IDisposable
         Start();
         ApplyCadence();
         _app.Log.Info($"Library launch armed profile '{profile.Name}' for {name}.exe until it exits.");
+        return true;
     }
 
     /// <summary>

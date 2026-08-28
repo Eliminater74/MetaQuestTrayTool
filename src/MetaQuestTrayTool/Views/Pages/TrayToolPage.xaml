@@ -103,6 +103,9 @@
         <CheckBox x:Name="AnnounceRecoveryBox" Content="PCVR recovery results"
                   ToolTip="Speak the short result after Recover PCVR finishes. Full service and setting details remain in Log."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceExperimentalBox" Content="Experimental launch results"
+                  ToolTip="Speak MSFS 2024 experimental VR launch and toggle results."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (important events still speak)"
                   ToolTip="Reduce chatter mid-game — still announce session connect/disconnect, profile apply/restore, and the 10-second Meta service stop after SteamVR closes."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>

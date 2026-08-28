@@ -131,9 +131,38 @@ public static class SessionHelperHost
                 return StartUri("steam://run/250820");
             }
 
+            if (line.StartsWith("URI64\t", StringComparison.OrdinalIgnoreCase))
+            {
+                return StartUri(Decode(line[6..]));
+            }
+
             if (line.StartsWith("URI\t", StringComparison.OrdinalIgnoreCase))
             {
                 return StartUri(line[4..]);
+            }
+
+            if (line.StartsWith("EXE64\t", StringComparison.OrdinalIgnoreCase))
+            {
+                var parts = line.Split('\t', StringSplitOptions.None);
+                if (parts.Length != 4)
+                {
+                    return "ERR malformed exe request";
+                }
+
+                var path = Decode(parts[1]);
+                var args = Decode(parts[2]);
+                var cwd = Decode(parts[3]);
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    return "ERR missing exe path";
+                }
+
+                if (!UnelevatedProcessLauncher.TryStart(path, args, cwd, dropElevation: false, out var detail))
+                {
+                    return "ERR " + detail;
+                }
+
+                return "OK " + detail;
             }
 
             if (line.StartsWith("EXE\t", StringComparison.OrdinalIgnoreCase))
@@ -172,4 +201,7 @@ public static class SessionHelperHost
 
         return "OK " + detail;
     }
+
+    private static string Decode(string value) =>
+        Encoding.UTF8.GetString(Convert.FromBase64String(value));
 }
