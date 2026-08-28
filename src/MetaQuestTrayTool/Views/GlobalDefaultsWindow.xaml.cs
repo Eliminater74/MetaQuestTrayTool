@@ -107,6 +107,7 @@ public partial class GlobalDefaultsWindow : Window
 
         var summary = App.Instance.ApplyGlobalGameSettings();
         App.Instance.Log.Info("Applied global defaults: " + summary);
+        App.Instance.HeadsetAnnouncer.AnnounceActionResult("Global defaults", summary);
         System.Windows.MessageBox.Show(this, summary, App.AppName);
     }
 

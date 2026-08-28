@@ -25,9 +25,22 @@ public sealed class HeadsetAnnouncerSettings
     /// <summary>Steam Link OpenXR nudge / restore (informational).</summary>
     public bool SteamLinkAssist { get; set; }
 
+    /// <summary>Results from hotkeys, voice commands, OpenXR changes, and manual tray actions.</summary>
+    public bool ActionResults { get; set; } = true;
+
+    /// <summary>Manual audio routing results. Automatic routing is summarized by session events.</summary>
+    public bool Audio { get; set; } = true;
+
+    /// <summary>Headset ADB, trust, and performance-tweak results.</summary>
+    public bool Headset { get; set; } = true;
+
+    /// <summary>PCVR recovery results.</summary>
+    public bool Recovery { get; set; } = true;
+
     /// <summary>
-    /// When a game profile is active, skip profile/launch/Dash/Steam Link phrases —
-    /// still allow session connect/disconnect and the SteamVR-exit 10s OVR wait.
+    /// When a game profile is active, skip lower-priority action chatter —
+    /// still allow session connect/disconnect, profile apply/restore, and the
+    /// SteamVR-exit 10s OVR wait.
     /// </summary>
     public bool QuietWhileGameProfileActive { get; set; } = true;
 
@@ -51,6 +64,10 @@ public sealed class HeadsetAnnouncerSettings
         GameLaunch = GameLaunch,
         DashToSteamVr = DashToSteamVr,
         SteamLinkAssist = SteamLinkAssist,
+        ActionResults = ActionResults,
+        Audio = Audio,
+        Headset = Headset,
+        Recovery = Recovery,
         QuietWhileGameProfileActive = QuietWhileGameProfileActive,
         DelayMs = DelayMs,
         ConnectDelayMs = ConnectDelayMs,
@@ -65,8 +82,13 @@ public enum HeadsetAnnounceKind
     ProfileApplied,
     ProfileRestored,
     GameLaunch,
+    LaunchFailed,
     DashToSteamVr,
     SteamVrExit,
     SteamLinkAssist,
-    GlobalDefaults
+    GlobalDefaults,
+    ActionResult,
+    Audio,
+    Headset,
+    Recovery
 }

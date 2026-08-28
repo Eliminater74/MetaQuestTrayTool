@@ -186,6 +186,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         App.Instance.Settings.Save();
         var summary = App.Instance.ApplyGlobalGameSettings();
         App.Instance.Log.Info(summary);
+        App.Instance.HeadsetAnnouncer.AnnounceActionResult("Game settings", summary);
         StatusText.Text = summary;
     }
 
@@ -317,6 +318,9 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
         var result = App.Instance.OpenXr.Set(kind);
         App.Instance.Log.Info(result);
+        App.Instance.HeadsetAnnouncer.AnnounceActionResult(
+            $"OpenXR switched to {OpenXrRuntimeService.Label(kind)}",
+            result);
         OpenXrStatusText.Text = App.Instance.OpenXr.Describe() + "  " + result;
         System.Windows.MessageBox.Show(Window.GetWindow(this), result, App.AppName);
     }

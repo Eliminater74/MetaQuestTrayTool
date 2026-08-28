@@ -139,6 +139,7 @@ public sealed class SessionRecoverService
 
         var summary = string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         _app.Log.Info(summary);
+        _app.HeadsetAnnouncer.AnnounceRecovery(summary);
         _app.TrayNotify("PCVR recover", "OVRService / Link / audio recovery finished. Reconnect Link if needed.");
         return summary;
     }

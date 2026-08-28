@@ -252,6 +252,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 
         var result = App.Instance.OpenXr.Set(OpenXrRuntimeKind.SteamVr);
         App.Instance.Log.Info(result);
+        App.Instance.HeadsetAnnouncer.AnnounceActionResult("OpenXR switched to SteamVR", result);
         Refresh();
         System.Windows.MessageBox.Show(Window.GetWindow(this), result, App.AppName);
     }

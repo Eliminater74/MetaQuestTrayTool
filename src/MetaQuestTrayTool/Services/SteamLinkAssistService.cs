@@ -131,7 +131,10 @@ public sealed class SteamLinkAssistService : IDisposable
                     _app.TrayNotify("Steam Link", "OpenXR is not SteamVR — OpenXR games may fail. See Info / Game Settings.");
                 }
 
-                _app.HeadsetAnnouncer.AnnounceSteamLink("OpenXR is not SteamVR.");
+                if (!_app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink)
+                {
+                    _app.HeadsetAnnouncer.AnnounceSteamLink("OpenXR is not SteamVR.");
+                }
             });
         }
 
@@ -160,7 +163,11 @@ public sealed class SteamLinkAssistService : IDisposable
                 _app.TrayNotify("Steam Link", "Switched OpenXR to SteamVR for this session.");
             }
 
-            _app.HeadsetAnnouncer.AnnounceSteamLink("Switched OpenXR to SteamVR.");
+            _app.HeadsetAnnouncer.AnnounceSteamLink(
+                result.Contains("could not", StringComparison.OrdinalIgnoreCase)
+                || result.Contains("failed", StringComparison.OrdinalIgnoreCase)
+                    ? "Could not switch OpenXR to SteamVR. Check Log."
+                    : "Switched OpenXR to SteamVR.");
         });
     }
 

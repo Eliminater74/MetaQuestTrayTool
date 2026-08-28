@@ -260,6 +260,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         {
             // Do not latch — otherwise we restore desktop immediately and flap forever.
             _app.Log.Info($"{reason} Could not switch to VR audio ({result}). Will retry when Link/SteamVR is live.");
+            _app.HeadsetAnnouncer.AnnounceAudioRouting("VR audio is unavailable. Check Audio settings.");
             return;
         }
 
@@ -275,5 +276,10 @@ public sealed class AudioSwitchWatcher : IDisposable
         var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
         _vrDevicesApplied = false;
         _app.Log.Info($"{reason} {result}");
+        if (result.Contains("No fallback", StringComparison.OrdinalIgnoreCase)
+            || result.Contains("Could not", StringComparison.OrdinalIgnoreCase))
+        {
+            _app.HeadsetAnnouncer.AnnounceAudioRouting("Desktop audio restore failed. Check Audio settings.");
+        }
     }
 }

@@ -193,7 +193,7 @@ public sealed class StatusDashboardService
     {
         "steamvr-install" => _app.SteamVrInstall.OpenInstallPage(),
         "steamvr-start" => _app.DashToSteamVr.StartSteamVrNow("Status chip"),
-        "openxr-steamvr" => _app.OpenXr.Set(OpenXrRuntimeKind.SteamVr),
+        "openxr-steamvr" => SetOpenXr(OpenXrRuntimeKind.SteamVr),
         "openxr-expected" => FixOpenXrForSetup(),
         "ovrservice" => _app.Oculus.Start(),
         _ => $"Unknown status action: {actionId}"
@@ -206,7 +206,16 @@ public sealed class StatusDashboardService
         settings.PreferredRuntime = target;
         settings.ApplyOnStart = true;
         _app.Settings.Save();
-        return _app.OpenXr.Set(target);
+        return SetOpenXr(target);
+    }
+
+    private string SetOpenXr(OpenXrRuntimeKind target)
+    {
+        var result = _app.OpenXr.Set(target);
+        _app.HeadsetAnnouncer.AnnounceActionResult(
+            $"OpenXR switched to {OpenXrRuntimeService.Label(target)}",
+            result);
+        return result;
     }
 
     private static StatusChipVm Chip(

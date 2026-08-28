@@ -231,7 +231,10 @@ public sealed class VoiceCommandService : IDisposable
             var summary = _commands.Execute(action);
             var label = HotKeyCatalog.DescribeAction(action);
             _app.Log.Info($"Voice \"{text}\" ({confidence:P0}) → {label}: {summary}");
-            Speak(label);
+            if (!HeadsetAnnouncerHandles(action))
+            {
+                Speak(label);
+            }
             if (_app.Settings.Current.ShowNotifications)
             {
                 _app.TrayNotify("Voice", $"{label}\n{summary}");
@@ -242,6 +245,19 @@ public sealed class VoiceCommandService : IDisposable
             _app.Log.Error("Voice command failed.", ex);
             Speak("Error");
         }
+    }
+
+    private bool HeadsetAnnouncerHandles(HotKeyAction action)
+    {
+        var settings = _app.Settings.Current.HeadsetAnnouncer;
+        if (!settings.Enabled)
+        {
+            return false;
+        }
+
+        return action is HotKeyAction.DashToSteamVr or HotKeyAction.StartSteamVr
+            ? settings.DashToSteamVr
+            : action != HotKeyAction.VoicePushToTalk && settings.ActionResults;
     }
 
     private void ApplyPreferredMic(bool forContinuous)

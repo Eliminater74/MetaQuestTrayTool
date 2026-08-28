@@ -60,6 +60,10 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         AnnounceLaunchBox.IsChecked = announcer.GameLaunch;
         AnnounceDashBox.IsChecked = announcer.DashToSteamVr;
         AnnounceSteamLinkBox.IsChecked = announcer.SteamLinkAssist;
+        AnnounceActionsBox.IsChecked = announcer.ActionResults;
+        AnnounceAudioBox.IsChecked = announcer.Audio;
+        AnnounceHeadsetBox.IsChecked = announcer.Headset;
+        AnnounceRecoveryBox.IsChecked = announcer.Recovery;
         AnnounceQuietBox.IsChecked = announcer.QuietWhileGameProfileActive;
         FillHeadsetVoiceBox(announcer.VoiceName);
         HeadsetAnnouncePanel.IsEnabled = announcer.Enabled;
@@ -107,6 +111,10 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         announcer.GameLaunch = AnnounceLaunchBox.IsChecked == true;
         announcer.DashToSteamVr = AnnounceDashBox.IsChecked == true;
         announcer.SteamLinkAssist = AnnounceSteamLinkBox.IsChecked == true;
+        announcer.ActionResults = AnnounceActionsBox.IsChecked == true;
+        announcer.Audio = AnnounceAudioBox.IsChecked == true;
+        announcer.Headset = AnnounceHeadsetBox.IsChecked == true;
+        announcer.Recovery = AnnounceRecoveryBox.IsChecked == true;
         announcer.QuietWhileGameProfileActive = AnnounceQuietBox.IsChecked == true;
         announcer.VoiceName = HeadsetVoiceBox.SelectedItem is ComboBoxItem { Tag: string name }
             ? name

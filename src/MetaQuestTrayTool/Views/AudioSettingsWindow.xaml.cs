@@ -148,6 +148,7 @@ public partial class AudioSettingsWindow : Window
         App.Instance.Settings.Save();
         var result = App.Instance.Audio.ApplyVrDevices(App.Instance.Settings.Current.Audio);
         App.Instance.Log.Info(result);
+        App.Instance.HeadsetAnnouncer.AnnounceAudioRouting(result);
         ReloadDevices();
     }
 
@@ -157,6 +158,7 @@ public partial class AudioSettingsWindow : Window
         App.Instance.Settings.Save();
         var result = App.Instance.Audio.RestoreFallbackDevices(App.Instance.Settings.Current.Audio);
         App.Instance.Log.Info(result);
+        App.Instance.HeadsetAnnouncer.AnnounceAudioRouting(result);
         ReloadDevices();
     }
 

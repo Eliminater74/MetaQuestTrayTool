@@ -143,6 +143,7 @@ public partial class ProfilesWindow : Window
 
         var summary = App.Instance.ApplyProfile(profile);
         App.Instance.Log.Info($"Applied personal profile '{profile.Name}': {summary}");
+        App.Instance.HeadsetAnnouncer.AnnounceProfileApplied(profile.Name, summary);
         if (App.Instance.Settings.Current.ShowNotifications)
         {
             App.Instance.TrayNotify("Profile applied", $"{profile.Name} settings are active.");

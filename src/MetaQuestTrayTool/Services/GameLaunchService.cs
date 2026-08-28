@@ -23,21 +23,33 @@ public sealed class GameLaunchService
         _app.Settings.Current.AutoApplyProfiles = true;
         _app.Settings.Save();
 
-        if (applyNow && profile is not null)
+        try
         {
-            var applied = _app.ApplyProfile(profile);
-            _app.Log.Info($"Armed profile '{profile.Name}' before launch: {applied}");
-        }
+            if (applyNow && profile is not null)
+            {
+                var applied = _app.ApplyProfile(profile);
+                _app.Log.Info($"Armed profile '{profile.Name}' before launch: {applied}");
+            }
 
-        if (profile is not null && !string.IsNullOrWhiteSpace(game.ProcessName))
+            if (profile is not null && !string.IsNullOrWhiteSpace(game.ProcessName))
+            {
+                _app.ProcessWatcher?.ArmActiveProfile(profile, game.ProcessName);
+            }
+
+            var launch = StartGame(game);
+            _app.TrayNotify("Launch", $"{game.Name}\n{launch}");
+            _app.HeadsetAnnouncer.AnnounceGameLaunch(
+                game.Name,
+                profile?.Name,
+                game.PlatformLabel);
+            return launch;
+        }
+        catch
         {
-            _app.ProcessWatcher?.ArmActiveProfile(profile, game.ProcessName);
+            _app.ProcessWatcher?.CancelArmedProfile();
+            _app.HeadsetAnnouncer.AnnounceGameLaunchFailed(game.Name, profile?.Name);
+            throw;
         }
-
-        var launch = StartGame(game);
-        _app.TrayNotify("Launch", $"{game.Name}\n{launch}");
-        _app.HeadsetAnnouncer.AnnounceGameLaunch(game.Name);
-        return launch;
     }
 
     public string LaunchProfile(GameProfile profile, bool applyNow = true)
@@ -47,55 +59,76 @@ public sealed class GameLaunchService
         _app.Settings.Current.AutoApplyProfiles = true;
         _app.Settings.Save();
 
-        if (applyNow)
+        var delegatedToLibrary = false;
+        try
         {
-            _app.ApplyProfile(profile);
-        }
-
-        if (!string.IsNullOrWhiteSpace(profile.ProcessName))
-        {
-            _app.ProcessWatcher?.ArmActiveProfile(profile, profile.ProcessName);
-        }
-
-        // Prefer Steam protocol when we have an AppId.
-        if (profile.Platform == GamePlatform.Steam && !string.IsNullOrWhiteSpace(profile.AppId))
-        {
-            StartSteam(profile.AppId!);
-            var msg = $"Launched Steam app {profile.AppId} ({profile.Name}). Profile armed.";
-            _app.Log.Info(msg);
-            _app.TrayNotify("Launch", msg);
-            _app.HeadsetAnnouncer.AnnounceGameLaunch(profile.Name);
-            return msg;
-        }
-
-        if (!string.IsNullOrWhiteSpace(profile.InstallPath) && !string.IsNullOrWhiteSpace(profile.LaunchFile))
-        {
-            var exe = Path.Combine(profile.InstallPath!, profile.LaunchFile!);
-            if (File.Exists(exe))
+            if (applyNow)
             {
-                StartExe(exe, profile.InstallPath!);
-                var msg = $"Launched {profile.Name} ({exe}). Profile armed.";
+                _app.ApplyProfile(profile);
+            }
+
+            if (!string.IsNullOrWhiteSpace(profile.ProcessName))
+            {
+                _app.ProcessWatcher?.ArmActiveProfile(profile, profile.ProcessName);
+            }
+
+            // Prefer Steam protocol when we have an AppId.
+            if (profile.Platform == GamePlatform.Steam && !string.IsNullOrWhiteSpace(profile.AppId))
+            {
+                StartSteam(profile.AppId!);
+                var msg = $"Launched Steam app {profile.AppId} ({profile.Name}). Profile armed.";
                 _app.Log.Info(msg);
                 _app.TrayNotify("Launch", msg);
-                _app.HeadsetAnnouncer.AnnounceGameLaunch(profile.Name);
+                _app.HeadsetAnnouncer.AnnounceGameLaunch(
+                    profile.Name,
+                    profile.Name,
+                    DescribePlatform(profile.Platform));
                 return msg;
             }
+
+            if (!string.IsNullOrWhiteSpace(profile.InstallPath) && !string.IsNullOrWhiteSpace(profile.LaunchFile))
+            {
+                var exe = Path.Combine(profile.InstallPath!, profile.LaunchFile!);
+                if (File.Exists(exe))
+                {
+                    StartExe(exe, profile.InstallPath!);
+                    var msg = $"Launched {profile.Name} ({exe}). Profile armed.";
+                    _app.Log.Info(msg);
+                    _app.TrayNotify("Launch", msg);
+                    _app.HeadsetAnnouncer.AnnounceGameLaunch(
+                        profile.Name,
+                        profile.Name,
+                        DescribePlatform(profile.Platform));
+                    return msg;
+                }
+            }
+
+            // Resolve from live library by AppId / process name.
+            var fromLibrary = _app.Library.GetAllGames().FirstOrDefault(game =>
+                (!string.IsNullOrWhiteSpace(profile.AppId)
+                 && string.Equals(game.AppId, profile.AppId, StringComparison.OrdinalIgnoreCase))
+                || ProfileService.NormalizeProcessName(game.ProcessName)
+                   == ProfileService.NormalizeProcessName(profile.ProcessName));
+
+            if (fromLibrary is not null)
+            {
+                delegatedToLibrary = true;
+                return LaunchLibraryGame(fromLibrary, ensureProfile: true, applyNow: false);
+            }
+
+            throw new InvalidOperationException(
+                $"Could not launch '{profile.Name}'. Set Steam AppId or InstallPath/LaunchFile, or add it again from the library.");
         }
-
-        // Resolve from live library by AppId / process name.
-        var fromLibrary = _app.Library.GetAllGames().FirstOrDefault(game =>
-            (!string.IsNullOrWhiteSpace(profile.AppId)
-             && string.Equals(game.AppId, profile.AppId, StringComparison.OrdinalIgnoreCase))
-            || ProfileService.NormalizeProcessName(game.ProcessName)
-               == ProfileService.NormalizeProcessName(profile.ProcessName));
-
-        if (fromLibrary is not null)
+        catch
         {
-            return LaunchLibraryGame(fromLibrary, ensureProfile: false, applyNow: false);
-        }
+            if (!delegatedToLibrary)
+            {
+                _app.ProcessWatcher?.CancelArmedProfile();
+                _app.HeadsetAnnouncer.AnnounceGameLaunchFailed(profile.Name, profile.Name);
+            }
 
-        throw new InvalidOperationException(
-            $"Could not launch '{profile.Name}'. Set Steam AppId or InstallPath/LaunchFile, or add it again from the library.");
+            throw;
+        }
     }
 
     private GameProfile EnsureProfile(LibraryGame game)
@@ -186,4 +219,11 @@ public sealed class GameLaunchService
             throw new InvalidOperationException("Could not start game: " + detail);
         }
     }
+
+    private static string DescribePlatform(GamePlatform platform) => platform switch
+    {
+        GamePlatform.Steam => "Steam",
+        GamePlatform.Meta => "Meta",
+        _ => "Custom"
+    };
 }

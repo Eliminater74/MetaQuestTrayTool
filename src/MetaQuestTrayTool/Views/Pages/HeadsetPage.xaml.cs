@@ -231,6 +231,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Headset action failed. Check Log.");
             ResultText.Text = ex.Message;
             UpdateTrustBanner();
         }
@@ -258,11 +259,14 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             var result = App.Instance.Headset.TrustCurrentHeadset(App.Instance.Settings.Current.Headset);
             App.Instance.Settings.Save();
             App.Instance.Log.Info(result);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction(result);
             ResultText.Text = result;
             UpdateTrustBanner();
         }
         catch (Exception ex)
         {
+            App.Instance.Log.Warn(ex.Message);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Headset action failed. Check Log.");
             ResultText.Text = ex.Message;
         }
     }
@@ -294,6 +298,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             Persist_Changed(this, new RoutedEventArgs());
             var result = await Task.Run(action).ConfigureAwait(true);
             App.Instance.Log.Info(result);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction(result);
             ResultText.Text = result;
             App.Instance.Settings.Save();
             UpdateTrustBanner();
@@ -301,6 +306,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Headset action failed. Check Log.");
             ResultText.Text = ex.Message;
             UpdateTrustBanner();
         }

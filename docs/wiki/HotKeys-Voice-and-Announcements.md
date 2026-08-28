@@ -67,9 +67,9 @@ Spell out **A S W**, **H U D**, **steam v r**, **open x r**, **GPU**.
 
 Windows TTS on the Link / VR audio path so you **hear** what the tray is doing when you cannot see desktop balloons.
 
-Examples: “Connected. Air Link. SteamVR OpenXR runtime will be used. Now starting SteamVR.” · “Connected. Air Link. OpenXR is set to Meta. Meta Horizon will load.” · “SteamVR closed. Stopping Meta service for 10 seconds.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.”
+Examples: “Connected. Air Link. SteamVR OpenXR runtime will be used. Now starting SteamVR.” · “Launching Beat Saber. Steam game. Profile Beat Saber is armed.” · “Beat Saber detected. Profile applied. OpenXR is set to SteamVR.” · “Beat Saber closed. Restored global settings after profile.” · “SteamVR closed. Stopping Meta service for 10 seconds.”
 
-Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect plus the SteamVR-exit 10s wait (so Quest Home is not silent).
+Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist, important action results, manual audio routing, headset/ADB results, and PCVR recovery. **Quiet while a game profile is active** still permits connect/disconnect, profile apply/restore, and the SteamVR-exit 10s wait, while suppressing lower-priority chatter.
 
 **Spoken voice:** Auto prefers an English **female** Windows TTS voice (Microsoft Zira when installed). Choose any installed voice from the list. Voice-command confirmations use the same voice.
 
@@ -77,7 +77,7 @@ Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tr
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 
-The connect announcement also reports the active Windows OpenXR runtime (Meta or SteamVR). When Dash → SteamVR is enabled, it reports that SteamVR OpenXR will be used because the runtime is switched as SteamVR starts. Waits ~900 ms for Link audio; uses WASAPI if Windows default is not the headset.
+The connect announcement also reports the active Windows OpenXR runtime (Meta or SteamVR), whether automatic VR audio switching is enabled, and the transport. When Dash → SteamVR is enabled, it reports that SteamVR OpenXR will be used because the runtime is switched as SteamVR starts. Important action results use short success/skip/failure summaries; full details remain in Log. Waits for Link audio (minimum connect delay is about 2.2 seconds); uses WASAPI if Windows default is not the headset.
 
 ## Related
 

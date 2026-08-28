@@ -541,18 +541,7 @@ public partial class App : System.Windows.Application
 
         if (profile.CustomCommands.AdbCommands.Count > 0)
         {
-            try
-            {
-                var quest = Headset.ReadIdentity(Settings.Current.Headset);
-                if (quest.IsVrHeadset && quest.IsReady && !quest.IsRogue && !string.IsNullOrWhiteSpace(quest.AdbSerial))
-                {
-                    parts.Add(CustomCommands.ApplyAdb(profile.CustomCommands.AdbCommands, quest.AdbSerial));
-                }
-            }
-            catch (Exception ex)
-            {
-                parts.Add("Custom ADB skipped: " + ex.Message);
-            }
+            parts.Add(TryApplyCustomAdb(profile.CustomCommands.AdbCommands));
         }
 
         if (profile.Link.HasAny)

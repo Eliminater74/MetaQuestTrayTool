@@ -21,10 +21,13 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     private readonly App _app;
     private readonly object _queueLock = new();
-    private readonly Queue<string> _queue = new();
+    private readonly Queue<QueuedAnnouncement> _queue = new();
+    private CancellationTokenSource _lifetimeCts = new();
     private SpeechSynthesizer? _synthesizer;
     private DispatcherTimer? _gapTimer;
     private bool _speaking;
+    private int _generation;
+    private bool _disposed;
 
     public HeadsetAnnouncerService(App app) => _app = app;
 
@@ -44,6 +47,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void Reload()
     {
+        CancelPendingAnnouncements();
         _synthesizer?.Dispose();
         _synthesizer = null;
 
@@ -116,22 +120,28 @@ public sealed class HeadsetAnnouncerService : IDisposable
             _ => "PCVR"
         };
         var openXrPhrase = BuildOpenXrPhrase();
+        var audioPhrase = _app.Settings.Current.Audio.AutoSwitchEnabled
+            ? " VR audio switching is enabled."
+            : string.Empty;
 
         if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink)
         {
             if (PcvrSetup.GetMode(_app) == PcvrSetupMode.SteamVrOverMetaLink)
             {
-                return $"Connected. {linkLabel}. SteamVR OpenXR runtime will be used. Now starting SteamVR.";
+                return $"Connected. {linkLabel}. SteamVR OpenXR runtime will be used. "
+                       + $"Now starting SteamVR.{audioPhrase}";
             }
 
-            return $"Connected. {linkLabel}. {openXrPhrase} Meta Horizon will load.";
+            return $"Connected. {linkLabel}. {openXrPhrase} Meta Horizon will load.{audioPhrase}";
         }
 
         return status.Kind switch
         {
-            VrConnectionKind.SteamLinkOrSteamVr => $"Connected. Steam Link or SteamVR. {openXrPhrase}",
-            VrConnectionKind.VirtualDesktop => $"Connected. Virtual Desktop. {openXrPhrase}",
-            _ => $"Connected. {openXrPhrase}"
+            VrConnectionKind.SteamLinkOrSteamVr =>
+                $"Connected. Steam Link or SteamVR. {openXrPhrase}{audioPhrase}",
+            VrConnectionKind.VirtualDesktop =>
+                $"Connected. Virtual Desktop. {openXrPhrase}{audioPhrase}",
+            _ => $"Connected. {openXrPhrase}{audioPhrase}"
         };
     }
 
@@ -173,22 +183,125 @@ public sealed class HeadsetAnnouncerService : IDisposable
             VrConnectionKind.VirtualDesktop => "Virtual Desktop session ended.",
             _ => "PCVR session ended."
         };
-        Enqueue(HeadsetAnnounceKind.SessionDisconnect, phrase, delayMs: DisconnectDelayMs, allowWithoutLiveSession: true);
+        if (_app.Settings.Current.Audio.AutoSwitchEnabled)
+        {
+            phrase += " Desktop audio will be restored.";
+        }
+
+        var playbackDeviceId = ResolveHeadsetPlaybackId();
+        Enqueue(
+            HeadsetAnnounceKind.SessionDisconnect,
+            phrase,
+            delayMs: DisconnectDelayMs,
+            allowWithoutLiveSession: true,
+            playbackDeviceId: playbackDeviceId);
     }
 
     public void AnnounceProfileApplied(string profileName)
     {
-        Enqueue(HeadsetAnnounceKind.ProfileApplied, $"Applying profile. {SanitizeName(profileName)}.");
+        AnnounceProfileApplied(profileName, summary: null);
+    }
+
+    public void AnnounceProfileApplied(string profileName, string? summary)
+    {
+        var outcome = DescribeResult(summary, "Profile settings applied.");
+        Enqueue(
+            HeadsetAnnounceKind.ProfileApplied,
+            $"Profile {SanitizeName(profileName)} applied. {outcome} {BuildOpenXrPhrase()}");
+    }
+
+    public void AnnounceProfileDetected(string profileName, string? summary)
+    {
+        var outcome = DescribeResult(summary, "Profile settings applied.");
+        Enqueue(
+            HeadsetAnnounceKind.ProfileApplied,
+            $"{SanitizeName(profileName)} detected. Profile applied. {outcome} {BuildOpenXrPhrase()}");
+    }
+
+    public void AnnounceProfileApplyFailed(string profileName)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.ProfileApplied,
+            $"Profile {SanitizeName(profileName)} failed to apply. Check Log.");
     }
 
     public void AnnounceProfileRestored(string profileName)
     {
-        Enqueue(HeadsetAnnounceKind.ProfileRestored, $"Restored global settings after {SanitizeName(profileName)}.");
+        AnnounceProfileRestored(profileName, summary: null);
+    }
+
+    public void AnnounceProfileRestored(string profileName, string? summary)
+    {
+        var outcome = DescribeResult(summary, "Global settings restored.");
+        Enqueue(
+            HeadsetAnnounceKind.ProfileRestored,
+            $"{SanitizeName(profileName)} closed. "
+            + $"{outcome} {BuildOpenXrPhrase()}");
+    }
+
+    public void AnnounceProfileRestoreFailed(string profileName)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.ProfileRestored,
+            $"Global settings failed to restore after {SanitizeName(profileName)}. Check Log.");
     }
 
     public void AnnounceGameLaunch(string gameName)
     {
-        Enqueue(HeadsetAnnounceKind.GameLaunch, $"Launching. {SanitizeName(gameName)}.");
+        AnnounceGameLaunch(gameName, profileName: null, platform: null);
+    }
+
+    public void AnnounceGameLaunch(string gameName, string? profileName, string? platform)
+    {
+        var profile = string.IsNullOrWhiteSpace(profileName)
+            ? "No personal profile is configured."
+            : $"Profile {SanitizeName(profileName)} is armed.";
+        var source = string.IsNullOrWhiteSpace(platform)
+            ? string.Empty
+            : $" {SanitizeName(platform)} game.";
+        Enqueue(
+            HeadsetAnnounceKind.GameLaunch,
+            $"Launching {SanitizeName(gameName)}.{source} {profile}");
+    }
+
+    public void AnnounceGameLaunchFailed(string gameName, string? profileName)
+    {
+        var profile = string.IsNullOrWhiteSpace(profileName)
+            ? string.Empty
+            : $" Profile {SanitizeName(profileName)} was not launched.";
+        Enqueue(
+            HeadsetAnnounceKind.LaunchFailed,
+            $"Could not launch {SanitizeName(gameName)}.{profile} Check Log for details.",
+            allowWithoutLiveSession: true);
+    }
+
+    public void AnnounceActionResult(string actionName, string? summary)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.ActionResult,
+            $"{SanitizeName(actionName)}. {DescribeResult(summary, "Completed.")}");
+    }
+
+    public void AnnounceAudioRouting(string summary)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.Audio,
+            $"Audio routing. {DescribeResult(summary, "Completed.")}");
+    }
+
+    public void AnnounceHeadsetAction(string summary)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.Headset,
+            $"Headset settings. {DescribeResult(summary, "Completed.")}");
+    }
+
+    public void AnnounceRecovery(string summary)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.Recovery,
+            $"PCVR recovery. {DescribeResult(summary, "Completed.")}",
+            allowWithoutLiveSession: true);
     }
 
     public void AnnounceDashToSteamVr() => AnnounceSteamVrStarting();
@@ -238,6 +351,8 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void Dispose()
     {
+        _disposed = true;
+        CancelPendingAnnouncements();
         _gapTimer?.Stop();
         _synthesizer?.Dispose();
         _synthesizer = null;
@@ -248,8 +363,14 @@ public sealed class HeadsetAnnouncerService : IDisposable
         string phrase,
         int? delayMs = null,
         bool allowWithoutLiveSession = false,
+        string? playbackDeviceId = null,
         bool force = false)
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         if (!force && !ShouldAnnounce(kind))
         {
             return;
@@ -266,50 +387,123 @@ public sealed class HeadsetAnnouncerService : IDisposable
         }
 
         var delay = Math.Clamp(delayMs ?? _app.Settings.Current.HeadsetAnnouncer.DelayMs, 0, 5000);
+        var generation = Volatile.Read(ref _generation);
+        var token = _lifetimeCts.Token;
         _ = Task.Run(async () =>
         {
-            if (delay > 0)
+            try
             {
-                await Task.Delay(delay).ConfigureAwait(false);
-            }
-
-            // Give Meta a moment to create/default the virtual audio endpoint after Link connect.
-            for (var attempt = 0; attempt < 4; attempt++)
-            {
-                if (force || CanSpeakToHeadset(allowWithoutLiveSession))
+                if (delay > 0)
                 {
-                    if (force && ResolveHeadsetPlaybackId() is null && !_app.Audio.IsCurrentPlaybackHeadset())
+                    await Task.Delay(delay, token).ConfigureAwait(false);
+                }
+
+                if (token.IsCancellationRequested || generation != Volatile.Read(ref _generation))
+                {
+                    return;
+                }
+
+                // Give Meta a moment to create/default the virtual audio endpoint after Link connect.
+                for (var attempt = 0; attempt < 4; attempt++)
+                {
+                    if (!string.IsNullOrWhiteSpace(playbackDeviceId)
+                        || force
+                        || CanSpeakToHeadset(allowWithoutLiveSession))
                     {
-                        if (attempt < 3)
+                        if (force && ResolveHeadsetPlaybackId() is null && !_app.Audio.IsCurrentPlaybackHeadset())
                         {
-                            await Task.Delay(400).ConfigureAwait(false);
-                            continue;
+                            if (attempt < 3)
+                            {
+                                await Task.Delay(400, token).ConfigureAwait(false);
+                                continue;
+                            }
+
+                            _app.Log.Info($"Headset announcer skipped (no headset audio path): {phrase}");
+                            return;
                         }
 
-                        _app.Log.Info($"Headset announcer skipped (no headset audio path): {phrase}");
+                        break;
+                    }
+
+                    if (attempt < 3)
+                    {
+                        await Task.Delay(400, token).ConfigureAwait(false);
+                        continue;
+                    }
+
+                    _app.Log.Info($"Headset announcer skipped (no headset audio path): {phrase}");
+                    return;
+                }
+
+                if (token.IsCancellationRequested || generation != Volatile.Read(ref _generation))
+                {
+                    return;
+                }
+
+                lock (_queueLock)
+                {
+                    if (_queue.Any(item => item.Kind == kind && item.Phrase.Equals(phrase, StringComparison.Ordinal)))
+                    {
                         return;
                     }
 
-                    break;
+                    var item = new QueuedAnnouncement(kind, phrase, playbackDeviceId, PriorityFor(kind));
+                    if (item.Priority >= 2 && _queue.Any(queued => queued.Priority < item.Priority))
+                    {
+                        var prioritized = new Queue<QueuedAnnouncement>();
+                        prioritized.Enqueue(item);
+                        foreach (var queued in _queue.Where(queued => queued.Priority >= item.Priority))
+                        {
+                            prioritized.Enqueue(queued);
+                        }
+
+                        _queue.Clear();
+                        foreach (var queued in prioritized)
+                        {
+                            _queue.Enqueue(queued);
+                        }
+                    }
+                    else
+                    {
+                        _queue.Enqueue(item);
+                    }
                 }
 
-                if (attempt < 3)
+                if (!token.IsCancellationRequested)
                 {
-                    await Task.Delay(400).ConfigureAwait(false);
-                    continue;
+                    _ = _app.Dispatcher.InvokeAsync(BeginDrainQueue);
                 }
-
-                _app.Log.Info($"Headset announcer skipped (no headset audio path): {phrase}");
-                return;
             }
-
-            lock (_queueLock)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
-                _queue.Enqueue(phrase);
+                // Reload / shutdown cancelled this pending phrase.
             }
-
-            _ = _app.Dispatcher.InvokeAsync(BeginDrainQueue);
+            catch (Exception ex)
+            {
+                _app.Log.Warn($"Headset announcer queue failed: {ex.Message}");
+            }
         });
+    }
+
+    private void CancelPendingAnnouncements()
+    {
+        Interlocked.Increment(ref _generation);
+        var previous = Interlocked.Exchange(ref _lifetimeCts, new CancellationTokenSource());
+        try
+        {
+            previous.Cancel();
+        }
+        finally
+        {
+            previous.Dispose();
+        }
+
+        lock (_queueLock)
+        {
+            _queue.Clear();
+        }
+
+        _gapTimer?.Stop();
     }
 
     private void SpeakAndWait(HeadsetAnnounceKind kind, string phrase)
@@ -328,6 +522,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         void Run()
         {
+            Interlocked.Increment(ref _generation);
             lock (_queueLock)
             {
                 _queue.Clear();
@@ -406,7 +601,10 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         if (settings.QuietWhileGameProfileActive && _app.IsGameProfileActive)
         {
-            if (kind is HeadsetAnnounceKind.SessionConnect or HeadsetAnnounceKind.SessionDisconnect)
+            if (kind is HeadsetAnnounceKind.SessionConnect
+                or HeadsetAnnounceKind.SessionDisconnect
+                or HeadsetAnnounceKind.ProfileApplied
+                or HeadsetAnnounceKind.ProfileRestored)
             {
                 return true;
             }
@@ -419,10 +617,14 @@ public sealed class HeadsetAnnouncerService : IDisposable
             HeadsetAnnounceKind.SessionConnect => settings.SessionConnect,
             HeadsetAnnounceKind.SessionDisconnect => settings.SessionDisconnect,
             HeadsetAnnounceKind.ProfileApplied or HeadsetAnnounceKind.ProfileRestored => settings.Profiles,
-            HeadsetAnnounceKind.GlobalDefaults => settings.Profiles,
-            HeadsetAnnounceKind.GameLaunch => settings.GameLaunch,
+            HeadsetAnnounceKind.GlobalDefaults => settings.ActionResults,
+            HeadsetAnnounceKind.GameLaunch or HeadsetAnnounceKind.LaunchFailed => settings.GameLaunch,
             HeadsetAnnounceKind.DashToSteamVr or HeadsetAnnounceKind.SteamVrExit => settings.DashToSteamVr,
             HeadsetAnnounceKind.SteamLinkAssist => settings.SteamLinkAssist,
+            HeadsetAnnounceKind.ActionResult => settings.ActionResults,
+            HeadsetAnnounceKind.Audio => settings.Audio,
+            HeadsetAnnounceKind.Headset => settings.Headset,
+            HeadsetAnnounceKind.Recovery => settings.Recovery,
             _ => false
         };
     }
@@ -432,7 +634,11 @@ public sealed class HeadsetAnnouncerService : IDisposable
         if (!allowWithoutLiveSession)
         {
             var status = _app.LinkConnection.Probe(includeEnumHmd: false);
-            if (!status.SessionActive)
+            var live = status.SessionActive
+                        && (status.Kind is VrConnectionKind.SteamLinkOrSteamVr
+                            or VrConnectionKind.VirtualDesktop
+                            || status.MetaLinkStreaming);
+            if (!live)
             {
                 return false;
             }
@@ -459,7 +665,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
             return;
         }
 
-        string? next;
+        QueuedAnnouncement? next;
         lock (_queueLock)
         {
             if (_queue.Count == 0)
@@ -473,9 +679,9 @@ public sealed class HeadsetAnnouncerService : IDisposable
         _speaking = true;
         try
         {
-            if (SpeakNow(next))
+            if (SpeakNow(next.Phrase, next.PlaybackDeviceId))
             {
-                _app.Log.Info($"Headset announcer: {next}");
+                _app.Log.Info($"Headset announcer: {next.Phrase}");
             }
         }
         catch (Exception ex)
@@ -486,13 +692,19 @@ public sealed class HeadsetAnnouncerService : IDisposable
         }
     }
 
-    private bool SpeakNow(string phrase)
+    private bool SpeakNow(string phrase, string? playbackDeviceId = null)
     {
         if (_synthesizer is null || string.IsNullOrWhiteSpace(phrase))
         {
             _speaking = false;
             BeginDrainQueue();
             return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(playbackDeviceId))
+        {
+            SpeakViaWasapi(phrase, playbackDeviceId);
+            return true;
         }
 
         if (_app.Audio.IsCurrentPlaybackHeadset())
@@ -667,4 +879,50 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         return trimmed[..45] + "...";
     }
+
+    private static int PriorityFor(HeadsetAnnounceKind kind) => kind switch
+    {
+        HeadsetAnnounceKind.SessionConnect
+            or HeadsetAnnounceKind.SessionDisconnect
+            or HeadsetAnnounceKind.SteamVrExit
+            or HeadsetAnnounceKind.Recovery => 2,
+        _ => 1
+    };
+
+    private static string DescribeResult(string? summary, string success)
+    {
+        var text = summary?.Trim() ?? string.Empty;
+        if (text.Length == 0)
+        {
+            return success.TrimEnd('.', '!', ' ');
+        }
+
+        var failure = text.Contains("failed", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("could not", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("not found", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("error", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("rejected", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("timed out", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("needs administrator", StringComparison.OrdinalIgnoreCase);
+        var skipped = text.Contains("skipped", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("not active", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("not configured", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("no VR audio devices", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("no fallback audio", StringComparison.OrdinalIgnoreCase)
+                      || text.Contains("unavailable", StringComparison.OrdinalIgnoreCase);
+
+        return failure && skipped
+            ? "Completed with errors and skipped settings. Check Log"
+            : failure
+                ? "Failed. Check Log"
+                : skipped
+                    ? "Completed with some settings skipped"
+                    : success.TrimEnd('.', '!', ' ');
+    }
+
+    private sealed record QueuedAnnouncement(
+        HeadsetAnnounceKind Kind,
+        string Phrase,
+        string? PlaybackDeviceId,
+        int Priority);
 }

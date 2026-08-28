@@ -16,7 +16,7 @@ public sealed class HotKeyCommandService
 
     public string Execute(HotKeyAction action)
     {
-        return action switch
+        var summary = action switch
         {
             HotKeyAction.ApplyGlobal => ExecuteApplyGlobal(),
             HotKeyAction.RestartOvrService => ExecuteRestartOvr(),
@@ -41,6 +41,18 @@ public sealed class HotKeyCommandService
             HotKeyAction.ApplyGpuPresets => ExecuteApplyGpuPresets(),
             _ => $"Unknown hotkey action: {action}"
         };
+
+        if (action is not HotKeyAction.VoicePushToTalk
+            and not HotKeyAction.DashToSteamVr
+            and not HotKeyAction.StartSteamVr
+            and not HotKeyAction.RecoverPcvr)
+        {
+            _app.HeadsetAnnouncer.AnnounceActionResult(
+                HotKeyCatalog.DescribeAction(action),
+                summary);
+        }
+
+        return summary;
     }
 
     private string ExecuteRestoreDesktopAudio()
@@ -87,12 +99,20 @@ public sealed class HotKeyCommandService
             try
             {
                 var result = _app.Oculus.Restart();
-                _app.Dispatcher.BeginInvoke(() => _app.Log.Info(result));
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    _app.Log.Info(result);
+                    _app.HeadsetAnnouncer.AnnounceActionResult("OVRService restart", result);
+                });
             }
             catch (Exception ex)
             {
                 _app.Dispatcher.BeginInvoke(() =>
-                    _app.Log.Warn("OVRService restart failed: " + ex.Message));
+                {
+                    var result = "OVRService restart failed: " + ex.Message;
+                    _app.Log.Warn(result);
+                    _app.HeadsetAnnouncer.AnnounceActionResult("OVRService restart", result);
+                });
             }
         });
 

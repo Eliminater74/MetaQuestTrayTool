@@ -118,6 +118,7 @@ On **Tray Tool**:
 
 - **HotKeys** — Enable → Configure. Defaults **Ctrl+Numpad 0–9** (ASW, SS cycle, apply global, restart OVRService, Perf HUD, open Meta Link, Dash → SteamVR). Assign **Open Debug Tool** / **Open SteamVR Home** if you want them. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
 - **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off”, “dash to steam v r”, or “open steam v r home”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
+- **Headset announcements** — Enable **Speak status in headset** to hear game name, profile armed/applied/restored, transport, OpenXR runtime, audio routing, recovery, SteamVR, and concise action results. Full diagnostics stay in Log; configure the announcement categories and test the Quest audio path on the **Tray Tool** page.
 
 Full shortcut and phrase list: [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md).
 

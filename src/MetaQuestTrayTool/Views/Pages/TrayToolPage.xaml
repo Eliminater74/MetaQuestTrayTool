@@ -68,22 +68,22 @@
 
       <TextBlock Text="Headset announcements" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="Spoken status in the Quest headset while PCVR is active — so you hear connect, the wait before SteamVR, SteamVR exit, and the 10-second Meta service stop even when desktop toasts are not visible."/>
+                 Text="Spoken status in the Quest headset while PCVR is active — so you hear game/profile launches, applied settings, runtime and transport, audio, recovery, connect/disconnect, SteamVR, and important failures even when desktop toasts are not visible."/>
       <CheckBox x:Name="HeadsetAnnounceBox" Content="Speak status in headset"
                 ToolTip="Use Windows text-to-speech on the Link / VR audio path when a PCVR session is active."
                 Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
       <StackPanel x:Name="HeadsetAnnouncePanel" Margin="28,0,0,8">
         <CheckBox x:Name="AnnounceConnectBox" Content="Session connect (Air Link, wired Link, Steam Link, VD)"
-                  ToolTip="Example: Connected. Air Link. Now starting SteamVR — or Meta Horizon will load when Dash is enabled."
+                  ToolTip="Announces transport, active or intended OpenXR runtime, audio switching, and SteamVR/Meta startup."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceDisconnectBox" Content="Session disconnect"
                   ToolTip="Example: Air Link session ended."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceProfilesBox" Content="Profile apply and global restore"
-                  ToolTip="Example: Applying profile. Beat Saber."
+                  ToolTip="Includes the game/profile name, concise apply or restore outcome, and OpenXR runtime."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceLaunchBox" Content="Game launch from library / profile"
-                  ToolTip="Example: Launching. Half-Life Alyx."
+                  ToolTip="Includes the game name, Steam/Meta/Custom source, and the profile armed for that launch."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceDashBox" Content="SteamVR start and SteamVR exit"
                   ToolTip="Please wait. Starting SteamVR. (on Link connect). SteamVR closed. Stopping Meta service for 10 seconds. (spoken in the headset before OVRService stops)."
@@ -91,8 +91,20 @@
         <CheckBox x:Name="AnnounceSteamLinkBox" Content="Steam Link OpenXR assist"
                   ToolTip="OpenXR nudge / restore during Steam Link sessions."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
-        <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (connect/disconnect + SteamVR exit wait)"
-                  ToolTip="Reduce chatter mid-game — still announce session connect, disconnect, and the 10-second Meta service stop after SteamVR closes."
+        <CheckBox x:Name="AnnounceActionsBox" Content="Important action results"
+                  ToolTip="Speak concise results for hotkeys, voice commands, OpenXR switches, recovery, and manual tray actions."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceAudioBox" Content="Manual audio routing"
+                  ToolTip="Speak when you manually switch to VR audio or restore desktop audio. Automatic routing is covered by session announcements."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceHeadsetBox" Content="Headset and ADB tweak results"
+                  ToolTip="Speak headset ADB, trust, and performance-tweak results when a headset audio path is available."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceRecoveryBox" Content="PCVR recovery results"
+                  ToolTip="Speak the short result after Recover PCVR finishes. Full service and setting details remain in Log."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceQuietBox" Content="Quiet while a game profile is active (important events still speak)"
+                  ToolTip="Reduce chatter mid-game — still announce session connect/disconnect, profile apply/restore, and the 10-second Meta service stop after SteamVR closes."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <TextBlock Text="Spoken voice" Margin="0,10,0,4" Foreground="{DynamicResource AppMutedBrush}"/>
         <ComboBox x:Name="HeadsetVoiceBox" MinWidth="320" MaxWidth="520" HorizontalAlignment="Left" Padding="6"

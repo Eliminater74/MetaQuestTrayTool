@@ -337,7 +337,11 @@ public sealed class HeadsetWatchService : IDisposable
             if (connected)
             {
                 _app.Dispatcher.BeginInvoke(() =>
-                    _app.Log.Info("ADB headset connect — auto-apply is off (enable under Headset settings)."));
+                {
+                    const string message = "ADB headset connect — auto-apply is off (enable under Headset settings).";
+                    _app.Log.Info(message);
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("ADB connected. Auto-apply is off.");
+                });
             }
 
             _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: true));
@@ -367,6 +371,7 @@ public sealed class HeadsetWatchService : IDisposable
                 if (connected)
                 {
                     _app.TrayNotify("Headset", result);
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction($"ADB connected. {result}");
                 }
 
                 ApplyCadence(headsetPresent: true);
@@ -377,6 +382,11 @@ public sealed class HeadsetWatchService : IDisposable
             _app.Dispatcher.BeginInvoke(() =>
             {
                 _app.Log.Warn($"Headset ADB: {ex.Message}");
+                if (connected)
+                {
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("ADB settings failed. Check Log.");
+                }
+
                 ApplyCadence(headsetPresent: true);
             });
         }

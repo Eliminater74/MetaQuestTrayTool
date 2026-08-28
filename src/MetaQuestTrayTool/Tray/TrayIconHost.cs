@@ -158,6 +158,7 @@ public sealed class TrayIconHost : IDisposable
         {
             var summary = _app.Oculus.ShowMetaHorizonLink();
             _app.Log.Info(summary);
+            _app.HeadsetAnnouncer.AnnounceActionResult("Open Meta Horizon Link", summary);
             Notify("Meta Horizon Link", summary);
         }));
         menu.Items.Add(new ToolStripMenuItem("Start SteamVR", null, (_, _) =>
@@ -183,6 +184,7 @@ public sealed class TrayIconHost : IDisposable
         {
             var summary = _app.Oculus.ShowOculusDebugTool();
             _app.Log.Info(summary);
+            _app.HeadsetAnnouncer.AnnounceActionResult("Open Oculus Debug Tool", summary);
             Notify("Oculus Debug Tool", summary);
         }));
         menu.Items.Add(new ToolStripMenuItem("Start SteamVR over Link", null, (_, _) =>
@@ -194,6 +196,7 @@ public sealed class TrayIconHost : IDisposable
         {
             var summary = _app.SteamVrInstall.OpenSteamVrHome();
             _app.Log.Info(summary);
+            _app.HeadsetAnnouncer.AnnounceActionResult("SteamVR Home", summary);
             Notify("SteamVR Home", summary.Length > 120 ? summary[..117] + "…" : summary);
         }));
         menu.Items.Add(new ToolStripMenuItem("Recover PCVR (after Link drop)", null, (_, _) =>
@@ -580,6 +583,7 @@ public sealed class TrayIconHost : IDisposable
         if (!caps.AllowsOculusDebugTool)
         {
             _app.Log.Info(caps.OdtSkipMessage);
+            _app.HeadsetAnnouncer.AnnounceActionResult("Game settings", caps.OdtSkipMessage);
             Notify("Game Settings", caps.OdtSkipMessage);
             _shell?.RefreshActivePage();
             return;
@@ -615,10 +619,12 @@ public sealed class TrayIconHost : IDisposable
         {
             var saved = _app.SaveLastGoodToActiveProfile();
             _app.Log.Info(saved);
+            _app.HeadsetAnnouncer.AnnounceActionResult("Game settings", result.Summary + " " + saved);
             Notify("Game Settings", result.Summary + " · " + saved);
         }
         else
         {
+            _app.HeadsetAnnouncer.AnnounceActionResult("Game settings", result.Summary);
             Notify("Game Settings", result.Summary);
         }
 
@@ -903,6 +909,9 @@ public sealed class TrayIconHost : IDisposable
         _app.Settings.Save();
         var result = _app.OpenXr.Set(kind);
         _app.Log.Info(result);
+        _app.HeadsetAnnouncer.AnnounceActionResult(
+            $"OpenXR switched to {OpenXrRuntimeService.Label(kind)}",
+            result);
         Notify("OpenXR", result);
         _shell?.RefreshActivePage();
     }
@@ -932,12 +941,14 @@ public sealed class TrayIconHost : IDisposable
         {
             var result = _app.Audio.ApplyVrDevices(_app.Settings.Current.Audio);
             _app.Log.Info(result);
+            _app.HeadsetAnnouncer.AnnounceAudioRouting(result);
             Notify("Audio", result);
         }));
         menu.DropDownItems.Add(new ToolStripMenuItem("Restore fallback devices", null, (_, _) =>
         {
             var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
             _app.Log.Info(result);
+            _app.HeadsetAnnouncer.AnnounceAudioRouting(result);
             Notify("Audio", result);
         }));
         menu.DropDownItems.Add(new ToolStripMenuItem("Capture current defaults as fallback", null, (_, _) =>
@@ -945,6 +956,7 @@ public sealed class TrayIconHost : IDisposable
             var result = _app.Audio.CaptureCurrentAsFallback(_app.Settings.Current.Audio);
             _app.Settings.Save();
             _app.Log.Info(result);
+            _app.HeadsetAnnouncer.AnnounceAudioRouting(result);
             Notify("Audio", result);
         }));
         return menu;
@@ -1255,6 +1267,7 @@ public sealed class TrayIconHost : IDisposable
                 _app.Dispatcher.BeginInvoke(() =>
                 {
                     _app.Log.Info(result);
+                    _app.HeadsetAnnouncer.AnnounceActionResult("Oculus Service", result);
                     Notify("Oculus Service", result);
                     _shell?.RefreshActivePage();
                 });
@@ -1264,6 +1277,7 @@ public sealed class TrayIconHost : IDisposable
                 _app.Dispatcher.BeginInvoke(() =>
                 {
                     _app.Log.Warn(ex.Message);
+                    _app.HeadsetAnnouncer.AnnounceActionResult("Oculus Service", "Service action failed. Check Log.");
                     Notify("Oculus Service", ex.Message);
                 });
             }

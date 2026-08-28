@@ -92,6 +92,30 @@ public sealed class ProcessWatcherService : IDisposable
         _app.Log.Info($"Library launch armed profile '{profile.Name}' for {name}.exe until it exits.");
     }
 
+    /// <summary>
+    /// Cancel a profile armed for a launch that failed before its process appeared.
+    /// This prevents a failed launch from leaving profile settings active for the
+    /// full launch grace period.
+    /// </summary>
+    public string CancelArmedProfile()
+    {
+        if (!_awaitingLaunchProcess || _activeProcess is null)
+        {
+            return string.Empty;
+        }
+
+        var processName = _activeProcess;
+        var profileName = _activeProfileName ?? "profile";
+        _activeProcess = null;
+        _activeProfileName = null;
+        _awaitingLaunchProcess = false;
+        var summary = _app.RestoreGlobalDefaults();
+        _app.Log.Info(
+            $"Launch of {processName}.exe failed before process start — cancelled profile '{profileName}' and restored globals. {summary}");
+        ApplyCadence();
+        return summary;
+    }
+
     public void Dispose() => _timer.Stop();
 
     private void BeginPoll()
@@ -241,7 +265,19 @@ public sealed class ProcessWatcherService : IDisposable
 
     private void ApplyProfile(GameProfile profile, string processName)
     {
-        var summary = _app.ApplyProfile(profile);
+        string summary;
+        try
+        {
+            summary = _app.ApplyProfile(profile);
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Error($"Detected {processName}.exe — profile '{profile.Name}' failed to apply.", ex);
+            Notify("Profile apply failed", $"{profile.Name} could not be applied to {processName}.exe.");
+            _app.HeadsetAnnouncer.AnnounceProfileApplyFailed(profile.Name);
+            return;
+        }
+
         TrySetPriority(processName, profile.CpuPriority);
         _activeProcess = processName;
         _activeProfileName = profile.Name;
@@ -249,7 +285,7 @@ public sealed class ProcessWatcherService : IDisposable
         Notify(
             "Profile applied",
             $"{profile.Name} is now active for {processName}.exe.\nGlobal defaults will return when you close the game.");
-        _app.HeadsetAnnouncer.AnnounceProfileApplied(profile.Name);
+        _app.HeadsetAnnouncer.AnnounceProfileDetected(profile.Name, summary);
         ApplyCadence();
     }
 
@@ -259,12 +295,25 @@ public sealed class ProcessWatcherService : IDisposable
         _activeProcess = null;
         _activeProfileName = null;
         _awaitingLaunchProcess = false;
-        var summary = _app.RestoreGlobalDefaults();
+        string summary;
+        try
+        {
+            summary = _app.RestoreGlobalDefaults();
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Error($"Could not restore global defaults after '{profileName}'.", ex);
+            Notify("Global restore failed", $"Could not restore global defaults after '{profileName}'.");
+            _app.HeadsetAnnouncer.AnnounceProfileRestoreFailed(profileName);
+            ApplyCadence();
+            return;
+        }
+
         _app.Log.Info($"{processName}.exe exited — restored global defaults after '{profileName}'. {summary}");
         Notify(
             "Global defaults restored",
             $"{processName}.exe closed.\nRestored your global VR settings after '{profileName}'.");
-        _app.HeadsetAnnouncer.AnnounceProfileRestored(profileName);
+        _app.HeadsetAnnouncer.AnnounceProfileRestored(profileName, summary);
         ApplyCadence();
     }
 
