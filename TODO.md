@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -250,6 +250,11 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Informed connect TTS (SteamVR vs Meta Horizon) + Link audio delay
 - [x] Bump version to **1.1.18**
 - [x] Tag and publish **v1.1.18**
+- [x] Expand headset voice coverage with game/profile, action, audio, headset, recovery, and experimental results
+- [x] Add opt-in experimental MSFS 2024 VR launch automation
+- [x] Audit and harden MSFS targeting, profile launch safety, helper IPC, TTS lifecycle, and voice fallback
+- [x] Bump version to **1.1.19**
+- [x] Tag and publish **v1.1.19**
 
 ### Housekeeping (ongoing)
 

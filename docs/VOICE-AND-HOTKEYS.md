@@ -117,7 +117,7 @@ Windows TTS on the Link / VR audio path so you **hear** what the tray is doing w
 
 Examples: “Connected. Air Link. SteamVR OpenXR runtime will be used. Now starting SteamVR.” · “Launching Beat Saber. Steam game. Profile Beat Saber is armed.” · “Beat Saber detected. Profile applied. OpenXR is set to SteamVR.” · “Beat Saber closed. Restored global settings after profile.” · “SteamVR closed. Stopping Meta service for 10 seconds.”
 
-Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist, important action results, manual audio routing, headset/ADB results, and PCVR recovery. **Quiet while a game profile is active** still permits connect/disconnect, profile apply/restore, and the SteamVR-exit 10s wait, while suppressing lower-priority chatter.
+Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist, important action results, manual audio routing, headset/ADB results, PCVR recovery, and experimental launch results. **Quiet while a game profile is active** still permits connect/disconnect, profile apply/restore, SteamVR-exit 10s wait, and experimental outcomes, while suppressing lower-priority chatter.
 
 Starting SteamVR (button / hotkey / voice) always tries to speak **“Starting SteamVR.”** in the Quest when a headset playback device is found — even if Status is not Active yet. Auto PreventDashLaunch speaks **“Please wait. Starting SteamVR.”** on Link connect. SteamVR exit speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** before OVRService stops. Other phrases still need **Speak status in headset**.
 

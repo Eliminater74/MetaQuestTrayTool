@@ -49,7 +49,7 @@ All stills captured **25 Aug 2025** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.18 — MetaQuestTrayTool-Setup-1.1.18.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.18/MetaQuestTrayTool-Setup-1.1.18.exe)
+**Latest:** [v1.1.19 — MetaQuestTrayTool-Setup-1.1.19.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.19/MetaQuestTrayTool-Setup-1.1.19.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -162,7 +162,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Informed connect TTS (SteamVR vs Meta Horizon), setup-aware PCVR Ready, neon icon, settings survive power loss.
+Release **[v1.1.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Expanded headset TTS, safer profile/game launches, and experimental MSFS 2024 VR automation are included.
 
 ### Shell & tray
 
@@ -216,7 +216,8 @@ Release **[v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - HotKeys: default **Ctrl+Numpad 0–9**; configure UI; assign Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
 - Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
-- **Headset announcements** (Tray Tool): TTS in the Quest on connect, the wait before SteamVR, SteamVR closed + 10s Meta service stop (spoken *before* OVR drops), profile apply, launch — when desktop toasts are not visible in-headset
+- **Headset announcements** (Tray Tool): TTS in the Quest on connect, the wait before SteamVR, SteamVR closed + 10s Meta service stop (spoken *before* OVR drops), profile apply/restore, game/profile launch, action/audio/headset/recovery results, and experimental MSFS outcomes — when desktop toasts are not visible in-headset
+- **Experimental MSFS 2024 VR launch** (opt-in per profile): prepares Meta Link or SteamVR over Link, starts with `-FastLaunch` when no custom arguments are set, then optionally focuses the launched simulator window and sends a configured VR toggle. Best-effort only; it does not click verification dialogs or detect when a flight is ready.
 - In-app updates from GitHub `v*` (on start, schedule, or Check now) — shows **what's new** before you install; ADB stopped before Setup; Setup itself shows the changelog page
 - **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
 - Backup export/import from Advanced; Donate (PayPal); **quiet tray idle** — adaptive watcher cadence (~30–45s when unused, faster only in PCVR / armed features); timers stop when features are off; Status/Info pause when the shell is hidden to the tray; shared Link probe caches

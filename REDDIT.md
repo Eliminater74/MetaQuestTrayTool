@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
-```
-[PC] Meta Quest Tray Tool v1.1.18 — free modern OTT-style tray app for Quest Link / SteamVR (neon icon + settings survive power loss)
+```text
+[PC] Meta Quest Tray Tool v1.1.19 — free modern OTT-style tray app for Quest Link / SteamVR (expanded headset voice + experimental MSFS VR launch)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.18** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.19** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,7 +54,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.18)
+### What works now (v1.1.19)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -63,7 +63,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Hands-free elevated start (one UAC, then silent elevated at logon)
 - Refreshed neon VR headset icon/logo (tray, About, settings sidebar)
 - Durable `settings.json` / `profiles.json` (flush + `.bak`/`.bak2` restore after power loss)
-- Fresh **v1.1.18 screenshots + walkthrough video** in the repo README; **full gallery + user guide:** https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos
+- Full gallery + user guide: https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos
 
 **Status & SteamVR**
 - Live Status chips (PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, session type, ADB, battery/Wi‑Fi, profile, HotKeys/Voice, Dash→SteamVR, GPU, audio)
@@ -105,7 +105,8 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - Assign **Open Debug Tool** / **Open SteamVR Home** / recover / OpenXR / overlays / GPU preset in Configure
 - Voice: Windows speech — push-to-talk (**Ctrl+Shift+V** default) or always-on; mic picker; min confidence; custom phrases
 - New phrases: recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset
-- **Headset announcements** (Tray Tool): spoken status in the Quest — connect waits for Link audio then says **“Connected. Air Link. Now starting SteamVR.”** (PreventDash) or **“Meta Horizon will load.”** (Dash path); SteamVR exit wait; profile apply; launch
+- **Headset announcements** (Tray Tool): spoken status in the Quest — transport and OpenXR on connect; SteamVR wait/exit; game name and armed profile; profile apply/restore; action, audio, headset/ADB, recovery, and experimental results. Voice falls back to a normal confirmation when headset delivery is unavailable.
+- **Experimental MSFS 2024 VR launch** (opt-in per profile): prepares Meta Link or SteamVR over Link, uses `-FastLaunch` when no custom arguments are set, and optionally focuses only the newly launched simulator window before sending a configured VR toggle. Best-effort; no verification-dialog or flight-ready detection.
 - Full list: wiki → HotKeys, voice, and headset announcements (`docs/VOICE-AND-HOTKEYS.md` in the repo)
 
 **OpenXR / audio / power**
@@ -210,5 +211,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.18) — neon icon, settings survive power loss, Pause ADB / VR-headsets-only so phones and TVs keep ADB, headset wait cues, unelevated SteamVR helper, Quest Home after SteamVR exit, TTS voice picker, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.19) — expanded headset voice coverage, opt-in experimental MSFS 2024 VR launch, neon icon, settings survive power loss, Pause ADB / VR-headsets-only so phones and TVs keep ADB, unelevated SteamVR helper, Quest Home after SteamVR exit, TTS voice picker, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

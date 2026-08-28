@@ -8,6 +8,19 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.19] - 2026-08-28
+
+### Added
+- Expanded headset announcements with game/profile launch details, profile apply/restore outcomes, action/audio/headset/recovery results, and an opt-in experimental-result toggle.
+- Experimental MSFS 2024 VR launch now prepares the selected PCVR path, supports configurable launch arguments and VR hotkeys, and verifies the target process window before sending input.
+
+### Fixed
+- Stale MSFS VR toggles are cancelled when another launch starts, and PCVR preparation failures no longer continue into game launch automation.
+- Profile launches are blocked from replacing an already-active game profile, preventing a failed second launch from restoring the wrong global settings.
+- Local profile executables must be relative `.exe` files inside the configured install directory; session-helper launch fields are encoded safely across the named pipe.
+- Headset TTS reload and shutdown now retire synthesizers only after active playback releases them, and voice confirmations fall back when headset delivery is unavailable.
+- OpenXR write failures are reported as failures in spoken action summaries.
+
 ## [1.1.18] - 2026-08-25
 
 ### Added
@@ -153,7 +166,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.18...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.19...HEAD
+[1.1.19]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.19
 [1.1.18]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.18
 [1.1.17]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.17
 [1.1.16]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.16

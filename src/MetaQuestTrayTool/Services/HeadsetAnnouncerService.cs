@@ -71,9 +71,10 @@ public sealed class HeadsetAnnouncerService : IDisposable
             }
         }
 
+        SpeechSynthesizer? synthesizer = null;
         try
         {
-            var synthesizer = new SpeechSynthesizer { Rate = 0 };
+            synthesizer = new SpeechSynthesizer { Rate = 0 };
             TtsVoiceCatalog.Apply(synthesizer, _app.Settings.Current.HeadsetAnnouncer.VoiceName);
             lock (_synthLock)
             {
@@ -85,9 +86,11 @@ public sealed class HeadsetAnnouncerService : IDisposable
             }
 
             synthesizer.Dispose();
+            synthesizer = null;
         }
         catch (Exception ex)
         {
+            synthesizer?.Dispose();
             _app.Log.Warn($"Headset announcer unavailable: {ex.Message}");
         }
     }
@@ -394,8 +397,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
             EnsureSynthesizer();
         }
 
-        return HasCurrentSynthesizer()
-               && (allowWithoutLiveSession || CanSpeakToHeadset(allowWithoutLiveSession));
+        return HasCurrentSynthesizer() && CanSpeakToHeadset(allowWithoutLiveSession);
     }
 
     private void Enqueue(

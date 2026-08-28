@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.18](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.19](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.18)
+## Current product (v1.1.19)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -20,7 +20,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Link / Dash | RemoteHeadset Link settings + presets, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
-| Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU), headset announcements, automation |
+| Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU), expanded headset announcements, experimental MSFS 2024 VR launch automation |
 | Updates / polish | In-app GitHub updates, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
@@ -117,6 +117,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.16 | Durable settings/profile save + .bak/.bak2 restore after power-loss truncated JSON; saves work again after corrupt load |
 | v1.1.17 | Neon VR icon/logo (tray + About + sidebar); exit/unhandled-exception logging for crash diagnosis |
 | v1.1.18 | Setup-aware PCVR Ready; informed connect TTS (SteamVR vs Meta Horizon) with Link audio delay |
+| v1.1.19 | Expanded headset voice coverage; safer TTS lifecycle and voice fallback; opt-in MSFS 2024 VR launch automation with target validation and safer profile/helper launches |
 
 ---
 

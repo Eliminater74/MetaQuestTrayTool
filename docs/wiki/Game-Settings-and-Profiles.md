@@ -42,6 +42,8 @@ Want Steam games with SS / ASW / Link bitrate? Use Link + [[Dash-to-SteamVR]] �
 4. When that process starts, the profile auto-applies (tray notification + optional headset announcement).
 5. When it exits, **global defaults restore**.
 
+The launcher will not replace an already-active game profile. Close the active game first so its settings are restored before starting another profiled game.
+
 **Ignore list** (Tray / Game Settings) stops Discord, browsers, `vrserver`, etc. from stealing the profile.
 
 **Save last-good** (tray) writes the current SS/ASW/HUD into the *active* personal profile mid-session.
@@ -56,7 +58,7 @@ Edit the MSFS 2024 profile and enable **Experimental MSFS 2024 VR launch**. This
 2. Starts MSFS normally with the profile's launch arguments. If the arguments are blank, the tool uses `-FastLaunch`.
 3. Waits for the `FlightSimulator2024` window, focuses it, and—if enabled—sends the configured toggle after the delay (default `Ctrl+Tab` after 45 seconds).
 
-This is best-effort automation, not a native MSFS VR boot. It does not click verification dialogs or detect when a flight is ready, and MSFS may ignore the toggle while a menu is loading. Confirm the first run manually and adjust the delay or disable automatic toggle if needed. Steam launch arguments are passed through the Steam run URI; if Steam ignores them, put `-FastLaunch` in Steam's normal Launch Options.
+This is best-effort automation, not a native MSFS VR boot. It does not click verification dialogs or detect when a flight is ready, and MSFS may ignore the toggle while a menu is loading. Confirm the first run manually and adjust the delay or disable automatic toggle if needed. The tool records the simulator processes that existed before launch and only sends input to a newly appeared `FlightSimulator2024` window that still belongs to that process. Steam launch arguments are passed through the Steam run URI; if Steam ignores them, put `-FastLaunch` in Steam's normal Launch Options.
 
 Profiles file: `%AppData%\MetaQuestTrayTool\profiles.json`. Export/import everything from **Advanced**.
 

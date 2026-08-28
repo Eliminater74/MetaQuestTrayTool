@@ -256,6 +256,7 @@ public sealed class ExperimentalMsfsVrService : IDisposable
         summary.Contains("could not", StringComparison.OrdinalIgnoreCase)
         || summary.Contains("not found", StringComparison.OrdinalIgnoreCase)
         || summary.Contains("failed", StringComparison.OrdinalIgnoreCase)
+        || summary.Contains("live value is still", StringComparison.OrdinalIgnoreCase)
         || summary.Contains("needs Administrator", StringComparison.OrdinalIgnoreCase)
         || summary.Contains("was not found", StringComparison.OrdinalIgnoreCase);
 

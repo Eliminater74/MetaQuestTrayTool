@@ -1,13 +1,15 @@
-Meta Quest Tray Tool 1.1.18 - What's new
+Meta Quest Tray Tool 1.1.19 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.18] - 2026-08-25
+[1.1.19] - 2026-08-28
 
 Added
-- Headset connect speech waits for Link audio and explains what happens next: Now starting SteamVR on PreventDash path, or Meta Horizon will load when Dash is allowed.
+- Expanded headset announcements with game/profile launch details, profile apply/restore outcomes, action/audio/headset/recovery results, and experimental-result controls.
+- Experimental MSFS 2024 VR launch prepares the selected PCVR path, supports configurable launch arguments and VR hotkeys, and validates the target process window before sending input.
 
 Fixed
-- PCVR Ready / Status use your setup path (PreventDash to SteamVR vs Meta Link / Dash), not a stale Meta OpenXR preference.
+- Stale MSFS toggles, failed PCVR preparation, unsafe profile overlap, untrusted local launch paths, helper IPC field splitting, and TTS reload/shutdown races are handled safely.
+- Voice confirmations fall back when headset delivery is unavailable, and OpenXR write failures are spoken as failures.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

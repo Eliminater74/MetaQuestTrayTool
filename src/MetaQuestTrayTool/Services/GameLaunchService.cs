@@ -72,6 +72,12 @@ public sealed class GameLaunchService
     public string LaunchProfile(GameProfile profile, bool applyNow = true)
     {
         ArgumentNullException.ThrowIfNull(profile);
+        if (ProfileService.NormalizeProcessName(profile.ProcessName).Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"Cannot launch profile '{profile.Name}' without a process name.");
+        }
+
         _app.ExperimentalMsfsVr.CancelScheduledToggle();
 
         _app.Settings.Current.AutoApplyProfiles = true;
