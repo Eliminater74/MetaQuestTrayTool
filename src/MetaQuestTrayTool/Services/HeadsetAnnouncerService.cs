@@ -115,24 +115,53 @@ public sealed class HeadsetAnnouncerService : IDisposable
             VrConnectionKind.VirtualDesktop => "Virtual Desktop",
             _ => "PCVR"
         };
+        var openXrPhrase = BuildOpenXrPhrase();
 
         if (status.Kind is VrConnectionKind.MetaAirLink or VrConnectionKind.MetaWiredLink)
         {
             if (PcvrSetup.GetMode(_app) == PcvrSetupMode.SteamVrOverMetaLink)
             {
-                return $"Connected. {linkLabel}. Now starting SteamVR.";
+                return $"Connected. {linkLabel}. SteamVR OpenXR runtime will be used. Now starting SteamVR.";
             }
 
-            return $"Connected. {linkLabel}. Meta Horizon will load.";
+            return $"Connected. {linkLabel}. {openXrPhrase} Meta Horizon will load.";
         }
 
         return status.Kind switch
         {
-            VrConnectionKind.SteamLinkOrSteamVr => "Connected. Steam Link. SteamVR session.",
-            VrConnectionKind.VirtualDesktop => "Connected. Virtual Desktop.",
-            _ => "Connected."
+            VrConnectionKind.SteamLinkOrSteamVr => $"Connected. Steam Link or SteamVR. {openXrPhrase}",
+            VrConnectionKind.VirtualDesktop => $"Connected. Virtual Desktop. {openXrPhrase}",
+            _ => $"Connected. {openXrPhrase}"
         };
     }
+
+    /// <summary>
+    /// Reports the Windows active OpenXR runtime. This is the runtime selected for
+    /// newly launched OpenXR applications; an already-running game may retain the
+    /// runtime it selected at launch.
+    /// </summary>
+    private string BuildOpenXrPhrase()
+    {
+        try
+        {
+            return _app.OpenXr.ReadActiveKind() switch
+            {
+                OpenXrRuntimeKind.Meta => "OpenXR is set to Meta.",
+                OpenXrRuntimeKind.SteamVr => "OpenXR is set to SteamVR.",
+                _ => "OpenXR runtime is unknown."
+            };
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn($"Headset announcer could not read OpenXR runtime: {ex.Message}");
+            return "OpenXR runtime could not be read.";
+        }
+    }
+
+    private string BuildSteamVrTargetPhrase() =>
+        _app.Settings.Current.DashToSteamVr.SwitchOpenXrToSteamVr
+            ? "SteamVR OpenXR runtime will be used."
+            : BuildOpenXrPhrase();
 
     public void AnnounceSessionDisconnected(VrConnectionKind? previous)
     {
@@ -174,7 +203,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
         Enqueue(
             HeadsetAnnounceKind.DashToSteamVr,
-            "Please wait. Starting SteamVR.",
+            $"Please wait. Starting SteamVR. {BuildSteamVrTargetPhrase()}",
             delayMs: Math.Max(400, _app.Settings.Current.HeadsetAnnouncer.DelayMs / 2),
             allowWithoutLiveSession: true,
             force: true);
@@ -186,7 +215,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
         EnsureSynthesizer();
         Enqueue(
             HeadsetAnnounceKind.DashToSteamVr,
-            "Starting SteamVR now.",
+            $"Starting SteamVR now. {BuildSteamVrTargetPhrase()}",
             delayMs: Math.Max(400, _app.Settings.Current.HeadsetAnnouncer.DelayMs / 2),
             allowWithoutLiveSession: true,
             force: true);

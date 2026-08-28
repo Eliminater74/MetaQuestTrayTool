@@ -115,7 +115,7 @@ Use **Test listen once** in Configure to try without leaving the window.
 
 Windows TTS on the Link / VR audio path so you **hear** what the tray is doing when you cannot see desktop balloons.
 
-Examples: “Connected. Air Link. Now starting SteamVR.” · “Connected. Air Link. Meta Horizon will load.” · “SteamVR closed. Stopping Meta service for 10 seconds.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.”
+Examples: “Connected. Air Link. SteamVR OpenXR runtime will be used. Now starting SteamVR.” · “Connected. Air Link. OpenXR is set to Meta. Meta Horizon will load.” · “SteamVR closed. Stopping Meta service for 10 seconds.” · “Applying profile. Beat Saber.” · “Launching. Half-Life Alyx.”
 
 Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Link assist. **Quiet while a game profile is active** = connect/disconnect plus the SteamVR-exit 10s wait (so Quest Home is not silent).
 
@@ -123,7 +123,7 @@ Starting SteamVR (button / hotkey / voice) always tries to speak **“Starting S
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 
-Waits ~900 ms for Link audio; uses WASAPI if Windows default is not the headset.
+The connect announcement also reports the active Windows OpenXR runtime (Meta or SteamVR). When Dash → SteamVR is enabled, it reports that SteamVR OpenXR will be used because the runtime is switched as SteamVR starts. Waits ~900 ms for Link audio; uses WASAPI if Windows default is not the headset.
 
 ---
 
