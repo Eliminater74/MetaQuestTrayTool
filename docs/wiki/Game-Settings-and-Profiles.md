@@ -48,6 +48,16 @@ Want Steam games with SS / ASW / Link bitrate? Use Link + [[Dash-to-SteamVR]] �
 
 Built-in presets exist for several PCVR titles (MSFS 2024, Beat Saber, HL:Alyx, DCS, iRacing, …).
 
+### Experimental MSFS 2024 VR launch
+
+Edit the MSFS 2024 profile and enable **Experimental MSFS 2024 VR launch**. This is opt-in and off by default. When enabled, a launch:
+
+1. Prepares the configured PCVR path (Meta Horizon Link, or SteamVR over Meta Link when Dash → SteamVR is configured).
+2. Starts MSFS normally with the profile's launch arguments. If the arguments are blank, the tool uses `-FastLaunch`.
+3. Waits for the `FlightSimulator2024` window, focuses it, and—if enabled—sends the configured toggle after the delay (default `Ctrl+Tab` after 45 seconds).
+
+This is best-effort automation, not a native MSFS VR boot. It does not click verification dialogs or detect when a flight is ready, and MSFS may ignore the toggle while a menu is loading. Confirm the first run manually and adjust the delay or disable automatic toggle if needed. Steam launch arguments are passed through the Steam run URI; if Steam ignores them, put `-FastLaunch` in Steam's normal Launch Options.
+
 Profiles file: `%AppData%\MetaQuestTrayTool\profiles.json`. Export/import everything from **Advanced**.
 
 ## Close overlays on Link connect

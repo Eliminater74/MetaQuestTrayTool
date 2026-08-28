@@ -90,5 +90,6 @@ public enum HeadsetAnnounceKind
     ActionResult,
     Audio,
     Headset,
-    Recovery
+    Recovery,
+    Experimental
 }

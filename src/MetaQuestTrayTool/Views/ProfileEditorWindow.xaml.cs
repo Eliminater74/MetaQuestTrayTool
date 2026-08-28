@@ -72,6 +72,16 @@ public partial class ProfileEditorWindow : Window
         NameBox.Text = profile.Name;
         ProcessBox.Text = profile.ProcessName;
         PlatformBox.SelectedItem = profile.Platform;
+        MsfsVrBox.IsChecked = profile.ExperimentalMsfsVr;
+        LaunchArgumentsBox.Text = profile.LaunchArguments
+            ?? (profile.ExperimentalMsfsVr ? "-FastLaunch" : string.Empty);
+        MsfsAutoToggleBox.IsChecked = profile.ExperimentalMsfsVrAutoToggle;
+        MsfsDelayBox.Text = Math.Clamp(profile.ExperimentalMsfsVrToggleDelaySeconds, 5, 600)
+            .ToString(CultureInfo.InvariantCulture);
+        MsfsHotkeyBox.Text = string.IsNullOrWhiteSpace(profile.ExperimentalMsfsVrHotkey)
+            ? "Ctrl+Tab"
+            : profile.ExperimentalMsfsVrHotkey;
+        MsfsVrPanel.IsEnabled = profile.ExperimentalMsfsVr;
         ScopeText.Text = profile.Scope == ProfileScope.Personal
             ? "Scope: Personal app profile (overrides global defaults while this process runs)."
             : "Scope: Global";
@@ -158,6 +168,15 @@ public partial class ProfileEditorWindow : Window
             : preset.Description;
     }
 
+    private void MsfsVr_Changed(object sender, RoutedEventArgs e)
+    {
+        MsfsVrPanel.IsEnabled = MsfsVrBox.IsChecked == true;
+        if (MsfsVrBox.IsChecked == true && string.IsNullOrWhiteSpace(LaunchArgumentsBox.Text))
+        {
+            LaunchArgumentsBox.Text = "-FastLaunch";
+        }
+    }
+
     private void BrowseLibrary_Click(object sender, RoutedEventArgs e)
     {
         var picker = new LibraryPickerWindow
@@ -220,6 +239,41 @@ public partial class ProfileEditorWindow : Window
         Profile.Name = NameBox.Text.Trim();
         Profile.ProcessName = ProfileService.NormalizeProcessName(ProcessBox.Text);
         Profile.Platform = PlatformBox.SelectedItem is GamePlatform platform ? platform : GamePlatform.Custom;
+        Profile.ExperimentalMsfsVr = MsfsVrBox.IsChecked == true;
+        if (Profile.ExperimentalMsfsVr && !ExperimentalMsfsVrService.IsMsfs2024(Profile))
+        {
+            System.Windows.MessageBox.Show(
+                this,
+                "Experimental MSFS 2024 VR launch requires the process name FlightSimulator2024.",
+                App.AppName);
+            return;
+        }
+
+        Profile.LaunchArguments = string.IsNullOrWhiteSpace(LaunchArgumentsBox.Text)
+            ? Profile.ExperimentalMsfsVr ? "-FastLaunch" : null
+            : LaunchArgumentsBox.Text.Trim();
+        Profile.ExperimentalMsfsVrAutoToggle = MsfsAutoToggleBox.IsChecked == true;
+        var hasMsfsDelay = int.TryParse(
+            MsfsDelayBox.Text,
+            NumberStyles.Integer,
+            CultureInfo.InvariantCulture,
+            out var msfsDelay);
+        if (Profile.ExperimentalMsfsVr
+            && (!hasMsfsDelay || msfsDelay is < 5 or > 600))
+        {
+            System.Windows.MessageBox.Show(
+                this,
+                "MSFS VR toggle delay must be between 5 and 600 seconds.",
+                App.AppName);
+            return;
+        }
+
+        Profile.ExperimentalMsfsVrToggleDelaySeconds = Profile.ExperimentalMsfsVr && hasMsfsDelay
+            ? Math.Clamp(msfsDelay, 5, 600)
+            : Math.Clamp(Profile.ExperimentalMsfsVrToggleDelaySeconds, 5, 600);
+        Profile.ExperimentalMsfsVrHotkey = string.IsNullOrWhiteSpace(MsfsHotkeyBox.Text)
+            ? "Ctrl+Tab"
+            : MsfsHotkeyBox.Text.Trim();
         Profile.Scope = ProfileScope.Personal;
         Profile.Settings.SuperSampling = SuperSamplingBox.SelectedItem is ComboBoxItem ssItem && ssItem.Tag is double ss
             ? ss

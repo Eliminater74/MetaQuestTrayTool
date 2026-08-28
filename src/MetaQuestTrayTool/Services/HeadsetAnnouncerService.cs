@@ -304,6 +304,13 @@ public sealed class HeadsetAnnouncerService : IDisposable
             allowWithoutLiveSession: true);
     }
 
+    public void AnnounceExperimentalMsfsVr(string phrase)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.Experimental,
+            $"MSFS experimental VR. {phrase}");
+    }
+
     public void AnnounceDashToSteamVr() => AnnounceSteamVrStarting();
 
     /// <summary>Spoken before auto SteamVR launch when connect did not already announce it.</summary>
@@ -604,7 +611,8 @@ public sealed class HeadsetAnnouncerService : IDisposable
             if (kind is HeadsetAnnounceKind.SessionConnect
                 or HeadsetAnnounceKind.SessionDisconnect
                 or HeadsetAnnounceKind.ProfileApplied
-                or HeadsetAnnounceKind.ProfileRestored)
+                or HeadsetAnnounceKind.ProfileRestored
+                or HeadsetAnnounceKind.Experimental)
             {
                 return true;
             }
@@ -625,6 +633,7 @@ public sealed class HeadsetAnnouncerService : IDisposable
             HeadsetAnnounceKind.Audio => settings.Audio,
             HeadsetAnnounceKind.Headset => settings.Headset,
             HeadsetAnnounceKind.Recovery => settings.Recovery,
+            HeadsetAnnounceKind.Experimental => settings.GameLaunch,
             _ => false
         };
     }

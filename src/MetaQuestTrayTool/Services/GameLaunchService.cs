@@ -31,17 +31,26 @@ public sealed class GameLaunchService
                 _app.Log.Info($"Armed profile '{profile.Name}' before launch: {applied}");
             }
 
+            if (profile?.ExperimentalMsfsVr == true)
+            {
+                _app.ExperimentalMsfsVr.Prepare(profile);
+            }
+
             if (profile is not null && !string.IsNullOrWhiteSpace(game.ProcessName))
             {
                 _app.ProcessWatcher?.ArmActiveProfile(profile, game.ProcessName);
             }
 
-            var launch = StartGame(game);
+            var launch = StartGame(game, EffectiveLaunchArguments(profile));
             _app.TrayNotify("Launch", $"{game.Name}\n{launch}");
             _app.HeadsetAnnouncer.AnnounceGameLaunch(
                 game.Name,
                 profile?.Name,
                 game.PlatformLabel);
+            if (profile is not null)
+            {
+                _app.ExperimentalMsfsVr.ScheduleToggle(profile);
+            }
             return launch;
         }
         catch
@@ -67,6 +76,11 @@ public sealed class GameLaunchService
                 _app.ApplyProfile(profile);
             }
 
+            if (profile.ExperimentalMsfsVr)
+            {
+                _app.ExperimentalMsfsVr.Prepare(profile);
+            }
+
             if (!string.IsNullOrWhiteSpace(profile.ProcessName))
             {
                 _app.ProcessWatcher?.ArmActiveProfile(profile, profile.ProcessName);
@@ -75,7 +89,7 @@ public sealed class GameLaunchService
             // Prefer Steam protocol when we have an AppId.
             if (profile.Platform == GamePlatform.Steam && !string.IsNullOrWhiteSpace(profile.AppId))
             {
-                StartSteam(profile.AppId!);
+                StartSteam(profile.AppId!, EffectiveLaunchArguments(profile));
                 var msg = $"Launched Steam app {profile.AppId} ({profile.Name}). Profile armed.";
                 _app.Log.Info(msg);
                 _app.TrayNotify("Launch", msg);
@@ -83,6 +97,7 @@ public sealed class GameLaunchService
                     profile.Name,
                     profile.Name,
                     DescribePlatform(profile.Platform));
+                _app.ExperimentalMsfsVr.ScheduleToggle(profile);
                 return msg;
             }
 
@@ -91,7 +106,7 @@ public sealed class GameLaunchService
                 var exe = Path.Combine(profile.InstallPath!, profile.LaunchFile!);
                 if (File.Exists(exe))
                 {
-                    StartExe(exe, profile.InstallPath!);
+                    StartExe(exe, profile.InstallPath!, EffectiveLaunchArguments(profile));
                     var msg = $"Launched {profile.Name} ({exe}). Profile armed.";
                     _app.Log.Info(msg);
                     _app.TrayNotify("Launch", msg);
@@ -99,6 +114,7 @@ public sealed class GameLaunchService
                         profile.Name,
                         profile.Name,
                         DescribePlatform(profile.Platform));
+                    _app.ExperimentalMsfsVr.ScheduleToggle(profile);
                     return msg;
                 }
             }
@@ -179,11 +195,11 @@ public sealed class GameLaunchService
         return profile;
     }
 
-    private string StartGame(LibraryGame game)
+    private string StartGame(LibraryGame game, string? launchArguments)
     {
         if (game.Platform == GamePlatform.Steam && !string.IsNullOrWhiteSpace(game.AppId))
         {
-            StartSteam(game.AppId!);
+            StartSteam(game.AppId!, launchArguments);
             return $"Started Steam title '{game.Name}' (app {game.AppId}).";
         }
 
@@ -195,7 +211,7 @@ public sealed class GameLaunchService
                 throw new FileNotFoundException($"Launch file not found: {exe}");
             }
 
-            StartExe(exe, game.InstallPath!);
+            StartExe(exe, game.InstallPath!, launchArguments);
             return $"Started '{game.Name}' ({exe}).";
         }
 
@@ -203,18 +219,25 @@ public sealed class GameLaunchService
             $"No launch method for '{game.Name}'. Steam needs an AppId; Meta needs InstallPath + LaunchFile.");
     }
 
-    private void StartSteam(string appId)
+    private void StartSteam(string appId, string? launchArguments = null)
     {
-        var uri = $"steam://run/{appId}";
+        var args = NormalizeLaunchArguments(launchArguments);
+        var uri = args.Length == 0
+            ? $"steam://run/{appId}"
+            : $"steam://run/{appId}//{Uri.EscapeDataString(args)}";
         if (!SessionHelperClient.TryLaunchUri(uri, out var detail))
         {
             throw new InvalidOperationException("Could not start Steam title: " + detail);
         }
     }
 
-    private void StartExe(string exe, string workingDirectory)
+    private void StartExe(string exe, string workingDirectory, string? launchArguments = null)
     {
-        if (!SessionHelperClient.TryLaunchExe(exe, arguments: null, workingDirectory, out var detail))
+        if (!SessionHelperClient.TryLaunchExe(
+                exe,
+                NormalizeLaunchArguments(launchArguments),
+                workingDirectory,
+                out var detail))
         {
             throw new InvalidOperationException("Could not start game: " + detail);
         }
@@ -226,4 +249,25 @@ public sealed class GameLaunchService
         GamePlatform.Meta => "Meta",
         _ => "Custom"
     };
+
+    private static string? EffectiveLaunchArguments(GameProfile? profile)
+    {
+        if (profile is null)
+        {
+            return null;
+        }
+
+        var arguments = NormalizeLaunchArguments(profile.LaunchArguments);
+        return arguments.Length > 0
+            ? arguments
+            : profile.ExperimentalMsfsVr
+                ? "-FastLaunch"
+                : null;
+    }
+
+    private static string NormalizeLaunchArguments(string? arguments) =>
+        (arguments ?? string.Empty)
+            .Replace('\r', ' ')
+            .Replace('\n', ' ')
+            .Trim();
 }

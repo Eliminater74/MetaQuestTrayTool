@@ -13,6 +13,13 @@ public sealed class GameProfile
     public string? InstallPath { get; set; }
     /// <summary>Relative exe name under <see cref="InstallPath"/> (Meta / local launch).</summary>
     public string? LaunchFile { get; set; }
+    /// <summary>Optional arguments passed to the Steam URI or local executable launch.</summary>
+    public string? LaunchArguments { get; set; }
+    /// <summary>Opt-in MSFS 2024 launcher: prepare PCVR and optionally send the VR toggle.</summary>
+    public bool ExperimentalMsfsVr { get; set; }
+    public bool ExperimentalMsfsVrAutoToggle { get; set; } = true;
+    public int ExperimentalMsfsVrToggleDelaySeconds { get; set; } = 45;
+    public string ExperimentalMsfsVrHotkey { get; set; } = "Ctrl+Tab";
     public GameSettings Settings { get; set; } = new();
 
     private LinkProfileOverrides _link = new();

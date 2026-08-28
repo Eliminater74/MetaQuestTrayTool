@@ -64,6 +64,34 @@
         <ComboBox x:Name="PlatformBox" Margin="0,0,0,16"
                   ToolTip="Where the game lives (Steam, Meta, custom). Used for library artwork and filtering."/>
 
+        <TextBlock Text="Launch automation" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+        <TextBlock Text="The experimental MSFS option prepares PCVR, starts the simulator normally, then sends a toggle after a delay. It cannot detect when a flight is ready."
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource AppMutedBrush}"
+                   FontSize="12"
+                   Margin="0,0,0,8"/>
+        <CheckBox x:Name="MsfsVrBox" Content="Experimental MSFS 2024 VR launch"
+                  Checked="MsfsVr_Changed" Unchecked="MsfsVr_Changed"
+                  ToolTip="Opt in for the FlightSimulator2024 profile only. Starts Meta Link or SteamVR over Link, then optionally sends the configured VR toggle."/>
+        <StackPanel x:Name="MsfsVrPanel" Margin="28,6,0,16">
+          <TextBlock Text="Launch arguments" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,4"/>
+          <TextBox x:Name="LaunchArgumentsBox" Text="-FastLaunch" Margin="0,0,0,8"
+                   ToolTip="Arguments passed to the Steam game URI or local executable. MSFS uses -FastLaunch by default when the experimental option is enabled."/>
+          <CheckBox x:Name="MsfsAutoToggleBox" Content="Send VR toggle automatically after loading delay"
+                    Margin="0,0,0,8"
+                    ToolTip="Best effort only. The window is focused and the configured key is sent after the delay; verify the simulator entered VR."/>
+          <TextBlock Text="Toggle delay (seconds)" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,4"/>
+          <TextBox x:Name="MsfsDelayBox" Margin="0,0,0,8"
+                   ToolTip="Wait after the MSFS window appears before sending the VR toggle. Allowed range: 5–600 seconds."/>
+          <TextBlock Text="VR toggle hotkey" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,4"/>
+          <TextBox x:Name="MsfsHotkeyBox" Margin="0,0,0,4"
+                   ToolTip="Supported combinations: Ctrl+Tab, Shift+Tab, or Alt+Tab. MSFS commonly uses Ctrl+Tab."/>
+          <TextBlock Text="The simulator must reach a usable 2D menu or flight first. This automation does not click verification dialogs or guarantee a successful VR transition."
+                     TextWrapping="Wrap"
+                     Foreground="{DynamicResource AppMutedBrush}"
+                     FontSize="12"/>
+        </StackPanel>
+
         <TextBlock Text="Super Sampling" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
         <ComboBox x:Name="SuperSamplingBox" Margin="0,0,0,16"
                   ToolTip="OculusDebugToolCLI super sampling while this process runs. Inherit keeps globals."/>

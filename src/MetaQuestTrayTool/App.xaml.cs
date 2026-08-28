@@ -57,6 +57,7 @@ public partial class App : System.Windows.Application
     public PcvrReadyService PcvrReady { get; }
     public SessionRecoverService SessionRecover { get; }
     public GameLaunchService GameLaunch { get; }
+    public ExperimentalMsfsVrService ExperimentalMsfsVr { get; }
     public OverlayCloseService OverlayClose { get; }
     public SteamVrInstallService SteamVrInstall { get; } = new();
     public StatusDashboardService StatusDashboard { get; }
@@ -88,6 +89,7 @@ public partial class App : System.Windows.Application
         PcvrReady = new PcvrReadyService(this);
         SessionRecover = new SessionRecoverService(this);
         GameLaunch = new GameLaunchService(this);
+        ExperimentalMsfsVr = new ExperimentalMsfsVrService(this);
         OverlayClose = new OverlayCloseService(this);
         StatusDashboard = new StatusDashboardService(this);
     }
@@ -436,6 +438,7 @@ public partial class App : System.Windows.Application
         _processWatcher?.Dispose();
         HotKeys.Dispose();
         Voice.Dispose();
+        ExperimentalMsfsVr.Dispose();
         HeadsetAnnouncer.Dispose();
 
         if (Settings.Current.Service.StopServiceWhenToolExits)

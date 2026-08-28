@@ -77,6 +77,8 @@ Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tr
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 
+For the opt-in **Experimental MSFS 2024 VR launch** profile option, headset speech also reports when the delayed VR toggle was sent, or when the MSFS window/focus/toggle step failed. The automation cannot click verification dialogs or know when a flight is ready; see [[Game-Settings-and-Profiles]] and verify the first run manually.
+
 The connect announcement also reports the active Windows OpenXR runtime (Meta or SteamVR), whether automatic VR audio switching is enabled, and the transport. When Dash → SteamVR is enabled, it reports that SteamVR OpenXR will be used because the runtime is switched as SteamVR starts. Important action results use short success/skip/failure summaries; full details remain in Log. Waits for Link audio (minimum connect delay is about 2.2 seconds); uses WASAPI if Windows default is not the headset.
 
 ## Related
