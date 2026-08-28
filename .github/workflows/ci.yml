@@ -15,12 +15,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 8.0.424
 
       - name: Restore
         run: dotnet restore MetaQuestTrayTool.sln
@@ -30,13 +30,23 @@ jobs:
         run: dotnet build MetaQuestTrayTool.sln -c Release --no-restore
         shell: pwsh
 
+      - name: Test
+        run: dotnet test MetaQuestTrayTool.sln -c Release --no-restore --no-build
+        shell: pwsh
+
+      - name: Check NuGet vulnerabilities
+        run: |
+          $result = dotnet list MetaQuestTrayTool.sln package --vulnerable --include-transitive 2>&1 | Out-String
+          $result
+          if ($result -match '(?m)^\s*>\s+.*\s+(Critical|High|Moderate|Low)\s+') {
+            throw "Vulnerable NuGet package detected."
+          }
+        shell: pwsh
+
       - name: Publish self-contained (smoke test)
-        run: >
-          dotnet publish src/MetaQuestTrayTool/MetaQuestTrayTool.csproj
-          -c Release -r win-x64 --self-contained true
-          -p:PublishReadyToRun=true
-          -p:DebugType=None -p:DebugSymbols=false
-          -o publish/ci-smoke
+        run: |
+          dotnet restore src/MetaQuestTrayTool/MetaQuestTrayTool.csproj -r win-x64 --force-evaluate
+          dotnet publish src/MetaQuestTrayTool/MetaQuestTrayTool.csproj -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false -o publish/ci-smoke --no-restore
         shell: pwsh
 
       - name: Verify publish output

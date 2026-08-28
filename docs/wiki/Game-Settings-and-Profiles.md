@@ -64,7 +64,7 @@ Profiles file: `%AppData%\MetaQuestTrayTool\profiles.json`. Export/import everyt
 
 ## Close overlays on Link connect
 
-Optional list of process names (no `.exe`) such as RTSS, Afterburner, NZXT CAM. Closed when a PCVR session connects. Voice **close overlays** can force the same list even if auto-close is off.
+Optional list of process names (no `.exe`) such as RTSS, Afterburner, NZXT CAM. Closed when a PCVR session connects. Voice **close overlays** can force the same list even if auto-close is off. The tool first asks each process to close; after 1.5 seconds it may terminate that process itself, but does not kill its child process tree.
 
 Never kills SteamVR, Oculus, Discord, or Explorer.
 
@@ -73,6 +73,7 @@ Never kills SteamVR, Oculus, Discord, or Explorer.
 ![Custom commands](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/02-game-settings-custom-commands.png)
 
 Extra OculusDebugToolCLI lines and `adb shell` lines on global defaults and on each profile.
+Custom ADB lines run only on a classified VR headset, and—when **Only run ADB commands on the trusted headset** is enabled—only after that headset has been explicitly trusted.
 
 ## Related
 

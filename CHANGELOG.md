@@ -8,6 +8,13 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Fixed
+- Custom ADB commands now honor the trusted-headset requirement, and profile editing is transactional when cancelled.
+- ODT / ADB failures now report timeouts and non-zero exit codes instead of false success.
+- Audio and power watchers restore captured desktop state when disabled or stopped; PreventDashLaunch preserves the optional SteamVR-exit preference.
+- Updates verify the exact GitHub installer asset, size, and published SHA-256 digest before launch.
+- Installer cleanup no longer terminates unrelated ADB clients and removes this app's startup registrations on uninstall.
+
 ## [1.1.19] - 2026-08-28
 
 ### Added

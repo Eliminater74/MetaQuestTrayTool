@@ -2,13 +2,13 @@
 
 Media used by the root [README](../../README.md) and the [GitHub Wiki gallery](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos).
 
-Captured **25 Aug 2025** on **v1.1.18** (Pure Black theme).
+Captured **25 Aug 2026** on **v1.1.18** (Pure Black theme).
 
 ## Video
 
 | File | Description |
 | --- | --- |
-| [demo.mp4](demo.mp4) | Full shell walkthrough (~65 MB, Aug 2025) |
+| [demo.mp4](demo.mp4) | Full shell walkthrough (~65 MiB / 68 MB, Aug 2026) |
 
 ## Shell pages
 

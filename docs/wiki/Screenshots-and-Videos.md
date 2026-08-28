@@ -1,12 +1,12 @@
 # Screenshots and videos
 
-Captured **25 Aug 2025** on **v1.1.18** (Pure Black theme).
+Captured **25 Aug 2026** on **v1.1.18** (Pure Black theme).
 
 ## Videos
 
 | Recording | Link |
 | --- | --- |
-| Shell walkthrough (25 Aug 2025) | [demo.mp4](https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4) |
+| Shell walkthrough (25 Aug 2026) | [demo.mp4](https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4) |
 | Earlier walkthrough (13 Aug 2026) | [Download MP4](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/walkthrough-2026-08-13.mp4) |
 
 GitHub wiki does not inline-play large MP4s — open the download link (VLC / browser).

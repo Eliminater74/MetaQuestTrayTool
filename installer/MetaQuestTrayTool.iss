@@ -44,7 +44,7 @@ PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
 MinVersion=10.0
 CloseApplications=yes
-CloseApplicationsFilter=MetaQuestTrayTool.exe,adb.exe
+CloseApplicationsFilter=MetaQuestTrayTool.exe
 RestartApplications=no
 AllowNoIcons=yes
 VersionInfoVersion={#MyAppVersion}.0
@@ -86,28 +86,20 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   ResultCode: Integer;
-  AdbPath: String;
 begin
   Result := '';
-  // Stop tray + ADB server so platform-tools\adb.exe is not locked during upgrade.
+  // Stop the tray before replacing installed files. Shared ADB sessions are not touched.
   Exec('taskkill.exe', '/IM MetaQuestTrayTool.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  AdbPath := ExpandConstant('{app}\platform-tools\adb.exe');
-  if FileExists(AdbPath) then
-    Exec(AdbPath, 'kill-server', ExpandConstant('{app}\platform-tools'), SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  Exec('taskkill.exe', '/IM adb.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   ResultCode: Integer;
-  AdbPath: String;
 begin
   if CurUninstallStep = usUninstall then
   begin
+    RegDeleteValue(HKEY_CURRENT_USER, 'Software\Microsoft\Windows\CurrentVersion\Run', 'MetaQuestTrayTool');
+    Exec('schtasks.exe', '/Delete /TN "MetaQuestTrayTool" /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Exec('taskkill.exe', '/IM MetaQuestTrayTool.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    AdbPath := ExpandConstant('{app}\platform-tools\adb.exe');
-    if FileExists(AdbPath) then
-      Exec(AdbPath, 'kill-server', ExpandConstant('{app}\platform-tools'), SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    Exec('taskkill.exe', '/IM adb.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 end;

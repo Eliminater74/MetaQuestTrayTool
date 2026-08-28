@@ -22,7 +22,7 @@ The app lives in the **notification area** (system tray), not as a full-time tas
 
 OpenXR switching, `OVRService` control, and some profile/registry writes need **Administrator**.
 
-1. On first run, approve the elevation prompt if offered.
+1. On first run, the default hands-free mode requests Administrator approval once. This creates an elevated logon scheduled task so future starts do not prompt while you are in VR. To opt out, disable automatic elevation in Tray Tool settings or launch with `--no-elevate`.
 2. Or use tray **Restart as Administrator…** / **Service & Startup → Run with Administrator rights at logon**.
 
 After one Windows approval, a logon scheduled task starts the tray elevated so you do **not** get UAC while wearing the headset.
@@ -52,7 +52,7 @@ If you *do* use Quest Link, Meta often opens at Windows sign-in because **OVRSer
 
 **Tray Tool → Check for updates on start** (on by default), a running schedule (weekly default), or **Check now** / tray **Check for updates…**.
 
-The updater downloads Setup.exe from GitHub, stops ADB so bundled platform-tools can be replaced, then installs over the current copy.
+The updater downloads and verifies the exact Setup.exe release asset from GitHub using its published SHA-256 digest, then installs over the current copy. It only stops this app's bundled ADB process; shared ADB servers and other Android tools are left alone.
 
 ## Next
 

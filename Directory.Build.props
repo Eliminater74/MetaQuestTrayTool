@@ -7,5 +7,7 @@
     <Company>Eliminater74</Company>
     <Authors>Eliminater74</Authors>
     <Copyright>Copyright c Eliminater74</Copyright>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode>true</RestoreLockedMode>
   </PropertyGroup>
 </Project>

@@ -44,6 +44,14 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
     $Version = Get-ProjectVersion
 }
 
+$projectVersion = Get-ProjectVersion
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "Version must use strict major.minor.patch format."
+}
+if ($Version -ne $projectVersion) {
+    throw "Version $Version does not match Directory.Build.props version $projectVersion."
+}
+
 $publishDir = Join-Path $root "publish\win-x64"
 $iss = Join-Path $root "installer\MetaQuestTrayTool.iss"
 $csproj = Join-Path $root "src\MetaQuestTrayTool\MetaQuestTrayTool.csproj"
@@ -61,10 +69,16 @@ if (-not $SkipPublish) {
     }
     New-Item -ItemType Directory -Path $publishDir -Force | Out-Null
 
+    & dotnet restore $csproj -r win-x64 --force-evaluate
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet restore failed with exit code $LASTEXITCODE"
+    }
+
     & dotnet publish $csproj `
         -c $Configuration `
         -r win-x64 `
         --self-contained true `
+        --no-restore `
         -p:PublishReadyToRun=true `
         -p:DebugType=None `
         -p:DebugSymbols=false `
@@ -82,9 +96,18 @@ if (-not $SkipPublish) {
     Write-Host "Publish OK." -ForegroundColor Green
 }
 else {
-    if (-not (Test-Path (Join-Path $publishDir "MetaQuestTrayTool.exe"))) {
+    $existingExe = Join-Path $publishDir "MetaQuestTrayTool.exe"
+    if (-not (Test-Path $existingExe)) {
         throw "SkipPublish set but $publishDir is empty. Run without -SkipPublish first."
     }
+
+    $embeddedVersion = (Get-Item $existingExe).VersionInfo.ProductVersion
+    $embeddedVersion = ($embeddedVersion -split '\+')[0]
+    if (($embeddedVersion -notmatch '^\d+\.\d+\.\d+(\.0)?$') -or
+        ($embeddedVersion -notmatch "^$([regex]::Escape($Version))(\.0)?$")) {
+        throw "Existing publish EXE version '$embeddedVersion' does not match requested version $Version. Publish again without -SkipPublish."
+    }
+
     Write-Host "Skipping publish (using existing folder)." -ForegroundColor DarkYellow
 }
 

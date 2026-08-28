@@ -19,7 +19,7 @@ This follows the [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKi
 
 Connect with **Meta Link / Air Link**. After a confirmed live stream (not Wi‑Fi auto-connect), the tray auto-starts SteamVR within a few seconds.
 
-When you **exit SteamVR**, the headset speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** then the tray **stops OVRService**, keeps it down **at least 10 seconds** so Link fully disconnects (Quest Home), then starts the service again. It does not leave OVR stopped. SteamVR is launched through a **normal-user session helper** unless Steam itself is already running as Administrator (then the helper is skipped so SteamVR matches that Steam).
+When **Restart OVRService when SteamVR exits** is enabled and you **exit SteamVR**, the headset speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** then the tray **stops OVRService**, keeps it down **at least 10 seconds** so Link fully disconnects (Quest Home), then starts the service again. It does not leave OVR stopped. If the option is disabled, the tray leaves OVRService running. SteamVR is launched through a **normal-user session helper** unless Steam itself is already running as Administrator (then the helper is skipped so SteamVR matches that Steam).
 
 On Link connect, the headset speaks **“Please wait. Starting SteamVR.”** during the short settle before SteamVR launches.
 

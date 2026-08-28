@@ -9,7 +9,7 @@ on:
       version:
         description: "Release version without v prefix (e.g. 1.0.0)"
         required: true
-        default: "1.0.0"
+        default: "1.1.19"
       prerelease:
         description: "Mark as pre-release"
         type: boolean
@@ -23,7 +23,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
@@ -39,17 +39,38 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($version)) {
             throw "Version is empty."
           }
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Version must use strict major.minor.patch format."
+          }
+          [xml]$props = Get-Content Directory.Build.props
+          $sourceVersion = $props.Project.PropertyGroup.Version
+          if ($version -ne $sourceVersion) {
+            throw "Release version $version does not match Directory.Build.props version $sourceVersion."
+          }
           "Resolved version: $version"
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=v$version" >> $env:GITHUB_OUTPUT
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 8.0.424
 
       - name: Install Inno Setup 6
         run: choco install innosetup -y --no-progress
+        shell: pwsh
+
+      - name: Test
+        run: dotnet test MetaQuestTrayTool.sln -c Release
+        shell: pwsh
+
+      - name: Check NuGet vulnerabilities
+        run: |
+          $result = dotnet list MetaQuestTrayTool.sln package --vulnerable --include-transitive 2>&1 | Out-String
+          $result
+          if ($result -match '(?m)^\s*>\s+.*\s+(Critical|High|Moderate|Low)\s+') {
+            throw "Vulnerable NuGet package detected."
+          }
         shell: pwsh
 
       - name: Build Setup.exe
@@ -57,7 +78,7 @@ jobs:
         shell: pwsh
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}
           path: dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
@@ -92,7 +113,7 @@ jobs:
           Get-Content $path
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Meta Quest Tray Tool ${{ steps.version.outputs.tag }}

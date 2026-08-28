@@ -5,11 +5,14 @@ Read these notes before installing. You can cancel Setup if you prefer to stay o
 [1.1.19] - 2026-08-28
 
 Added
-- Expanded headset announcements with game/profile launch details, profile apply/restore outcomes, action/audio/headset/recovery results, and experimental-result controls.
-- Experimental MSFS 2024 VR launch prepares the selected PCVR path, supports configurable launch arguments and VR hotkeys, and validates the target process window before sending input.
+- Expanded headset announcements with game/profile launch details, profile apply/restore outcomes, action/audio/headset/recovery results, and an opt-in experimental-result toggle.
+- Experimental MSFS 2024 VR launch now prepares the selected PCVR path, supports configurable launch arguments and VR hotkeys, and verifies the target process window before sending input.
 
 Fixed
-- Stale MSFS toggles, failed PCVR preparation, unsafe profile overlap, untrusted local launch paths, helper IPC field splitting, and TTS reload/shutdown races are handled safely.
-- Voice confirmations fall back when headset delivery is unavailable, and OpenXR write failures are spoken as failures.
+- Stale MSFS VR toggles are cancelled when another launch starts, and PCVR preparation failures no longer continue into game launch automation.
+- Profile launches are blocked from replacing an already-active game profile, preventing a failed second launch from restoring the wrong global settings.
+- Local profile executables must be relative .exe files inside the configured install directory; session-helper launch fields are encoded safely across the named pipe.
+- Headset TTS reload and shutdown now retire synthesizers only after active playback releases them, and voice confirmations fall back when headset delivery is unavailable.
+- OpenXR write failures are reported as failures in spoken action summaries.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

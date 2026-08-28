@@ -6,6 +6,7 @@
 | [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
 | [../CHANGELOG.md](../CHANGELOG.md) | What's new per release (also shown in Setup and the in-app updater) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
+| [SECURITY.md](SECURITY.md) | Update verification, local-data privacy, and device/process safety |
 | [../README.md](../README.md) | User guide, download, feature inventory (v1.1.19) |
 | [wiki/](wiki/) | GitHub Wiki source (user guide, troubleshooting, videos) |
 | [GitHub Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) | Published wiki |

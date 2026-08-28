@@ -10,7 +10,7 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 
 ### Preview
 
-**Demo video (Aug 2025, v1.1.18):** [Watch walkthrough (MP4)](docs/media/demo.mp4) · **[Screenshot gallery](docs/media/README.md)** · **[Wiki gallery](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos)
+**Demo video (Aug 2026, v1.1.18):** [Watch walkthrough (MP4)](docs/media/demo.mp4) · **[Screenshot gallery](docs/media/README.md)** · **[Wiki gallery](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Screenshots-and-Videos)
 
 <p align="center">
   <a href="docs/media/demo.mp4">
@@ -41,7 +41,7 @@ Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Elimi
 | Profiles | ![Profiles](docs/media/14-profiles.png) |
 | Audio switching | ![Audio switching](docs/media/15-audio-switching.png) |
 
-All stills captured **25 Aug 2025** on **v1.1.18** (Pure Black theme). Full list: [docs/media/README.md](docs/media/README.md).
+All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list: [docs/media/README.md](docs/media/README.md).
 
 </details>
 
@@ -89,7 +89,7 @@ Global defaults stay applied until a game with a personal profile launches.
 ### 4. Per-game profiles (optional)
 
 1. Open **Profiles** → **New profile** (or pick a built-in preset such as MSFS 2024 or Beat Saber).
-2. Set the **executable name** (e.g. `FlightSimulator.exe`) and any overrides (Link, OpenXR runtime, game settings).
+2. Set the **executable name** (for MSFS 2020 use `FlightSimulator`; for MSFS 2024 use `FlightSimulator2024`) and any overrides (Link, OpenXR runtime, game settings).
 3. Optionally **Launch** from the library / profile (`steam://run/{appId}`), or use the **ignore list** so noisy helper processes do not steal the profile.
 4. When that game starts, the profile auto-applies and you get a tray notification.
 5. When the game exits, **global defaults are restored** automatically. Mid-session you can **save last-good** SS/ASW/HUD into the active profile.
@@ -251,6 +251,7 @@ See [ROADMAP.md](ROADMAP.md) and [TODO.md](TODO.md) for history and remaining ho
 | [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry keys vs CLI commands (from Meta binaries) |
 | [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) | Hotkey shortcuts and voice phrase reference |
 | [docs/media/README.md](docs/media/README.md) | Screenshots and demo video |
+| [docs/SECURITY.md](docs/SECURITY.md) | Update verification and local-data safety notes |
 | [ROADMAP.md](ROADMAP.md) | See the planned phases and why they exist |
 | [TODO.md](TODO.md) | Check what is done vs next, checkbox style |
 | [REDDIT.md](REDDIT.md) | Copy-paste Reddit announcement (title + body) |

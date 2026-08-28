@@ -12,7 +12,7 @@ Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OT
 
 | Video | What it shows |
 | --- | --- |
-| [Walkthrough (25 Aug 2025, v1.1.18)](https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4) | Full shell walkthrough — Status, pages, profiles, VR Tools |
+| [Walkthrough (25 Aug 2026, v1.1.18)](https://github.com/Eliminater74/MetaQuestTrayTool/raw/main/docs/media/demo.mp4) | Full shell walkthrough — Status, pages, profiles, VR Tools |
 | [Earlier walkthrough (13 Aug 2026)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.2/walkthrough-2026-08-13.mp4) | Previous recording (pre–Status / VR Tools stills) |
 
 **Screenshot gallery:** [[Screenshots-and-Videos]] · [docs/media](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/media/README.md)
