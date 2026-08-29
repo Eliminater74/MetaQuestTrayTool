@@ -23,7 +23,7 @@ jobs:
           dotnet-version: 8.0.424
 
       - name: Restore
-        run: dotnet restore MetaQuestTrayTool.sln
+        run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --force-evaluate
         shell: pwsh
 
       - name: Build

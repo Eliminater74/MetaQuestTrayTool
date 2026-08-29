@@ -60,8 +60,12 @@ jobs:
         run: choco install innosetup -y --no-progress
         shell: pwsh
 
+      - name: Restore
+        run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --force-evaluate
+        shell: pwsh
+
       - name: Test
-        run: dotnet test MetaQuestTrayTool.sln -c Release
+        run: dotnet test MetaQuestTrayTool.sln -c Release --no-restore
         shell: pwsh
 
       - name: Check NuGet vulnerabilities
