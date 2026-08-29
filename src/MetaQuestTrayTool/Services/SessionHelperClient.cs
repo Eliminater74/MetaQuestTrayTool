@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.IO;
 using System.Text;
@@ -109,7 +110,25 @@ public static class SessionHelperClient
             out detail);
     }
 
-    public static void RequestQuit() => TrySend("QUIT", out _);
+    public static void RequestQuit()
+    {
+        if (!TryGetHelperProcessId(out var pid))
+        {
+            TrySend("QUIT", out _);
+            return;
+        }
+
+        TrySend("QUIT", out _);
+        if (WaitForHelperExit(pid, TimeSpan.FromSeconds(3)))
+        {
+            return;
+        }
+
+        // The helper may be stuck while the tray is exiting. Only terminate the
+        // process that identified itself over the protected helper pipe and whose
+        // executable path matches this application.
+        TryTerminateHelper(pid);
+    }
 
     private static bool TryLaunch(
         bool steamFamily,
@@ -200,6 +219,77 @@ public static class SessionHelperClient
         catch (Exception ex)
         {
             detail = ex.Message;
+            return false;
+        }
+    }
+
+    private static bool TryGetHelperProcessId(out int pid)
+    {
+        pid = 0;
+        return TrySend("PID", out var detail)
+            && int.TryParse(detail, out pid)
+            && pid > 0
+            && pid != Environment.ProcessId;
+    }
+
+    private static bool WaitForHelperExit(int pid, TimeSpan timeout)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(pid);
+            if (!IsOwnedHelper(process))
+            {
+                return true;
+            }
+
+            return process.WaitForExit((int)timeout.TotalMilliseconds);
+        }
+        catch (ArgumentException)
+        {
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void TryTerminateHelper(int pid)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(pid);
+            if (!IsOwnedHelper(process) || process.HasExited)
+            {
+                return;
+            }
+
+            process.Kill(entireProcessTree: false);
+            process.WaitForExit(3000);
+        }
+        catch
+        {
+            // The helper may have exited between the PID query and cleanup.
+        }
+    }
+
+    private static bool IsOwnedHelper(Process process)
+    {
+        if (process.Id == Environment.ProcessId
+            || string.IsNullOrWhiteSpace(Environment.ProcessPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            return string.Equals(
+                Path.GetFullPath(process.MainModule?.FileName ?? string.Empty),
+                Path.GetFullPath(Environment.ProcessPath),
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
             return false;
         }
     }

@@ -74,6 +74,12 @@ public static class SessionHelperHost
                     return;
                 }
 
+                if (line.Equals("PID", StringComparison.OrdinalIgnoreCase))
+                {
+                    writer.WriteLine("OK " + Environment.ProcessId);
+                    continue;
+                }
+
                 writer.WriteLine(Handle(line));
             }
             catch (OperationCanceledException)
