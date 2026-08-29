@@ -8,6 +8,10 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+No changes yet.
+
+## [1.1.20] - 2026-08-29
+
 ### Fixed
 - A stale session-helper process no longer blocks the tray after an unclean exit. A genuine second tray launch now displays the owning process ID and clear recovery instructions.
 - Custom ADB commands now honor the trusted-headset requirement, and profile editing is transactional when cancelled.
@@ -174,7 +178,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.19...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.20...HEAD
+[1.1.20]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.20
 [1.1.19]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.19
 [1.1.18]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.18
 [1.1.17]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.17
