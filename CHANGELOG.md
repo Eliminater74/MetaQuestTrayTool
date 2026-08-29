@@ -10,6 +10,11 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 No changes yet.
 
+## [1.1.22] - 2026-08-29
+
+### Fixed
+- Exiting the tray now requests the session helper to shut down, waits for it to exit, and safely terminates it if it remains stuck so a later launch is not blocked.
+
 ## [1.1.21] - 2026-08-29
 
 ### Added
@@ -186,7 +191,8 @@ No changes yet.
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.21...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.22...HEAD
+[1.1.22]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.22
 [1.1.21]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.21
 [1.1.20]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.20
 [1.1.19]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.19
