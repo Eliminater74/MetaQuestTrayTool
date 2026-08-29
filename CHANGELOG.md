@@ -9,6 +9,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 ## [Unreleased]
 
 ### Fixed
+- A stale session-helper process no longer blocks the tray after an unclean exit. A genuine second tray launch now displays the owning process ID and clear recovery instructions.
 - Custom ADB commands now honor the trusted-headset requirement, and profile editing is transactional when cancelled.
 - ODT / ADB failures now report timeouts and non-zero exit codes instead of false success.
 - Audio and power watchers restore captured desktop state when disabled or stopped; PreventDashLaunch preserves the optional SteamVR-exit preference.

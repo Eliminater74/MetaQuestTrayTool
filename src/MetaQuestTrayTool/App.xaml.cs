@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
@@ -15,6 +16,8 @@ public partial class App : System.Windows.Application
     public static string AppName => AppInfo.ProductName;
     private const string MutexName = @"Global\MetaQuestTrayTool.SingleInstance";
     private const string ShowShellEventName = @"Local\MetaQuestTrayTool.ShowShell";
+    private static readonly string InstancePidFile =
+        System.IO.Path.Combine(AppPaths.AppDataDirectory, "instance.pid");
 
     private Mutex? _singleInstanceMutex;
     private EventWaitHandle? _showShellEvent;
@@ -109,10 +112,14 @@ public partial class App : System.Windows.Application
         if (!TryTakeSingleInstance(restarting, out _singleInstanceMutex))
         {
             RequestExistingInstanceToShow();
+            ShowAlreadyRunningMessage();
             Shutdown();
             return;
         }
 
+        // A previous elevated process can leave only its unelevated session helper behind
+        // after a crash. It is not a second tray instance and should not block startup.
+        SessionHelperClient.RequestQuit();
         ArmShowShellListener();
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
@@ -463,6 +470,7 @@ public partial class App : System.Windows.Application
         }
 
         _singleInstanceMutex?.Dispose();
+        TryDeleteInstancePid();
         base.OnExit(e);
     }
 
@@ -473,14 +481,10 @@ public partial class App : System.Windows.Application
         mutex = null;
         if (restarting)
         {
-            WaitForOtherInstances(TimeSpan.FromSeconds(4));
-        }
-        else if (FindOtherInstance() is not null)
-        {
-            return false;
+            WaitForInstanceRelease(TimeSpan.FromSeconds(15));
         }
 
-        var attempts = restarting ? 20 : 1;
+        var attempts = restarting ? 100 : 1;
         for (var i = 0; i < attempts; i++)
         {
             try
@@ -489,6 +493,7 @@ public partial class App : System.Windows.Application
                 mutex = new Mutex(true, MutexName, out var created);
                 if (created)
                 {
+                    WriteInstancePid();
                     return true;
                 }
             }
@@ -507,23 +512,103 @@ public partial class App : System.Windows.Application
             }
         }
 
-        return restarting && FindOtherInstance() is null;
+        return false;
     }
 
-    private static Process? FindOtherInstance()
+    private static void WriteInstancePid()
     {
-        var current = Process.GetCurrentProcess();
-        return Process.GetProcessesByName(current.ProcessName)
-            .FirstOrDefault(process => process.Id != current.Id);
+        try
+        {
+            AppPaths.EnsureAppDataDirectory();
+            File.WriteAllText(InstancePidFile, Environment.ProcessId.ToString());
+        }
+        catch
+        {
+            // The mutex remains authoritative if the diagnostic PID file cannot be written.
+        }
     }
 
-    private static void WaitForOtherInstances(TimeSpan timeout)
+    private static void TryDeleteInstancePid()
+    {
+        try
+        {
+            if (File.Exists(InstancePidFile)
+                && int.TryParse(File.ReadAllText(InstancePidFile), out var pid)
+                && pid == Environment.ProcessId)
+            {
+                File.Delete(InstancePidFile);
+            }
+        }
+        catch
+        {
+            // Best effort cleanup; a future startup will replace stale diagnostics.
+        }
+    }
+
+    private static void WaitForInstanceRelease(TimeSpan timeout)
     {
         var deadline = DateTime.UtcNow + timeout;
-        while (DateTime.UtcNow < deadline && FindOtherInstance() is not null)
+        while (DateTime.UtcNow < deadline)
         {
-            Thread.Sleep(100);
+            using var probe = new Mutex(false, MutexName, out var created);
+            if (created)
+            {
+                return;
+            }
+
+            try
+            {
+                if (probe.WaitOne(0))
+                {
+                    probe.ReleaseMutex();
+                    return;
+                }
+            }
+            catch (AbandonedMutexException)
+            {
+                return;
+            }
+
+            Thread.Sleep(150);
         }
+    }
+
+    private static void ShowAlreadyRunningMessage()
+    {
+        var process = ReadRunningProcessDescription();
+        try
+        {
+            System.Windows.MessageBox.Show(
+                $"Meta Quest Tray Tool is already running.\n\n{process}\n\n" +
+                "Close that process before starting another copy. If the tray window is hidden, " +
+                "use the notification-area icon or end the listed process in Task Manager.",
+                AppName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch
+        {
+            // Startup must still terminate cleanly if a desktop message box is unavailable.
+        }
+    }
+
+    private static string ReadRunningProcessDescription()
+    {
+        try
+        {
+            if (int.TryParse(File.ReadAllText(InstancePidFile), out var pid)
+                && pid > 0)
+            {
+                using var process = Process.GetProcessById(pid);
+                return $"Process {pid} ({process.ProcessName}.exe) is running.";
+            }
+        }
+        catch
+        {
+            // The PID file may be stale after a crash.
+        }
+
+        return "Another instance is holding the single-instance lock.";
     }
 
     public string ApplyProfile(GameProfile profile)

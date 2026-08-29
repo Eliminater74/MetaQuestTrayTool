@@ -41,7 +41,10 @@ Typical actions:
 
 ## Single instance
 
-Only one copy of the tray runs. Starting a second copy focuses the existing one.
+Only one tray instance can own the app lock. Starting a second copy now shows a blocker with
+the running process ID and explains how to close it. The second copy then signals the existing
+tray to show its shell and exits. The normal-user `--session-helper` process is an internal
+launch helper; it does not block the tray from starting and is shut down when possible.
 
 ## Idle behavior
 
