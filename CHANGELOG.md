@@ -10,6 +10,14 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 No changes yet.
 
+## [1.1.21] - 2026-08-29
+
+### Added
+- A manually runnable and weekly scheduled workflow to retain the five newest runs per workflow while skipping active runs.
+
+### Fixed
+- CI and release builds now restore the solution with the `win-x64` runtime before locked-mode build and test steps.
+
 ## [1.1.20] - 2026-08-29
 
 ### Fixed
@@ -178,7 +186,8 @@ No changes yet.
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.20...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.21...HEAD
+[1.1.21]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.21
 [1.1.20]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.20
 [1.1.19]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.19
 [1.1.18]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.18

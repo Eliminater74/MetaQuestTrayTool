@@ -1,0 +1,88 @@
+name: Cleanup workflow runs
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List deletions without deleting anything"
+        required: true
+        type: boolean
+        default: true
+  schedule:
+    - cron: "17 3 * * 0"
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+    steps:
+      - name: Keep the five newest runs per workflow
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $keepCount = 5
+          $runs = [System.Collections.Generic.List[object]]::new()
+          $page = 1
+
+          do {
+            $uri = "repos/$env:REPOSITORY/actions/runs?per_page=100&page=$page"
+            $response = gh api $uri | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0) {
+              throw "GitHub API request failed for page $page."
+            }
+
+            foreach ($run in @($response.workflow_runs)) {
+              $runs.Add($run)
+            }
+
+            $pageRuns = @($response.workflow_runs)
+            $page++
+          } while ($pageRuns.Count -eq 100)
+
+          $deletions = [System.Collections.Generic.List[object]]::new()
+          foreach ($workflowRuns in ($runs | Group-Object workflow_id)) {
+            $ordered = @(
+              $workflowRuns.Group |
+                Sort-Object { [DateTimeOffset]::Parse($_.created_at) } -Descending
+            )
+
+            foreach ($run in @($ordered | Select-Object -Skip $keepCount)) {
+              if ($run.status -in @('queued', 'in_progress', 'waiting', 'pending', 'requested')) {
+                Write-Host "Skipping active run $($run.id) ($($run.name))."
+                continue
+              }
+
+              $deletions.Add($run)
+            }
+          }
+
+          Write-Host "Found $($runs.Count) workflow runs across $(
+            @($runs | Group-Object workflow_id).Count
+          ) workflows."
+          Write-Host "Runs eligible for deletion: $($deletions.Count)."
+
+          $dryRun = $env:DRY_RUN -eq 'true'
+          foreach ($run in $deletions) {
+            if ($dryRun) {
+              Write-Host "[DRY RUN] Would delete run $($run.id): $($run.name) / $($run.created_at)"
+              continue
+            }
+
+            Write-Host "Deleting run $($run.id): $($run.name) / $($run.created_at)"
+            gh api --method DELETE "repos/$env:REPOSITORY/actions/runs/$($run.id)"
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to delete workflow run $($run.id)."
+            }
+          }
+
+          if ($dryRun) {
+            Write-Host "Dry run complete. Re-run with dry_run=false to delete the listed runs."
+          } else {
+            Write-Host "Workflow run cleanup complete."
+          }
