@@ -31,6 +31,7 @@ public sealed class AdbService
     private string? _cachedRuntimeSerial;
     private DateTime _cachedRuntimeUtc = DateTime.MinValue;
     private static readonly TimeSpan RuntimeCache = TimeSpan.FromSeconds(20);
+    private readonly SemaphoreSlim _commandGate = new(1, 1);
 
     public void Refresh()
     {
@@ -49,36 +50,48 @@ public sealed class AdbService
     public string KillServerForUpdate()
     {
         Refresh();
-        var parts = new List<string>();
-
-        var killed = 0;
-        foreach (var process in Process.GetProcessesByName("adb"))
+        if (!_commandGate.Wait(TimeSpan.FromSeconds(30)))
         {
-            try
-            {
-                using (process)
-                {
-                    if (!IsBundledProcess(process))
-                    {
-                        continue;
-                    }
-
-                    process.Kill(entireProcessTree: true);
-                    process.WaitForExit(5000);
-                    killed++;
-                }
-            }
-            catch
-            {
-                // Access denied / already exiting
-            }
+            return "ADB command queue was busy for 30s; could not kill bundled adb.exe for update yet.";
         }
 
-        parts.Add(killed == 0
-            ? "No bundled adb.exe processes left (shared ADB server was left untouched)."
-            : $"Killed {killed} bundled adb.exe process(es); shared ADB server was left untouched.");
-        InvalidateDeviceCache();
-        return string.Join(" ", parts);
+        var parts = new List<string>();
+
+        try
+        {
+            var killed = 0;
+            foreach (var process in Process.GetProcessesByName("adb"))
+            {
+                try
+                {
+                    using (process)
+                    {
+                        if (!IsBundledProcess(process))
+                        {
+                            continue;
+                        }
+
+                        process.Kill(entireProcessTree: true);
+                        process.WaitForExit(5000);
+                        killed++;
+                    }
+                }
+                catch
+                {
+                    // Access denied / already exiting
+                }
+            }
+
+            parts.Add(killed == 0
+                ? "No bundled adb.exe processes left (shared ADB server was left untouched)."
+                : $"Killed {killed} bundled adb.exe process(es); shared ADB server was left untouched.");
+            InvalidateDeviceCache();
+            return string.Join(" ", parts);
+        }
+        finally
+        {
+            _commandGate.Release();
+        }
     }
 
     /// <summary>Wait until this app's bundled ADB processes have actually exited (file locks).</summary>
@@ -998,67 +1011,80 @@ public sealed class AdbService
             throw new InvalidOperationException("ADB was not found.");
         }
 
-        using var process = new Process
+        if (!_commandGate.Wait(TimeSpan.FromSeconds(30)))
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = AdbPath,
-                Arguments = arguments,
-                WorkingDirectory = Path.GetDirectoryName(AdbPath) ?? AppContext.BaseDirectory,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8
-            }
-        };
-
-        if (!process.Start())
-        {
-            throw new InvalidOperationException("ADB process could not be started.");
-        }
-        var stdout = process.StandardOutput.ReadToEndAsync();
-        var stderr = process.StandardError.ReadToEndAsync();
-        if (!process.WaitForExit(20_000))
-        {
-            try
-            {
-                process.Kill(entireProcessTree: true);
-            }
-            catch
-            {
-                // hung adb.exe
-            }
-
-            try
-            {
-                process.WaitForExit(3_000);
-            }
-            catch
-            {
-                // ignore
-            }
-
-            throw new TimeoutException($"ADB timed out after 20s: adb {arguments}");
+            throw new TimeoutException($"ADB command queue was busy for 30s: adb {arguments}");
         }
 
-        if (!Task.WaitAll([stdout, stderr], 3_000))
+        try
         {
-            throw new TimeoutException($"ADB output read timed out: adb {arguments}");
-        }
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = AdbPath,
+                    Arguments = arguments,
+                    WorkingDirectory = Path.GetDirectoryName(AdbPath) ?? AppContext.BaseDirectory,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8
+                }
+            };
 
-        var output = stdout.Result;
-        var error = stderr.Result;
-        var combined = (output + Environment.NewLine + error).Trim();
-        if (process.ExitCode != 0)
+            if (!process.Start())
+            {
+                throw new InvalidOperationException("ADB process could not be started.");
+            }
+
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit(20_000))
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch
+                {
+                    // hung adb.exe
+                }
+
+                try
+                {
+                    process.WaitForExit(3_000);
+                }
+                catch
+                {
+                    // ignore
+                }
+
+                throw new TimeoutException($"ADB timed out after 20s: adb {arguments}");
+            }
+
+            if (!Task.WaitAll([stdout, stderr], 3_000))
+            {
+                throw new TimeoutException($"ADB output read timed out: adb {arguments}");
+            }
+
+            var output = stdout.Result;
+            var error = stderr.Result;
+            var combined = (output + Environment.NewLine + error).Trim();
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException(
+                    string.IsNullOrWhiteSpace(combined)
+                        ? $"ADB exited with code {process.ExitCode}: adb {arguments}"
+                        : $"ADB exited with code {process.ExitCode}: {combined}");
+            }
+
+            return combined;
+        }
+        finally
         {
-            throw new InvalidOperationException(
-                string.IsNullOrWhiteSpace(combined)
-                    ? $"ADB exited with code {process.ExitCode}: adb {arguments}"
-                    : $"ADB exited with code {process.ExitCode}: {combined}");
+            _commandGate.Release();
         }
-
-        return combined;
     }
 
     private static bool IsBundledProcess(Process process)
