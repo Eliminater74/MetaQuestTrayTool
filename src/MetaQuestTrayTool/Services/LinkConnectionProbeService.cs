@@ -619,7 +619,18 @@ public sealed class LinkConnectionProbeService
         bool running;
         try
         {
-            running = Process.GetProcessesByName(name).Length > 0;
+            var processes = Process.GetProcessesByName(name);
+            try
+            {
+                running = processes.Length > 0;
+            }
+            finally
+            {
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
+            }
         }
         catch
         {

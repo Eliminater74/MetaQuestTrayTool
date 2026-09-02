@@ -322,14 +322,30 @@ public sealed class SteamVrInstallService
         try
         {
             // Match Dash→SteamVR: lone vrserver without compositor is not a healthy session.
-            return (Process.GetProcessesByName("vrserver").Length > 0
-                    && (Process.GetProcessesByName("vrcompositor").Length > 0
-                        || Process.GetProcessesByName("vrdashboard").Length > 0))
-                   || Process.GetProcessesByName("vrstartup").Length > 0;
+            return IsProcessRunning("vrstartup")
+                   || (IsProcessRunning("vrserver")
+                       && (IsProcessRunning("vrcompositor")
+                           || IsProcessRunning("vrdashboard")));
         }
         catch
         {
             return false;
+        }
+    }
+
+    private static bool IsProcessRunning(string name)
+    {
+        var processes = Process.GetProcessesByName(name);
+        try
+        {
+            return processes.Length > 0;
+        }
+        finally
+        {
+            foreach (var process in processes)
+            {
+                process.Dispose();
+            }
         }
     }
 }

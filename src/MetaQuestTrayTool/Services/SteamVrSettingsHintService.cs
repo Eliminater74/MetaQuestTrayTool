@@ -90,7 +90,18 @@ public static class SteamVrSettingsHintService
     {
         try
         {
-            return System.Diagnostics.Process.GetProcessesByName("vrserver").Length > 0;
+            var processes = System.Diagnostics.Process.GetProcessesByName("vrserver");
+            try
+            {
+                return processes.Length > 0;
+            }
+            finally
+            {
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
+            }
         }
         catch
         {

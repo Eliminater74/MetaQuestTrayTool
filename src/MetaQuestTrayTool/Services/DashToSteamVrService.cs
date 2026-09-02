@@ -1115,7 +1115,18 @@ public sealed class DashToSteamVrService : IDisposable
     {
         try
         {
-            return Process.GetProcessesByName(name).Length > 0;
+            var processes = Process.GetProcessesByName(name);
+            try
+            {
+                return processes.Length > 0;
+            }
+            finally
+            {
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
+            }
         }
         catch
         {
