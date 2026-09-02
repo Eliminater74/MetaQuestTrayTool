@@ -143,7 +143,21 @@ public sealed class ProcessWatcherService : IDisposable
         _activeProcess = null;
         _activeProfileName = null;
         _awaitingLaunchProcess = false;
-        var summary = _app.RestoreGlobalDefaults();
+
+        string summary;
+        try
+        {
+            summary = _app.RestoreGlobalDefaults();
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Error(
+                $"Launch of {processName}.exe failed before process start — cancelled profile '{profileName}', but global restore failed.",
+                ex);
+            ApplyCadence();
+            return "Profile launch was cancelled, but global defaults could not be restored.";
+        }
+
         _app.Log.Info(
             $"Launch of {processName}.exe failed before process start — cancelled profile '{profileName}' and restored globals. {summary}");
         ApplyCadence();
