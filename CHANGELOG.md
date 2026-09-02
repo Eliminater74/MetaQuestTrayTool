@@ -16,6 +16,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Log redaction now covers `Wi-Fi` / `Wi‑Fi` SSID labels and quoted SSID values with spaces.
 - VR Tools web links now require a valid absolute `http://` or `https://` URL instead of accepting any string that starts with `http`.
 - Timer-driven SteamVR/session probes now dispose `Process` handles after `GetProcessesByName` checks, avoiding slow handle growth during long tray runs.
+- `powercfg.exe` and `sc.exe` runners now read output asynchronously and honor timeouts instead of blocking indefinitely before the timeout check.
 
 ## [1.1.22] - 2026-08-29
 

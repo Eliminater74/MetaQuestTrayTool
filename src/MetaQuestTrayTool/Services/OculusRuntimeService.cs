@@ -132,9 +132,29 @@ public sealed class OculusRuntimeService
             };
             using var process = Process.Start(psi)
                 ?? throw new InvalidOperationException("Could not run sc.exe.");
-            var stdout = process.StandardOutput.ReadToEnd();
-            var stderr = process.StandardError.ReadToEnd();
-            process.WaitForExit(TimeSpan.FromSeconds(15));
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit(TimeSpan.FromSeconds(15)))
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch
+                {
+                    // Timed-out service-control command; return a useful error below.
+                }
+
+                return $"Could not change {ServiceName} boot policy: sc.exe timed out.";
+            }
+
+            if (!Task.WaitAll([stdoutTask, stderrTask], 3_000))
+            {
+                return $"Could not change {ServiceName} boot policy: sc.exe output read timed out.";
+            }
+
+            var stdout = stdoutTask.Result;
+            var stderr = stderrTask.Result;
             if (process.ExitCode != 0)
             {
                 var detail = string.IsNullOrWhiteSpace(stderr) ? stdout.Trim() : stderr.Trim();

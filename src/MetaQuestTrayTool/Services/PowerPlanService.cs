@@ -174,10 +174,34 @@ public sealed class PowerPlanService
             }
         };
 
-        process.Start();
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
-        process.WaitForExit(10_000);
+        if (!process.Start())
+        {
+            throw new InvalidOperationException("powercfg.exe did not start.");
+        }
+
+        var outputTask = process.StandardOutput.ReadToEndAsync();
+        var errorTask = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(10_000))
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // Timed-out powercfg command; throw below.
+            }
+
+            throw new TimeoutException($"powercfg.exe timed out: {arguments}");
+        }
+
+        if (!Task.WaitAll([outputTask, errorTask], 3_000))
+        {
+            throw new TimeoutException($"powercfg.exe output read timed out: {arguments}");
+        }
+
+        var output = outputTask.Result;
+        var error = errorTask.Result;
 
         if (process.ExitCode != 0)
         {
