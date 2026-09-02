@@ -21,6 +21,7 @@ public sealed class TrayIconHost : IDisposable
     private LinkSettingsWindow? _linkSettings;
     private AudioSettingsWindow? _audioSettings;
     private PowerSettingsWindow? _powerSettings;
+    private int _dynamicRefreshInFlight;
 
     public TrayIconHost(App app)
     {
@@ -149,7 +150,8 @@ public sealed class TrayIconHost : IDisposable
 
         menu.Opening += (_, _) =>
         {
-            RefreshDynamicItems(menu);
+            RefreshDynamicItems(menu, _app.RuntimeSnapshots.TryGetCached());
+            QueueDynamicRefresh(menu, force: true);
             PaintMenu(menu, ThemeService.MenuPalette(), menu.Renderer);
         };
 
@@ -325,11 +327,9 @@ public sealed class TrayIconHost : IDisposable
         return root;
     }
 
-    private void RefreshDynamicItems(ContextMenuStrip menu)
+    private void RefreshDynamicItems(ContextMenuStrip menu, RuntimeSnapshot? snapshot = null)
     {
-        var snapshot = _app.RuntimeSnapshots.Capture();
-
-        if (FindItem(menu.Items, "ServiceStatus") is ToolStripMenuItem status)
+        if (snapshot is not null && FindItem(menu.Items, "ServiceStatus") is ToolStripMenuItem status)
         {
             status.Text = $"Status: {snapshot.OculusServiceStatus}";
         }
@@ -373,7 +373,12 @@ public sealed class TrayIconHost : IDisposable
         SyncOpenXrChecks(menu, snapshot);
         SyncAudioChecks(menu);
         SyncPowerChecks(menu);
-        SyncHeadsetChecks(menu);
+        SyncHeadsetChecks(menu, snapshot);
+        if (snapshot is null)
+        {
+            return;
+        }
+
         var pcvr = snapshot.Link.Summary;
         if (pcvr.Length > 22)
         {
@@ -406,7 +411,8 @@ public sealed class TrayIconHost : IDisposable
     {
         if (_menu is not null)
         {
-            RefreshDynamicItems(_menu);
+            RefreshDynamicItems(_menu, _app.RuntimeSnapshots.TryGetCached());
+            QueueDynamicRefresh(_menu);
         }
     }
 
@@ -1178,7 +1184,43 @@ public sealed class TrayIconHost : IDisposable
         return menu;
     }
 
-    private void SyncHeadsetChecks(ContextMenuStrip root)
+    private void QueueDynamicRefresh(ContextMenuStrip menu, bool force = false)
+    {
+        if (Interlocked.Exchange(ref _dynamicRefreshInFlight, 1) != 0)
+        {
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            try
+            {
+                return _app.RuntimeSnapshots.Capture(force: force);
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.Log.Warn("Tray status refresh failed: " + ex.Message));
+                return null;
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _dynamicRefreshInFlight, 0);
+            }
+        }).ContinueWith(task =>
+        {
+            var snapshot = task.Result;
+            if (snapshot is null || menu.IsDisposed || !ReferenceEquals(_menu, menu))
+            {
+                return;
+            }
+
+            RefreshDynamicItems(menu, snapshot);
+            PaintMenu(menu, ThemeService.MenuPalette(), menu.Renderer);
+        }, TaskScheduler.FromCurrentSynchronizationContext());
+    }
+
+    private void SyncHeadsetChecks(ContextMenuStrip root, RuntimeSnapshot? snapshot = null)
     {
         var headset = _app.Settings.Current.Headset;
         var paused = _app.HeadsetWatch?.IsPaused == true;
@@ -1223,7 +1265,7 @@ public sealed class TrayIconHost : IDisposable
             var pauseText = _app.HeadsetWatch?.PauseStatusText;
             status.Text = !string.IsNullOrWhiteSpace(pauseText)
                 ? pauseText
-                : _app.Adb.DescribeStatus();
+                : snapshot?.Headset?.Summary ?? _app.Adb.DescribeCachedStatus();
         }
     }
 

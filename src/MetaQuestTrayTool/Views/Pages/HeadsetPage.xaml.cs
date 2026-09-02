@@ -8,6 +8,7 @@ namespace MetaQuestTrayTool.Views.Pages;
 public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPage
 {
     private bool _loading;
+    private int _trustRefreshVersion;
 
     public HeadsetPage()
     {
@@ -92,9 +93,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         // ADB identity is slow — don't block the first paint of this page.
         StatusText.Text = "Checking ADB…";
         TrustText.Text = "…";
-        Dispatcher.BeginInvoke(
-            System.Windows.Threading.DispatcherPriority.Background,
-            UpdateTrustBanner);
+        UpdateTrustBanner();
     }
 
     private void ComboPersist_Changed(object sender, SelectionChangedEventArgs e) => Persist_Changed(sender, e);
@@ -281,14 +280,41 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         ResultText.Text = "Trusted headset cleared. The next connected Quest will be remembered.";
     }
 
-    private void UpdateTrustBanner()
+    private async void UpdateTrustBanner()
     {
-        var identity = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
-        TrustText.Text = identity.Summary;
-        StatusText.Text = App.Instance.Adb.DescribeStatus();
-        RuntimeText.Text = identity.IsReady && identity.IsVrHeadset
-            ? "Battery / Wi‑Fi: " + (identity.Runtime?.Summary ?? "reading…")
-            : "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
+        var version = Interlocked.Increment(ref _trustRefreshVersion);
+        try
+        {
+            var result = await Task.Run(() =>
+            {
+                var identity = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
+                var status = App.Instance.Adb.DescribeCachedStatus();
+                var runtime = identity.IsReady && identity.IsVrHeadset
+                    ? "Battery / Wi‑Fi: " + (identity.Runtime?.Summary ?? "reading…")
+                    : "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
+                return (identity.Summary, status, runtime);
+            }).ConfigureAwait(true);
+
+            if (!IsLoaded || version != _trustRefreshVersion)
+            {
+                return;
+            }
+
+            TrustText.Text = result.Summary;
+            StatusText.Text = result.status;
+            RuntimeText.Text = result.runtime;
+        }
+        catch (Exception ex)
+        {
+            if (!IsLoaded || version != _trustRefreshVersion)
+            {
+                return;
+            }
+
+            TrustText.Text = "Could not read headset identity.";
+            StatusText.Text = ex.Message;
+            RuntimeText.Text = "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
+        }
     }
 
     private async void Run(Func<string> action)

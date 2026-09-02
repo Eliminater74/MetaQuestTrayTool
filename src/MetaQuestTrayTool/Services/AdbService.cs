@@ -597,6 +597,50 @@ public sealed class AdbService
         return $"VR headset connected ({transport}): {model} ({quest.Serial}).";
     }
 
+    public string DescribeCachedStatus()
+    {
+        IReadOnlyList<AdbDevice>? devices;
+        DateTime cachedAt;
+        lock (_cacheLock)
+        {
+            devices = _cachedDevices;
+            cachedAt = _cachedDevicesUtc;
+        }
+
+        if (devices is null)
+        {
+            return IsAvailable
+                ? "ADB ready. Status will refresh in the background."
+                : "ADB not checked yet.";
+        }
+
+        var age = DateTime.UtcNow - cachedAt;
+        var suffix = age > TimeSpan.FromSeconds(10)
+            ? $" Last checked {(int)age.TotalSeconds}s ago."
+            : string.Empty;
+        var quest = devices.FirstOrDefault(device => VrHeadsetClassifier.IsAllowedVrHeadset(device))
+                    ?? devices.FirstOrDefault(device =>
+                        device.NeedsAuthorization
+                        && !LooksLikeWirelessSerial(device.Serial)
+                        && !VrHeadsetClassifier.IsObviousEmulator(device));
+
+        if (quest is null)
+        {
+            var ignored = devices.FirstOrDefault(device => !VrHeadsetClassifier.IsAllowedVrHeadset(device));
+            return ignored is null
+                ? "ADB ready. No VR headset connected." + suffix
+                : $"No VR headset. ADB sees {ignored.Serial} ({ignored.Model ?? ignored.State})." + suffix;
+        }
+
+        if (quest.NeedsAuthorization)
+        {
+            return $"Headset {quest.Serial} is unauthorized." + suffix;
+        }
+
+        var transport = LooksLikeWirelessSerial(quest.Serial) ? "wireless" : "USB";
+        return $"VR headset connected ({transport}): {quest.Model ?? "Quest"} ({quest.Serial})." + suffix;
+    }
+
     public HeadsetIdentity ReadIdentity(string? trustedSerial)
     {
         var devices = ListDevices();

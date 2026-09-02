@@ -55,6 +55,21 @@ public sealed class RuntimeSnapshotService
         }
     }
 
+    public RuntimeSnapshot? TryGetCached(bool requireHeadset = false)
+    {
+        lock (_sync)
+        {
+            if (_cached is null
+                || DateTimeOffset.UtcNow - _cached.CapturedAt >= CacheTtl
+                || (requireHeadset && !_cached.IncludesHeadset))
+            {
+                return null;
+            }
+
+            return _cached;
+        }
+    }
+
     public RuntimeSnapshot Capture(bool includeHeadset = false, bool force = false)
     {
         if (!force)
