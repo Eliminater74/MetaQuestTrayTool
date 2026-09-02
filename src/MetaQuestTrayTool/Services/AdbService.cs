@@ -198,18 +198,35 @@ public sealed class AdbService
             throw new ArgumentException("Enter the headset LAN IP (e.g. 192.168.1.40).", nameof(host));
         }
 
+        // Strip accidental :port from the host field.
+        var colon = host.IndexOf(':');
+        if (colon >= 0)
+        {
+            if (colon > 0 && colon == host.LastIndexOf(':')
+                && int.TryParse(host[(colon + 1)..], out var embeddedPort))
+            {
+                host = host[..colon];
+                port = embeddedPort;
+            }
+            else
+            {
+                throw new ArgumentException("Enter the headset IP/host name and numeric port only.", nameof(host));
+            }
+        }
+
+        if (host.Any(char.IsWhiteSpace) || host.IndexOfAny(['"', '\'', '`']) >= 0)
+        {
+            throw new ArgumentException("Enter only the headset IP/host name, without spaces, quotes, or extra ADB arguments.", nameof(host));
+        }
+
+        if (host.Length == 0)
+        {
+            throw new ArgumentException("Enter the headset LAN IP (e.g. 192.168.1.40).", nameof(host));
+        }
+
         if (port is < 1 or > 65535)
         {
             throw new ArgumentOutOfRangeException(nameof(port), "Port must be 1–65535 (classic tcpip uses 5555).");
-        }
-
-        // Strip accidental :port from the host field.
-        var colon = host.IndexOf(':');
-        if (colon > 0 && host.IndexOf(':') == host.LastIndexOf(':')
-            && int.TryParse(host[(colon + 1)..], out var embeddedPort))
-        {
-            host = host[..colon];
-            port = embeddedPort;
         }
 
         return $"{host}:{port}";

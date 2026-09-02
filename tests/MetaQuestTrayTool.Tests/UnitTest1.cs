@@ -122,6 +122,22 @@ public class RuntimeSafetyTests
     }
 
     [Fact]
+    public void AdbEndpoint_EmbeddedPortIsRevalidated()
+    {
+        Assert.Equal("192.168.1.40:5556", AdbService.FormatEndpoint("192.168.1.40:5556", 5555));
+        Assert.Throws<ArgumentOutOfRangeException>(() => AdbService.FormatEndpoint("192.168.1.40:99999", 5555));
+    }
+
+    [Theory]
+    [InlineData("192.168.1.40 -s other")]
+    [InlineData("192.168.1.40:abc")]
+    [InlineData("\"192.168.1.40\"")]
+    public void AdbEndpoint_RejectsHostTextThatWouldSplitArguments(string host)
+    {
+        Assert.Throws<ArgumentException>(() => AdbService.FormatEndpoint(host, 5555));
+    }
+
+    [Fact]
     public void ProfileStore_LoadKeepsIntentionalEmptyPrimary()
     {
         var dir = Path.Combine(Path.GetTempPath(), "MetaQuestTrayTool.Tests", Guid.NewGuid().ToString("N"));
