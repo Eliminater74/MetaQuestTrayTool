@@ -43,7 +43,7 @@ public sealed class AdbService
     }
 
     /// <summary>
-    /// Stops this app's ADB server and only terminates matching bundled ADB processes so Setup
+    /// Stops this app's bundled ADB process and only terminates packaged ADB processes so Setup
     /// can replace platform-tools without disrupting Android Studio, SideQuest, or other ADB clients.
     /// </summary>
     public string KillServerForUpdate()
@@ -58,7 +58,7 @@ public sealed class AdbService
             {
                 using (process)
                 {
-                    if (!IsOwnedProcess(process))
+                    if (!IsBundledProcess(process))
                     {
                         continue;
                     }
@@ -97,7 +97,7 @@ public sealed class AdbService
                 return "adb.exe gone.";
             }
 
-            var owned = leftover.Where(IsOwnedProcess).ToArray();
+            var owned = leftover.Where(IsBundledProcess).ToArray();
             foreach (var process in leftover)
             {
                 process.Dispose();
@@ -1000,21 +1000,41 @@ public sealed class AdbService
         return combined;
     }
 
-    private bool IsOwnedProcess(Process process)
+    private static bool IsBundledProcess(Process process)
     {
-        if (!IsAvailable || string.IsNullOrWhiteSpace(AdbPath))
+        try
+        {
+            var executable = process.MainModule?.FileName;
+            return IsBundledAdbExecutable(executable);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    internal static bool IsBundledAdbExecutable(string? executablePath)
+    {
+        if (string.IsNullOrWhiteSpace(executablePath))
         {
             return false;
         }
 
         try
         {
-            var executable = process.MainModule?.FileName;
-            return executable is not null
-                && string.Equals(
-                    Path.GetFullPath(executable),
-                    Path.GetFullPath(AdbPath),
-                    StringComparison.OrdinalIgnoreCase);
+            var fullPath = Path.GetFullPath(executablePath);
+            var baseDir = Path.GetFullPath(AppContext.BaseDirectory);
+            var packagedCandidates = new[]
+            {
+                Path.Combine(baseDir, "platform-tools", "adb.exe"),
+                Path.Combine(baseDir, "adb.exe")
+            };
+
+            return packagedCandidates.Any(candidate =>
+                string.Equals(
+                    fullPath,
+                    Path.GetFullPath(candidate),
+                    StringComparison.OrdinalIgnoreCase));
         }
         catch
         {

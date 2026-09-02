@@ -93,6 +93,34 @@ public class RuntimeSafetyTests
         Assert.Equal(["first", "second"], commands);
     }
 
+    [Fact]
+    public void AdbUpdateCleanup_OnlyOwnsPackagedAdb()
+    {
+        var baseDir = AppContext.BaseDirectory;
+
+        Assert.True(AdbService.IsBundledAdbExecutable(
+            Path.Combine(baseDir, "platform-tools", "adb.exe")));
+        Assert.True(AdbService.IsBundledAdbExecutable(
+            Path.Combine(baseDir, "adb.exe")));
+
+        Assert.False(AdbService.IsBundledAdbExecutable(
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Android",
+                "Sdk",
+                "platform-tools",
+                "adb.exe")));
+        Assert.False(AdbService.IsBundledAdbExecutable(
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                "SideQuest",
+                "resources",
+                "app.asar.unpacked",
+                "build",
+                "platform-tools",
+                "adb.exe")));
+    }
+
     [Theory]
     [InlineData("v1.2.3", 1, 2, 3)]
     [InlineData("1.2.3-beta", 1, 2, 3)]
