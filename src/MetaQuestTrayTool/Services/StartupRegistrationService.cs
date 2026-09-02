@@ -349,7 +349,35 @@ public sealed class StartupRegistrationService
                 return -1;
             }
 
-            process.WaitForExit();
+            Task<string>? stdoutTask = null;
+            Task<string>? stderrTask = null;
+            if (!elevate)
+            {
+                stdoutTask = process.StandardOutput.ReadToEndAsync();
+                stderrTask = process.StandardError.ReadToEndAsync();
+            }
+
+            if (!process.WaitForExit(30_000))
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch
+                {
+                    // Timed-out schtasks command; return failure below.
+                }
+
+                return -1;
+            }
+
+            if (stdoutTask is not null
+                && stderrTask is not null
+                && !Task.WaitAll([stdoutTask, stderrTask], 3_000))
+            {
+                return -1;
+            }
+
             return process.ExitCode;
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
