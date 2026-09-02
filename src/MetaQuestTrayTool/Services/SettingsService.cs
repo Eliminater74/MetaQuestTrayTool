@@ -16,6 +16,10 @@ public sealed class SettingsService
 
     private readonly ProfileStore _profileStore = new();
     private readonly object _saveLock = new();
+    private readonly object _debounceLock = new();
+    private System.Threading.Timer? _debouncedSaveTimer;
+    private int _savingDebounced;
+    private static readonly TimeSpan DefaultSaveDebounce = TimeSpan.FromMilliseconds(750);
 
     public AppSettings Current { get; private set; } = new();
 
@@ -104,11 +108,39 @@ public sealed class SettingsService
 
     public void Save()
     {
+        if (Volatile.Read(ref _savingDebounced) == 0)
+        {
+            CancelDebouncedSave();
+        }
+
         lock (_saveLock)
         {
             SaveUnlocked();
         }
     }
+
+    public void SaveSoon(TimeSpan? delay = null)
+    {
+        lock (_debounceLock)
+        {
+            _debouncedSaveTimer ??= new System.Threading.Timer(_ =>
+            {
+                Interlocked.Exchange(ref _savingDebounced, 1);
+                try
+                {
+                    Save();
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _savingDebounced, 0);
+                }
+            });
+
+            _debouncedSaveTimer.Change(delay ?? DefaultSaveDebounce, Timeout.InfiniteTimeSpan);
+        }
+    }
+
+    public void FlushPendingSave() => Save();
 
     public void ResetKeepingProfiles()
     {
@@ -178,6 +210,14 @@ public sealed class SettingsService
         var path = AppPaths.SettingsFile;
         RotateBackups(path, path + ".bak", path + ".bak2");
         WriteDurable(path, json);
+    }
+
+    private void CancelDebouncedSave()
+    {
+        lock (_debounceLock)
+        {
+            _debouncedSaveTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
     }
 
     private static bool TryPickBackup(

@@ -219,7 +219,14 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         }
 
         WriteToSettings();
-        App.Instance.Settings.Save();
+        if (restartService)
+        {
+            App.Instance.Settings.Save();
+        }
+        else
+        {
+            App.Instance.Settings.SaveSoon();
+        }
 
         if (!App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
         {

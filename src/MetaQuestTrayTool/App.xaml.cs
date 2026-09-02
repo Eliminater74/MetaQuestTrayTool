@@ -470,7 +470,7 @@ public partial class App : System.Windows.Application
         }
 
         _tray?.Dispose();
-        Settings.Save();
+        Settings.FlushPendingSave();
         try
         {
             _singleInstanceMutex?.ReleaseMutex();
