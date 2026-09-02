@@ -10,27 +10,24 @@ public sealed class StatusDashboardService
 
     public StatusDashboardService(App app) => _app = app;
 
-    public IReadOnlyList<StatusChipVm> BuildChips()
+    public IReadOnlyList<StatusChipVm> BuildChips(RuntimeSnapshot? snapshot = null)
     {
-        _app.Oculus.Refresh();
-        var link = _app.LinkConnection.Probe(includeEnumHmd: false);
-        var steamVr = _app.SteamVrInstall.Probe();
-        var openXr = _app.OpenXr.ReadActiveKind();
-        var openXrAlignment = PcvrSetup.EvaluateOpenXr(_app, openXr);
-        var setupMode = PcvrSetup.GetMode(_app);
-        var openXrPath = _app.OpenXr.ReadActivePath();
-        var headset = _app.Headset.ReadIdentity(_app.Settings.Current.Headset);
-        var runtime = headset.IsReady
-            ? _app.Adb.ReadRuntimeStatus(headset.AdbSerial ?? headset.Serial ?? string.Empty)
-            : null;
-        var ready = _app.PcvrReady.Evaluate();
-        var gpu = _app.Gpu.GetRecommendation();
-        var elevated = _app.StartupRegistration.IsProcessElevated;
-        var profileActive = _app.IsGameProfileActive;
-        var hotKeys = _app.Settings.Current.HotKeys.Enabled;
-        var voice = _app.Settings.Current.Voice.Enabled;
-        var dash = _app.Settings.Current.DashToSteamVr;
-        var preventDash = _app.DashToSteamVr.IsPreventDashLaunchEnabled() || dash.PreferPreventDashLaunch;
+        snapshot ??= _app.RuntimeSnapshots.Capture(includeHeadset: true);
+        var link = snapshot.Link;
+        var steamVr = snapshot.SteamVr;
+        var openXr = snapshot.OpenXr;
+        var openXrAlignment = snapshot.OpenXrAlignment;
+        var setupMode = snapshot.SetupMode;
+        var openXrPath = snapshot.OpenXrPath;
+        var headset = snapshot.Headset;
+        var runtime = headset?.Runtime;
+        var ready = _app.PcvrReady.Evaluate(snapshot);
+        var gpu = snapshot.Gpu;
+        var elevated = snapshot.IsElevated;
+        var profileActive = snapshot.IsGameProfileActive;
+        var hotKeys = snapshot.HotKeysEnabled;
+        var voice = snapshot.VoiceEnabled;
+        var preventDash = snapshot.PreventDashLaunchEffective;
 
         var chips = new List<StatusChipVm>
         {
@@ -88,11 +85,11 @@ public sealed class StatusDashboardService
                 setupMode == PcvrSetupMode.SteamVrOverMetaLink ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("OVRService",
-                _app.Oculus.ServiceStatus,
-                _app.Oculus.InstallPath ?? "Meta Quest PC app path unknown",
-                _app.Oculus.IsServiceRunning ? StatusChipKind.On : StatusChipKind.Fail,
-                !_app.Oculus.IsServiceRunning ? "ovrservice" : null,
-                !_app.Oculus.IsServiceRunning ? "Start" : null),
+                snapshot.OculusServiceStatus,
+                snapshot.OculusInstallPath ?? "Meta Quest PC app path unknown",
+                snapshot.OculusServiceRunning ? StatusChipKind.On : StatusChipKind.Fail,
+                !snapshot.OculusServiceRunning ? "ovrservice" : null,
+                !snapshot.OculusServiceRunning ? "Start" : null),
 
             Chip("Administrator",
                 elevated ? "Elevated" : "Normal user",
@@ -126,13 +123,13 @@ public sealed class StatusDashboardService
                 link.VirtualDesktopRunning ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("Headset ADB",
-                headset.IsReady ? "Connected" : "Not connected",
-                headset.IsReady
+                headset?.IsReady == true ? "Connected" : "Not connected",
+                headset?.IsReady == true
                     ? $"{headset.Model ?? "Quest"} · {headset.Serial ?? headset.AdbSerial}"
                     : "Optional — USB or wireless debugging for headset props",
-                headset.IsReady
+                headset?.IsReady == true
                     ? StatusChipKind.On
-                    : headset.IsRogue
+                    : headset?.IsRogue == true
                         ? StatusChipKind.Fail
                         : StatusChipKind.Off),
 

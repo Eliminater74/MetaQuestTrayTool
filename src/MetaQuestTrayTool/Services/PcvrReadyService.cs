@@ -64,20 +64,20 @@ public sealed class PcvrReadyService
 
     public PcvrReadyService(App app) => _app = app;
 
-    public PcvrReadyReport Evaluate()
+    public PcvrReadyReport Evaluate(RuntimeSnapshot? snapshot = null)
     {
         var items = new List<PcvrReadyItem>
         {
-            CheckOvrService(),
-            CheckOpenXrPreferred(),
-            CheckSteamVrInstalled(),
-            CheckSteamVrOpenXrAvailable(),
+            CheckOvrService(snapshot),
+            CheckOpenXrPreferred(snapshot),
+            CheckSteamVrInstalled(snapshot),
+            CheckSteamVrOpenXrAvailable(snapshot),
             CheckSteamLinkOpenXrAssist(),
-            CheckPowerPlan(),
+            CheckPowerPlan(snapshot),
             CheckAudio(),
             CheckLinkApplyOnStart(),
-            CheckGpu(),
-            CheckDashToSteamVr()
+            CheckGpu(snapshot),
+            CheckDashToSteamVr(snapshot)
         };
 
         return new PcvrReadyReport { Items = items };
@@ -112,16 +112,22 @@ public sealed class PcvrReadyService
             : string.Join(Environment.NewLine, parts);
     }
 
-    private PcvrReadyItem CheckOvrService()
+    private PcvrReadyItem CheckOvrService(RuntimeSnapshot? snapshot)
     {
-        _app.Oculus.Refresh();
-        if (!_app.Oculus.ServiceExists)
+        if (snapshot is null)
+        {
+            _app.Oculus.Refresh();
+        }
+
+        var exists = snapshot?.OculusServiceExists ?? _app.Oculus.ServiceExists;
+        var running = snapshot?.OculusServiceRunning ?? _app.Oculus.IsServiceRunning;
+        if (!exists)
         {
             return Item("ovrservice", "OVRService", "Meta Quest PC runtime / OVRService not installed.",
                 PcvrReadyLevel.Fail);
         }
 
-        if (_app.Oculus.IsServiceRunning)
+        if (running)
         {
             return Item("ovrservice", "OVRService", "Running — Link can start.", PcvrReadyLevel.Ok);
         }
@@ -130,17 +136,17 @@ public sealed class PcvrReadyService
             "Start OVRService", canFix: true);
     }
 
-    private PcvrReadyItem CheckOpenXrPreferred()
+    private PcvrReadyItem CheckOpenXrPreferred(RuntimeSnapshot? snapshot)
     {
-        var active = _app.OpenXr.ReadActiveKind();
-        var alignment = PcvrSetup.EvaluateOpenXr(_app, active);
+        var alignment = snapshot?.OpenXrAlignment
+                        ?? PcvrSetup.EvaluateOpenXr(_app, _app.OpenXr.ReadActiveKind());
         return Item("openxr", "OpenXR runtime", alignment.Detail, alignment.Level,
             alignment.FixLabel, alignment.CanFix);
     }
 
-    private PcvrReadyItem CheckSteamVrInstalled()
+    private PcvrReadyItem CheckSteamVrInstalled(RuntimeSnapshot? snapshot)
     {
-        var info = _app.SteamVrInstall.Probe();
+        var info = snapshot?.SteamVr ?? _app.SteamVrInstall.Probe();
         if (!info.IsInstalled)
         {
             return Item("steamvr-install", "SteamVR installed",
@@ -153,15 +159,15 @@ public sealed class PcvrReadyService
         return Item("steamvr-install", title, info.Detail, level);
     }
 
-    private PcvrReadyItem CheckSteamVrOpenXrAvailable()
+    private PcvrReadyItem CheckSteamVrOpenXrAvailable(RuntimeSnapshot? snapshot)
     {
-        if (_app.OpenXr.IsAvailable(OpenXrRuntimeKind.SteamVr))
+        if (snapshot?.SteamVrOpenXrAvailable ?? _app.OpenXr.IsAvailable(OpenXrRuntimeKind.SteamVr))
         {
             return Item("steamvr-openxr", "SteamVR OpenXR",
                 "SteamVR OpenXR runtime JSON found.", PcvrReadyLevel.Ok);
         }
 
-        var install = _app.SteamVrInstall.Probe();
+        var install = snapshot?.SteamVr ?? _app.SteamVrInstall.Probe();
         if (!install.IsInstalled)
         {
             return Item("steamvr-openxr", "SteamVR OpenXR",
@@ -191,7 +197,7 @@ public sealed class PcvrReadyService
             PcvrReadyLevel.Warn, "Enable assist", canFix: true);
     }
 
-    private PcvrReadyItem CheckPowerPlan()
+    private PcvrReadyItem CheckPowerPlan(RuntimeSnapshot? snapshot)
     {
         var power = _app.Settings.Current.Power;
         if (string.IsNullOrWhiteSpace(power.VrPlanGuid))
@@ -201,7 +207,7 @@ public sealed class PcvrReadyService
                 PcvrReadyLevel.Warn);
         }
 
-        var active = _app.Power.GetActivePlan();
+        var active = snapshot?.ActivePowerPlan ?? _app.Power.GetActivePlan();
         var match = active is not null
                     && string.Equals(active.Guid.ToString("D"), power.VrPlanGuid, StringComparison.OrdinalIgnoreCase);
         if (match)
@@ -264,9 +270,9 @@ public sealed class PcvrReadyService
             PcvrReadyLevel.Warn, "Enable + apply now", canFix: true);
     }
 
-    private PcvrReadyItem CheckGpu()
+    private PcvrReadyItem CheckGpu(RuntimeSnapshot? snapshot)
     {
-        var rec = _app.Gpu.GetRecommendation();
+        var rec = snapshot?.Gpu ?? _app.Gpu.GetRecommendation();
         if (rec is null)
         {
             return Item("gpu", "GPU presets", "No GPU detected.", PcvrReadyLevel.Warn);
@@ -288,11 +294,14 @@ public sealed class PcvrReadyService
             PcvrReadyLevel.Warn, "Apply GPU presets", canFix: true);
     }
 
-    private PcvrReadyItem CheckDashToSteamVr()
+    private PcvrReadyItem CheckDashToSteamVr(RuntimeSnapshot? snapshot)
     {
         var dash = _app.Settings.Current.DashToSteamVr;
-        var prevent = _app.DashToSteamVr.IsPreventDashLaunchEnabled() || dash.PreferPreventDashLaunch;
-        var steamVrRunning = IsSteamVrRunning();
+        var prevent = snapshot?.PreventDashLaunchEffective
+                      ?? (_app.DashToSteamVr.IsPreventDashLaunchEnabled() || dash.PreferPreventDashLaunch);
+        var steamVrRunning = snapshot is not null
+            ? snapshot.SteamVr.IsRunning || snapshot.Link.SteamVrRunning
+            : IsSteamVrRunning();
 
         if (steamVrRunning)
         {

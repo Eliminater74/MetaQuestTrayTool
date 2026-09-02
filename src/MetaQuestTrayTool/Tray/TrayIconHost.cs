@@ -327,11 +327,11 @@ public sealed class TrayIconHost : IDisposable
 
     private void RefreshDynamicItems(ContextMenuStrip menu)
     {
-        _app.Oculus.Refresh();
+        var snapshot = _app.RuntimeSnapshots.Capture();
 
         if (FindItem(menu.Items, "ServiceStatus") is ToolStripMenuItem status)
         {
-            status.Text = $"Status: {_app.Oculus.ServiceStatus}";
+            status.Text = $"Status: {snapshot.OculusServiceStatus}";
         }
 
         _syncingStartup = true;
@@ -370,20 +370,20 @@ public sealed class TrayIconHost : IDisposable
         SyncGameSettingChecks(menu);
         RebuildProfileItems(menu);
         SyncLinkChecks(menu);
-        SyncOpenXrChecks(menu);
+        SyncOpenXrChecks(menu, snapshot);
         SyncAudioChecks(menu);
         SyncPowerChecks(menu);
         SyncHeadsetChecks(menu);
-        var pcvr = _app.LinkConnection.Probe(includeEnumHmd: false).Summary;
+        var pcvr = snapshot.Link.Summary;
         if (pcvr.Length > 22)
         {
             pcvr = pcvr[..19] + "…";
         }
 
-        var ready = _app.PcvrReady.Evaluate().ShortTraySummary;
-        var openXr = OpenXrRuntimeService.Label(_app.OpenXr.ReadActiveKind());
-        var profile = _app.IsGameProfileActive
-            ? Truncate(_app.ActiveProfileName ?? "profile", 14)
+        var ready = _app.PcvrReady.Evaluate(snapshot).ShortTraySummary;
+        var openXr = OpenXrRuntimeService.Label(snapshot.OpenXr);
+        var profile = snapshot.IsGameProfileActive
+            ? Truncate(snapshot.ActiveProfileName ?? "profile", 14)
             : null;
 
         // NotifyIcon.Text max is 63 chars on Windows.
@@ -879,12 +879,15 @@ public sealed class TrayIconHost : IDisposable
         return menu;
     }
 
-    private void SyncOpenXrChecks(ContextMenuStrip root)
+    private void SyncOpenXrChecks(ContextMenuStrip root, RuntimeSnapshot? snapshot = null)
     {
-        var live = _app.OpenXr.ReadActiveKind();
+        var live = snapshot?.OpenXr ?? _app.OpenXr.ReadActiveKind();
         if (FindItem(root.Items, "OpenXrStatus") is ToolStripMenuItem status)
         {
-            status.Text = _app.OpenXr.Describe();
+            var path = snapshot?.OpenXrPath ?? _app.OpenXr.ReadActivePath();
+            status.Text = string.IsNullOrWhiteSpace(path)
+                ? "OpenXR: no ActiveRuntime is set."
+                : $"OpenXR: {OpenXrRuntimeService.Label(live)} ({path})";
         }
 
         if (FindItem(root.Items, "OpenXrMeta") is ToolStripMenuItem meta)

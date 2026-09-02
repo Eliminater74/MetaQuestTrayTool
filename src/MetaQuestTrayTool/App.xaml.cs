@@ -64,6 +64,7 @@ public partial class App : System.Windows.Application
     public ExperimentalMsfsVrService ExperimentalMsfsVr { get; }
     public OverlayCloseService OverlayClose { get; }
     public SteamVrInstallService SteamVrInstall { get; } = new();
+    public RuntimeSnapshotService RuntimeSnapshots { get; }
     public StatusDashboardService StatusDashboard { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
@@ -95,6 +96,7 @@ public partial class App : System.Windows.Application
         GameLaunch = new GameLaunchService(this);
         ExperimentalMsfsVr = new ExperimentalMsfsVrService(this);
         OverlayClose = new OverlayCloseService(this);
+        RuntimeSnapshots = new RuntimeSnapshotService(this);
         StatusDashboard = new StatusDashboardService(this);
     }
 

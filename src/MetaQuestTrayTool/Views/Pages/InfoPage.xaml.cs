@@ -57,8 +57,9 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 
     public void Refresh()
     {
-        RefreshBanners(includeAdb: true);
-        RefreshReadyChecklist();
+        var snapshot = App.Instance.RuntimeSnapshots.Capture(includeHeadset: true, force: true);
+        RefreshBanners(snapshot);
+        RefreshReadyChecklist(snapshot);
         ReportBox.Text = "Building report…";
         _ = LoadFullReportAsync();
     }
@@ -83,9 +84,10 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         }
     }
 
-    private void RefreshReadyChecklist()
+    private void RefreshReadyChecklist(RuntimeSnapshot? snapshot = null)
     {
-        var report = App.Instance.PcvrReady.Evaluate();
+        snapshot ??= App.Instance.RuntimeSnapshots.Capture();
+        var report = App.Instance.PcvrReady.Evaluate(snapshot);
         ReadySummaryText.Text = report.Summary;
         ReadySummaryText.Foreground = BrushFor(report.Overall);
 
@@ -98,13 +100,18 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 
     private void RefreshBanners(bool includeAdb = true)
     {
-        var connection = App.Instance.LinkConnection.Probe(includeEnumHmd: false);
+        RefreshBanners(App.Instance.RuntimeSnapshots.Capture(includeHeadset: includeAdb));
+    }
+
+    private void RefreshBanners(RuntimeSnapshot snapshot)
+    {
+        var connection = snapshot.Link;
         ConnectionBanner.Text = $"Link: {connection.InfoBanner}";
         ConnectionBanner.Foreground = connection.SessionActive
             ? (MediaBrush)FindResource("AppAccentBrush")
             : (MediaBrush)FindResource("AppMutedBrush");
 
-        var steamVr = App.Instance.SteamVrInstall.Probe();
+        var steamVr = snapshot.SteamVr;
         SteamVrBanner.Text = steamVr.Banner;
         SteamVrBanner.Foreground = !steamVr.IsInstalled
             ? System.Windows.Media.Brushes.OrangeRed
@@ -113,7 +120,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
                 : (MediaBrush)FindResource("AppAccentBrush");
         InstallSteamVrButton.Visibility = steamVr.IsInstalled ? Visibility.Collapsed : Visibility.Visible;
 
-        var gpu = App.Instance.Gpu.GetRecommendation();
+        var gpu = snapshot.Gpu;
         GpuBanner.Text = gpu is null
             ? "GPU: not detected"
             : $"GPU: {gpu.Banner}";
@@ -121,12 +128,10 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             ? (MediaBrush)FindResource("AppMutedBrush")
             : (MediaBrush)FindResource("AppAccentBrush");
 
-        var openXr = App.Instance.OpenXr.ReadActiveKind();
-        OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(openXr)}";
+        OpenXrBanner.Text = $"OpenXR: {OpenXrRuntimeService.Label(snapshot.OpenXr)}";
 
-        if (includeAdb)
+        if (snapshot.Headset is { } headset)
         {
-            var headset = App.Instance.Headset.ReadIdentity(App.Instance.Settings.Current.Headset);
             HeadsetBanner.Text = $"ADB: {headset.DescribeAdbBanner(connection)}";
             HeadsetBanner.Foreground = headset.IsRogue || headset.IsIgnored
                 ? System.Windows.Media.Brushes.OrangeRed
