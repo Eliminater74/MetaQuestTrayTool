@@ -202,6 +202,25 @@ public class RuntimeSafetyTests
     }
 
     [Theory]
+    [InlineData("https://github.com/Eliminater74/MetaQuestTrayTool")]
+    [InlineData("http://example.com")]
+    public void UrlLaunch_AllowsOnlyAbsoluteWebUrls(string url)
+    {
+        Assert.True(UrlLaunchService.IsAllowedWebUrl(url));
+    }
+
+    [Theory]
+    [InlineData("httpx://example.com")]
+    [InlineData("steam://run/250820")]
+    [InlineData("www.example.com")]
+    [InlineData("/relative/path")]
+    [InlineData("")]
+    public void UrlLaunch_RejectsNonWebOrRelativeUrls(string url)
+    {
+        Assert.False(UrlLaunchService.IsAllowedWebUrl(url));
+    }
+
+    [Theory]
     [InlineData("v1.2.3", 1, 2, 3)]
     [InlineData("1.2.3-beta", 1, 2, 3)]
     public void UpdateVersionParser_ParsesReleaseVersions(string input, int major, int minor, int build)

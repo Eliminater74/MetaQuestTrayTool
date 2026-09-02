@@ -4,8 +4,7 @@ public static class UrlLaunchService
 {
     public static void Open(string url)
     {
-        if (string.IsNullOrWhiteSpace(url)
-            || !url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        if (!IsAllowedWebUrl(url))
         {
             throw new ArgumentException("URL must start with http:// or https://.", nameof(url));
         }
@@ -15,4 +14,9 @@ public static class UrlLaunchService
             throw new InvalidOperationException("Could not open URL: " + detail);
         }
     }
+
+    internal static bool IsAllowedWebUrl(string? url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var uri)
+        && (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+            || uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase));
 }
