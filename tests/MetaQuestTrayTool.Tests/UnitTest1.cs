@@ -155,6 +155,87 @@ public class RuntimeSafetyTests
     }
 
     [Fact]
+    public void HotKeyConflict_IgnoresDisabledVoicePushToTalk()
+    {
+        var voice = new VoiceSettings
+        {
+            Enabled = false,
+            PushToTalkOnly = true,
+            PushToTalkModifiers = HotKeyModifiers.Control,
+            PushToTalkKey = "NumPad1"
+        };
+        var hotKeys = new HotKeySettings
+        {
+            Enabled = true,
+            Bindings =
+            [
+                new HotKeyBinding
+                {
+                    Action = HotKeyAction.AswOff,
+                    Modifiers = HotKeyModifiers.Control,
+                    Key = "NumPad1"
+                }
+            ]
+        };
+
+        Assert.False(HotKeyChordHelper.ConflictsWithHotKeys(voice, hotKeys));
+    }
+
+    [Fact]
+    public void HotKeyConflict_IgnoresContinuousVoiceMode()
+    {
+        var voice = new VoiceSettings
+        {
+            Enabled = true,
+            PushToTalkOnly = false,
+            PushToTalkModifiers = HotKeyModifiers.Control,
+            PushToTalkKey = "NumPad1"
+        };
+        var hotKeys = new HotKeySettings
+        {
+            Enabled = true,
+            Bindings =
+            [
+                new HotKeyBinding
+                {
+                    Action = HotKeyAction.AswOff,
+                    Modifiers = HotKeyModifiers.Control,
+                    Key = "NumPad1"
+                }
+            ]
+        };
+
+        Assert.False(HotKeyChordHelper.ConflictsWithHotKeys(voice, hotKeys));
+    }
+
+    [Fact]
+    public void HotKeyConflict_DetectsEnabledPushToTalkCollision()
+    {
+        var voice = new VoiceSettings
+        {
+            Enabled = true,
+            PushToTalkOnly = true,
+            PushToTalkModifiers = HotKeyModifiers.Control,
+            PushToTalkKey = "NumPad1"
+        };
+        var hotKeys = new HotKeySettings
+        {
+            Enabled = true,
+            Bindings =
+            [
+                new HotKeyBinding
+                {
+                    Action = HotKeyAction.AswOff,
+                    Modifiers = HotKeyModifiers.Control,
+                    Key = "NumPad1"
+                }
+            ]
+        };
+
+        Assert.True(HotKeyChordHelper.ConflictsWithHotKeys(voice, hotKeys));
+    }
+
+    [Fact]
     public void ProfileStore_LoadKeepsIntentionalEmptyPrimary()
     {
         var dir = Path.Combine(Path.GetTempPath(), "MetaQuestTrayTool.Tests", Guid.NewGuid().ToString("N"));

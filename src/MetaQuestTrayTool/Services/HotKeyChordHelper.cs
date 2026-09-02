@@ -10,13 +10,18 @@ public static class HotKeyChordHelper
 
     public static bool ConflictsWithHotKeys(VoiceSettings voice, HotKeySettings hotKeys)
     {
-        if (!hotKeys.Enabled)
+        if (!voice.Enabled || !voice.PushToTalkOnly || !hotKeys.Enabled)
         {
             return false;
         }
 
         var pushToTalk = voice.ToPushToTalkBinding();
-        return hotKeys.Bindings.Any(binding => SameChord(binding, pushToTalk));
+        if (!pushToTalk.TryParseKey(out _))
+        {
+            return false;
+        }
+
+        return hotKeys.Bindings.Any(binding => binding.TryParseKey(out _) && SameChord(binding, pushToTalk));
     }
 
     public static bool TryFindDuplicate(IReadOnlyList<HotKeyBinding> bindings, out HotKeyBinding? duplicate)
