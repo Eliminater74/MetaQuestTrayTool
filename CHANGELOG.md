@@ -8,9 +8,11 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.24] - 2026-09-02
+
 ### Fixed
 - Session-helper mode now skips the tray owner's shutdown cleanup, so quitting the helper cannot run normal tray exit work or save default settings over the user's configuration.
-- Tray exit and startup cleanup now bound helper pipe replies, use a recorded helper owner plus same-exe child fallback, and the helper exits when its tray parent disappears, preventing an unresponsive helper from leaving the next launch stuck hidden.
+- Tray exit and startup cleanup now uses bounded helper pipe replies, a recorded helper owner, and same-exe child fallback; the helper also exits when its tray parent disappears, preventing an unresponsive helper from leaving the next launch stuck hidden.
 
 ## [1.1.23] - 2026-09-02
 
@@ -210,7 +212,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.23...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.24...HEAD
+[1.1.24]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.24
 [1.1.23]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.23
 [1.1.22]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.22
 [1.1.21]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.21

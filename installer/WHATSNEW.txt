@@ -1,22 +1,11 @@
-Meta Quest Tray Tool 1.1.23 - What's new
+Meta Quest Tray Tool 1.1.24 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.23] - 2026-09-02
+[1.1.24] - 2026-09-02
 
 Fixed
-- Update cleanup now only terminates packaged adb.exe processes under this app's install folder, preserving external Android SDK / SideQuest / PATH ADB processes even when the bundled copy is unavailable.
-- Developer command-line build instructions now use the locked win-x64 restore + no-restore build/test flow that CI uses.
-- Deleting all profiles now persists as an intentional empty profile list instead of restoring old profiles from backup on the next launch.
-- Elevated URI fallback launches now use Explorer directly instead of cmd /c start, so Donate, VR Tools, and Steam URI fallbacks are not parsed as shell commands.
-- Log redaction now covers Wi-Fi / Wi‑Fi SSID labels and quoted SSID values with spaces.
-- VR Tools web links now require a valid absolute http:// or https:// URL instead of accepting any string that starts with http.
-- Timer-driven SteamVR/session probes now dispose Process handles after GetProcessesByName checks, avoiding slow handle growth during long tray runs.
-- powercfg.exe and sc.exe runners now read output asynchronously and honor timeouts instead of blocking indefinitely before the timeout check.
-- Startup scheduled-task queries and updates now have bounded schtasks.exe waits and output reads.
-- Failed library launches now keep the original launch error visible even if the armed-profile cleanup restore also fails.
-- Wireless ADB host parsing now revalidates embedded ports and rejects host text that would split into extra ADB arguments.
-- Restarting OVRService now preserves failed stop errors instead of reporting a misleading “already running” start result.
-- Hotkey startup now only reports voice push-to-talk conflicts when voice push-to-talk is actually enabled and mapped.
+- Session-helper mode now skips the tray owner's shutdown cleanup, so quitting the helper cannot run normal tray exit work or save default settings over the user's configuration.
+- Tray exit and startup cleanup now uses bounded helper pipe replies, a recorded helper owner, and same-exe child fallback; the helper also exits when its tray parent disappears, preventing an unresponsive helper from leaving the next launch stuck hidden.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

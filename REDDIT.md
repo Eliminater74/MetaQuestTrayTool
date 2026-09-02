@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.23](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.24](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```text
-[PC] Meta Quest Tray Tool v1.1.23 — free modern OTT-style tray app for Quest Link / SteamVR (audit hardening + safer updater/ADB/profile handling)
+[PC] Meta Quest Tray Tool v1.1.24 — free modern OTT-style tray app for Quest Link / SteamVR (exit/helper hotfix + audit hardening)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.23** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.24** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,12 +54,13 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.23)
+### What works now (v1.1.24)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
 - Sidebar: **Status**, Game Settings, Tray Tool, Power Options, Service & Startup, Log, Advanced, Quest Link, Headset, **VR Tools**, Info / About
 - Hover tooltips; close-to-tray; start minimized; hide from Alt+Tab; single-instance
+- Tray Exit cleans up the internal normal-user session helper even if the helper pipe stops answering
 - Hands-free elevated start (one UAC, then silent elevated at logon)
 - Refreshed neon VR headset icon/logo (tray, About, settings sidebar)
 - Durable `settings.json` / `profiles.json` (flush + `.bak`/`.bak2` restore after power loss)
@@ -212,5 +213,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.23) — audit hardening for updater ADB ownership, wireless ADB parsing, profile storage, URL launching, log redaction, service/power/startup command timeouts, OVRService restart reporting, and voice hotkey conflicts; plus expanded headset voice coverage, opt-in experimental MSFS 2024 VR launch, single-instance protection, stale helper recovery, neon icon, settings survive power loss, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.24) — exit/helper hotfix for hidden stuck relaunches, plus audit hardening for updater ADB ownership, wireless ADB parsing, profile storage, URL launching, log redaction, service/power/startup command timeouts, OVRService restart reporting, and voice hotkey conflicts; expanded headset voice coverage, opt-in experimental MSFS 2024 VR launch, single-instance protection, stale helper recovery, neon icon, settings survive power loss, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

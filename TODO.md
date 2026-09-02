@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.23](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.24](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -258,6 +258,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Full v1.1.23 audit hardening: ADB/update/profile/URL/service/startup/power safety, process-handle cleanup, log redaction, docs/build-flow alignment
 - [x] Bump version to **1.1.23**
 - [x] Tag and publish **v1.1.23**
+- [x] Fix tray Exit/session-helper shutdown so a stuck helper cannot leave the next launch hidden
+- [x] Bump version to **1.1.24**
+- [x] Tag and publish **v1.1.24**
 
 ### Housekeeping (ongoing)
 
