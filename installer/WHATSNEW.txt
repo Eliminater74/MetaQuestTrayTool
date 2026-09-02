@@ -1,18 +1,22 @@
-Meta Quest Tray Tool 1.1.19 - What's new
+Meta Quest Tray Tool 1.1.23 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.19] - 2026-08-28
-
-Added
-- Expanded headset announcements with game/profile launch details, profile apply/restore outcomes, action/audio/headset/recovery results, and an opt-in experimental-result toggle.
-- Experimental MSFS 2024 VR launch now prepares the selected PCVR path, supports configurable launch arguments and VR hotkeys, and verifies the target process window before sending input.
+[1.1.23] - 2026-09-02
 
 Fixed
-- Stale MSFS VR toggles are cancelled when another launch starts, and PCVR preparation failures no longer continue into game launch automation.
-- Profile launches are blocked from replacing an already-active game profile, preventing a failed second launch from restoring the wrong global settings.
-- Local profile executables must be relative .exe files inside the configured install directory; session-helper launch fields are encoded safely across the named pipe.
-- Headset TTS reload and shutdown now retire synthesizers only after active playback releases them, and voice confirmations fall back when headset delivery is unavailable.
-- OpenXR write failures are reported as failures in spoken action summaries.
+- Update cleanup now only terminates packaged adb.exe processes under this app's install folder, preserving external Android SDK / SideQuest / PATH ADB processes even when the bundled copy is unavailable.
+- Developer command-line build instructions now use the locked win-x64 restore + no-restore build/test flow that CI uses.
+- Deleting all profiles now persists as an intentional empty profile list instead of restoring old profiles from backup on the next launch.
+- Elevated URI fallback launches now use Explorer directly instead of cmd /c start, so Donate, VR Tools, and Steam URI fallbacks are not parsed as shell commands.
+- Log redaction now covers Wi-Fi / Wi‑Fi SSID labels and quoted SSID values with spaces.
+- VR Tools web links now require a valid absolute http:// or https:// URL instead of accepting any string that starts with http.
+- Timer-driven SteamVR/session probes now dispose Process handles after GetProcessesByName checks, avoiding slow handle growth during long tray runs.
+- powercfg.exe and sc.exe runners now read output asynchronously and honor timeouts instead of blocking indefinitely before the timeout check.
+- Startup scheduled-task queries and updates now have bounded schtasks.exe waits and output reads.
+- Failed library launches now keep the original launch error visible even if the armed-profile cleanup restore also fails.
+- Wireless ADB host parsing now revalidates embedded ports and rejects host text that would split into extra ADB arguments.
+- Restarting OVRService now preserves failed stop errors instead of reporting a misleading “already running” start result.
+- Hotkey startup now only reports voice push-to-talk conflicts when voice push-to-talk is actually enabled and mapped.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

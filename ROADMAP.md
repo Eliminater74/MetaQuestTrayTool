@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.22](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.23](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.22)
+## Current product (v1.1.23)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -121,6 +121,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.20 | Single-instance startup protection with visible process diagnostics; stale session-helper recovery |
 | v1.1.21 | Clean-runner locked restore correction; workflow-run retention cleanup |
 | v1.1.22 | Deterministic session-helper shutdown on tray exit |
+| v1.1.23 | Full audit hardening: ADB/update/profile/URL/service/startup/power safety, process-handle cleanup, docs/build-flow alignment |
 
 ---
 

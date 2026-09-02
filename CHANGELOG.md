@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.23] - 2026-09-02
+
 ### Fixed
 - Update cleanup now only terminates packaged `adb.exe` processes under this app's install folder, preserving external Android SDK / SideQuest / PATH ADB processes even when the bundled copy is unavailable.
 - Developer command-line build instructions now use the locked `win-x64` restore + no-restore build/test flow that CI uses.
@@ -204,7 +206,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.22...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.23...HEAD
+[1.1.23]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.23
 [1.1.22]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.22
 [1.1.21]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.21
 [1.1.20]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.20

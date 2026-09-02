@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.22](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.23](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -255,6 +255,9 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Audit and harden MSFS targeting, profile launch safety, helper IPC, TTS lifecycle, and voice fallback
 - [x] Bump version to **1.1.19**
 - [x] Tag and publish **v1.1.19**
+- [x] Full v1.1.23 audit hardening: ADB/update/profile/URL/service/startup/power safety, process-handle cleanup, log redaction, docs/build-flow alignment
+- [x] Bump version to **1.1.23**
+- [x] Tag and publish **v1.1.23**
 
 ### Housekeeping (ongoing)
 
