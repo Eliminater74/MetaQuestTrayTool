@@ -44,8 +44,8 @@ Typical actions:
 Only one tray instance can own the app lock. Starting a second copy now shows a blocker with
 the running process ID and explains how to close it. The second copy then signals the existing
 tray to show its shell and exits. The normal-user `--session-helper` process is an internal
-launch helper; it does not block the tray from starting and is shut down during tray exit, with
-a safe fallback if it becomes stuck.
+launch helper; it does not block the tray from starting, records its tray owner, exits when that
+owner is gone, and is cleaned up during tray exit even if its helper pipe stops answering.
 
 ## Idle behavior
 

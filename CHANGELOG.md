@@ -8,6 +8,10 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Fixed
+- Session-helper mode now skips the tray owner's shutdown cleanup, so quitting the helper cannot run normal tray exit work or save default settings over the user's configuration.
+- Tray exit and startup cleanup now bound helper pipe replies, use a recorded helper owner plus same-exe child fallback, and the helper exits when its tray parent disappears, preventing an unresponsive helper from leaving the next launch stuck hidden.
+
 ## [1.1.23] - 2026-09-02
 
 ### Fixed

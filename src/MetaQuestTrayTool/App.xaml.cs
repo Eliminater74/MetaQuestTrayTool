@@ -23,6 +23,7 @@ public partial class App : System.Windows.Application
     private EventWaitHandle? _showShellEvent;
     private CancellationTokenSource? _showShellCts;
     private bool _pendingShowShell;
+    private bool _isSessionHelper;
     private TrayIconHost? _tray;
     private ProcessWatcherService? _processWatcher;
     private AudioSwitchWatcher? _audioWatcher;
@@ -103,8 +104,9 @@ public partial class App : System.Windows.Application
 
         if (SessionHelperHost.IsHelperProcess(e.Args))
         {
+            _isSessionHelper = true;
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            SessionHelperHost.Attach(this);
+            SessionHelperHost.Attach(this, e.Args);
             return;
         }
 
@@ -418,6 +420,13 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        if (_isSessionHelper)
+        {
+            Log.Info($"Meta Quest Tray Tool session helper exiting (code {e.ApplicationExitCode}).");
+            base.OnExit(e);
+            return;
+        }
+
         Log.Info($"Meta Quest Tray Tool exiting (code {e.ApplicationExitCode}).");
         SessionHelperClient.RequestQuit();
         try

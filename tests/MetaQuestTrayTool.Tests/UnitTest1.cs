@@ -303,6 +303,63 @@ public class RuntimeSafetyTests
     }
 
     [Fact]
+    public void SessionHelper_ParentPidArgumentRoundTrips()
+    {
+        var arguments = SessionHelperHost.BuildArgumentsForParent(12345).Split(' ');
+
+        Assert.Contains(SessionHelperHost.Switch, arguments);
+        Assert.Equal(12345, SessionHelperHost.ParseParentProcessId(arguments));
+        Assert.Equal(67890, SessionHelperHost.ParseParentProcessId(
+        [
+            SessionHelperHost.Switch,
+            SessionHelperHost.ParentPidSwitch + "=67890"
+        ]));
+    }
+
+    [Fact]
+    public void SessionHelper_RecordedStateTrustsCurrentOrDeadParentOnly()
+    {
+        var currentExe = Path.Combine(Path.GetTempPath(), "MetaQuestTrayTool.exe");
+        var state = new SessionHelperHost.HelperState
+        {
+            ProcessId = 200,
+            ParentProcessId = 100,
+            ExecutablePath = currentExe
+        };
+
+        Assert.True(SessionHelperClient.IsTrustedRecordedHelperState(
+            state,
+            currentPid: 100,
+            currentProcessPath: currentExe,
+            isProcessRunning: _ => true));
+        Assert.True(SessionHelperClient.IsTrustedRecordedHelperState(
+            state,
+            currentPid: 300,
+            currentProcessPath: currentExe,
+            isProcessRunning: _ => false));
+        Assert.False(SessionHelperClient.IsTrustedRecordedHelperState(
+            state,
+            currentPid: 300,
+            currentProcessPath: currentExe,
+            isProcessRunning: _ => true));
+        Assert.False(SessionHelperClient.IsTrustedRecordedHelperState(
+            state with { ProcessId = 300 },
+            currentPid: 300,
+            currentProcessPath: currentExe,
+            isProcessRunning: _ => false));
+        Assert.False(SessionHelperClient.IsTrustedRecordedHelperState(
+            state with { ParentProcessId = 0 },
+            currentPid: 300,
+            currentProcessPath: currentExe,
+            isProcessRunning: _ => false));
+        Assert.False(SessionHelperClient.IsTrustedRecordedHelperState(
+            state with { ExecutablePath = Path.Combine(Path.GetTempPath(), "Other.exe") },
+            currentPid: 100,
+            currentProcessPath: currentExe,
+            isProcessRunning: _ => true));
+    }
+
+    [Fact]
     public void LogRedaction_CoversHyphenatedWifiAndQuotedValues()
     {
         var redacted = LogService.RedactSensitiveData(

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MetaQuestTrayTool.Services;
@@ -13,6 +14,9 @@ namespace MetaQuestTrayTool.Services;
 /// </summary>
 public static class SessionHelperClient
 {
+    private static readonly TimeSpan PipeConnectTimeout = TimeSpan.FromMilliseconds(800);
+    private static readonly TimeSpan PipeReplyTimeout = TimeSpan.FromMilliseconds(800);
+
     public static bool IsSteamRunningElevated() =>
         UnelevatedProcessLauncher.TryGetNamedProcessElevated("steam", out var elevated) && elevated;
 
@@ -46,15 +50,16 @@ public static class SessionHelperClient
         }
 
         var drop = UnelevatedProcessLauncher.IsCurrentProcessElevated();
+        var helperArguments = SessionHelperHost.BuildArgumentsForParent(Environment.ProcessId);
         var started = drop
             ? UnelevatedProcessLauncher.TryStartHiddenUnelevated(
                 exe,
-                SessionHelperHost.Switch,
+                helperArguments,
                 Path.GetDirectoryName(exe),
                 out var startDetail)
             : UnelevatedProcessLauncher.TryStart(
                 exe,
-                SessionHelperHost.Switch,
+                helperArguments,
                 Path.GetDirectoryName(exe),
                 dropElevation: false,
                 out startDetail);
@@ -112,22 +117,26 @@ public static class SessionHelperClient
 
     public static void RequestQuit()
     {
-        if (!TryGetHelperProcessId(out var pid))
-        {
-            TrySend("QUIT", out _);
-            return;
-        }
+        var pids = GetKnownHelperProcessIds();
 
         TrySend("QUIT", out _);
-        if (WaitForHelperExit(pid, TimeSpan.FromSeconds(3)))
+        if (pids.Count == 0)
         {
             return;
         }
 
-        // The helper may be stuck while the tray is exiting. Only terminate the
-        // process that identified itself over the protected helper pipe and whose
-        // executable path matches this application.
-        TryTerminateHelper(pid);
+        foreach (var pid in pids)
+        {
+            if (WaitForHelperExit(pid, TimeSpan.FromSeconds(3)))
+            {
+                continue;
+            }
+
+            // The helper may be stuck while the tray is exiting. Only terminate a
+            // helper PID that either identified itself over the protected pipe, was
+            // recorded by helper startup, or is a same-exe child of this tray process.
+            TryTerminateHelper(pid);
+        }
     }
 
     private static bool TryLaunch(
@@ -200,14 +209,15 @@ public static class SessionHelperClient
                 SessionHelperHost.PipeName,
                 PipeDirection.InOut,
                 PipeOptions.None);
-            client.Connect(800);
+            client.Connect((int)PipeConnectTimeout.TotalMilliseconds);
+            TrySetPipeTimeouts(client);
             using var writer = new StreamWriter(client, Encoding.UTF8, leaveOpen: true) { AutoFlush = true };
             using var reader = new StreamReader(client, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
             writer.WriteLine(command);
-            var response = reader.ReadLine();
+            var response = ReadLineWithTimeout(reader, PipeReplyTimeout, out var readDetail);
             if (string.IsNullOrWhiteSpace(response))
             {
-                detail = "empty helper reply";
+                detail = readDetail;
                 return false;
             }
 
@@ -223,6 +233,39 @@ public static class SessionHelperClient
         }
     }
 
+    private static void TrySetPipeTimeouts(NamedPipeClientStream client)
+    {
+        try
+        {
+            client.ReadTimeout = (int)PipeReplyTimeout.TotalMilliseconds;
+            client.WriteTimeout = (int)PipeReplyTimeout.TotalMilliseconds;
+        }
+        catch
+        {
+            // Some pipe configurations do not support stream timeouts.
+        }
+    }
+
+    private static string? ReadLineWithTimeout(StreamReader reader, TimeSpan timeout, out string detail)
+    {
+        using var cts = new CancellationTokenSource(timeout);
+        try
+        {
+            detail = "empty helper reply";
+            return reader.ReadLineAsync(cts.Token).AsTask().GetAwaiter().GetResult();
+        }
+        catch (OperationCanceledException)
+        {
+            detail = "helper reply timed out";
+            return null;
+        }
+        catch (TimeoutException)
+        {
+            detail = "helper reply timed out";
+            return null;
+        }
+    }
+
     private static bool TryGetHelperProcessId(out int pid)
     {
         pid = 0;
@@ -230,6 +273,90 @@ public static class SessionHelperClient
             && int.TryParse(detail, out pid)
             && pid > 0
             && pid != Environment.ProcessId;
+    }
+
+    private static HashSet<int> GetKnownHelperProcessIds()
+    {
+        var pids = new HashSet<int>();
+        if (TryGetHelperProcessId(out var pipePid))
+        {
+            pids.Add(pipePid);
+        }
+
+        if (TryGetRecordedHelperProcessId(out var recordedPid))
+        {
+            pids.Add(recordedPid);
+        }
+
+        foreach (var childPid in GetSameExeChildProcessIds())
+        {
+            pids.Add(childPid);
+        }
+
+        return pids;
+    }
+
+    private static bool TryGetRecordedHelperProcessId(out int pid)
+    {
+        pid = 0;
+        if (!SessionHelperHost.TryReadHelperState(out var state)
+            || !IsTrustedRecordedHelperState(
+                state,
+                Environment.ProcessId,
+                Environment.ProcessPath,
+                IsProcessRunning))
+        {
+            return false;
+        }
+
+        pid = state.ProcessId;
+        return true;
+    }
+
+    internal static bool IsTrustedRecordedHelperState(
+        SessionHelperHost.HelperState state,
+        int currentPid,
+        string? currentProcessPath,
+        Func<int, bool> isProcessRunning)
+    {
+        if (state.ProcessId <= 0
+            || state.ProcessId == currentPid
+            || string.IsNullOrWhiteSpace(state.ExecutablePath)
+            || string.IsNullOrWhiteSpace(currentProcessPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            if (!string.Equals(
+                    Path.GetFullPath(state.ExecutablePath),
+                    Path.GetFullPath(currentProcessPath),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return state.ParentProcessId == currentPid
+               || (state.ParentProcessId > 0 && !isProcessRunning(state.ParentProcessId));
+    }
+
+    private static bool IsProcessRunning(int pid)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(pid);
+            return !process.HasExited;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static bool WaitForHelperExit(int pid, TimeSpan timeout)
@@ -294,6 +421,122 @@ public static class SessionHelperClient
         }
     }
 
+    private static IEnumerable<int> GetSameExeChildProcessIds()
+    {
+        var exePath = Environment.ProcessPath;
+        if (string.IsNullOrWhiteSpace(exePath))
+        {
+            yield break;
+        }
+
+        var processName = Path.GetFileNameWithoutExtension(exePath);
+        Process[] processes;
+        try
+        {
+            processes = Process.GetProcessesByName(processName);
+        }
+        catch
+        {
+            yield break;
+        }
+
+        try
+        {
+            foreach (var process in processes)
+            {
+                if (process.Id == Environment.ProcessId)
+                {
+                    continue;
+                }
+
+                if (TryGetParentProcessId(process.Id, out var parentPid)
+                    && parentPid == Environment.ProcessId
+                    && IsOwnedHelper(process))
+                {
+                    yield return process.Id;
+                }
+            }
+        }
+        finally
+        {
+            foreach (var process in processes)
+            {
+                process.Dispose();
+            }
+        }
+    }
+
+    private static bool TryGetParentProcessId(int pid, out int parentPid)
+    {
+        parentPid = 0;
+        var snapshot = CreateToolhelp32Snapshot(Th32csSnapprocess, 0);
+        if (snapshot == InvalidHandleValue)
+        {
+            return false;
+        }
+
+        try
+        {
+            var entry = new ProcessEntry32
+            {
+                dwSize = (uint)Marshal.SizeOf<ProcessEntry32>()
+            };
+            if (!Process32First(snapshot, ref entry))
+            {
+                return false;
+            }
+
+            do
+            {
+                if (entry.th32ProcessID != pid)
+                {
+                    continue;
+                }
+
+                parentPid = (int)entry.th32ParentProcessID;
+                return parentPid > 0;
+            }
+            while (Process32Next(snapshot, ref entry));
+
+            return false;
+        }
+        finally
+        {
+            CloseHandle(snapshot);
+        }
+    }
+
     private static string Encode(string? value) =>
         Convert.ToBase64String(Encoding.UTF8.GetBytes(value ?? string.Empty));
+
+    private const uint Th32csSnapprocess = 0x00000002;
+    private static readonly IntPtr InvalidHandleValue = new(-1);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct ProcessEntry32
+    {
+        public uint dwSize;
+        public uint cntUsage;
+        public uint th32ProcessID;
+        public IntPtr th32DefaultHeapID;
+        public uint th32ModuleID;
+        public uint cntThreads;
+        public uint th32ParentProcessID;
+        public int pcPriClassBase;
+        public uint dwFlags;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+        public string szExeFile;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint processId);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern bool Process32First(IntPtr snapshot, ref ProcessEntry32 entry);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern bool Process32Next(IntPtr snapshot, ref ProcessEntry32 entry);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool CloseHandle(IntPtr handle);
 }

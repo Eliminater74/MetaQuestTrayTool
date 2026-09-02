@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 
 namespace MetaQuestTrayTool.Services;
@@ -16,14 +18,21 @@ namespace MetaQuestTrayTool.Services;
 public static class SessionHelperHost
 {
     public const string Switch = "--session-helper";
+    internal const string ParentPidSwitch = "--session-helper-parent-pid";
     public const string PipeName = "MetaQuestTrayTool.SessionHelper";
     private const string MutexName = @"Local\MetaQuestTrayTool.SessionHelper";
+    internal static string HelperStateFile { get; } =
+        Path.Combine(AppPaths.AppDataDirectory, "session-helper.json");
 
     public static bool IsHelperProcess(IEnumerable<string> args) =>
         args.Any(arg => string.Equals(arg, Switch, StringComparison.OrdinalIgnoreCase));
 
-    public static void Attach(System.Windows.Application app)
+    internal static string BuildArgumentsForParent(int parentPid) =>
+        $"{Switch} {ParentPidSwitch} {parentPid}";
+
+    public static void Attach(System.Windows.Application app, IEnumerable<string> args)
     {
+        var parentPid = ParseParentProcessId(args);
         var mutex = new Mutex(initiallyOwned: true, MutexName, out var created);
         if (!created)
         {
@@ -32,8 +41,10 @@ public static class SessionHelperHost
             return;
         }
 
+        TryWriteHelperState(parentPid);
         app.Exit += (_, _) =>
         {
+            TryDeleteHelperStateForCurrentProcess();
             try
             {
                 mutex.ReleaseMutex();
@@ -48,7 +59,38 @@ public static class SessionHelperHost
 
         var cts = new CancellationTokenSource();
         app.Exit += (_, _) => cts.Cancel();
+        if (parentPid > 0 && parentPid != Environment.ProcessId)
+        {
+            _ = Task.Run(() => WatchParent(app, parentPid, cts.Token), cts.Token);
+        }
+
         _ = Task.Run(() => ListenLoop(app, cts.Token), cts.Token);
+    }
+
+    internal static int ParseParentProcessId(IEnumerable<string> args)
+    {
+        var values = args.ToArray();
+        for (var i = 0; i < values.Length; i++)
+        {
+            var arg = values[i];
+            if (string.Equals(arg, ParentPidSwitch, StringComparison.OrdinalIgnoreCase)
+                && i + 1 < values.Length
+                && int.TryParse(values[i + 1], out var nextPid)
+                && nextPid > 0)
+            {
+                return nextPid;
+            }
+
+            var prefix = ParentPidSwitch + "=";
+            if (arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                && int.TryParse(arg[prefix.Length..], out var inlinePid)
+                && inlinePid > 0)
+            {
+                return inlinePid;
+            }
+        }
+
+        return 0;
     }
 
     private static void ListenLoop(System.Windows.Application app, CancellationToken token)
@@ -70,7 +112,7 @@ public static class SessionHelperHost
                 if (line.Equals("QUIT", StringComparison.OrdinalIgnoreCase))
                 {
                     writer.WriteLine("OK shutting down");
-                    app.Dispatcher.BeginInvoke(() => app.Shutdown());
+                    RequestShutdown(app);
                     return;
                 }
 
@@ -89,6 +131,58 @@ public static class SessionHelperHost
             catch
             {
                 // next client
+            }
+        }
+    }
+
+    private static void WatchParent(System.Windows.Application app, int parentPid, CancellationToken token)
+    {
+        try
+        {
+            using var parent = Process.GetProcessById(parentPid);
+            while (!token.IsCancellationRequested)
+            {
+                if (parent.WaitForExit(1000))
+                {
+                    break;
+                }
+            }
+        }
+        catch (ArgumentException)
+        {
+            // Parent has already exited.
+        }
+        catch (InvalidOperationException)
+        {
+            // Parent exited while the process handle was being prepared.
+        }
+        catch
+        {
+            // If parent monitoring is unavailable, keep the helper pipe alive.
+            return;
+        }
+
+        if (!token.IsCancellationRequested)
+        {
+            RequestShutdown(app);
+        }
+    }
+
+    private static void RequestShutdown(System.Windows.Application app)
+    {
+        try
+        {
+            app.Dispatcher.BeginInvoke(() => app.Shutdown());
+        }
+        catch
+        {
+            try
+            {
+                app.Shutdown();
+            }
+            catch
+            {
+                // Process teardown is already in flight.
             }
         }
     }
@@ -210,4 +304,70 @@ public static class SessionHelperHost
 
     private static string Decode(string value) =>
         Encoding.UTF8.GetString(Convert.FromBase64String(value));
+
+    internal sealed record HelperState
+    {
+        public int ProcessId { get; init; }
+        public int ParentProcessId { get; init; }
+        public string? ExecutablePath { get; init; }
+    }
+
+    internal static bool TryReadHelperState(out HelperState state)
+    {
+        state = new HelperState();
+        try
+        {
+            if (!File.Exists(HelperStateFile))
+            {
+                return false;
+            }
+
+            var parsed = JsonSerializer.Deserialize<HelperState>(File.ReadAllText(HelperStateFile));
+            if (parsed is null || parsed.ProcessId <= 0)
+            {
+                return false;
+            }
+
+            state = parsed;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void TryWriteHelperState(int parentPid)
+    {
+        try
+        {
+            AppPaths.EnsureAppDataDirectory();
+            var state = new HelperState
+            {
+                ProcessId = Environment.ProcessId,
+                ParentProcessId = parentPid,
+                ExecutablePath = Environment.ProcessPath ?? string.Empty
+            };
+            File.WriteAllText(HelperStateFile, JsonSerializer.Serialize(state));
+        }
+        catch
+        {
+            // The helper pipe remains authoritative if the diagnostic state file cannot be written.
+        }
+    }
+
+    private static void TryDeleteHelperStateForCurrentProcess()
+    {
+        try
+        {
+            if (TryReadHelperState(out var state) && state.ProcessId == Environment.ProcessId)
+            {
+                File.Delete(HelperStateFile);
+            }
+        }
+        catch
+        {
+            // Best effort cleanup; future startups validate the PID before trusting this file.
+        }
+    }
 }
