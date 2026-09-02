@@ -11,7 +11,7 @@ public sealed class OverlayCloseService
     private static readonly HashSet<string> NeverKill = new(StringComparer.OrdinalIgnoreCase)
     {
         "steam", "steamwebhelper", "steamvr", "vrserver", "vrdashboard", "vrcompositor",
-        "ovrserver_x64", "oculusclient", "oculusdash", "oculusvr", "meta", 
+        "ovrserver_x64", "oculusclient", "oculusdash", "oculusvr", "meta",
         "discord", "explorer", "csrss", "winlogon", "services", "system",
         "metaquesttraytool", "dwm"
     };

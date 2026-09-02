@@ -176,7 +176,8 @@ public sealed class PcvrReadyService
 
     private string FixSteamVrOpenXr() => _app.SteamVrInstall.OpenInstallPage();
 
-    private PcvrReadyItem CheckSteamLinkOpenXrAssist()    {
+    private PcvrReadyItem CheckSteamLinkOpenXrAssist()
+    {
         var on = _app.Settings.Current.OpenXr.PreferSteamVrDuringSteamLink;
         if (on)
         {
@@ -396,12 +397,12 @@ public sealed class PcvrReadyService
         PcvrReadyLevel level,
         string? fixLabel = null,
         bool canFix = false) => new()
-    {
-        Id = id,
-        Title = title,
-        Detail = detail,
-        Level = level,
-        FixLabel = fixLabel,
-        CanFix = canFix
-    };
+        {
+            Id = id,
+            Title = title,
+            Detail = detail,
+            Level = level,
+            FixLabel = fixLabel,
+            CanFix = canFix
+        };
 }

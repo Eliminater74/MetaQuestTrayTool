@@ -225,12 +225,12 @@ public static class ProfilePresetCatalog
 
     private static LinkSettings BuildGlobalLink(string presetName, int linkMbps,
         LinkSharpeningMode sharpen, int encode) => new()
-    {
-        PresetName = presetName,
-        BitrateMbps = linkMbps,
-        Sharpening = sharpen,
-        EncodeResolutionWidth = encode
-    };
+        {
+            PresetName = presetName,
+            BitrateMbps = linkMbps,
+            Sharpening = sharpen,
+            EncodeResolutionWidth = encode
+        };
 
     private static LinkProfileOverrides BuildLinkOverrides(int? linkMbps,
         LinkSharpeningMode sharpen, int? encode) =>

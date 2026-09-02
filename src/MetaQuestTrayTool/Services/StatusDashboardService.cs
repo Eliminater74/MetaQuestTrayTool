@@ -225,14 +225,14 @@ public sealed class StatusDashboardService
         StatusChipKind kind,
         string? actionId = null,
         string? actionLabel = null) => new()
-    {
-        Title = title,
-        Value = value,
-        Detail = detail,
-        Kind = kind,
-        ActionId = actionId,
-        ActionLabel = actionLabel
-    };
+        {
+            Title = title,
+            Value = value,
+            Detail = detail,
+            Kind = kind,
+            ActionId = actionId,
+            ActionLabel = actionLabel
+        };
 
     private static string DescribeLinkKind(VrConnectionStatus link) => link.Kind switch
     {
