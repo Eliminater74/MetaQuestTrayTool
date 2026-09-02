@@ -19,6 +19,13 @@ public sealed class ProfileStore
 
     public static string ProfilesFile { get; } = Path.Combine(AppPaths.AppDataDirectory, "profiles.json");
 
+    private readonly string _profilesFile;
+
+    public ProfileStore(string? profilesFile = null)
+    {
+        _profilesFile = string.IsNullOrWhiteSpace(profilesFile) ? ProfilesFile : profilesFile;
+    }
+
     public bool LastLoadFailed { get; private set; }
 
     public bool RestoredFromBackup { get; private set; }
@@ -27,9 +34,9 @@ public sealed class ProfileStore
     {
         LastLoadFailed = false;
         RestoredFromBackup = false;
-        AppPaths.EnsureAppDataDirectory();
+        EnsureProfileDirectory();
 
-        var primary = ProfilesFile;
+        var primary = _profilesFile;
         var bak = primary + ".bak";
         var bak2 = primary + ".bak2";
 
@@ -45,7 +52,7 @@ public sealed class ProfileStore
             return primaryList;
         }
 
-        if (primaryOk && primaryList.Count == 0 && !bakOk && !bak2Ok)
+        if (primaryOk && primaryList.Count == 0)
         {
             return primaryList;
         }
@@ -82,11 +89,20 @@ public sealed class ProfileStore
 
     public void Save(IReadOnlyList<GameProfile> profiles)
     {
-        AppPaths.EnsureAppDataDirectory();
+        EnsureProfileDirectory();
         var json = JsonSerializer.Serialize(profiles, JsonOptions);
-        var path = ProfilesFile;
+        var path = _profilesFile;
         RotateBackups(path, path + ".bak", path + ".bak2");
         SettingsService.WriteDurable(path, json);
+    }
+
+    private void EnsureProfileDirectory()
+    {
+        var dir = Path.GetDirectoryName(_profilesFile);
+        if (!string.IsNullOrWhiteSpace(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
     }
 
     private static bool TryPickBackup(

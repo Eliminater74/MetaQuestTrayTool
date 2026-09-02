@@ -121,6 +121,63 @@ public class RuntimeSafetyTests
                 "adb.exe")));
     }
 
+    [Fact]
+    public void ProfileStore_LoadKeepsIntentionalEmptyPrimary()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "MetaQuestTrayTool.Tests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var path = Path.Combine(dir, "profiles.json");
+            var store = new ProfileStore(path);
+
+            store.Save(
+            [
+                new GameProfile { Name = "Old profile", ProcessName = "OldGame" }
+            ]);
+            store.Save([]);
+
+            var loaded = store.Load();
+
+            Assert.Empty(loaded);
+            Assert.False(store.RestoredFromBackup);
+            Assert.False(store.LastLoadFailed);
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ProfileStore_LoadRestoresCorruptPrimaryFromBackup()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "MetaQuestTrayTool.Tests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, "profiles.json");
+            File.WriteAllText(path, "{");
+            File.WriteAllText(path + ".bak", """[{"Name":"Recovered","ProcessName":"RecoveredGame"}]""");
+            var store = new ProfileStore(path);
+
+            var loaded = store.Load();
+
+            var profile = Assert.Single(loaded);
+            Assert.Equal("Recovered", profile.Name);
+            Assert.True(store.RestoredFromBackup);
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
+
     [Theory]
     [InlineData("v1.2.3", 1, 2, 3)]
     [InlineData("1.2.3-beta", 1, 2, 3)]
