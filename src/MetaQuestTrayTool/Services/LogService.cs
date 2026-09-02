@@ -11,7 +11,7 @@ public sealed class LogService
     private const long MaxFileBytes = 5 * 1024 * 1024;
     private readonly object _sync = new();
     private static readonly Regex SensitiveValue = new(
-        @"(?<label>\b(?:serial|fingerprint|ssid|wifi(?:\s+ssid)?)(?:\s*[:=]\s*|\s+))(?<value>[^\s,;)\]]+)",
+        @"(?<label>\b(?:serial|fingerprint|ssid|wi(?:fi|[-\u2010-\u2015]?fi)(?:\s+ssid)?)(?:\s*[:=]\s*|\s+))(?<value>""[^""]*""|\u201c[^\u201d]*\u201d|[^\s,;)\]]+)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public ObservableCollection<LogEntry> Entries { get; } = [];
@@ -103,7 +103,7 @@ public sealed class LogService
         }
     }
 
-    private static string RedactSensitiveData(string message) =>
+    internal static string RedactSensitiveData(string message) =>
         SensitiveValue.Replace(message, match => match.Groups["label"].Value + "<redacted>");
 
     private static void RotateLogIfNeeded()

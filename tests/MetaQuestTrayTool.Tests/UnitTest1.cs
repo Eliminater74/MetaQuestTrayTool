@@ -188,6 +188,19 @@ public class RuntimeSafetyTests
         Assert.DoesNotContain("/c start", arguments, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void LogRedaction_CoversHyphenatedWifiAndQuotedValues()
+    {
+        var redacted = LogService.RedactSensitiveData(
+            "serial=ABC123 fingerprint: meta/build/value Wi-Fi SSID: \"Living Room\" Wi\u2011Fi SSID: \u201cQuest Net\u201d");
+
+        Assert.DoesNotContain("ABC123", redacted);
+        Assert.DoesNotContain("meta/build/value", redacted);
+        Assert.DoesNotContain("Living Room", redacted);
+        Assert.DoesNotContain("Quest Net", redacted);
+        Assert.Equal(4, redacted.Split("<redacted>").Length - 1);
+    }
+
     [Theory]
     [InlineData("v1.2.3", 1, 2, 3)]
     [InlineData("1.2.3-beta", 1, 2, 3)]

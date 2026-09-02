@@ -13,6 +13,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Developer command-line build instructions now use the locked `win-x64` restore + no-restore build/test flow that CI uses.
 - Deleting all profiles now persists as an intentional empty profile list instead of restoring old profiles from backup on the next launch.
 - Elevated URI fallback launches now use Explorer directly instead of `cmd /c start`, so Donate, VR Tools, and Steam URI fallbacks are not parsed as shell commands.
+- Log redaction now covers `Wi-Fi` / `Wi‑Fi` SSID labels and quoted SSID values with spaces.
 
 ## [1.1.22] - 2026-08-29
 
