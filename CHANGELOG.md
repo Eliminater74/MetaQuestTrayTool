@@ -8,7 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
-No changes yet.
+### Fixed
+- Update cleanup now only terminates packaged `adb.exe` processes under this app's install folder, preserving external Android SDK / SideQuest / PATH ADB processes even when the bundled copy is unavailable.
+- Developer command-line build instructions now use the locked `win-x64` restore + no-restore build/test flow that CI uses.
 
 ## [1.1.22] - 2026-08-29
 

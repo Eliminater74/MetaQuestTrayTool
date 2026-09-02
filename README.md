@@ -268,7 +268,9 @@ See [ROADMAP.md](ROADMAP.md) and [TODO.md](TODO.md) for history and remaining ho
 **Command line:**
 
 ```powershell
-dotnet build .\MetaQuestTrayTool.sln -c Release
+dotnet restore .\MetaQuestTrayTool.sln -r win-x64 --force-evaluate
+dotnet build .\MetaQuestTrayTool.sln -c Release --no-restore
+dotnet test .\MetaQuestTrayTool.sln -c Release --no-restore --no-build
 dotnet run --project .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj
 ```
 
