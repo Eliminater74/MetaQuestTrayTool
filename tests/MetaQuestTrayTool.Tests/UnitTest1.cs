@@ -178,6 +178,16 @@ public class RuntimeSafetyTests
         }
     }
 
+    [Fact]
+    public void UriLaunchArguments_KeepUrlAsSingleExplorerArgument()
+    {
+        var arguments = UnelevatedProcessLauncher.BuildUriLaunchArguments(
+            "https://example.com/donate?amount=5&note=Quest Link");
+
+        Assert.Equal("\"https://example.com/donate?amount=5&note=Quest Link\"", arguments);
+        Assert.DoesNotContain("/c start", arguments, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Theory]
     [InlineData("v1.2.3", 1, 2, 3)]
     [InlineData("1.2.3-beta", 1, 2, 3)]

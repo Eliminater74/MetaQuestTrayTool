@@ -12,6 +12,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Update cleanup now only terminates packaged `adb.exe` processes under this app's install folder, preserving external Android SDK / SideQuest / PATH ADB processes even when the bundled copy is unavailable.
 - Developer command-line build instructions now use the locked `win-x64` restore + no-restore build/test flow that CI uses.
 - Deleting all profiles now persists as an intentional empty profile list instead of restoring old profiles from backup on the next launch.
+- Elevated URI fallback launches now use Explorer directly instead of `cmd /c start`, so Donate, VR Tools, and Steam URI fallbacks are not parsed as shell commands.
 
 ## [1.1.22] - 2026-08-29
 

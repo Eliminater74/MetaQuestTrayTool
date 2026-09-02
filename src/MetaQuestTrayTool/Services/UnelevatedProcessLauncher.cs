@@ -102,10 +102,12 @@ public static class UnelevatedProcessLauncher
             return TryStartDirect(uri, arguments: null, workingDirectory: null, out detail);
         }
 
-        var cmd = Path.Combine(Environment.SystemDirectory, "cmd.exe");
+        var explorer = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            "explorer.exe");
         if (TryStartWithShellToken(
-                cmd,
-                $"/c start \"\" {uri}",
+                explorer,
+                BuildUriLaunchArguments(uri),
                 workingDirectory: null,
                 hideWindow: true,
                 out detail))
@@ -123,6 +125,8 @@ public static class UnelevatedProcessLauncher
         detail = $"unelevated URI launch failed ({tokenError}); explorer: {detail}";
         return false;
     }
+
+    internal static string BuildUriLaunchArguments(string uri) => Quote(uri);
 
     /// <summary>
     /// True when a process with this name exists and its token is elevated.
@@ -373,8 +377,16 @@ public static class UnelevatedProcessLauncher
         }
     }
 
-    private static string Quote(string value) =>
-        value.StartsWith('"') ? value : $"\"{value}\"";
+    private static string Quote(string value)
+    {
+        var trimmed = value.Trim();
+        if (trimmed.Length >= 2 && trimmed[0] == '"' && trimmed[^1] == '"')
+        {
+            trimmed = trimmed[1..^1];
+        }
+
+        return "\"" + trimmed.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
+    }
 
     private static string Win32(string op) =>
         $"{op}: {new Win32Exception(Marshal.GetLastWin32Error()).Message}";
