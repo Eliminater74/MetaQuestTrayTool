@@ -212,9 +212,15 @@ public sealed class OculusRuntimeService
         if (IsServiceRunning)
         {
             var stopResult = Stop();
-            if (!IsServiceRunning && stopResult.Contains("denied", StringComparison.OrdinalIgnoreCase))
+            if (IsServiceActionFailure(stopResult))
             {
                 return stopResult;
+            }
+
+            Refresh(force: true);
+            if (IsServiceRunning)
+            {
+                return $"{ServiceName} did not stop; restart cancelled. {stopResult}";
             }
         }
 
@@ -355,6 +361,18 @@ public sealed class OculusRuntimeService
         ];
 
         return candidates.FirstOrDefault(File.Exists);
+    }
+
+    internal static bool IsServiceActionFailure(string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary))
+        {
+            return false;
+        }
+
+        return summary.Contains("Access denied", StringComparison.OrdinalIgnoreCase)
+               || summary.Contains("Could not", StringComparison.OrdinalIgnoreCase)
+               || summary.Contains("was not found", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TryActivateExistingClient(string clientPath)

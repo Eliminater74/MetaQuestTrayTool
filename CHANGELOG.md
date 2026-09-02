@@ -20,6 +20,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Startup scheduled-task queries and updates now have bounded `schtasks.exe` waits and output reads.
 - Failed library launches now keep the original launch error visible even if the armed-profile cleanup restore also fails.
 - Wireless ADB host parsing now revalidates embedded ports and rejects host text that would split into extra ADB arguments.
+- Restarting `OVRService` now preserves failed stop errors instead of reporting a misleading “already running” start result.
 
 ## [1.1.22] - 2026-08-29
 

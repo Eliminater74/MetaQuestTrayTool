@@ -137,6 +137,23 @@ public class RuntimeSafetyTests
         Assert.Throws<ArgumentException>(() => AdbService.FormatEndpoint(host, 5555));
     }
 
+    [Theory]
+    [InlineData("Access denied while changing OVRService.")]
+    [InlineData("Could not change OVRService: timed out")]
+    [InlineData("OVRService was not found.")]
+    public void OculusRestart_TreatsFailedStopSummariesAsTerminal(string summary)
+    {
+        Assert.True(OculusRuntimeService.IsServiceActionFailure(summary));
+    }
+
+    [Theory]
+    [InlineData("OVRService is now Stopped.")]
+    [InlineData("OVRService is already stopped.")]
+    public void OculusRestart_AllowsSuccessfulStopSummaries(string summary)
+    {
+        Assert.False(OculusRuntimeService.IsServiceActionFailure(summary));
+    }
+
     [Fact]
     public void ProfileStore_LoadKeepsIntentionalEmptyPrimary()
     {
