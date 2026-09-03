@@ -1,4 +1,5 @@
 using System.Windows;
+using MetaQuestTrayTool.Services;
 
 namespace MetaQuestTrayTool.Views.Pages;
 
@@ -13,7 +14,7 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
     {
         var profiles = App.Instance.Settings.Current.Profiles.Count;
         StatusText.Text =
-            $"Profiles: {profiles}. Settings: {Services.AppPaths.SettingsFile}  ·  Profiles file: {Services.ProfileStore.ProfilesFile}";
+            $"Profiles: {profiles}. Settings: {AppPaths.SettingsFile}  ·  Profiles file: {ProfileStore.ProfilesFile}";
     }
 
     private void ResetSettings_Click(object sender, RoutedEventArgs e)
@@ -163,5 +164,22 @@ public partial class AdvancedPage : System.Windows.Controls.UserControl, IShellP
         StatusText.Text = "Checking GitHub for updates…";
         await App.Instance.Updates.CheckInteractivelyAsync(Window.GetWindow(this), quietIfUpToDate: false);
         StatusText.Text = "Update check finished.";
+    }
+
+    private async void RepairHelper_Click(object sender, RoutedEventArgs e)
+    {
+        StatusText.Text = "Repairing session helper…";
+        var summary = await Task.Run(SessionHelperClient.RepairKnownHelpers).ConfigureAwait(true);
+        App.Instance.Log.Info("Session helper repair:\n" + summary);
+        StatusText.Text = summary;
+        System.Windows.MessageBox.Show(Window.GetWindow(this), summary, App.AppName);
+    }
+
+    private void CopyProcessDiagnostics_Click(object sender, RoutedEventArgs e)
+    {
+        var diagnostics = SessionHelperClient.DescribeHelperDiagnostics();
+        System.Windows.Clipboard.SetText(diagnostics);
+        App.Instance.Log.Info("Copied app process diagnostics to the clipboard.");
+        StatusText.Text = "Copied app process diagnostics.";
     }
 }

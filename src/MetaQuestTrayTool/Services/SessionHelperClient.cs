@@ -139,6 +139,83 @@ public static class SessionHelperClient
         }
     }
 
+    public static string RepairKnownHelpers()
+    {
+        var pids = GetKnownHelperProcessIds();
+        var sentQuit = TrySend("QUIT", out var quitDetail);
+        if (pids.Count == 0)
+        {
+            TryDeleteStaleHelperState(Array.Empty<int>());
+            return sentQuit
+                ? "Session helper accepted quit, but no helper PID was available to verify."
+                : "No trusted session helper process was found. Pipe detail: " + quitDetail;
+        }
+
+        var results = new List<string>
+        {
+            sentQuit
+                ? "Sent quit request to session helper."
+                : "Could not send helper quit request: " + quitDetail
+        };
+
+        foreach (var pid in pids.Order())
+        {
+            if (WaitForHelperExit(pid, TimeSpan.FromSeconds(3)))
+            {
+                results.Add($"Helper PID {pid} exited.");
+                continue;
+            }
+
+            results.Add(TryTerminateHelper(pid)
+                ? $"Helper PID {pid} was still running and was terminated."
+                : $"Helper PID {pid} did not exit and could not be terminated safely.");
+        }
+
+        TryDeleteStaleHelperState(pids);
+        return string.Join(Environment.NewLine, results);
+    }
+
+    public static string DescribeHelperDiagnostics()
+    {
+        var lines = new List<string>
+        {
+            $"Current process PID: {Environment.ProcessId}",
+            $"Current exe: {Environment.ProcessPath ?? "unknown"}"
+        };
+
+        if (TryGetHelperProcessId(out var pipePid))
+        {
+            lines.Add($"Helper pipe PID: {pipePid}");
+        }
+        else
+        {
+            lines.Add("Helper pipe PID: not responding");
+        }
+
+        if (SessionHelperHost.TryReadHelperState(out var state))
+        {
+            var trusted = IsTrustedRecordedHelperState(
+                state,
+                Environment.ProcessId,
+                Environment.ProcessPath,
+                IsProcessRunning);
+            lines.Add(
+                $"Recorded helper: pid={state.ProcessId}; parent={state.ParentProcessId}; "
+                + $"running={IsProcessRunning(state.ProcessId)}; trusted={trusted}");
+            lines.Add($"Recorded helper exe: {state.ExecutablePath ?? "unknown"}");
+        }
+        else
+        {
+            lines.Add("Recorded helper: none");
+        }
+
+        var children = GetSameExeChildProcessIds().Order().ToArray();
+        lines.Add(children.Length == 0
+            ? "Same-exe child helpers: none"
+            : $"Same-exe child helpers: {string.Join(", ", children)}");
+        return string.Join(Environment.NewLine, lines);
+    }
+
     private static bool TryLaunch(
         bool steamFamily,
         string helperCommand,
@@ -381,22 +458,49 @@ public static class SessionHelperClient
         }
     }
 
-    private static void TryTerminateHelper(int pid)
+    private static bool TryTerminateHelper(int pid)
     {
         try
         {
             using var process = Process.GetProcessById(pid);
             if (!IsOwnedHelper(process) || process.HasExited)
             {
-                return;
+                return false;
             }
 
             process.Kill(entireProcessTree: false);
             process.WaitForExit(3000);
+            return process.HasExited;
+        }
+        catch (ArgumentException)
+        {
+            // The helper may have exited between the PID query and cleanup.
+            return true;
         }
         catch
         {
-            // The helper may have exited between the PID query and cleanup.
+            return false;
+        }
+    }
+
+    private static void TryDeleteStaleHelperState(IReadOnlyCollection<int> candidatePids)
+    {
+        try
+        {
+            if (!SessionHelperHost.TryReadHelperState(out var state))
+            {
+                return;
+            }
+
+            var candidateMatch = candidatePids.Count == 0 || candidatePids.Contains(state.ProcessId);
+            if (candidateMatch && !IsProcessRunning(state.ProcessId))
+            {
+                File.Delete(SessionHelperHost.HelperStateFile);
+            }
+        }
+        catch
+        {
+            // Best effort diagnostic cleanup.
         }
     }
 

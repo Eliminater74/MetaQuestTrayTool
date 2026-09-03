@@ -79,6 +79,14 @@
                      Foreground="{DynamicResource AppMutedBrush}"
                      Text="Downloads the latest Setup.exe from GitHub and installs over this copy."/>
         </StackPanel>
+
+        <TextBlock Grid.Row="9" Text="App processes" Style="{StaticResource SettingLabelStyle}"/>
+        <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+          <Button Content="Repair stuck helper" Style="{StaticResource AccentButtonStyle}" Click="RepairHelper_Click"
+                  ToolTip="Ask the session helper to quit, then terminate only a validated same-exe helper if it is stuck."/>
+          <Button Content="Copy diagnostics" Style="{StaticResource GhostButtonStyle}" Click="CopyProcessDiagnostics_Click"
+                  ToolTip="Copy main/helper PID diagnostics for troubleshooting hidden or stuck tray processes."/>
+        </StackPanel>
       </Grid>
 
       <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"/>

@@ -25,6 +25,17 @@ public static class SystemInfoService
         text.AppendLine($"ADB binary: {app.Adb.AdbPath ?? "not found"}");
         text.AppendLine();
 
+        text.AppendLine("App internals");
+        foreach (var line in SessionHelperClient.DescribeHelperDiagnostics()
+                     .Split(Environment.NewLine, StringSplitOptions.None))
+        {
+            text.AppendLine("  " + line);
+        }
+
+        text.AppendLine($"  Settings file: {AppPaths.SettingsFile}");
+        text.AppendLine($"  Profiles file: {ProfileStore.ProfilesFile}");
+        text.AppendLine();
+
         var steamVr = app.SteamVrInstall.Probe(force: true);
         text.AppendLine("SteamVR");
         text.AppendLine($"  Installed: {steamVr.IsInstalled}");
