@@ -39,13 +39,15 @@ public sealed class HotKeyCommandService
             HotKeyAction.OpenXrSteamVr => SwitchOpenXr(OpenXrRuntimeKind.SteamVr),
             HotKeyAction.CloseOverlays => ExecuteCloseOverlays(),
             HotKeyAction.ApplyGpuPresets => ExecuteApplyGpuPresets(),
+            HotKeyAction.TakeHeadsetScreenshot => ExecuteTakeHeadsetScreenshot(),
             _ => $"Unknown hotkey action: {action}"
         };
 
         if (action is not HotKeyAction.VoicePushToTalk
             and not HotKeyAction.DashToSteamVr
             and not HotKeyAction.StartSteamVr
-            and not HotKeyAction.RecoverPcvr)
+            and not HotKeyAction.RecoverPcvr
+            and not HotKeyAction.TakeHeadsetScreenshot)
         {
             _app.HeadsetAnnouncer.AnnounceActionResult(
                 HotKeyCatalog.DescribeAction(action),
@@ -53,6 +55,31 @@ public sealed class HotKeyCommandService
         }
 
         return summary;
+    }
+
+    private string ExecuteTakeHeadsetScreenshot()
+    {
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                var summary = _app.CaptureHeadsetScreenshot("hotkey/voice");
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.TrayNotify("Screenshot", Truncate(summary)));
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    var summary = "Headset screenshot failed: " + ex.Message;
+                    _app.Log.Warn(summary);
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.TrayNotify("Screenshot", Truncate(ex.Message));
+                });
+            }
+        });
+
+        return "Taking headset screenshot…";
     }
 
     private string ExecuteRestoreDesktopAudio()
@@ -314,6 +341,9 @@ public sealed class HotKeyCommandService
 
         return $"{title}. {result.Summary}";
     }
+
+    private static string Truncate(string text, int max = 180) =>
+        text.Length <= max ? text : text[..max] + "…";
 
     private static string FormatAsw(AswMode mode) => mode switch
     {

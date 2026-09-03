@@ -889,6 +889,34 @@ public sealed class AdbService
         return "Sent text to the focused headset field.";
     }
 
+    public string CapturePngScreenshot(string serial, string outputPath)
+    {
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            throw new ArgumentException("ADB serial is required.", nameof(serial));
+        }
+
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            throw new ArgumentException("Screenshot output path is required.", nameof(outputPath));
+        }
+
+        var folder = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        RunToFile($"-s {serial} exec-out screencap -p", outputPath);
+        if (!IsValidPngFile(outputPath))
+        {
+            TryDeleteFile(outputPath);
+            throw new InvalidOperationException("ADB screenshot did not produce a valid PNG.");
+        }
+
+        return outputPath;
+    }
+
     private (bool IsVr, DeviceProbe? Probe) Classify(AdbDevice device)
     {
         if (VrHeadsetClassifier.IsObviousEmulator(device))
@@ -1084,6 +1112,140 @@ public sealed class AdbService
         finally
         {
             _commandGate.Release();
+        }
+    }
+
+    private void RunToFile(string arguments, string outputPath)
+    {
+        if (!IsAvailable)
+        {
+            throw new InvalidOperationException("ADB was not found.");
+        }
+
+        if (!_commandGate.Wait(TimeSpan.FromSeconds(30)))
+        {
+            throw new TimeoutException($"ADB command queue was busy for 30s: adb {arguments}");
+        }
+
+        var tempPath = outputPath + ".tmp";
+        try
+        {
+            TryDeleteFile(tempPath);
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = AdbPath,
+                    Arguments = arguments,
+                    WorkingDirectory = Path.GetDirectoryName(AdbPath) ?? AppContext.BaseDirectory,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardErrorEncoding = Encoding.UTF8
+                }
+            };
+
+            using var output = new FileStream(
+                tempPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 64 * 1024,
+                FileOptions.SequentialScan);
+
+            if (!process.Start())
+            {
+                throw new InvalidOperationException("ADB process could not be started.");
+            }
+
+            var stdout = process.StandardOutput.BaseStream.CopyToAsync(output);
+            var stderr = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit(20_000))
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch
+                {
+                    // hung adb.exe
+                }
+
+                try
+                {
+                    process.WaitForExit(3_000);
+                }
+                catch
+                {
+                    // ignore
+                }
+
+                throw new TimeoutException($"ADB timed out after 20s: adb {arguments}");
+            }
+
+            if (!Task.WaitAll([stdout, stderr], 3_000))
+            {
+                throw new TimeoutException($"ADB output read timed out: adb {arguments}");
+            }
+
+            output.Flush(flushToDisk: true);
+            var error = stderr.Result.Trim();
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException(
+                    string.IsNullOrWhiteSpace(error)
+                        ? $"ADB exited with code {process.ExitCode}: adb {arguments}"
+                        : $"ADB exited with code {process.ExitCode}: {error}");
+            }
+
+            File.Move(tempPath, outputPath, overwrite: true);
+        }
+        catch
+        {
+            TryDeleteFile(tempPath);
+            throw;
+        }
+        finally
+        {
+            _commandGate.Release();
+        }
+    }
+
+    internal static bool IsValidPngFile(string path)
+    {
+        try
+        {
+            var file = new FileInfo(path);
+            if (!file.Exists || file.Length < 8)
+            {
+                return false;
+            }
+
+            var expected = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+            var actual = new byte[expected.Length];
+            using var stream = File.OpenRead(path);
+            return stream.Read(actual, 0, actual.Length) == actual.Length
+                   && actual.SequenceEqual(expected);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // best effort cleanup
         }
     }
 

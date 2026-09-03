@@ -1149,6 +1149,11 @@ public sealed class TrayIconHost : IDisposable
                 }
             });
         }));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Take screenshot", null, (_, _) => TakeHeadsetScreenshot())
+        {
+            Name = "HeadsetScreenshot",
+            ToolTipText = "Capture the current Quest headset view over ADB and save it under app data."
+        });
         menu.DropDownItems.Add(new ToolStripSeparator());
 
         menu.DropDownItems.Add(new ToolStripMenuItem("Pause ADB until I resume", null, (_, _) =>
@@ -1182,6 +1187,29 @@ public sealed class TrayIconHost : IDisposable
 
         menu.DropDownItems.Add(new ToolStripMenuItem("Status: Unknown") { Enabled = false, Name = "HeadsetStatus" });
         return menu;
+    }
+
+    private void TakeHeadsetScreenshot()
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                var summary = _app.CaptureHeadsetScreenshot("tray menu");
+                _app.Dispatcher.BeginInvoke(() =>
+                    Notify("Screenshot", Truncate(summary)));
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    var summary = "Headset screenshot failed: " + ex.Message;
+                    _app.Log.Warn(summary);
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    Notify("Screenshot", Truncate(ex.Message));
+                });
+            }
+        });
     }
 
     private void QueueDynamicRefresh(ContextMenuStrip menu, bool force = false)

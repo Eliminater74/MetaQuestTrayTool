@@ -1,6 +1,32 @@
+using System.Globalization;
+using System.IO;
 using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
+
+public sealed record HeadsetScreenshotResult(
+    string FilePath,
+    string Model,
+    string Transport,
+    long Bytes)
+{
+    public string Summary => $"Saved {Model} screenshot ({Transport}, {FormatBytes(Bytes)}) to {FilePath}.";
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes >= 1024 * 1024)
+        {
+            return (bytes / 1024d / 1024d).ToString("0.0 MB", CultureInfo.InvariantCulture);
+        }
+
+        if (bytes >= 1024)
+        {
+            return (bytes / 1024d).ToString("0.0 KB", CultureInfo.InvariantCulture);
+        }
+
+        return bytes.ToString(CultureInfo.InvariantCulture) + " bytes";
+    }
+}
 
 public sealed class HeadsetSettingsService
 {
@@ -190,6 +216,20 @@ public sealed class HeadsetSettingsService
         return _adb.SendText(quest.Serial, text);
     }
 
+    public HeadsetScreenshotResult CaptureScreenshot(HeadsetSettings settings)
+    {
+        var quest = RequireReadyHeadset(settings);
+        var model = quest.Model ?? _adb.GetProp(quest.Serial, "ro.product.model") ?? "Quest";
+        var outputPath = CreateScreenshotPath(DateTimeOffset.Now, model);
+        _adb.CapturePngScreenshot(quest.Serial, outputPath);
+        var transport = AdbService.LooksLikeWirelessSerial(quest.Serial) ? "wireless" : "USB";
+        return new HeadsetScreenshotResult(
+            outputPath,
+            model,
+            transport,
+            new FileInfo(outputPath).Length);
+    }
+
     private void ForgetInvalidTrust(HeadsetSettings settings)
     {
         var model = settings.TrustedModel ?? string.Empty;
@@ -240,6 +280,60 @@ public sealed class HeadsetSettingsService
         }
 
         return quest;
+    }
+
+    private static string CreateScreenshotPath(DateTimeOffset capturedAt, string? model)
+    {
+        Directory.CreateDirectory(AppPaths.ScreenshotsDirectory);
+        for (var attempt = 0; attempt < 100; attempt++)
+        {
+            var fileName = BuildScreenshotFileName(
+                capturedAt,
+                model,
+                attempt == 0 ? null : attempt + 1);
+            var path = Path.Combine(AppPaths.ScreenshotsDirectory, fileName);
+            if (!File.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        return Path.Combine(
+            AppPaths.ScreenshotsDirectory,
+            BuildScreenshotFileName(capturedAt, model, duplicateIndex: null)
+                .Replace(".png", "-" + Guid.NewGuid().ToString("N")[..8] + ".png", StringComparison.Ordinal));
+    }
+
+    internal static string BuildScreenshotFileName(
+        DateTimeOffset capturedAt,
+        string? model,
+        int? duplicateIndex = null)
+    {
+        var timestamp = capturedAt.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+        var suffix = duplicateIndex is null ? string.Empty : "-" + duplicateIndex.Value.ToString(CultureInfo.InvariantCulture);
+        return $"QuestScreenshot-{timestamp}-{SanitizeFileToken(model)}{suffix}.png";
+    }
+
+    private static string SanitizeFileToken(string? value)
+    {
+        var token = string.IsNullOrWhiteSpace(value) ? "Quest" : value.Trim();
+        var invalid = Path.GetInvalidFileNameChars();
+        var chars = token
+            .Select(ch => invalid.Contains(ch) || char.IsWhiteSpace(ch) ? '-' : ch)
+            .ToArray();
+        var clean = new string(chars);
+        while (clean.Contains("--", StringComparison.Ordinal))
+        {
+            clean = clean.Replace("--", "-", StringComparison.Ordinal);
+        }
+
+        clean = clean.Trim('-');
+        if (clean.Length == 0)
+        {
+            return "Quest";
+        }
+
+        return clean.Length <= 40 ? clean : clean[..40].Trim('-');
     }
 
     private static bool TryTextureSize(HeadsetTexturePreset preset, out int width, out int height)

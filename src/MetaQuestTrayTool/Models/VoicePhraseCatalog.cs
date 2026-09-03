@@ -68,7 +68,12 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "apply GPU preset", Action = HotKeyAction.ApplyGpuPresets },
         new VoicePhrase { Phrase = "apply gpu preset", Action = HotKeyAction.ApplyGpuPresets },
         new VoicePhrase { Phrase = "apply GPU presets", Action = HotKeyAction.ApplyGpuPresets },
-        new VoicePhrase { Phrase = "GPU preset", Action = HotKeyAction.ApplyGpuPresets }
+        new VoicePhrase { Phrase = "GPU preset", Action = HotKeyAction.ApplyGpuPresets },
+        new VoicePhrase { Phrase = "take screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
+        new VoicePhrase { Phrase = "take headset screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
+        new VoicePhrase { Phrase = "capture screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
+        new VoicePhrase { Phrase = "quest screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
+        new VoicePhrase { Phrase = "save screenshot", Action = HotKeyAction.TakeHeadsetScreenshot }
     ];
 
     public static bool TryMatch(string recognizedText, out HotKeyAction action) =>

@@ -22,5 +22,6 @@ public enum HotKeyAction
     OpenXrMeta,
     OpenXrSteamVr,
     CloseOverlays,
-    ApplyGpuPresets
+    ApplyGpuPresets,
+    TakeHeadsetScreenshot
 }

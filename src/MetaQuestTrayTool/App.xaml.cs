@@ -324,6 +324,16 @@ public partial class App : System.Windows.Application
 
     public void NotifyStillRunningInTray() => _tray?.NotifyStillRunning();
 
+    public string CaptureHeadsetScreenshot(string source)
+    {
+        var result = Headset.CaptureScreenshot(Settings.Current.Headset);
+        var summary = result.Summary;
+        Log.Info($"Headset screenshot ({source}): {summary}");
+        RuntimeSnapshots.Invalidate();
+        HeadsetAnnouncer.AnnounceScreenshotTaken();
+        return summary;
+    }
+
     /// <summary>Refresh tray tooltip / menu pause state (e.g. after timed ADB resume).</summary>
     public void RefreshTrayUi() => _tray?.RefreshUi();
 

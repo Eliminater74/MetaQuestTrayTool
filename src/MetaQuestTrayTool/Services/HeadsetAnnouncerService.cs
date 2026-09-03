@@ -314,6 +314,11 @@ public sealed class HeadsetAnnouncerService : IDisposable
             $"Headset settings. {DescribeResult(summary, "Completed.")}");
     }
 
+    public void AnnounceScreenshotTaken()
+    {
+        Enqueue(HeadsetAnnounceKind.Headset, "Screenshot taken.");
+    }
+
     public void AnnounceRecovery(string summary)
     {
         Enqueue(

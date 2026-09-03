@@ -260,6 +260,8 @@ public sealed class VoiceCommandService : IDisposable
                     force: true),
             HotKeyAction.RecoverPcvr =>
                 _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.Recovery, allowWithoutLiveSession: true),
+            HotKeyAction.TakeHeadsetScreenshot =>
+                _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.Headset),
             _ => _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.ActionResult)
         };
 

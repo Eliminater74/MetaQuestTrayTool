@@ -137,6 +137,68 @@ public class RuntimeSafetyTests
         Assert.Throws<ArgumentException>(() => AdbService.FormatEndpoint(host, 5555));
     }
 
+    [Fact]
+    public void AdbScreenshot_ValidatesPngSignature()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "MetaQuestTrayTool.Tests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var valid = Path.Combine(dir, "valid.png");
+            var invalid = Path.Combine(dir, "invalid.png");
+            File.WriteAllBytes(
+                valid,
+                new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00 });
+            File.WriteAllText(invalid, "not a png");
+
+            Assert.True(AdbService.IsValidPngFile(valid));
+            Assert.False(AdbService.IsValidPngFile(invalid));
+            Assert.False(AdbService.IsValidPngFile(Path.Combine(dir, "missing.png")));
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void HeadsetScreenshot_BuildsSafeFileName()
+    {
+        var capturedAt = new DateTimeOffset(2026, 9, 2, 15, 4, 5, TimeSpan.Zero);
+
+        Assert.Equal(
+            "QuestScreenshot-20260902-150405-Meta-Quest-3-Beta.png",
+            HeadsetSettingsService.BuildScreenshotFileName(capturedAt, "Meta Quest 3:Beta"));
+        Assert.Equal(
+            "QuestScreenshot-20260902-150405-Quest-2.png",
+            HeadsetSettingsService.BuildScreenshotFileName(capturedAt, "  ", duplicateIndex: 2));
+    }
+
+    [Fact]
+    public void HotKeySettings_DefaultsIncludeHeadsetScreenshot()
+    {
+        var binding = Assert.Single(
+            HotKeySettings.CreateDefaultBindings(),
+            item => item.Action == HotKeyAction.TakeHeadsetScreenshot);
+
+        Assert.Equal(HotKeyModifiers.Control | HotKeyModifiers.Shift, binding.Modifiers);
+        Assert.Equal("NumPad9", binding.Key);
+    }
+
+    [Theory]
+    [InlineData("take screenshot")]
+    [InlineData("capture screenshot")]
+    [InlineData("please save screenshot")]
+    [InlineData("quest screenshot")]
+    public void VoicePhraseCatalog_MatchesHeadsetScreenshot(string phrase)
+    {
+        Assert.True(VoicePhraseCatalog.TryMatch(phrase, out var action));
+        Assert.Equal(HotKeyAction.TakeHeadsetScreenshot, action);
+    }
+
     [Theory]
     [InlineData("Access denied while changing OVRService.")]
     [InlineData("Could not change OVRService: timed out")]

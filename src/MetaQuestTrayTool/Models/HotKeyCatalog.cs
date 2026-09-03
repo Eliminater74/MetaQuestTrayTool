@@ -25,6 +25,7 @@ public static class HotKeyCatalog
         HotKeyAction.OpenXrSteamVr => "Switch OpenXR to SteamVR",
         HotKeyAction.CloseOverlays => "Close configured overlays",
         HotKeyAction.ApplyGpuPresets => "Apply GPU recommended presets",
+        HotKeyAction.TakeHeadsetScreenshot => "Take headset screenshot",
         _ => action.ToString()
     };
 

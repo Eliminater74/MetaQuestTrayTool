@@ -498,6 +498,17 @@ public sealed class SettingsService
                 });
             }
 
+            if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.TakeHeadsetScreenshot))
+            {
+                Current.HotKeys.Bindings.Add(new HotKeyBinding
+                {
+                    Id = 0,
+                    Action = HotKeyAction.TakeHeadsetScreenshot,
+                    Modifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift,
+                    Key = "NumPad9"
+                });
+            }
+
             Current.HotKeys.EnsureBindingIds();
         }
 
