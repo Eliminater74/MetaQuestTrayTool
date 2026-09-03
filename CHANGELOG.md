@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.25] - 2026-09-03
+
 ### Added
 - Quest headset screenshots can be captured from tray → **Headset (ADB) → Take screenshot**, default hotkey **Ctrl+Shift+Num 9**, or voice phrases like “take screenshot” / “capture screenshot.” Captures use the trusted-headset ADB guard, save timestamped PNGs under `%AppData%\MetaQuestTrayTool\screenshots\`, show a tray result, and say **“Screenshot taken.”** in the headset when the announcement audio path is available.
 - Advanced now includes **Repair stuck helper** and **Copy diagnostics** actions for hidden helper/process situations, and the Info dump includes main/helper PID details and settings/profile paths.
@@ -227,7 +229,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.24...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.25...HEAD
+[1.1.25]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.25
 [1.1.24]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.24
 [1.1.23]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.23
 [1.1.22]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.22

@@ -22,7 +22,7 @@ Expected when the tray is **elevated**. Use [[HotKeys-Voice-and-Announcements]].
 
 ## Exit leaves a hidden helper or the next launch is silent
 
-v1.1.24 fixed the main exit/helper shutdown path. Source builds after v1.1.24 also add **Advanced → Repair stuck helper** and **Copy diagnostics**. Use Repair if Task Manager shows a leftover **Meta Quest Tray Tool** background process after Exit; it asks the helper to quit first, then terminates only a validated same-exe helper if it is still stuck.
+v1.1.24 fixed the main exit/helper shutdown path. v1.1.25 adds **Advanced → Repair stuck helper** and **Copy diagnostics**. Use Repair if Task Manager shows a leftover **Meta Quest Tray Tool** background process after Exit; it asks the helper to quit first, then terminates only a validated same-exe helper if it is still stuck.
 
 If the problem returns, use **Copy diagnostics** or **Info → Copy system info** and check the `App internals` lines for main PID, helper pipe PID, recorded helper state, same-exe child helpers, and settings/profile paths.
 

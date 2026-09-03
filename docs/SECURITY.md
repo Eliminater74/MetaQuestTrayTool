@@ -6,9 +6,9 @@ The in-app updater accepts only the exact `MetaQuestTrayTool-Setup-{version}.exe
 the project's HTTPS GitHub release URL. Before it launches an installer, it validates the
 release tag, download size, and GitHub-published SHA-256 digest.
 
-Source builds after v1.1.24 also generate a `MetaQuestTrayTool-Setup-{version}.exe.sha256.txt`
-sidecar during installer builds. The Release workflow verifies that sidecar against the
-generated Setup.exe before uploading both files to GitHub Releases.
+v1.1.25+ installer builds generate a `MetaQuestTrayTool-Setup-{version}.exe.sha256.txt`
+sidecar. The Release workflow verifies that sidecar against the generated Setup.exe
+before uploading both files to GitHub Releases.
 
 Release installers are not currently Authenticode-signed. Windows SmartScreen may therefore
 show an additional warning. Maintainers should sign release installers with an

@@ -15,7 +15,7 @@ Repo gallery index: [docs/media/README.md](https://github.com/Eliminater74/MetaQ
 
 ## Quest headset screenshots
 
-Source builds after v1.1.24 can capture the current Quest headset view over ADB:
+v1.1.25+ can capture the current Quest headset view over ADB:
 
 - Tray → **Headset (ADB) → Take screenshot**
 - **Ctrl+Shift+Num 9**

@@ -1,11 +1,22 @@
-Meta Quest Tray Tool 1.1.24 - What's new
+﻿Meta Quest Tray Tool 1.1.25 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.24] - 2026-09-02
+[1.1.25] - 2026-09-03
+
+Added
+- Quest headset screenshots can be captured from tray → Headset (ADB) → Take screenshot, default hotkey Ctrl+Shift+Num 9, or voice phrases like “take screenshot” / “capture screenshot.” Captures use the trusted-headset ADB guard, save timestamped PNGs under %AppData%\MetaQuestTrayTool\screenshots\, show a tray result, and say “Screenshot taken.” in the headset when the announcement audio path is available.
+- Advanced now includes Repair stuck helper and Copy diagnostics actions for hidden helper/process situations, and the Info dump includes main/helper PID details and settings/profile paths.
+- Installer builds now emit a MetaQuestTrayTool-Setup-<version>.exe.sha256.txt sidecar, and the Release workflow verifies and uploads that checksum alongside the Setup.exe.
+
+Changed
+- Status, Info, PCVR Ready, and tray menu refreshes now share a short-lived runtime snapshot instead of repeating the same SteamVR/OpenXR/OVRService/GPU probes.
+- Tray menu status refresh and Headset trust-banner refresh now run expensive probes in the background so opening the menu or page stays responsive.
+- ADB commands are serialized through one queue, including screenshot capture, so watcher/status/custom/headset actions cannot collide on adb.exe.
+- High-churn Quest Link registry edits debounce settings writes and flush pending changes on exit.
 
 Fixed
-- Session-helper mode now skips the tray owner's shutdown cleanup, so quitting the helper cannot run normal tray exit work or save default settings over the user's configuration.
-- Tray exit and startup cleanup now uses bounded helper pipe replies, a recorded helper owner, and same-exe child fallback; the helper also exits when its tray parent disappears, preventing an unresponsive helper from leaving the next launch stuck hidden.
+- A stuck but verified same-exe session helper can now be repaired from the Advanced page without using Task Manager.
+- Screenshot capture validates the PNG signature before reporting success and deletes corrupt output if ADB returned text/errors instead of image bytes.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

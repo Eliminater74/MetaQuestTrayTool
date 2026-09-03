@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.24](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```text
-[PC] Meta Quest Tray Tool v1.1.24 — free modern OTT-style tray app for Quest Link / SteamVR (exit/helper hotfix + audit hardening)
+[PC] Meta Quest Tray Tool v1.1.25 — free modern OTT-style tray app for Quest Link / SteamVR (Quest screenshots + helper repair + performance hardening)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.24** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.25** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,13 +54,14 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What works now (v1.1.24)
+### What works now (v1.1.25)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
 - Sidebar: **Status**, Game Settings, Tray Tool, Power Options, Service & Startup, Log, Advanced, Quest Link, Headset, **VR Tools**, Info / About
 - Hover tooltips; close-to-tray; start minimized; hide from Alt+Tab; single-instance
 - Tray Exit cleans up the internal normal-user session helper even if the helper pipe stops answering
+- Advanced includes **Repair stuck helper** and **Copy diagnostics** for rare hidden-process cleanup cases
 - Hands-free elevated start (one UAC, then silent elevated at logon)
 - Refreshed neon VR headset icon/logo (tray, About, settings sidebar)
 - Durable `settings.json` / `profiles.json` (flush + `.bak`/`.bak2` restore after power loss)
@@ -68,6 +69,7 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 **Status & SteamVR**
 - Live Status chips (PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, session type, ADB, battery/Wi‑Fi, profile, HotKeys/Voice, Dash→SteamVR, GPU, audio)
+- Shared/nonblocking runtime probes keep Status, Info, PCVR Ready, and tray menu refreshes responsive instead of re-running the same expensive checks
 - SteamVR install detect + Install SteamVR action
 - PCVR Ready checklist (Info) with fix actions
 - Recover PCVR after Link / Steam / VD drop
@@ -103,9 +105,10 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 **HotKeys + voice**
 - Defaults **Ctrl+Numpad 0–9** (ASW, SS cycle, apply global, restart OVRService, Perf HUD, Meta Link, Dash→SteamVR)
+- **Ctrl+Shift+Num 9** captures a Quest screenshot
 - Assign **Open Debug Tool** / **Open SteamVR Home** / recover / OpenXR / overlays / GPU preset in Configure
 - Voice: Windows speech — push-to-talk (**Ctrl+Shift+V** default) or always-on; mic picker; min confidence; custom phrases
-- New phrases: recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset
+- New phrases: recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset, take screenshot
 - **Headset announcements** (Tray Tool): spoken status in the Quest — transport and OpenXR on connect; SteamVR wait/exit; game name and armed profile; profile apply/restore; action, audio, headset/ADB, recovery, and experimental results. Voice falls back to a normal confirmation when headset delivery is unavailable.
 - **Experimental MSFS 2024 VR launch** (opt-in per profile): prepares Meta Link or SteamVR over Link, uses `-FastLaunch` when no custom arguments are set, and optionally focuses only the newly launched simulator window before sending a configured VR toggle. Best-effort; no verification-dialog or flight-ready detection.
 - Full list: wiki → HotKeys, voice, and headset announcements (`docs/VOICE-AND-HOTKEYS.md` in the repo)
@@ -125,10 +128,12 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 - **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip, auto-reconnect
 - **VR headsets only** (default on; tray + Headset page): drop phone/TV wireless ADB — uncheck to allow any device
 - **Pause ADB** (tray): until you resume, or for 2 hours — other gadgets can use ADB without quitting
+- **Take screenshot** from tray, **Ctrl+Shift+Num 9**, or voice; saves a timestamped PNG under `%AppData%\MetaQuestTrayTool\screenshots\` and says **“Screenshot taken.”** in the headset when announcements can reach Quest audio
 - Battery / charge / Wi‑Fi via ADB
 
 **Updates / tools / donate**
 - In-app updates from GitHub `v*` (on start, schedule, or Check now); only this app's bundled ADB is stopped before Setup
+- Release assets include a SHA-256 checksum sidecar that the workflow verifies before publishing
 - **VR Tools** page + tray: curated third-party links
 - Audit hardening: safer URL and wireless ADB parsing, durable delete-all-profiles behavior, bounded service/power/startup commands, log redaction, and cleaner OVRService/voice-hotkey error reporting
 - Donate (PayPal) optional
@@ -213,5 +218,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.24) — exit/helper hotfix for hidden stuck relaunches, plus audit hardening for updater ADB ownership, wireless ADB parsing, profile storage, URL launching, log redaction, service/power/startup command timeouts, OVRService restart reporting, and voice hotkey conflicts; expanded headset voice coverage, opt-in experimental MSFS 2024 VR launch, single-instance protection, stale helper recovery, neon icon, settings survive power loss, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.25) — Quest screenshots from tray, Ctrl+Shift+Num 9, or voice with headset “Screenshot taken” feedback; helper repair/copy diagnostics for rare hidden stuck relaunches; performance hardening with shared/nonblocking status probes, serialized ADB, debounced Link-setting saves, and verified installer checksum sidecars; plus expanded headset voice coverage, opt-in experimental MSFS 2024 VR launch, single-instance protection, stale helper recovery, neon icon, settings survive power loss, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

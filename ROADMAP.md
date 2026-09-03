@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.24](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.24)
+## Current product (v1.1.25)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -19,17 +19,17 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
 | Link / Dash | RemoteHeadset Link settings + presets, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
-| Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
-| Mid-session | HotKeys (Ctrl+Num 0–9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU), expanded headset announcements, experimental MSFS 2024 VR launch automation |
-| Updates / polish | In-app GitHub updates, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
+| Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
+| Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/screenshots), expanded headset announcements, experimental MSFS 2024 VR launch automation |
+| Updates / polish | In-app GitHub updates, release checksum sidecars, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
 ---
 
-## Unreleased local work after v1.1.24
+## v1.1.25 — audit, screenshots, and release checksums
 
-These commits are in source only until the next authorized version bump/tag/push:
+Released work:
 
 - Shared runtime probe snapshots for Status, Info, PCVR Ready, and tray menu status.
 - Nonblocking tray status refresh and background Headset trust-banner refresh.
@@ -137,6 +137,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.22 | Deterministic session-helper shutdown on tray exit |
 | v1.1.23 | Full audit hardening: ADB/update/profile/URL/service/startup/power safety, process-handle cleanup, docs/build-flow alignment |
 | v1.1.24 | Exit/helper hotfix: bounded helper IPC replies, helper owner tracking, parent-death shutdown, and stuck-helper cleanup |
+| v1.1.25 | Audit/performance hardening: shared/nonblocking probes, serialized ADB, debounced Link-settings saves, stuck-helper repair diagnostics, Quest screenshots, and release checksum sidecars |
 
 ---
 

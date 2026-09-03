@@ -25,7 +25,7 @@ CPU / GPU levels, texture size, refresh rate, FFR, chroma, capture helpers, past
 
 ## Quest screenshots
 
-Source builds after v1.1.24 can save the current headset view as a PNG:
+v1.1.25+ can save the current headset view as a PNG:
 
 - Tray → **Headset (ADB) → Take screenshot**
 - **Ctrl+Shift+Num 9**

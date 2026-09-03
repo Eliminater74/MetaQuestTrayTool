@@ -2,13 +2,13 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.24](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## Remaining / later
 
-- [ ] Physical Quest validation for unreleased screenshot flow: USB ADB, wireless ADB, voice command, default hotkey, tray command, and headset “Screenshot taken” audio path.
+- [ ] Physical Quest validation for v1.1.25 screenshot flow: USB ADB, wireless ADB, voice command, default hotkey, tray command, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -22,7 +22,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Shipped checklist (history)
 
-### Unreleased after v1.1.24 (local source only)
+### v1.1.25
 
 - [x] Share runtime probe snapshots across Status, Info, PCVR Ready, and tray menu refreshes
 - [x] Make tray status refresh and Headset trust-banner refresh nonblocking
@@ -273,6 +273,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Fix tray Exit/session-helper shutdown so a stuck helper cannot leave the next launch hidden
 - [x] Bump version to **1.1.24**
 - [x] Tag and publish **v1.1.24**
+- [x] Bump version to **1.1.25**
+- [x] Tag and publish **v1.1.25**
 
 ### Housekeeping (ongoing)
 

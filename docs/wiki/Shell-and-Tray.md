@@ -46,8 +46,8 @@ the running process ID and explains how to close it. The second copy then signal
 tray to show its shell and exits. The normal-user `--session-helper` process is an internal
 launch helper; it does not block the tray from starting, records its tray owner, exits when that
 owner is gone, and is cleaned up during tray exit even if its helper pipe stops answering.
-Source builds after v1.1.24 also add **Advanced → Repair stuck helper** and **Copy diagnostics**
-for rare hidden-process cleanup cases.
+v1.1.25+ adds **Advanced → Repair stuck helper** and **Copy diagnostics** for rare
+hidden-process cleanup cases.
 
 ## Idle behavior
 

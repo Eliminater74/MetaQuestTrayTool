@@ -32,7 +32,7 @@ if (-not (Test-Path $ChangelogPath)) {
 }
 
 $version = $Version.Trim().TrimStart('v', 'V')
-$lines = Get-Content -Path $ChangelogPath
+$lines = Get-Content -Path $ChangelogPath -Encoding utf8
 $start = -1
 for ($i = 0; $i -lt $lines.Count; $i++) {
     if ($lines[$i] -match "^## \[$([regex]::Escape($version))\]") {
@@ -96,7 +96,9 @@ if (-not [string]::IsNullOrWhiteSpace($OutFile)) {
     if ($dir -and -not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
-    Set-Content -Path $OutFile -Value $text -Encoding utf8
+    $outPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutFile)
+    $utf8WithBom = New-Object System.Text.UTF8Encoding -ArgumentList $true
+    [System.IO.File]::WriteAllText($outPath, $text + [Environment]::NewLine, $utf8WithBom)
     Write-Host "Wrote $OutFile"
 }
 else {
