@@ -39,6 +39,8 @@ public sealed class HotKeyCommandService
             HotKeyAction.OpenXrSteamVr => SwitchOpenXr(OpenXrRuntimeKind.SteamVr),
             HotKeyAction.CloseOverlays => ExecuteCloseOverlays(),
             HotKeyAction.ApplyGpuPresets => ExecuteApplyGpuPresets(),
+            HotKeyAction.TakeScreenshot => ExecuteTakeScreenshot(),
+            HotKeyAction.TakeQuestLinkMirrorScreenshot => ExecuteTakeQuestLinkMirrorScreenshot(),
             HotKeyAction.TakeHeadsetScreenshot => ExecuteTakeHeadsetScreenshot(),
             _ => $"Unknown hotkey action: {action}"
         };
@@ -47,6 +49,8 @@ public sealed class HotKeyCommandService
             and not HotKeyAction.DashToSteamVr
             and not HotKeyAction.StartSteamVr
             and not HotKeyAction.RecoverPcvr
+            and not HotKeyAction.TakeScreenshot
+            and not HotKeyAction.TakeQuestLinkMirrorScreenshot
             and not HotKeyAction.TakeHeadsetScreenshot)
         {
             _app.HeadsetAnnouncer.AnnounceActionResult(
@@ -55,6 +59,56 @@ public sealed class HotKeyCommandService
         }
 
         return summary;
+    }
+
+    private string ExecuteTakeScreenshot()
+    {
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                var summary = _app.CaptureScreenshot("hotkey/voice");
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.TrayNotify("Screenshot", Truncate(summary)));
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    var summary = "Screenshot failed: " + ex.Message;
+                    _app.Log.Warn(summary);
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.TrayNotify("Screenshot", Truncate(ex.Message));
+                });
+            }
+        });
+
+        return "Taking screenshot…";
+    }
+
+    private string ExecuteTakeQuestLinkMirrorScreenshot()
+    {
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                var summary = _app.CaptureQuestLinkMirrorScreenshot("hotkey/voice");
+                _app.Dispatcher.BeginInvoke(() =>
+                    _app.TrayNotify("Screenshot", Truncate(summary)));
+            }
+            catch (Exception ex)
+            {
+                _app.Dispatcher.BeginInvoke(() =>
+                {
+                    var summary = "Quest Link mirror screenshot failed: " + ex.Message;
+                    _app.Log.Warn(summary);
+                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.TrayNotify("Screenshot", Truncate(ex.Message));
+                });
+            }
+        });
+
+        return "Taking Quest Link mirror screenshot…";
     }
 
     private string ExecuteTakeHeadsetScreenshot()

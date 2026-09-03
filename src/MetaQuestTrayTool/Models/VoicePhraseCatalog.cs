@@ -69,11 +69,19 @@ public static class VoicePhraseCatalog
         new VoicePhrase { Phrase = "apply gpu preset", Action = HotKeyAction.ApplyGpuPresets },
         new VoicePhrase { Phrase = "apply GPU presets", Action = HotKeyAction.ApplyGpuPresets },
         new VoicePhrase { Phrase = "GPU preset", Action = HotKeyAction.ApplyGpuPresets },
-        new VoicePhrase { Phrase = "take screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
+        new VoicePhrase { Phrase = "take screenshot", Action = HotKeyAction.TakeScreenshot },
+        new VoicePhrase { Phrase = "capture screenshot", Action = HotKeyAction.TakeScreenshot },
+        new VoicePhrase { Phrase = "save screenshot", Action = HotKeyAction.TakeScreenshot },
+        new VoicePhrase { Phrase = "take link screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
+        new VoicePhrase { Phrase = "take quest link screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
+        new VoicePhrase { Phrase = "capture link screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
+        new VoicePhrase { Phrase = "quest link screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
+        new VoicePhrase { Phrase = "link screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
+        new VoicePhrase { Phrase = "mirror screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
+        new VoicePhrase { Phrase = "take mirror screenshot", Action = HotKeyAction.TakeQuestLinkMirrorScreenshot },
         new VoicePhrase { Phrase = "take headset screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
-        new VoicePhrase { Phrase = "capture screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
         new VoicePhrase { Phrase = "quest screenshot", Action = HotKeyAction.TakeHeadsetScreenshot },
-        new VoicePhrase { Phrase = "save screenshot", Action = HotKeyAction.TakeHeadsetScreenshot }
+        new VoicePhrase { Phrase = "adb screenshot", Action = HotKeyAction.TakeHeadsetScreenshot }
     ];
 
     public static bool TryMatch(string recognizedText, out HotKeyAction action) =>

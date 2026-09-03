@@ -178,12 +178,17 @@ public class RuntimeSafetyTests
     }
 
     [Fact]
-    public void HotKeySettings_DefaultsIncludeHeadsetScreenshot()
+    public void HotKeySettings_DefaultsIncludeScreenshotActions()
     {
+        var generic = Assert.Single(
+            HotKeySettings.CreateDefaultBindings(),
+            item => item.Action == HotKeyAction.TakeScreenshot);
         var binding = Assert.Single(
             HotKeySettings.CreateDefaultBindings(),
             item => item.Action == HotKeyAction.TakeHeadsetScreenshot);
 
+        Assert.Equal(HotKeyModifiers.Control | HotKeyModifiers.Shift, generic.Modifiers);
+        Assert.Equal("NumPad8", generic.Key);
         Assert.Equal(HotKeyModifiers.Control | HotKeyModifiers.Shift, binding.Modifiers);
         Assert.Equal("NumPad9", binding.Key);
     }
@@ -192,11 +197,69 @@ public class RuntimeSafetyTests
     [InlineData("take screenshot")]
     [InlineData("capture screenshot")]
     [InlineData("please save screenshot")]
+    public void VoicePhraseCatalog_MatchesSmartScreenshot(string phrase)
+    {
+        Assert.True(VoicePhraseCatalog.TryMatch(phrase, out var action));
+        Assert.Equal(HotKeyAction.TakeScreenshot, action);
+    }
+
+    [Theory]
+    [InlineData("take quest link screenshot")]
+    [InlineData("capture link screenshot")]
+    [InlineData("mirror screenshot")]
+    [InlineData("link screenshot")]
+    public void VoicePhraseCatalog_MatchesQuestLinkMirrorScreenshot(string phrase)
+    {
+        Assert.True(VoicePhraseCatalog.TryMatch(phrase, out var action));
+        Assert.Equal(HotKeyAction.TakeQuestLinkMirrorScreenshot, action);
+    }
+
+    [Theory]
+    [InlineData("take headset screenshot")]
     [InlineData("quest screenshot")]
     public void VoicePhraseCatalog_MatchesHeadsetScreenshot(string phrase)
     {
         Assert.True(VoicePhraseCatalog.TryMatch(phrase, out var action));
         Assert.Equal(HotKeyAction.TakeHeadsetScreenshot, action);
+    }
+
+    [Fact]
+    public void QuestLinkMirrorScreenshot_BuildsSafeFileName()
+    {
+        var capturedAt = new DateTimeOffset(2026, 9, 3, 9, 8, 7, TimeSpan.Zero);
+
+        Assert.Equal(
+            "QuestLinkMirror-20260903-090807-Air-Link.png",
+            QuestLinkMirrorService.BuildScreenshotFileName(capturedAt, VrConnectionKind.MetaAirLink));
+        Assert.Equal(
+            "QuestLinkMirror-20260903-090807-Wired-Link-3.png",
+            QuestLinkMirrorService.BuildScreenshotFileName(capturedAt, VrConnectionKind.MetaWiredLink, duplicateIndex: 3));
+    }
+
+    [Fact]
+    public void QuestLinkMirror_AvailableOnlyForStreamingMetaLink()
+    {
+        Assert.True(QuestLinkMirrorService.IsMirrorCaptureAvailable(new VrConnectionStatus
+        {
+            Kind = VrConnectionKind.MetaAirLink,
+            Summary = "Meta Air Link",
+            SessionActive = true,
+            MetaLinkStreaming = true
+        }));
+        Assert.False(QuestLinkMirrorService.IsMirrorCaptureAvailable(new VrConnectionStatus
+        {
+            Kind = VrConnectionKind.MetaAirLink,
+            Summary = "Meta Air Link",
+            SessionActive = true,
+            MetaLinkStreaming = false
+        }));
+        Assert.False(QuestLinkMirrorService.IsMirrorCaptureAvailable(new VrConnectionStatus
+        {
+            Kind = VrConnectionKind.SteamLinkOrSteamVr,
+            Summary = "SteamVR session",
+            SessionActive = true,
+            MetaLinkStreaming = false
+        }));
     }
 
     [Theory]

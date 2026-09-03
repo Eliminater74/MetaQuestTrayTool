@@ -64,6 +64,7 @@ public partial class App : System.Windows.Application
     public ExperimentalMsfsVrService ExperimentalMsfsVr { get; }
     public OverlayCloseService OverlayClose { get; }
     public SteamVrInstallService SteamVrInstall { get; } = new();
+    public QuestLinkMirrorService QuestLinkMirror { get; }
     public RuntimeSnapshotService RuntimeSnapshots { get; }
     public StatusDashboardService StatusDashboard { get; }
 
@@ -96,6 +97,7 @@ public partial class App : System.Windows.Application
         GameLaunch = new GameLaunchService(this);
         ExperimentalMsfsVr = new ExperimentalMsfsVrService(this);
         OverlayClose = new OverlayCloseService(this);
+        QuestLinkMirror = new QuestLinkMirrorService(this);
         RuntimeSnapshots = new RuntimeSnapshotService(this);
         StatusDashboard = new StatusDashboardService(this);
     }
@@ -332,6 +334,24 @@ public partial class App : System.Windows.Application
         RuntimeSnapshots.Invalidate();
         HeadsetAnnouncer.AnnounceScreenshotTaken();
         return summary;
+    }
+
+    public string CaptureQuestLinkMirrorScreenshot(string source)
+    {
+        var result = QuestLinkMirror.CaptureScreenshot();
+        var summary = result.Summary;
+        Log.Info($"Quest Link mirror screenshot ({source}): {summary}");
+        RuntimeSnapshots.Invalidate();
+        HeadsetAnnouncer.AnnounceScreenshotTaken();
+        return summary;
+    }
+
+    public string CaptureScreenshot(string source)
+    {
+        var status = LinkConnection.Probe();
+        return QuestLinkMirrorService.IsMirrorCaptureAvailable(status)
+            ? CaptureQuestLinkMirrorScreenshot(source)
+            : CaptureHeadsetScreenshot(source);
     }
 
     /// <summary>Refresh tray tooltip / menu pause state (e.g. after timed ADB resume).</summary>

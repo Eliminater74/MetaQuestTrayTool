@@ -25,7 +25,9 @@ public static class HotKeyCatalog
         HotKeyAction.OpenXrSteamVr => "Switch OpenXR to SteamVR",
         HotKeyAction.CloseOverlays => "Close configured overlays",
         HotKeyAction.ApplyGpuPresets => "Apply GPU recommended presets",
-        HotKeyAction.TakeHeadsetScreenshot => "Take headset screenshot",
+        HotKeyAction.TakeScreenshot => "Take screenshot (Quest Link preferred)",
+        HotKeyAction.TakeQuestLinkMirrorScreenshot => "Take Quest Link mirror screenshot",
+        HotKeyAction.TakeHeadsetScreenshot => "Take headset screenshot (ADB)",
         _ => action.ToString()
     };
 

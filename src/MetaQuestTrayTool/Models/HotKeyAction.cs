@@ -23,5 +23,7 @@ public enum HotKeyAction
     OpenXrSteamVr,
     CloseOverlays,
     ApplyGpuPresets,
+    TakeScreenshot,
+    TakeQuestLinkMirrorScreenshot,
     TakeHeadsetScreenshot
 }

@@ -498,6 +498,12 @@ public sealed class SettingsService
                 });
             }
 
+            AddMissingDefaultHotKey(
+                Current.HotKeys,
+                HotKeyAction.TakeScreenshot,
+                HotKeyModifiers.Control | HotKeyModifiers.Shift,
+                "NumPad8");
+
             if (Current.HotKeys.Bindings.All(binding => binding.Action != HotKeyAction.TakeHeadsetScreenshot))
             {
                 Current.HotKeys.Bindings.Add(new HotKeyBinding
@@ -520,5 +526,32 @@ public sealed class SettingsService
         {
             Current.Tray.EnableHotKeys = true;
         }
+    }
+
+    private static void AddMissingDefaultHotKey(
+        HotKeySettings hotKeys,
+        HotKeyAction action,
+        HotKeyModifiers modifiers,
+        string key)
+    {
+        if (hotKeys.Bindings.Any(binding => binding.Action == action))
+        {
+            return;
+        }
+
+        var candidate = new HotKeyBinding
+        {
+            Id = 0,
+            Action = action,
+            Modifiers = modifiers,
+            Key = key
+        };
+        if (hotKeys.Bindings.Any(binding => HotKeyChordHelper.SameChord(binding, candidate)))
+        {
+            candidate.Modifiers = HotKeyModifiers.None;
+            candidate.Key = "None";
+        }
+
+        hotKeys.Bindings.Add(candidate);
     }
 }

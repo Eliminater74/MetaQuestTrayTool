@@ -25,7 +25,8 @@ public sealed class HotKeySettings
         new HotKeyBinding { Id = 9, Action = HotKeyAction.OpenMetaLink, Modifiers = HotKeyModifiers.Control, Key = "NumPad9" },
         new HotKeyBinding { Id = 10, Action = HotKeyAction.DashToSteamVr, Modifiers = HotKeyModifiers.Control, Key = "NumPad0" },
         new HotKeyBinding { Id = 11, Action = HotKeyAction.StartSteamVr, Modifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift, Key = "NumPad0" },
-        new HotKeyBinding { Id = 12, Action = HotKeyAction.TakeHeadsetScreenshot, Modifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift, Key = "NumPad9" }
+        new HotKeyBinding { Id = 12, Action = HotKeyAction.TakeScreenshot, Modifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift, Key = "NumPad8" },
+        new HotKeyBinding { Id = 13, Action = HotKeyAction.TakeHeadsetScreenshot, Modifiers = HotKeyModifiers.Control | HotKeyModifiers.Shift, Key = "NumPad9" }
     ];
 
     public void EnsureBindingIds()
