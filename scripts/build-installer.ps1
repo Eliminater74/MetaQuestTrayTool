@@ -150,9 +150,16 @@ if (-not (Test-Path $setup)) {
     throw "Expected installer not found: $setup"
 }
 
+$hash = Get-FileHash -Path $setup -Algorithm SHA256
+$checksum = "$($hash.Hash)  $(Split-Path -Leaf $setup)"
+$checksumPath = Join-Path $distDir "MetaQuestTrayTool-Setup-$Version.exe.sha256.txt"
+Set-Content -Path $checksumPath -Value $checksum -Encoding ascii
+
 $sizeMb = [math]::Round((Get-Item $setup).Length / 1MB, 1)
 Write-Host ""
 Write-Host "Installer ready:" -ForegroundColor Green
 Write-Host "  $setup ($sizeMb MB)"
+Write-Host "  SHA256: $($hash.Hash)"
+Write-Host "  Checksum: $checksumPath"
 Write-Host ""
 Write-Host "Users can double-click that Setup.exe to install (OTT-style)."

@@ -81,11 +81,36 @@ jobs:
         run: .\scripts\build-installer.ps1 -Version ${{ steps.version.outputs.version }}
         shell: pwsh
 
+      - name: Verify installer artifact
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $setup = "dist/MetaQuestTrayTool-Setup-$version.exe"
+          $checksum = "$setup.sha256.txt"
+          if (-not (Test-Path $setup)) {
+            throw "Missing installer: $setup"
+          }
+          if (-not (Test-Path $checksum)) {
+            throw "Missing installer checksum: $checksum"
+          }
+          $size = (Get-Item $setup).Length
+          if ($size -le 0) {
+            throw "Installer is empty: $setup"
+          }
+          $actual = (Get-FileHash -Path $setup -Algorithm SHA256).Hash
+          $recorded = ((Get-Content -Path $checksum -Raw).Trim() -split '\s+')[0]
+          if ($actual -ne $recorded) {
+            throw "Installer checksum mismatch. Expected $recorded but got $actual."
+          }
+          Write-Host "Installer verified: $setup ($size bytes, SHA256 $actual)"
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}
-          path: dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
+          path: |
+            dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
+            dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe.sha256.txt
           retention-days: 30
 
       - name: Extract changelog
@@ -94,6 +119,8 @@ jobs:
         run: |
           $version = '${{ steps.version.outputs.version }}'
           $section = & .\scripts\Extract-Changelog.ps1 -Version $version
+          $checksum = "dist/MetaQuestTrayTool-Setup-$version.exe.sha256.txt"
+          $sha256 = ((Get-Content -Path $checksum -Raw).Trim() -split '\s+')[0]
           $path = Join-Path $env:RUNNER_TEMP "release-notes.md"
           $sb = New-Object System.Text.StringBuilder
           [void]$sb.AppendLine("## Meta Quest Tray Tool $version")
@@ -105,6 +132,7 @@ jobs:
           [void]$sb.AppendLine("**Windows Setup (recommended):** download ``MetaQuestTrayTool-Setup-$version.exe``, run it, then launch from the Start Menu or system tray.")
           [void]$sb.AppendLine()
           [void]$sb.AppendLine("- Self-contained installer (includes .NET 8 — no separate runtime install)")
+          [void]$sb.AppendLine("- SHA-256: ``$sha256``")
           [void]$sb.AppendLine("- Settings persist in ``%AppData%\MetaQuestTrayTool\``")
           [void]$sb.AppendLine("- Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)")
           [void]$sb.AppendLine()
@@ -122,7 +150,9 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Meta Quest Tray Tool ${{ steps.version.outputs.tag }}
           body_path: ${{ steps.changelog.outputs.notes_path }}
-          files: dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
+          files: |
+            dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
+            dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe.sha256.txt
           draft: false
           prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease }}
           generate_release_notes: false
