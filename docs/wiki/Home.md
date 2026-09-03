@@ -4,6 +4,8 @@ Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OT
 
 **Current public release:** [v1.1.24](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
+Source builds after v1.1.24 include unreleased audit updates: shared/nonblocking status probes, stuck-helper repair diagnostics, Quest screenshots, and release checksum sidecars.
+
 [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
 ---
@@ -49,8 +51,8 @@ Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OT
 | OVRService | Start / stop / restart; **Manual-at-boot** so Meta does not pop at Windows sign-in |
 | OpenXR | Switch Meta vs SteamVR (global + per-profile); Steam Link assist |
 | Audio / power | Switch to headset on PCVR start, restore desktop on exit; power plan; USB suspend |
-| Headset ADB | CPU/GPU/refresh/FFR; Wireless Pair; VR headsets only; Pause ADB |
-| Voice / HotKeys | Ctrl+Numpad, push-to-talk, headset spoken status |
+| Headset ADB | CPU/GPU/refresh/FFR; Wireless Pair; VR headsets only; Pause ADB; source builds add Quest screenshots |
+| Voice / HotKeys | Ctrl+Numpad, push-to-talk, headset spoken status; source builds add screenshot command |
 
 ---
 

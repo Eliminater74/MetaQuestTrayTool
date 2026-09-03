@@ -3,7 +3,7 @@
 | Document | Description |
 | --- | --- |
 | [ODT-REGISTRY.md](ODT-REGISTRY.md) | Oculus Debug Tool registry keys vs CLI commands (from Meta binaries) |
-| [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home) |
+| [VOICE-AND-HOTKEYS.md](VOICE-AND-HOTKEYS.md) | Global hotkeys and voice command phrases (incl. SteamVR Home and Quest screenshots) |
 | [../CHANGELOG.md](../CHANGELOG.md) | What's new per release (also shown in Setup and the in-app updater) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
 | [SECURITY.md](SECURITY.md) | Update verification, local-data privacy, and device/process safety |

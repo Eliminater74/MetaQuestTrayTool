@@ -8,6 +8,21 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Quest headset screenshots can be captured from tray → **Headset (ADB) → Take screenshot**, default hotkey **Ctrl+Shift+Num 9**, or voice phrases like “take screenshot” / “capture screenshot.” Captures use the trusted-headset ADB guard, save timestamped PNGs under `%AppData%\MetaQuestTrayTool\screenshots\`, show a tray result, and say **“Screenshot taken.”** in the headset when the announcement audio path is available.
+- Advanced now includes **Repair stuck helper** and **Copy diagnostics** actions for hidden helper/process situations, and the Info dump includes main/helper PID details and settings/profile paths.
+- Installer builds now emit a `MetaQuestTrayTool-Setup-<version>.exe.sha256.txt` sidecar, and the Release workflow verifies and uploads that checksum alongside the Setup.exe.
+
+### Changed
+- Status, Info, PCVR Ready, and tray menu refreshes now share a short-lived runtime snapshot instead of repeating the same SteamVR/OpenXR/OVRService/GPU probes.
+- Tray menu status refresh and Headset trust-banner refresh now run expensive probes in the background so opening the menu or page stays responsive.
+- ADB commands are serialized through one queue, including screenshot capture, so watcher/status/custom/headset actions cannot collide on `adb.exe`.
+- High-churn Quest Link registry edits debounce settings writes and flush pending changes on exit.
+
+### Fixed
+- A stuck but verified same-exe session helper can now be repaired from the Advanced page without using Task Manager.
+- Screenshot capture validates the PNG signature before reporting success and deletes corrupt output if ADB returned text/errors instead of image bytes.
+
 ## [1.1.24] - 2026-09-02
 
 ### Fixed

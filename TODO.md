@@ -8,6 +8,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Remaining / later
 
+- [ ] Physical Quest validation for unreleased screenshot flow: USB ADB, wireless ADB, voice command, default hotkey, tray command, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -20,6 +21,17 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### Unreleased after v1.1.24 (local source only)
+
+- [x] Share runtime probe snapshots across Status, Info, PCVR Ready, and tray menu refreshes
+- [x] Make tray status refresh and Headset trust-banner refresh nonblocking
+- [x] Serialize ADB command execution through one queue
+- [x] Debounce high-churn Quest Link settings saves and flush pending saves on exit
+- [x] Add Advanced repair/copy diagnostics for stuck session helpers
+- [x] Add Quest screenshot capture from tray, **Ctrl+Shift+Num 9**, and voice
+- [x] Speak **“Screenshot taken.”** in the headset when the announcement audio route is available
+- [x] Emit, verify, upload, and document release installer SHA-256 checksum sidecars
 
 ### v0.1 — tray host
 

@@ -13,6 +13,16 @@ GitHub wiki does not inline-play large MP4s — open the download link (VLC / br
 
 Repo gallery index: [docs/media/README.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/media/README.md)
 
+## Quest headset screenshots
+
+Source builds after v1.1.24 can capture the current Quest headset view over ADB:
+
+- Tray → **Headset (ADB) → Take screenshot**
+- **Ctrl+Shift+Num 9**
+- Voice: “take screenshot”, “capture screenshot”, or “quest screenshot”
+
+Screenshots require a trusted, ready Quest over USB or wireless ADB. PNG files are written to `%AppData%\MetaQuestTrayTool\screenshots\` with timestamped names such as `QuestScreenshot-20260902-150405-Meta-Quest-3.png`. When **Speak status in headset** can reach the Quest audio path, the app says **“Screenshot taken.”** after the file is saved.
+
 ## Shell screenshots
 
 | Page | Preview |

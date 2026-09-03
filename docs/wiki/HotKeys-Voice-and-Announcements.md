@@ -21,8 +21,9 @@ Defaults use **Ctrl + Numpad**:
 | Ctrl+Num 9 | Open Meta Horizon Link |
 | Ctrl+Num 0 | Start SteamVR over Link (PreventDashLaunch) |
 | Ctrl+Shift+Num 0 | Start SteamVR |
+| Ctrl+Shift+Num 9 | Take Quest headset screenshot |
 
-Also bindable (no default numpad): Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets.
+Also bindable: Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets.
 
 Record a new chord, or restore defaults, in Configure.
 
@@ -58,6 +59,7 @@ Spell out **A S W**, **H U D**, **steam v r**, **open x r**, **GPU**.
 | switch open x r meta / steam open x r | OpenXR runtime |
 | close overlays / kill overlays | Configured overlay processes |
 | apply GPU preset | GPU-tier Link + globals |
+| take screenshot / capture screenshot / quest screenshot | Quest headset screenshot |
 
 **Custom phrases:** map your wording to any tray action in Configure. **Test listen once** is on that window.
 
@@ -74,6 +76,8 @@ Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Li
 **Spoken voice:** Auto prefers an English **female** Windows TTS voice (Microsoft Zira when installed). Choose any installed voice from the list. Voice-command confirmations use the same voice.
 
 Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tries to speak **“Starting SteamVR.”** in the headset when a Quest playback device is found. Auto PreventDashLaunch also speaks **“Please wait. Starting SteamVR.”** as soon as Link is confirmed. Exit under PreventDashLaunch speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** *before* OVRService stops, while headset audio is still there.
+
+Taking a Quest screenshot from tray, **Ctrl+Shift+Num 9**, or voice queues **“Screenshot taken.”** after the PNG has been saved. Screenshots require a trusted, ready Quest over ADB and are written to `%AppData%\MetaQuestTrayTool\screenshots\`.
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 

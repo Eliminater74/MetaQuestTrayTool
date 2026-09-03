@@ -31,6 +31,7 @@ Output:
 
 - Published app: `publish\win-x64\`
 - Installer: `dist\MetaQuestTrayTool-Setup-<version>.exe`
+- Checksum: `dist\MetaQuestTrayTool-Setup-<version>.exe.sha256.txt`
 
 Optional flags:
 
@@ -58,7 +59,7 @@ dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
 | Workflow | Trigger | Result |
 | --- | --- | --- |
 | **CI** (`.github/workflows/ci.yml`) | Push/PR to `main`, manual | Build + publish smoke test |
-| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (e.g. `v1.0.0`), manual | Setup.exe + GitHub Release |
+| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (e.g. `v1.0.0`), manual | Setup.exe + SHA-256 sidecar + GitHub Release |
 
 Tag a release:
 

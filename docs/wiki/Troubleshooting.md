@@ -20,6 +20,12 @@ DeviceCache and Oculus virtual audio often blip on resume. **v1.1.3** ignores co
 
 Expected when the tray is **elevated**. Use [[HotKeys-Voice-and-Announcements]].
 
+## Exit leaves a hidden helper or the next launch is silent
+
+v1.1.24 fixed the main exit/helper shutdown path. Source builds after v1.1.24 also add **Advanced → Repair stuck helper** and **Copy diagnostics**. Use Repair if Task Manager shows a leftover **Meta Quest Tray Tool** background process after Exit; it asks the helper to quit first, then terminates only a validated same-exe helper if it is still stuck.
+
+If the problem returns, use **Copy diagnostics** or **Info → Copy system info** and check the `App internals` lines for main PID, helper pipe PID, recorded helper state, same-exe child helpers, and settings/profile paths.
+
 ## OpenXR / OVRService / PreventDashLaunch does nothing
 
 Run **as Administrator**. Use Restart as Administrator or the logon elevation task.
@@ -41,6 +47,10 @@ Developer Mode + USB debugging **or** Wireless Pair. Same Wi‑Fi for wireless. 
 If a **phone** or **TV** keeps disappearing from `adb devices`, **VR headsets only** is on (default). Uncheck it on the Headset page or tray → **Headset (ADB)** to leave other wireless ADB devices connected. Or use **Pause ADB** (until resume / 2 hours) so the watcher fully stops without quitting the tray.
 
 **SideQuest on the headset:** if SideQuest is running in VR, it may open an ADB port (often 5555). Use that LAN IP:port with **Connect** on the Headset page — see [[Headset-ADB]].
+
+## Quest screenshot fails
+
+Screenshot capture needs a trusted, ready Quest over ADB. Check Headset status for unauthorized/disconnected/ignored devices, then try **Headset (ADB) → Take screenshot** again. PNG files save to `%AppData%\MetaQuestTrayTool\screenshots\`; corrupt output is deleted instead of reported as success.
 
 ## Meta will not start after Manual-at-boot
 

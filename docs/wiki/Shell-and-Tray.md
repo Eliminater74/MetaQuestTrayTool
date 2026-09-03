@@ -12,9 +12,9 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | **Power Options** | VR vs desktop power plan, USB selective suspend, restart OVRService after sleep. |
 | **Service & Startup** | Start/Stop/Restart OVRService, Manual-at-boot, PreventDashLaunch, CoreChannel, SteamVR Home. |
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |
-| **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI. |
+| **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI, stuck-helper repair and process diagnostics. |
 | **Quest Link** | RemoteHeadset bitrate, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets. |
-| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, **VR headsets only**, **Pause ADB**. |
+| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, Quest screenshots, **VR headsets only**, **Pause ADB**. |
 | **VR Tools** | Curated third-party links (overlays, wireless PCVR, tracking, essentials). |
 | **Info** | PCVR Ready checklist, Recover PCVR, session probe, system dump. |
 | **Donate / About** | PayPal + version / credits. |
@@ -31,7 +31,7 @@ Typical actions:
 
 - Open Settings, Meta Horizon Link, Oculus Debug Tool
 - Start SteamVR over Link, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
-- Game Settings, Profiles, Quest Link, OpenXR, Audio, Power, Headset (ADB: VR headsets only / Pause / Resume)
+- Game Settings, Profiles, Quest Link, OpenXR, Audio, Power, Headset (ADB: screenshots / VR headsets only / Pause / Resume)
 - Start / stop / restart **OVRService**
 - Check for updates, VR Tools, Donate, Exit
 
@@ -46,6 +46,8 @@ the running process ID and explains how to close it. The second copy then signal
 tray to show its shell and exits. The normal-user `--session-helper` process is an internal
 launch helper; it does not block the tray from starting, records its tray owner, exits when that
 owner is gone, and is cleaned up during tray exit even if its helper pipe stops answering.
+Source builds after v1.1.24 also add **Advanced → Repair stuck helper** and **Copy diagnostics**
+for rare hidden-process cleanup cases.
 
 ## Idle behavior
 

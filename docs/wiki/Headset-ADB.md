@@ -23,6 +23,16 @@ Only **real VR headsets** are trusted. Phones, tablets, and emulators never rece
 
 CPU / GPU levels, texture size, refresh rate, FFR, chroma, capture helpers, paste-text / proximity / guardian helpers.
 
+## Quest screenshots
+
+Source builds after v1.1.24 can save the current headset view as a PNG:
+
+- Tray → **Headset (ADB) → Take screenshot**
+- **Ctrl+Shift+Num 9**
+- Voice: “take screenshot”, “capture screenshot”, or “quest screenshot”
+
+Files save under `%AppData%\MetaQuestTrayTool\screenshots\`. The command uses the same real-VR/trusted-headset guard as other ADB actions, validates the PNG before reporting success, and queues **“Screenshot taken.”** through headset announcements when the Quest audio route is available.
+
 **Apply when headset connects** re-pushes props (Quest **resets `debug.oculus.*` on reboot**).
 
 Battery, charge, and Wi‑Fi show on Status / Info via `dumpsys` when ADB is up.

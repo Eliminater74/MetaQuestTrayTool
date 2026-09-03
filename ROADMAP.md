@@ -27,6 +27,20 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ---
 
+## Unreleased local work after v1.1.24
+
+These commits are in source only until the next authorized version bump/tag/push:
+
+- Shared runtime probe snapshots for Status, Info, PCVR Ready, and tray menu status.
+- Nonblocking tray status refresh and background Headset trust-banner refresh.
+- Serialized ADB command execution across watcher, status, custom command, headset tweak, and screenshot paths.
+- Debounced high-churn Quest Link settings saves with an exit-time flush.
+- Advanced **Repair stuck helper** / **Copy diagnostics** actions plus Info process diagnostics.
+- Quest headset screenshots through tray, **Ctrl+Shift+Num 9**, and voice (“take screenshot”), with headset **“Screenshot taken.”** feedback when announcements can reach the Quest audio path.
+- Release installer SHA-256 sidecar generation, workflow verification, and checksum upload.
+
+---
+
 ## Done (by phase)
 
 ### v0.1 — tray host
