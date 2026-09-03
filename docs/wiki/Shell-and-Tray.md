@@ -8,13 +8,13 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | --- | --- |
 | **Status** | Default home. Live chips: PCVR Ready, SteamVR install/running/Stable\|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR, GPU, audio. |
 | **Game Settings** | Global Super Sampling, ASW, FOV, HUD, OpenXR, overlay-close list. Opens Profiles / Global defaults. |
-| **Tray Tool** | Start with Windows, elevation, audio switcher, HotKeys, voice, headset announcements, updates, theme, notifications. |
+| **Tray Tool** | Start with Windows, elevation, audio switcher, HotKeys, voice, screenshot controls, headset announcements, updates, theme, notifications. |
 | **Power Options** | VR vs desktop power plan, USB selective suspend, restart OVRService after sleep. |
 | **Service & Startup** | Start/Stop/Restart OVRService, Manual-at-boot, PreventDashLaunch, CoreChannel, SteamVR Home. |
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |
 | **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI, stuck-helper repair and process diagnostics. |
-| **Quest Link** | RemoteHeadset bitrate, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets. |
-| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, Quest screenshots, **VR headsets only**, **Pause ADB**. |
+| **Quest Link** | RemoteHeadset bitrate, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets, Quest Link mirror screenshots. |
+| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, ADB screenshots, **VR headsets only**, **Pause ADB**. |
 | **VR Tools** | Curated third-party links (overlays, wireless PCVR, tracking, essentials). |
 | **Info** | PCVR Ready checklist, Recover PCVR, session probe, system dump. |
 | **Donate / About** | PayPal + version / credits. |
@@ -31,7 +31,7 @@ Typical actions:
 
 - Open Settings, Meta Horizon Link, Oculus Debug Tool
 - Start SteamVR over Link, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
-- Game Settings, Profiles, Quest Link, OpenXR, Audio, Power, Headset (ADB: screenshots / VR headsets only / Pause / Resume)
+- Game Settings, Profiles, Quest Link, Screenshots, OpenXR, Audio, Power, Headset (ADB: screenshots / VR headsets only / Pause / Resume), HotKeys / Voice
 - Start / stop / restart **OVRService**
 - Check for updates, VR Tools, Donate, Exit
 

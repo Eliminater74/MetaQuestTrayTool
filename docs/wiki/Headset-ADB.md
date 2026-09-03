@@ -23,15 +23,19 @@ Only **real VR headsets** are trusted. Phones, tablets, and emulators never rece
 
 CPU / GPU levels, texture size, refresh rate, FFR, chroma, capture helpers, paste-text / proximity / guardian helpers.
 
-## Quest screenshots
+## Headset ADB screenshots
 
-v1.1.25+ can save the current headset view as a PNG:
+The ADB screenshot path saves the current headset view as a PNG:
 
-- Tray → **Headset (ADB) → Take screenshot**
+- Tray → **Screenshots → Take headset screenshot (ADB)**
+- Tray → **Headset (ADB) → Take headset screenshot (ADB)**
+- Headset page → **Take headset screenshot (ADB)**
 - **Ctrl+Shift+Num 9**
-- Voice: “take screenshot”, “capture screenshot”, or “quest screenshot”
+- Voice: “take headset screenshot”, “quest screenshot”, or “ADB screenshot”
 
 Files save under `%AppData%\MetaQuestTrayTool\screenshots\`. The command uses the same real-VR/trusted-headset guard as other ADB actions, validates the PNG before reporting success, and queues **“Screenshot taken.”** through headset announcements when the Quest audio route is available.
+
+The **Take screenshot (Quest Link preferred)** action on the tray Screenshots menu and Headset page first tries Quest Link / Air Link mirror capture when Meta Link is actively streaming, then falls back to this ADB path.
 
 **Apply when headset connects** re-pushes props (Quest **resets `debug.oculus.*` on reboot**).
 

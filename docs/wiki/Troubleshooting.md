@@ -50,7 +50,9 @@ If a **phone** or **TV** keeps disappearing from `adb devices`, **VR headsets on
 
 ## Quest screenshot fails
 
-Screenshot capture needs a trusted, ready Quest over ADB. Check Headset status for unauthorized/disconnected/ignored devices, then try **Headset (ADB) → Take screenshot** again. PNG files save to `%AppData%\MetaQuestTrayTool\screenshots\`; corrupt output is deleted instead of reported as success.
+**Quest Link mirror screenshot** needs an active Meta Quest Link / Air Link stream and Meta's `OculusMirror.exe` under the Meta install folder. If it says Link is not streaming, connect Quest Link / Air Link first and try **Quest Link → Take Quest Link mirror screenshot** again.
+
+**Headset screenshot (ADB)** needs a trusted, ready Quest over ADB. Check Headset status for unauthorized/disconnected/ignored devices, then try **Headset (ADB) → Take headset screenshot (ADB)** again. PNG files save to `%AppData%\MetaQuestTrayTool\screenshots\`; corrupt output is deleted instead of reported as success.
 
 ## Meta will not start after Manual-at-boot
 

@@ -27,6 +27,12 @@ GPU-tier **Apply recommended presets** fills Link + global game settings from th
 
 Registry reference (value names from Meta’s Debug Tool binaries): see [ODT-REGISTRY.md in the repo](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/ODT-REGISTRY.md).
 
+## Quest Link screenshots
+
+Use **Quest Link → Take Quest Link mirror screenshot**, tray → **Screenshots → Take Quest Link mirror screenshot**, or voice **take link screenshot** / **quest link screenshot** / **mirror screenshot** to capture the live Meta Link / Air Link mirror through Meta's `OculusMirror.exe`. This path requires an active Quest Link / Air Link stream and does not require ADB.
+
+Use **Take screenshot (auto)**, tray → **Screenshots → Take screenshot (Quest Link preferred)**, **Ctrl+Shift+Num 8**, or voice **take screenshot** when you want Link mirror capture first and ADB fallback if Link is not streaming. Saved PNGs go to `%AppData%\MetaQuestTrayTool\screenshots\`, and headset announcements say **“Screenshot taken.”** after a successful save when audio can reach the Quest.
+
 ## Air Link vs wired
 
 There is **no** RemoteHeadset key for “Air vs cable”. Meta stores transport in:

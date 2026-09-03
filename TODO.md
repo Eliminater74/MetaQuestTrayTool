@@ -8,7 +8,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Remaining / later
 
-- [ ] Physical Quest validation for v1.1.25 screenshot flow: USB ADB, wireless ADB, voice command, default hotkey, tray command, and headset “Screenshot taken” audio path.
+- [ ] Physical Quest validation for v1.1.26 screenshot flow: Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -21,6 +21,14 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.26
+
+- [x] Add Quest Link / Air Link mirror screenshot capture through Meta `OculusMirror.exe`
+- [x] Add smart screenshot action that prefers Quest Link mirror capture and falls back to ADB
+- [x] Add default **Ctrl+Shift+Num 8** for smart screenshots and keep **Ctrl+Shift+Num 9** for ADB headset screenshots
+- [x] Add dedicated tray **Screenshots** and **HotKeys / Voice** menus
+- [x] Add screenshot and voice-command controls to the Headset, Quest Link, and Tray Tool pages
 
 ### v1.1.25
 

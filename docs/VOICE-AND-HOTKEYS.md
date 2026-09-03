@@ -37,9 +37,10 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Num 9 | Open Meta Horizon Link |
 | Ctrl+Num 0 | Start SteamVR over Link (PreventDashLaunch) |
 | Ctrl+Shift+Num 0 | Start SteamVR (always — if auto-start missed) |
-| Ctrl+Shift+Num 9 | Take Quest headset screenshot |
+| Ctrl+Shift+Num 8 | Take screenshot (Quest Link preferred, ADB fallback) |
+| Ctrl+Shift+Num 9 | Take headset screenshot (ADB) |
 
-Assign **Open Oculus Debug Tool** or **Open SteamVR Home** in Configure if you want a shortcut. Existing installs get the Start SteamVR and screenshot shortcuts on next launch if they are not already bound.
+Assign **Quest Link mirror screenshot**, **Open Oculus Debug Tool**, or **Open SteamVR Home** in Configure if you want a shortcut. Existing installs get the Start SteamVR and screenshot shortcuts on next launch if those actions are not already bound.
 
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 
@@ -95,7 +96,9 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | switch open x r steam / open x r steam v r / steam open x r | Switch OpenXR runtime to SteamVR |
 | close overlays / kill overlays / close overlay apps | Close configured overlay processes (RTSS, CAM, etc.) |
 | apply GPU preset / apply GPU presets / GPU preset | Apply GPU-tier Link + global game presets |
-| take screenshot / capture screenshot / quest screenshot | Take a Quest headset screenshot |
+| take screenshot / capture screenshot / save screenshot | Take screenshot (Quest Link preferred, ADB fallback) |
+| take link screenshot / take quest link screenshot / mirror screenshot | Take Quest Link mirror screenshot |
+| take headset screenshot / quest screenshot / ADB screenshot | Take headset screenshot (ADB) |
 
 Custom phrases can be added in Configure (phrase → tray action). New actions above can also be bound as hotkeys in Configure.
 
@@ -123,7 +126,7 @@ Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Li
 
 Starting SteamVR (button / hotkey / voice) always tries to speak **“Starting SteamVR.”** in the Quest when a headset playback device is found — even if Status is not Active yet. Auto PreventDashLaunch speaks **“Please wait. Starting SteamVR.”** on Link connect. SteamVR exit speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** before OVRService stops. Other phrases still need **Speak status in headset**.
 
-Taking a Quest screenshot from tray, **Ctrl+Shift+Num 9**, or voice queues **“Screenshot taken.”** after the PNG has been saved. Screenshots require a trusted, ready Quest over ADB and are written to `%AppData%\MetaQuestTrayTool\screenshots\`.
+Taking a screenshot from the tray **Screenshots** menu, **Ctrl+Shift+Num 8**, or voice **“take screenshot”** prefers Quest Link / Air Link mirror capture while Meta Link is actively streaming, then falls back to the trusted-headset ADB path. **“Take link screenshot”** forces Oculus Mirror capture. **Ctrl+Shift+Num 9** or **“take headset screenshot”** forces ADB. Saved PNGs are written to `%AppData%\MetaQuestTrayTool\screenshots\`, and the app queues **“Screenshot taken.”** after the file has been saved.
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 

@@ -8,6 +8,14 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Quest Link / Air Link mirror screenshots can now be captured through Meta's `OculusMirror.exe` from the tray **Screenshots** menu, the **Quest Link** page, voice phrases like “take link screenshot”, or a bindable hotkey action. This path requires an active Meta Link stream but does **not** require ADB.
+- A new smart screenshot action prefers Quest Link mirror capture when Meta Link is actively streaming, then falls back to the trusted-headset ADB screenshot path. It is exposed from the tray **Screenshots** menu, the Headset / Quest Link / Tray Tool pages, voice phrases like “take screenshot”, and default hotkey **Ctrl+Shift+Num 8**.
+
+### Changed
+- Screenshot labels now distinguish **Quest Link mirror** from **Headset ADB** capture. ADB screenshots remain available from the Headset page/menu, voice phrases like “take headset screenshot”, and default hotkey **Ctrl+Shift+Num 9**.
+- The tray menu now has dedicated **Screenshots** and **HotKeys / Voice** submenus, and the Tray Tool page surfaces voice/hotkey controls near headset announcements with screenshot phrases and a **Listen once** action.
+
 ## [1.1.25] - 2026-09-03
 
 ### Added

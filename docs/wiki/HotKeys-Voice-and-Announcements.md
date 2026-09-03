@@ -21,9 +21,10 @@ Defaults use **Ctrl + Numpad**:
 | Ctrl+Num 9 | Open Meta Horizon Link |
 | Ctrl+Num 0 | Start SteamVR over Link (PreventDashLaunch) |
 | Ctrl+Shift+Num 0 | Start SteamVR |
-| Ctrl+Shift+Num 9 | Take Quest headset screenshot |
+| Ctrl+Shift+Num 8 | Take screenshot (Quest Link preferred, ADB fallback) |
+| Ctrl+Shift+Num 9 | Take headset screenshot (ADB) |
 
-Also bindable: Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets.
+Also bindable: Quest Link mirror screenshot, Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets.
 
 Record a new chord, or restore defaults, in Configure.
 
@@ -59,7 +60,9 @@ Spell out **A S W**, **H U D**, **steam v r**, **open x r**, **GPU**.
 | switch open x r meta / steam open x r | OpenXR runtime |
 | close overlays / kill overlays | Configured overlay processes |
 | apply GPU preset | GPU-tier Link + globals |
-| take screenshot / capture screenshot / quest screenshot | Quest headset screenshot |
+| take screenshot / capture screenshot / save screenshot | Screenshot (Quest Link preferred, ADB fallback) |
+| take link screenshot / quest link screenshot / mirror screenshot | Quest Link mirror screenshot |
+| take headset screenshot / quest screenshot / ADB screenshot | Headset screenshot (ADB) |
 
 **Custom phrases:** map your wording to any tray action in Configure. **Test listen once** is on that window.
 
@@ -77,7 +80,7 @@ Sub-toggles: connect, disconnect, profiles, launch, SteamVR start/exit, Steam Li
 
 Starting SteamVR (button / **Ctrl+Shift+Num 0** / **start steam v r**) always tries to speak **“Starting SteamVR.”** in the headset when a Quest playback device is found. Auto PreventDashLaunch also speaks **“Please wait. Starting SteamVR.”** as soon as Link is confirmed. Exit under PreventDashLaunch speaks **“SteamVR closed. Stopping Meta service for 10 seconds.”** *before* OVRService stops, while headset audio is still there.
 
-Taking a Quest screenshot from tray, **Ctrl+Shift+Num 9**, or voice queues **“Screenshot taken.”** after the PNG has been saved. Screenshots require a trusted, ready Quest over ADB and are written to `%AppData%\MetaQuestTrayTool\screenshots\`.
+Taking a screenshot from the tray **Screenshots** menu, **Ctrl+Shift+Num 8**, or voice **take screenshot** prefers Quest Link / Air Link mirror capture while Meta Link is actively streaming, then falls back to trusted-headset ADB. **Take link screenshot** forces Oculus Mirror capture. **Ctrl+Shift+Num 9** or **take headset screenshot** forces ADB. Saved PNGs are written to `%AppData%\MetaQuestTrayTool\screenshots\`, and the app queues **“Screenshot taken.”** after the file has been saved.
 
 **Test in headset** speaks a sample phrase. Enable **Use Audio Switcher** so TTS actually routes to the Quest.
 

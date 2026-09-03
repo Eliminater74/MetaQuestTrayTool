@@ -36,7 +36,7 @@ No. Meta removed it. Use Dash → SteamVR and optional SteamVR Home.
 
 After a sudden power cut, if options look wiped, check `settings.json.bak` / `settings.json.bak2` (and the same for `profiles.json`) before quitting the app again. v1.1.16+ auto-restores from those backups and flushes saves to disk.
 
-Quest screenshots save under `%AppData%\MetaQuestTrayTool\screenshots\`.
+Quest Link mirror and ADB screenshots save under `%AppData%\MetaQuestTrayTool\screenshots\`.
 
 ## macOS / Linux?
 

@@ -100,7 +100,7 @@ Export/import profiles and full settings from **Advanced**.
 
 - **Quest Link** registry settings usually need a Link reconnect or **OVRService** restart — use **Service & Startup** or the tray menu.
 - **Headset** (ADB) tweaks (CPU/GPU, refresh rate, texture size, etc.) apply when a trusted Quest connects. Enable **Developer Mode** on the headset and approve USB debugging once, **or** use **Wireless ADB** (Enable tcpip once, or Wireless debugging **Pair** + Connect). These settings do not survive a headset reboot; the tray re-applies them on connect.
-- Take a Quest screenshot from **Headset (ADB) → Take screenshot**, **Ctrl+Shift+Num 9**, or voice (“take screenshot”). PNGs save under `%AppData%\MetaQuestTrayTool\screenshots\`.
+- Take a Quest screenshot from the tray **Screenshots** menu, Headset / Quest Link pages, hotkeys, or voice. **Take screenshot** prefers Quest Link / Air Link mirror capture when Meta Link is actively streaming, then falls back to ADB. **Take Quest Link mirror screenshot** uses Meta's Oculus Mirror with no ADB required. **Take headset screenshot (ADB)** needs a trusted USB or wireless ADB headset. PNGs save under `%AppData%\MetaQuestTrayTool\screenshots\`.
 - Only **real VR headsets** are trusted. Phones, tablets, and Android emulators are ignored.
 - **Status** / **Info** show PCVR Ready, battery / Wi‑Fi (via ADB), and session type (Air Link vs wired, Steam Link / SteamVR, Virtual Desktop).
 
@@ -110,15 +110,15 @@ Export/import profiles and full settings from **Advanced**.
 
 - Open Settings, Meta Horizon Link, Oculus Debug Tool
 - Start SteamVR over Link, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
-- Game Settings (SS, ASW, FOV, …), Profiles, Quest Link, OpenXR, Audio, Power, Headset (ADB, including screenshots)
+- Game Settings (SS, ASW, FOV, …), Profiles, Quest Link, Screenshots, OpenXR, Audio, Power, Headset (ADB), HotKeys / Voice
 - Start / stop / restart **OVRService**, Check for updates, VR Tools, Donate, Exit
 
 ### 7. HotKeys and voice (optional)
 
 On **Tray Tool**:
 
-- **HotKeys** — Enable → Configure. Defaults **Ctrl+Numpad 0–9** (ASW, SS cycle, apply global, restart OVRService, Perf HUD, open Meta Link, Dash → SteamVR), plus **Ctrl+Shift+Num 0** for Start SteamVR and **Ctrl+Shift+Num 9** for a Quest screenshot. Assign **Open Debug Tool** / **Open SteamVR Home** if you want them. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
-- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off”, “dash to steam v r”, “open steam v r home”, or “take screenshot”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
+- **HotKeys** — Enable → Configure. Defaults **Ctrl+Numpad 0–9** (ASW, SS cycle, apply global, restart OVRService, Perf HUD, open Meta Link, Dash → SteamVR), plus **Ctrl+Shift+Num 0** for Start SteamVR, **Ctrl+Shift+Num 8** for smart screenshot, and **Ctrl+Shift+Num 9** for ADB headset screenshot. Assign **Quest Link mirror screenshot**, **Open Debug Tool**, or **Open SteamVR Home** if you want them. **Required for mid-session control in SteamVR** — an elevated tray cannot be clicked from SteamVR.
+- **Voice commands** — Enable → Configure. Default **push-to-talk Ctrl+Shift+V**, then say e.g. “A S W off”, “dash to steam v r”, “open steam v r home”, “take screenshot”, “take link screenshot”, or “take headset screenshot”. Optional mic preference, min confidence, and custom phrases. Same actions as hotkeys when you cannot reach the tray.
 - **Headset announcements** — Enable **Speak status in headset** to hear game name, profile armed/applied/restored, transport, OpenXR runtime, audio routing, recovery, SteamVR, and concise action results. Full diagnostics stay in Log; configure the announcement categories and test the Quest audio path on the **Tray Tool** page.
 - **Experimental MSFS 2024 VR launch** — Enable it inside the MSFS 2024 personal profile to prepare Meta Link/SteamVR, use `-FastLaunch`, and optionally send `Ctrl+Tab` after a configurable delay. It is off by default and best-effort; it cannot click verification dialogs or know when a flight is ready.
 
@@ -163,7 +163,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. This release adds shared runtime probes, nonblocking tray/headset refreshes, serialized ADB, debounced Link-settings saves, helper repair diagnostics, Quest screenshots, and release checksum assets.
+Release **[v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. This release adds shared runtime probes, nonblocking tray/headset refreshes, serialized ADB, debounced Link-settings saves, helper repair diagnostics, Quest screenshots, and release checksum assets. The next release adds Quest Link mirror screenshots, a smart screenshot action, and dedicated screenshot / HotKeys / Voice menu surfaces.
 
 ### Shell & tray
 
@@ -210,14 +210,14 @@ Release **[v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect (saved IP only — no LAN scan) — SideQuest on the headset can also open an ADB port (often 5555)
 - **VR headsets only** (on by default; Headset page + tray → Headset (ADB)): disconnect phones/tablets/TVs that show up over wireless ADB; uncheck to leave any ADB device connected. Tweaks still never run on non-headsets
 - **Pause ADB** (tray → Headset (ADB)): stop polling / reconnect / disconnect until you resume, or for 2 hours — use while debugging a phone or TV without quitting the tray
-- **Take screenshot** (tray → Headset (ADB), **Ctrl+Shift+Num 9**, or voice “take screenshot”): saves a trusted-headset PNG to `%AppData%\MetaQuestTrayTool\screenshots\` and says **“Screenshot taken.”** in the Quest when headset announcements can reach the audio path
+- **Take screenshot** (tray **Screenshots**, Headset / Quest Link / Tray Tool pages, **Ctrl+Shift+Num 8**, or voice “take screenshot”): prefers Quest Link mirror capture while Meta Link is actively streaming, then falls back to trusted-headset ADB. **Ctrl+Shift+Num 9** or voice “take headset screenshot” forces ADB. PNGs save to `%AppData%\MetaQuestTrayTool\screenshots\` and the app says **“Screenshot taken.”** in the Quest when headset announcements can reach the audio path
 - Trusted VR headset serial only — phones / tablets / emulators ignored
 - Battery / charge / Wi‑Fi status via ADB dumpsys
 
 ### HotKeys, voice, updates, tools
 
-- HotKeys: default **Ctrl+Numpad 0–9**, **Ctrl+Shift+Num 0** for Start SteamVR, and **Ctrl+Shift+Num 9** for Quest screenshot; configure UI; assign Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
-- Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset, Quest screenshot — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
+- HotKeys: default **Ctrl+Numpad 0–9**, **Ctrl+Shift+Num 0** for Start SteamVR, **Ctrl+Shift+Num 8** for smart screenshot, and **Ctrl+Shift+Num 9** for ADB screenshot; configure UI; assign Link mirror screenshot / Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
+- Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset, smart / Link mirror / ADB screenshots — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
 - **Headset announcements** (Tray Tool): TTS in the Quest on connect, the wait before SteamVR, SteamVR closed + 10s Meta service stop (spoken *before* OVR drops), profile apply/restore, game/profile launch, action/audio/headset/recovery results, and experimental MSFS outcomes — when desktop toasts are not visible in-headset
 - **Experimental MSFS 2024 VR launch** (opt-in per profile): prepares Meta Link or SteamVR over Link, starts with `-FastLaunch` when no custom arguments are set, then optionally focuses the launched simulator window and sends a configured VR toggle. Best-effort only; it does not click verification dialogs or detect when a flight is ready.
 - In-app updates from GitHub `v*` (on start, schedule, or Check now) — shows **what's new** before you install; ADB stopped before Setup; Setup itself shows the changelog page. Release installers publish a SHA-256 checksum sidecar

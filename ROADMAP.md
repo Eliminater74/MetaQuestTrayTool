@@ -17,10 +17,10 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Shell | Status (default), Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
 | Status / Ready | Live chips, SteamVR install/version/Stable\|Beta, PCVR Ready checklist, Recover PCVR, session probe (Air/wired/Steam/VD) |
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
-| Link / Dash | RemoteHeadset Link settings + presets, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
+| Link / Dash | RemoteHeadset Link settings + presets, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
-| Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
-| Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/screenshots), expanded headset announcements, experimental MSFS 2024 VR launch automation |
+| Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
+| Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots), expanded headset announcements, experimental MSFS 2024 VR launch automation |
 | Updates / polish | In-app GitHub updates, release checksum sidecars, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
@@ -38,6 +38,17 @@ Released work:
 - Advanced **Repair stuck helper** / **Copy diagnostics** actions plus Info process diagnostics.
 - Quest headset screenshots through tray, **Ctrl+Shift+Num 9**, and voice (“take screenshot”), with headset **“Screenshot taken.”** feedback when announcements can reach the Quest audio path.
 - Release installer SHA-256 sidecar generation, workflow verification, and checksum upload.
+
+---
+
+## Next release — Quest Link mirror screenshots
+
+Landed work:
+
+- Quest Link / Air Link screenshots through Meta `OculusMirror.exe` while a live Meta Link stream is active.
+- Smart screenshot action that prefers Quest Link mirror capture and falls back to trusted-headset ADB.
+- Dedicated tray **Screenshots** and **HotKeys / Voice** submenus.
+- Screenshot buttons on Headset, Quest Link, and Tray Tool pages, with headset **“Screenshot taken.”** feedback after successful saves.
 
 ---
 

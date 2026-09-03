@@ -46,13 +46,13 @@ v1.1.25 adds shared/nonblocking status probes, stuck-helper repair diagnostics, 
 | Status | Live PCVR Ready chips, session type (Air / wired / Steam Link / VD), SteamVR install |
 | Game settings | Super Sampling, ASW, FOV, HUD via Oculus Debug Tool CLI + GUI |
 | Profiles | Auto-apply on game launch, restore globals on exit, library Launch |
-| Quest Link | Bitrate, encode width, HEVC, sharpening, DBR, Mobile ASW |
+| Quest Link | Bitrate, encode width, HEVC, sharpening, DBR, Mobile ASW, mirror screenshots |
 | Dash → SteamVR | PreventDashLaunch registry (no Meta process killing); auto SteamVR on real Link stream |
 | OVRService | Start / stop / restart; **Manual-at-boot** so Meta does not pop at Windows sign-in |
 | OpenXR | Switch Meta vs SteamVR (global + per-profile); Steam Link assist |
 | Audio / power | Switch to headset on PCVR start, restore desktop on exit; power plan; USB suspend |
-| Headset ADB | CPU/GPU/refresh/FFR; Wireless Pair; VR headsets only; Pause ADB; Quest screenshots |
-| Voice / HotKeys | Ctrl+Numpad, push-to-talk, headset spoken status, screenshot command |
+| Headset ADB | CPU/GPU/refresh/FFR; Wireless Pair; VR headsets only; Pause ADB; ADB screenshots |
+| Voice / HotKeys | Ctrl+Numpad, push-to-talk, headset spoken status, smart / Link / ADB screenshot commands |
 
 ---
 
