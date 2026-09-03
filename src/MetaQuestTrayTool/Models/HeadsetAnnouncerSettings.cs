@@ -25,8 +25,17 @@ public sealed class HeadsetAnnouncerSettings
     /// <summary>Steam Link OpenXR nudge / restore (informational).</summary>
     public bool SteamLinkAssist { get; set; }
 
-    /// <summary>Results from hotkeys, voice commands, OpenXR changes, and manual tray actions.</summary>
+    /// <summary>Results from OpenXR changes and manual tray/page actions.</summary>
     public bool ActionResults { get; set; } = true;
+
+    /// <summary>Results from global HotKey commands.</summary>
+    public bool HotKeyResults { get; set; } = true;
+
+    /// <summary>Results from recognized voice commands.</summary>
+    public bool VoiceCommandResults { get; set; } = true;
+
+    /// <summary>Screenshot success/failure confirmations.</summary>
+    public bool ScreenshotResults { get; set; } = true;
 
     /// <summary>Manual audio routing results. Automatic routing is summarized by session events.</summary>
     public bool Audio { get; set; } = true;
@@ -68,6 +77,9 @@ public sealed class HeadsetAnnouncerSettings
         DashToSteamVr = DashToSteamVr,
         SteamLinkAssist = SteamLinkAssist,
         ActionResults = ActionResults,
+        HotKeyResults = HotKeyResults,
+        VoiceCommandResults = VoiceCommandResults,
+        ScreenshotResults = ScreenshotResults,
         Audio = Audio,
         Headset = Headset,
         Recovery = Recovery,
@@ -92,6 +104,9 @@ public enum HeadsetAnnounceKind
     SteamLinkAssist,
     GlobalDefaults,
     ActionResult,
+    HotKeyResult,
+    VoiceCommandResult,
+    ScreenshotResult,
     Audio,
     Headset,
     Recovery,

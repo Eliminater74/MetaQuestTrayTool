@@ -227,7 +227,7 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
-            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+            App.Instance.HeadsetAnnouncer.AnnounceScreenshotFailed();
             LiveStatusText.Text = ex.Message;
         }
     }

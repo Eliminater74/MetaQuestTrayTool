@@ -87,7 +87,7 @@ public sealed class HotKeyService : IDisposable
         {
             try
             {
-                var summary = _commands.Execute(binding.Action);
+                var summary = _commands.Execute(binding.Action, HotKeyCommandSource.HotKey);
                 _app.Log.Info($"Hotkey {binding.DescribeChord()} → {binding.DescribeAction()}: {summary}");
                 if (_app.Settings.Current.ShowNotifications)
                 {

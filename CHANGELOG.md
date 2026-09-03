@@ -8,6 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Fixed
+- Headset announcements now show and honor explicit default-on categories for **HotKey action results**, **Voice command results**, and **Screenshot taken confirmations**. Screenshot success/failure speech no longer depends on the broader headset/ADB bucket, and HotKey/voice command result speech no longer depends on the generic important-action bucket.
+
 ## [1.1.26] - 2026-09-03
 
 ### Added

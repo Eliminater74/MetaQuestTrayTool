@@ -3,7 +3,7 @@ using MetaQuestTrayTool.Models;
 namespace MetaQuestTrayTool.Services;
 
 /// <summary>
-/// Executes tray actions shared by hotkeys (and future voice commands).
+/// Executes tray actions shared by HotKeys and voice commands.
 /// </summary>
 public sealed class HotKeyCommandService
 {
@@ -14,12 +14,13 @@ public sealed class HotKeyCommandService
         _app = app;
     }
 
-    public string Execute(HotKeyAction action)
+    public string Execute(HotKeyAction action, HotKeyCommandSource source = HotKeyCommandSource.HotKey)
     {
+        var sourceLabel = DescribeSource(source);
         var summary = action switch
         {
             HotKeyAction.ApplyGlobal => ExecuteApplyGlobal(),
-            HotKeyAction.RestartOvrService => ExecuteRestartOvr(),
+            HotKeyAction.RestartOvrService => ExecuteRestartOvr(source),
             HotKeyAction.AswOff => SetAsw(AswMode.Off),
             HotKeyAction.AswAuto => SetAsw(AswMode.Auto),
             HotKeyAction.AswClock45 => SetAsw(AswMode.Clock45),
@@ -29,19 +30,19 @@ public sealed class HotKeyCommandService
             HotKeyAction.VoicePushToTalk => ExecuteVoicePushToTalk(),
             HotKeyAction.OpenMetaLink => _app.Oculus.ShowMetaHorizonLink(),
             HotKeyAction.OpenDebugTool => _app.Oculus.ShowOculusDebugTool(),
-            HotKeyAction.DashToSteamVr => _app.DashToSteamVr.RunNow("hotkey/voice"),
-            HotKeyAction.StartSteamVr => _app.DashToSteamVr.StartSteamVrNow("hotkey/voice"),
+            HotKeyAction.DashToSteamVr => _app.DashToSteamVr.RunNow(sourceLabel),
+            HotKeyAction.StartSteamVr => _app.DashToSteamVr.StartSteamVrNow(sourceLabel),
             HotKeyAction.OpenSteamVrHome => _app.SteamVrInstall.OpenSteamVrHome(),
-            HotKeyAction.RecoverPcvr => _app.SessionRecover.Recover("hotkey/voice"),
+            HotKeyAction.RecoverPcvr => _app.SessionRecover.Recover(sourceLabel),
             HotKeyAction.RestoreDesktopAudio => ExecuteRestoreDesktopAudio(),
             HotKeyAction.SwitchToVrAudio => ExecuteSwitchToVrAudio(),
             HotKeyAction.OpenXrMeta => SwitchOpenXr(OpenXrRuntimeKind.Meta),
             HotKeyAction.OpenXrSteamVr => SwitchOpenXr(OpenXrRuntimeKind.SteamVr),
-            HotKeyAction.CloseOverlays => ExecuteCloseOverlays(),
+            HotKeyAction.CloseOverlays => ExecuteCloseOverlays(sourceLabel),
             HotKeyAction.ApplyGpuPresets => ExecuteApplyGpuPresets(),
-            HotKeyAction.TakeScreenshot => ExecuteTakeScreenshot(),
-            HotKeyAction.TakeQuestLinkMirrorScreenshot => ExecuteTakeQuestLinkMirrorScreenshot(),
-            HotKeyAction.TakeHeadsetScreenshot => ExecuteTakeHeadsetScreenshot(),
+            HotKeyAction.TakeScreenshot => ExecuteTakeScreenshot(sourceLabel),
+            HotKeyAction.TakeQuestLinkMirrorScreenshot => ExecuteTakeQuestLinkMirrorScreenshot(sourceLabel),
+            HotKeyAction.TakeHeadsetScreenshot => ExecuteTakeHeadsetScreenshot(sourceLabel),
             _ => $"Unknown hotkey action: {action}"
         };
 
@@ -53,21 +54,19 @@ public sealed class HotKeyCommandService
             and not HotKeyAction.TakeQuestLinkMirrorScreenshot
             and not HotKeyAction.TakeHeadsetScreenshot)
         {
-            _app.HeadsetAnnouncer.AnnounceActionResult(
-                HotKeyCatalog.DescribeAction(action),
-                summary);
+            AnnounceCommandResult(source, HotKeyCatalog.DescribeAction(action), summary);
         }
 
         return summary;
     }
 
-    private string ExecuteTakeScreenshot()
+    private string ExecuteTakeScreenshot(string sourceLabel)
     {
         _ = Task.Run(() =>
         {
             try
             {
-                var summary = _app.CaptureScreenshot("hotkey/voice");
+                var summary = _app.CaptureScreenshot(sourceLabel);
                 _app.Dispatcher.BeginInvoke(() =>
                     _app.TrayNotify("Screenshot", Truncate(summary)));
             }
@@ -77,7 +76,7 @@ public sealed class HotKeyCommandService
                 {
                     var summary = "Screenshot failed: " + ex.Message;
                     _app.Log.Warn(summary);
-                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.HeadsetAnnouncer.AnnounceScreenshotFailed();
                     _app.TrayNotify("Screenshot", Truncate(ex.Message));
                 });
             }
@@ -86,13 +85,13 @@ public sealed class HotKeyCommandService
         return "Taking screenshot…";
     }
 
-    private string ExecuteTakeQuestLinkMirrorScreenshot()
+    private string ExecuteTakeQuestLinkMirrorScreenshot(string sourceLabel)
     {
         _ = Task.Run(() =>
         {
             try
             {
-                var summary = _app.CaptureQuestLinkMirrorScreenshot("hotkey/voice");
+                var summary = _app.CaptureQuestLinkMirrorScreenshot(sourceLabel);
                 _app.Dispatcher.BeginInvoke(() =>
                     _app.TrayNotify("Screenshot", Truncate(summary)));
             }
@@ -102,7 +101,7 @@ public sealed class HotKeyCommandService
                 {
                     var summary = "Quest Link mirror screenshot failed: " + ex.Message;
                     _app.Log.Warn(summary);
-                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.HeadsetAnnouncer.AnnounceScreenshotFailed();
                     _app.TrayNotify("Screenshot", Truncate(ex.Message));
                 });
             }
@@ -111,13 +110,13 @@ public sealed class HotKeyCommandService
         return "Taking Quest Link mirror screenshot…";
     }
 
-    private string ExecuteTakeHeadsetScreenshot()
+    private string ExecuteTakeHeadsetScreenshot(string sourceLabel)
     {
         _ = Task.Run(() =>
         {
             try
             {
-                var summary = _app.CaptureHeadsetScreenshot("hotkey/voice");
+                var summary = _app.CaptureHeadsetScreenshot(sourceLabel);
                 _app.Dispatcher.BeginInvoke(() =>
                     _app.TrayNotify("Screenshot", Truncate(summary)));
             }
@@ -127,7 +126,7 @@ public sealed class HotKeyCommandService
                 {
                     var summary = "Headset screenshot failed: " + ex.Message;
                     _app.Log.Warn(summary);
-                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.HeadsetAnnouncer.AnnounceScreenshotFailed();
                     _app.TrayNotify("Screenshot", Truncate(ex.Message));
                 });
             }
@@ -159,9 +158,9 @@ public sealed class HotKeyCommandService
         return result;
     }
 
-    private string ExecuteCloseOverlays()
+    private string ExecuteCloseOverlays(string sourceLabel)
     {
-        var summary = _app.OverlayClose.CloseConfiguredOverlays("voice/hotkey", force: true);
+        var summary = _app.OverlayClose.CloseConfiguredOverlays(sourceLabel, force: true);
         if (string.IsNullOrWhiteSpace(summary))
         {
             var count = (_app.Settings.Current.OverlayCloseProcesses ?? []).Count;
@@ -173,7 +172,7 @@ public sealed class HotKeyCommandService
         return summary;
     }
 
-    private string ExecuteRestartOvr()
+    private string ExecuteRestartOvr(HotKeyCommandSource source)
     {
         _ = Task.Run(() =>
         {
@@ -183,7 +182,7 @@ public sealed class HotKeyCommandService
                 _app.Dispatcher.BeginInvoke(() =>
                 {
                     _app.Log.Info(result);
-                    _app.HeadsetAnnouncer.AnnounceActionResult("OVRService restart", result);
+                    AnnounceCommandResult(source, "OVRService restart", result);
                 });
             }
             catch (Exception ex)
@@ -192,7 +191,7 @@ public sealed class HotKeyCommandService
                 {
                     var result = "OVRService restart failed: " + ex.Message;
                     _app.Log.Warn(result);
-                    _app.HeadsetAnnouncer.AnnounceActionResult("OVRService restart", result);
+                    AnnounceCommandResult(source, "OVRService restart", result);
                 });
             }
         });
@@ -396,6 +395,20 @@ public sealed class HotKeyCommandService
         return $"{title}. {result.Summary}";
     }
 
+    private void AnnounceCommandResult(HotKeyCommandSource source, string actionName, string? summary)
+    {
+        if (source == HotKeyCommandSource.VoiceCommand)
+        {
+            _app.HeadsetAnnouncer.AnnounceVoiceCommandResult(actionName, summary);
+            return;
+        }
+
+        _app.HeadsetAnnouncer.AnnounceHotKeyResult(actionName, summary);
+    }
+
+    private static string DescribeSource(HotKeyCommandSource source) =>
+        source == HotKeyCommandSource.VoiceCommand ? "voice" : "hotkey";
+
     private static string Truncate(string text, int max = 180) =>
         text.Length <= max ? text : text[..max] + "…";
 
@@ -408,4 +421,10 @@ public sealed class HotKeyCommandService
         AswMode.Clock18 => "18 FPS",
         _ => mode.ToString()
     };
+}
+
+public enum HotKeyCommandSource
+{
+    HotKey,
+    VoiceCommand
 }

@@ -228,7 +228,7 @@ public sealed class VoiceCommandService : IDisposable
 
         try
         {
-            var summary = _commands.Execute(action);
+            var summary = _commands.Execute(action, HotKeyCommandSource.VoiceCommand);
             var label = HotKeyCatalog.DescribeAction(action);
             _app.Log.Info($"Voice \"{text}\" ({confidence:P0}) → {label}: {summary}");
             if (!HeadsetAnnouncerHandles(action, summary))
@@ -260,9 +260,11 @@ public sealed class VoiceCommandService : IDisposable
                     force: true),
             HotKeyAction.RecoverPcvr =>
                 _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.Recovery, allowWithoutLiveSession: true),
-            HotKeyAction.TakeHeadsetScreenshot =>
-                _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.Headset),
-            _ => _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.ActionResult)
+            HotKeyAction.TakeScreenshot
+                or HotKeyAction.TakeQuestLinkMirrorScreenshot
+                or HotKeyAction.TakeHeadsetScreenshot =>
+                _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.ScreenshotResult),
+            _ => _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.VoiceCommandResult)
         };
 
     private void ApplyPreferredMic(bool forContinuous)

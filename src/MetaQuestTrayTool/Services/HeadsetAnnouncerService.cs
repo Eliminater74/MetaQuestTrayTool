@@ -300,6 +300,20 @@ public sealed class HeadsetAnnouncerService : IDisposable
             $"{SanitizeName(actionName)}. {DescribeResult(summary, "Completed.")}");
     }
 
+    public void AnnounceHotKeyResult(string actionName, string? summary)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.HotKeyResult,
+            $"HotKey. {SanitizeName(actionName)}. {DescribeResult(summary, "Completed.")}");
+    }
+
+    public void AnnounceVoiceCommandResult(string actionName, string? summary)
+    {
+        Enqueue(
+            HeadsetAnnounceKind.VoiceCommandResult,
+            $"Voice command. {SanitizeName(actionName)}. {DescribeResult(summary, "Completed.")}");
+    }
+
     public void AnnounceAudioRouting(string summary)
     {
         Enqueue(
@@ -316,7 +330,12 @@ public sealed class HeadsetAnnouncerService : IDisposable
 
     public void AnnounceScreenshotTaken()
     {
-        Enqueue(HeadsetAnnounceKind.Headset, "Screenshot taken.");
+        Enqueue(HeadsetAnnounceKind.ScreenshotResult, "Screenshot taken.");
+    }
+
+    public void AnnounceScreenshotFailed()
+    {
+        Enqueue(HeadsetAnnounceKind.ScreenshotResult, "Screenshot failed. Check Log.");
     }
 
     public void AnnounceRecovery(string summary)
@@ -649,7 +668,14 @@ public sealed class HeadsetAnnouncerService : IDisposable
                 return true;
             }
 
-            return kind == HeadsetAnnounceKind.SteamVrExit && settings.DashToSteamVr;
+            return kind switch
+            {
+                HeadsetAnnounceKind.HotKeyResult => settings.HotKeyResults,
+                HeadsetAnnounceKind.VoiceCommandResult => settings.VoiceCommandResults,
+                HeadsetAnnounceKind.ScreenshotResult => settings.ScreenshotResults,
+                HeadsetAnnounceKind.SteamVrExit => settings.DashToSteamVr,
+                _ => false
+            };
         }
 
         return kind switch
@@ -662,6 +688,9 @@ public sealed class HeadsetAnnouncerService : IDisposable
             HeadsetAnnounceKind.DashToSteamVr or HeadsetAnnounceKind.SteamVrExit => settings.DashToSteamVr,
             HeadsetAnnounceKind.SteamLinkAssist => settings.SteamLinkAssist,
             HeadsetAnnounceKind.ActionResult => settings.ActionResults,
+            HeadsetAnnounceKind.HotKeyResult => settings.HotKeyResults,
+            HeadsetAnnounceKind.VoiceCommandResult => settings.VoiceCommandResults,
+            HeadsetAnnounceKind.ScreenshotResult => settings.ScreenshotResults,
             HeadsetAnnounceKind.Audio => settings.Audio,
             HeadsetAnnounceKind.Headset => settings.Headset,
             HeadsetAnnounceKind.Recovery => settings.Recovery,

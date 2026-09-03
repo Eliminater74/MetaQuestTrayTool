@@ -193,6 +193,34 @@ public class RuntimeSafetyTests
         Assert.Equal("NumPad9", binding.Key);
     }
 
+    [Fact]
+    public void HeadsetAnnouncerSettings_DefaultsEnableCommandAndScreenshotResults()
+    {
+        var settings = new HeadsetAnnouncerSettings();
+
+        Assert.True(settings.ActionResults);
+        Assert.True(settings.HotKeyResults);
+        Assert.True(settings.VoiceCommandResults);
+        Assert.True(settings.ScreenshotResults);
+    }
+
+    [Fact]
+    public void HeadsetAnnouncerSettings_ClonePreservesCommandAndScreenshotResults()
+    {
+        var settings = new HeadsetAnnouncerSettings
+        {
+            HotKeyResults = false,
+            VoiceCommandResults = false,
+            ScreenshotResults = false
+        };
+
+        var clone = settings.Clone();
+
+        Assert.False(clone.HotKeyResults);
+        Assert.False(clone.VoiceCommandResults);
+        Assert.False(clone.ScreenshotResults);
+    }
+
     [Theory]
     [InlineData("take screenshot")]
     [InlineData("capture screenshot")]

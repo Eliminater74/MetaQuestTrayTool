@@ -63,6 +63,9 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         AnnounceDashBox.IsChecked = announcer.DashToSteamVr;
         AnnounceSteamLinkBox.IsChecked = announcer.SteamLinkAssist;
         AnnounceActionsBox.IsChecked = announcer.ActionResults;
+        AnnounceHotKeysBox.IsChecked = announcer.HotKeyResults;
+        AnnounceVoiceCommandsBox.IsChecked = announcer.VoiceCommandResults;
+        AnnounceScreenshotsBox.IsChecked = announcer.ScreenshotResults;
         AnnounceAudioBox.IsChecked = announcer.Audio;
         AnnounceHeadsetBox.IsChecked = announcer.Headset;
         AnnounceRecoveryBox.IsChecked = announcer.Recovery;
@@ -115,6 +118,9 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         announcer.DashToSteamVr = AnnounceDashBox.IsChecked == true;
         announcer.SteamLinkAssist = AnnounceSteamLinkBox.IsChecked == true;
         announcer.ActionResults = AnnounceActionsBox.IsChecked == true;
+        announcer.HotKeyResults = AnnounceHotKeysBox.IsChecked == true;
+        announcer.VoiceCommandResults = AnnounceVoiceCommandsBox.IsChecked == true;
+        announcer.ScreenshotResults = AnnounceScreenshotsBox.IsChecked == true;
         announcer.Audio = AnnounceAudioBox.IsChecked == true;
         announcer.Headset = AnnounceHeadsetBox.IsChecked == true;
         announcer.Recovery = AnnounceRecoveryBox.IsChecked == true;
@@ -353,7 +359,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
-            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+            App.Instance.HeadsetAnnouncer.AnnounceScreenshotFailed();
             StatusText.Text = ex.Message;
         }
     }

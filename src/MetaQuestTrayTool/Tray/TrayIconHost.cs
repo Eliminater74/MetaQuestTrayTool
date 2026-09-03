@@ -1303,7 +1303,7 @@ public sealed class TrayIconHost : IDisposable
                 {
                     var summary = title + " failed: " + ex.Message;
                     _app.Log.Warn(summary);
-                    _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+                    _app.HeadsetAnnouncer.AnnounceScreenshotFailed();
                     Notify(title, Truncate(ex.Message));
                 });
             }

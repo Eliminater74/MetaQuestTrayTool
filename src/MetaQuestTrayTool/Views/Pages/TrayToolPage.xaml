@@ -89,7 +89,7 @@
 
       <TextBlock Text="Headset announcements" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
-                 Text="Spoken status in the Quest headset while PCVR is active — so you hear game/profile launches, applied settings, runtime and transport, audio, recovery, connect/disconnect, SteamVR, and important failures even when desktop toasts are not visible."/>
+                 Text="Spoken status in the Quest headset while PCVR is active — so you hear game/profile launches, applied settings, runtime and transport, screenshots, HotKeys, voice commands, audio, recovery, connect/disconnect, SteamVR, and important failures even when desktop toasts are not visible."/>
       <CheckBox x:Name="HeadsetAnnounceBox" Content="Speak status in headset"
                 ToolTip="Use Windows text-to-speech on the Link / VR audio path when a PCVR session is active."
                 Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
@@ -113,7 +113,16 @@
                   ToolTip="OpenXR nudge / restore during Steam Link sessions."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceActionsBox" Content="Important action results"
-                  ToolTip="Speak concise results for hotkeys, voice commands, OpenXR switches, recovery, and manual tray actions."
+                  ToolTip="Speak concise results for OpenXR switches and manual tray/page actions."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceHotKeysBox" Content="HotKey action results"
+                  ToolTip="Speak concise results after global HotKey commands run."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceVoiceCommandsBox" Content="Voice command results"
+                  ToolTip="Speak concise results after recognized voice commands run."
+                  Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
+        <CheckBox x:Name="AnnounceScreenshotsBox" Content="Screenshot taken confirmations"
+                  ToolTip="Say Screenshot taken in the headset after a Quest Link mirror or ADB screenshot saves."
                   Checked="HeadsetAnnounce_Changed" Unchecked="HeadsetAnnounce_Changed"/>
         <CheckBox x:Name="AnnounceAudioBox" Content="Manual audio routing"
                   ToolTip="Speak when you manually switch to VR audio or restore desktop audio. Automatic routing is covered by session announcements."

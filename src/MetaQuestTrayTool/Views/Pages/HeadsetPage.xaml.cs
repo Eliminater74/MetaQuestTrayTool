@@ -378,7 +378,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
-            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+            App.Instance.HeadsetAnnouncer.AnnounceScreenshotFailed();
             ResultText.Text = ex.Message;
             UpdateTrustBanner();
         }
