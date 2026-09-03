@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.25 — MetaQuestTrayTool-Setup-1.1.25.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.25/MetaQuestTrayTool-Setup-1.1.25.exe)
+**Latest:** [v1.1.26 — MetaQuestTrayTool-Setup-1.1.26.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.26/MetaQuestTrayTool-Setup-1.1.26.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,7 +163,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. This release adds shared runtime probes, nonblocking tray/headset refreshes, serialized ADB, debounced Link-settings saves, helper repair diagnostics, Quest screenshots, and release checksum assets. The next release adds Quest Link mirror screenshots, a smart screenshot action, and dedicated screenshot / HotKeys / Voice menu surfaces.
+Release **[v1.1.26](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. This release adds Quest Link mirror screenshots, a smart screenshot action, default **Ctrl+Shift+Num 8** / **Ctrl+Shift+Num 9** screenshot hotkeys, dedicated screenshot / HotKeys / Voice menu surfaces, and headset **“Screenshot taken.”** feedback after saved captures.
 
 ### Shell & tray
 

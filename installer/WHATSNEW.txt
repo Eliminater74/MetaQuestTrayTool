@@ -1,22 +1,15 @@
-﻿Meta Quest Tray Tool 1.1.25 - What's new
+﻿Meta Quest Tray Tool 1.1.26 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.25] - 2026-09-03
+[1.1.26] - 2026-09-03
 
 Added
-- Quest headset screenshots can be captured from tray → Headset (ADB) → Take screenshot, default hotkey Ctrl+Shift+Num 9, or voice phrases like “take screenshot” / “capture screenshot.” Captures use the trusted-headset ADB guard, save timestamped PNGs under %AppData%\MetaQuestTrayTool\screenshots\, show a tray result, and say “Screenshot taken.” in the headset when the announcement audio path is available.
-- Advanced now includes Repair stuck helper and Copy diagnostics actions for hidden helper/process situations, and the Info dump includes main/helper PID details and settings/profile paths.
-- Installer builds now emit a MetaQuestTrayTool-Setup-<version>.exe.sha256.txt sidecar, and the Release workflow verifies and uploads that checksum alongside the Setup.exe.
+- Quest Link / Air Link mirror screenshots can now be captured through Meta's OculusMirror.exe from the tray Screenshots menu, the Quest Link page, voice phrases like “take link screenshot”, or a bindable hotkey action. This path requires an active Meta Link stream but does not require ADB.
+- A new smart screenshot action prefers Quest Link mirror capture when Meta Link is actively streaming, then falls back to the trusted-headset ADB screenshot path. It is exposed from the tray Screenshots menu, the Headset / Quest Link / Tray Tool pages, voice phrases like “take screenshot”, and default hotkey Ctrl+Shift+Num 8.
 
 Changed
-- Status, Info, PCVR Ready, and tray menu refreshes now share a short-lived runtime snapshot instead of repeating the same SteamVR/OpenXR/OVRService/GPU probes.
-- Tray menu status refresh and Headset trust-banner refresh now run expensive probes in the background so opening the menu or page stays responsive.
-- ADB commands are serialized through one queue, including screenshot capture, so watcher/status/custom/headset actions cannot collide on adb.exe.
-- High-churn Quest Link registry edits debounce settings writes and flush pending changes on exit.
-
-Fixed
-- A stuck but verified same-exe session helper can now be repaired from the Advanced page without using Task Manager.
-- Screenshot capture validates the PNG signature before reporting success and deletes corrupt output if ADB returned text/errors instead of image bytes.
+- Screenshot labels now distinguish Quest Link mirror from Headset ADB capture. ADB screenshots remain available from the Headset page/menu, voice phrases like “take headset screenshot”, and default hotkey Ctrl+Shift+Num 9.
+- The tray menu now has dedicated Screenshots and HotKeys / Voice submenus, and the Tray Tool page surfaces voice/hotkey controls near headset announcements with screenshot phrases and a Listen once action.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

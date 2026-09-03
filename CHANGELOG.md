@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.26] - 2026-09-03
+
 ### Added
 - Quest Link / Air Link mirror screenshots can now be captured through Meta's `OculusMirror.exe` from the tray **Screenshots** menu, the **Quest Link** page, voice phrases like “take link screenshot”, or a bindable hotkey action. This path requires an active Meta Link stream but does **not** require ADB.
 - A new smart screenshot action prefers Quest Link mirror capture when Meta Link is actively streaming, then falls back to the trusted-headset ADB screenshot path. It is exposed from the tray **Screenshots** menu, the Headset / Quest Link / Tray Tool pages, voice phrases like “take screenshot”, and default hotkey **Ctrl+Shift+Num 8**.
@@ -237,7 +239,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.25...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.26...HEAD
+[1.1.26]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.26
 [1.1.25]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.25
 [1.1.24]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.24
 [1.1.23]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.23

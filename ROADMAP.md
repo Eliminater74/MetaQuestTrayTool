@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.26](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.25)
+## Current product (v1.1.26)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -27,6 +27,17 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ---
 
+## v1.1.26 — Quest Link mirror screenshots
+
+Released work:
+
+- Quest Link / Air Link screenshots through Meta `OculusMirror.exe` while a live Meta Link stream is active.
+- Smart screenshot action that prefers Quest Link mirror capture and falls back to trusted-headset ADB.
+- Dedicated tray **Screenshots** and **HotKeys / Voice** submenus.
+- Screenshot buttons on Headset, Quest Link, and Tray Tool pages, with headset **“Screenshot taken.”** feedback after successful saves.
+
+---
+
 ## v1.1.25 — audit, screenshots, and release checksums
 
 Released work:
@@ -38,17 +49,6 @@ Released work:
 - Advanced **Repair stuck helper** / **Copy diagnostics** actions plus Info process diagnostics.
 - Quest headset screenshots through tray, **Ctrl+Shift+Num 9**, and voice (“take screenshot”), with headset **“Screenshot taken.”** feedback when announcements can reach the Quest audio path.
 - Release installer SHA-256 sidecar generation, workflow verification, and checksum upload.
-
----
-
-## Next release — Quest Link mirror screenshots
-
-Landed work:
-
-- Quest Link / Air Link screenshots through Meta `OculusMirror.exe` while a live Meta Link stream is active.
-- Smart screenshot action that prefers Quest Link mirror capture and falls back to trusted-headset ADB.
-- Dedicated tray **Screenshots** and **HotKeys / Voice** submenus.
-- Screenshot buttons on Headset, Quest Link, and Tray Tool pages, with headset **“Screenshot taken.”** feedback after successful saves.
 
 ---
 
@@ -149,6 +149,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.23 | Full audit hardening: ADB/update/profile/URL/service/startup/power safety, process-handle cleanup, docs/build-flow alignment |
 | v1.1.24 | Exit/helper hotfix: bounded helper IPC replies, helper owner tracking, parent-death shutdown, and stuck-helper cleanup |
 | v1.1.25 | Audit/performance hardening: shared/nonblocking probes, serialized ADB, debounced Link-settings saves, stuck-helper repair diagnostics, Quest screenshots, and release checksum sidecars |
+| v1.1.26 | Quest Link mirror screenshots, smart screenshot fallback, screenshot tray/page controls, and HotKeys / Voice menu polish |
 
 ---
 

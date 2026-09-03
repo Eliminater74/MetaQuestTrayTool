@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.25](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.26](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -283,6 +283,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tag and publish **v1.1.24**
 - [x] Bump version to **1.1.25**
 - [x] Tag and publish **v1.1.25**
+- [x] Bump version to **1.1.26**
+- [x] Tag and publish **v1.1.26**
 
 ### Housekeeping (ongoing)
 
