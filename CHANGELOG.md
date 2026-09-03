@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.27] - 2026-09-03
+
 ### Fixed
 - Headset announcements now show and honor explicit default-on categories for **HotKey action results**, **Voice command results**, and **Screenshot taken confirmations**. Screenshot success/failure speech no longer depends on the broader headset/ADB bucket, and HotKey/voice command result speech no longer depends on the generic important-action bucket.
 
@@ -242,7 +244,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.26...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.27...HEAD
+[1.1.27]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.27
 [1.1.26]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.26
 [1.1.25]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.25
 [1.1.24]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.24
