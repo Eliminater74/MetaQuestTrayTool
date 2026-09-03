@@ -30,6 +30,21 @@
                 ToolTip="Requires PreventDashLaunch. Optionally switch OpenXR to SteamVR and launch SteamVR. Connect with Meta Link first. Hotkey: Ctrl+Num 0."/>
       </StackPanel>
 
+      <TextBlock Text="Quest Link screenshots" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Captures the active Quest Link / Air Link mirror through Oculus Mirror, with no ADB connection needed. Use smart screenshot when you want the tool to fall back to ADB if Link is not streaming."/>
+      <WrapPanel Margin="0,0,0,16">
+        <Button Content="Take Quest Link mirror screenshot" Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,8"
+                Click="QuestLinkScreenshot_Click"
+                ToolTip="Capture the live Meta Link / Air Link mirror window through OculusMirror.exe."/>
+        <Button Content="Take screenshot (auto)" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="SmartScreenshot_Click"
+                ToolTip="Use Quest Link mirror capture when active; otherwise fall back to headset ADB screenshot."/>
+        <Button Content="Open screenshots folder" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="OpenScreenshotsFolder_Click"
+                ToolTip="Open the folder where screenshot PNG files are saved."/>
+      </WrapPanel>
+
       <TextBlock Text="Global Link presets" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Pick a preset to load values into the fields below. Changes apply immediately — use Load preset first, then tweak."/>

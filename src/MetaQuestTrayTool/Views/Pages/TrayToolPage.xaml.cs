@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
@@ -310,6 +312,68 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         var window = new VoiceCommandsWindow { Owner = Window.GetWindow(this) };
         window.ShowDialog();
         Refresh();
+    }
+
+    private void VoiceListenOnce_Click(object sender, RoutedEventArgs e)
+    {
+        var voice = App.Instance.Settings.Current.Voice;
+        if (!voice.Enabled)
+        {
+            voice.Enabled = true;
+            VoiceBox.IsChecked = true;
+            App.Instance.Settings.Save();
+            App.Instance.Voice.Reload();
+        }
+
+        if (!App.Instance.Voice.IsAvailable)
+        {
+            StatusText.Text = App.Instance.Voice.Status;
+            return;
+        }
+
+        if (!voice.PushToTalkOnly)
+        {
+            StatusText.Text = "Voice is already listening continuously.";
+            return;
+        }
+
+        App.Instance.Voice.ListenOnce();
+        StatusText.Text = "Listening once — say \"take screenshot\", \"take link screenshot\", or any phrase from the voice list.";
+    }
+
+    private async void SmartScreenshot_Click(object sender, RoutedEventArgs e)
+    {
+        StatusText.Text = "Taking screenshot…";
+        try
+        {
+            var summary = await Task.Run(() =>
+                App.Instance.CaptureScreenshot("Tray Tool page")).ConfigureAwait(true);
+            StatusText.Text = summary;
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
+            StatusText.Text = ex.Message;
+        }
+    }
+
+    private void OpenScreenshotsFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Directory.CreateDirectory(AppPaths.ScreenshotsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppPaths.ScreenshotsDirectory,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn("Could not open screenshots folder: " + ex.Message);
+            StatusText.Text = ex.Message;
+        }
     }
 
     private void Voice_Changed(object sender, RoutedEventArgs e)

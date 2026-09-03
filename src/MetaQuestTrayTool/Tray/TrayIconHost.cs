@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Forms;
 using MetaQuestTrayTool.Models;
@@ -21,6 +23,8 @@ public sealed class TrayIconHost : IDisposable
     private LinkSettingsWindow? _linkSettings;
     private AudioSettingsWindow? _audioSettings;
     private PowerSettingsWindow? _powerSettings;
+    private HotKeysWindow? _hotKeys;
+    private VoiceCommandsWindow? _voiceCommands;
     private int _dynamicRefreshInFlight;
 
     public TrayIconHost(App app)
@@ -216,6 +220,7 @@ public sealed class TrayIconHost : IDisposable
             Name = "CyclePerfHud",
             ToolTipText = "Cycle OculusDebugTool Visual HUD: Off → Performance → timing modes → Off."
         });
+        menu.Items.Add(BuildScreenshotsMenu());
         menu.Items.Add(new ToolStripSeparator());
 
         var serviceMenu = new ToolStripMenuItem("Oculus Service");
@@ -234,6 +239,7 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(BuildAudioMenu());
         menu.Items.Add(BuildPowerMenu());
         menu.Items.Add(BuildHeadsetMenu());
+        menu.Items.Add(BuildInputMenu());
         menu.Items.Add(new ToolStripSeparator());
 
         var startWithWindows = new ToolStripMenuItem("Start with Windows")
@@ -374,6 +380,7 @@ public sealed class TrayIconHost : IDisposable
         SyncAudioChecks(menu);
         SyncPowerChecks(menu);
         SyncHeadsetChecks(menu, snapshot);
+        SyncInputChecks(menu);
         if (snapshot is null)
         {
             return;
@@ -703,6 +710,11 @@ public sealed class TrayIconHost : IDisposable
     {
         var menu = new ToolStripMenuItem("Quest Link / Air Link") { Name = "LinkMenu" };
         menu.DropDownItems.Add(new ToolStripMenuItem("Open Link settings…", null, (_, _) => ShowLinkSettings()));
+        menu.DropDownItems.Add(new ToolStripMenuItem("Take Quest Link mirror screenshot", null, (_, _) => TakeQuestLinkMirrorScreenshot())
+        {
+            Name = "LinkMirrorScreenshot",
+            ToolTipText = "Capture the live Quest Link / Air Link mirror with OculusMirror.exe. Requires an active Meta Link stream."
+        });
         menu.DropDownItems.Add(new ToolStripSeparator());
 
         var bitrateMenu = new ToolStripMenuItem("Bitrate") { Name = "LinkBitrateMenu" };
@@ -789,6 +801,37 @@ public sealed class TrayIconHost : IDisposable
             RunServiceAction(_app.Oculus.Restart);
         }));
         menu.DropDownItems.Add(applyOnStart);
+        return menu;
+    }
+
+    private ToolStripMenuItem BuildScreenshotsMenu()
+    {
+        var menu = new ToolStripMenuItem("Screenshots") { Name = "ScreenshotsMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Take screenshot (Quest Link preferred)", null, (_, _) => TakeScreenshot())
+        {
+            Name = "SmartScreenshot",
+            ToolTipText = "Capture Quest Link / Air Link with Oculus Mirror when active; otherwise fall back to headset ADB."
+        });
+        menu.DropDownItems.Add(new ToolStripMenuItem("Take Quest Link mirror screenshot", null, (_, _) => TakeQuestLinkMirrorScreenshot())
+        {
+            Name = "QuestLinkMirrorScreenshot",
+            ToolTipText = "Capture the live Quest Link / Air Link mirror window through OculusMirror.exe."
+        });
+        menu.DropDownItems.Add(new ToolStripMenuItem("Take headset screenshot (ADB)", null, (_, _) => TakeHeadsetScreenshot())
+        {
+            Name = "HeadsetAdbScreenshot",
+            ToolTipText = "Capture the current Quest headset view over ADB. Requires a trusted connected headset."
+        });
+        menu.DropDownItems.Add(new ToolStripSeparator());
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open screenshots folder", null, (_, _) => OpenScreenshotsFolder())
+        {
+            ToolTipText = "Open the folder where screenshot PNG files are saved."
+        });
+        menu.DropDownItems.Add(new ToolStripSeparator());
+        menu.DropDownItems.Add(new ToolStripMenuItem("Voice: \"take screenshot\" / \"take link screenshot\" / \"take headset screenshot\"")
+        {
+            Enabled = false
+        });
         return menu;
     }
 
@@ -1149,7 +1192,7 @@ public sealed class TrayIconHost : IDisposable
                 }
             });
         }));
-        menu.DropDownItems.Add(new ToolStripMenuItem("Take screenshot", null, (_, _) => TakeHeadsetScreenshot())
+        menu.DropDownItems.Add(new ToolStripMenuItem("Take headset screenshot (ADB)", null, (_, _) => TakeHeadsetScreenshot())
         {
             Name = "HeadsetScreenshot",
             ToolTipText = "Capture the current Quest headset view over ADB and save it under app data."
@@ -1189,27 +1232,100 @@ public sealed class TrayIconHost : IDisposable
         return menu;
     }
 
+    private ToolStripMenuItem BuildInputMenu()
+    {
+        var menu = new ToolStripMenuItem("HotKeys / Voice") { Name = "InputMenu" };
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open HotKeys…", null, (_, _) => ShowHotKeysSettings())
+        {
+            ToolTipText = "Add, change, or restore global shortcuts before entering VR."
+        });
+        menu.DropDownItems.Add(new ToolStripMenuItem("Open Voice Commands…", null, (_, _) => ShowVoiceCommands())
+        {
+            ToolTipText = "Configure microphone, push-to-talk, confidence, and built-in or custom phrases."
+        });
+        menu.DropDownItems.Add(new ToolStripSeparator());
+
+        var hotKeys = new ToolStripMenuItem("Enable HotKeys")
+        {
+            Name = "InputHotKeysEnabled",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.HotKeys.Enabled
+        };
+        hotKeys.CheckedChanged += (_, _) => ToggleHotKeys(hotKeys.Checked);
+        menu.DropDownItems.Add(hotKeys);
+
+        var voice = new ToolStripMenuItem("Enable voice commands")
+        {
+            Name = "InputVoiceEnabled",
+            CheckOnClick = true,
+            Checked = _app.Settings.Current.Voice.Enabled
+        };
+        voice.CheckedChanged += (_, _) => ToggleVoiceCommands(voice.Checked);
+        menu.DropDownItems.Add(voice);
+
+        menu.DropDownItems.Add(new ToolStripMenuItem("Listen once now", null, (_, _) => ListenForVoiceCommand())
+        {
+            Name = "InputVoiceListenOnce",
+            ToolTipText = "For push-to-talk voice mode: listen for one command right now."
+        });
+        menu.DropDownItems.Add(new ToolStripSeparator());
+        menu.DropDownItems.Add(new ToolStripMenuItem("Screenshot phrases: \"take screenshot\", \"take link screenshot\", \"take headset screenshot\"")
+        {
+            Enabled = false
+        });
+        return menu;
+    }
+
+    private void TakeScreenshot() =>
+        RunScreenshotAction("Screenshot", () => _app.CaptureScreenshot("tray menu"));
+
+    private void TakeQuestLinkMirrorScreenshot() =>
+        RunScreenshotAction("Quest Link screenshot", () => _app.CaptureQuestLinkMirrorScreenshot("tray menu"));
+
     private void TakeHeadsetScreenshot()
+    {
+        RunScreenshotAction("Headset screenshot", () => _app.CaptureHeadsetScreenshot("tray menu"));
+    }
+
+    private void RunScreenshotAction(string title, Func<string> action)
     {
         Task.Run(() =>
         {
             try
             {
-                var summary = _app.CaptureHeadsetScreenshot("tray menu");
+                var summary = action();
                 _app.Dispatcher.BeginInvoke(() =>
-                    Notify("Screenshot", Truncate(summary)));
+                    Notify(title, Truncate(summary)));
             }
             catch (Exception ex)
             {
                 _app.Dispatcher.BeginInvoke(() =>
                 {
-                    var summary = "Headset screenshot failed: " + ex.Message;
+                    var summary = title + " failed: " + ex.Message;
                     _app.Log.Warn(summary);
                     _app.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
-                    Notify("Screenshot", Truncate(ex.Message));
+                    Notify(title, Truncate(ex.Message));
                 });
             }
         });
+    }
+
+    private void OpenScreenshotsFolder()
+    {
+        try
+        {
+            Directory.CreateDirectory(AppPaths.ScreenshotsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppPaths.ScreenshotsDirectory,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _app.Log.Warn("Could not open screenshots folder: " + ex.Message);
+            Notify("Screenshots", ex.Message);
+        }
     }
 
     private void QueueDynamicRefresh(ContextMenuStrip menu, bool force = false)
@@ -1297,6 +1413,33 @@ public sealed class TrayIconHost : IDisposable
         }
     }
 
+    private void SyncInputChecks(ContextMenuStrip root)
+    {
+        var settings = _app.Settings.Current;
+        _syncingMenu = true;
+        try
+        {
+            if (FindItem(root.Items, "InputHotKeysEnabled") is ToolStripMenuItem hotKeys)
+            {
+                hotKeys.Checked = settings.HotKeys.Enabled;
+            }
+
+            if (FindItem(root.Items, "InputVoiceEnabled") is ToolStripMenuItem voice)
+            {
+                voice.Checked = settings.Voice.Enabled;
+            }
+        }
+        finally
+        {
+            _syncingMenu = false;
+        }
+
+        if (FindItem(root.Items, "InputVoiceListenOnce") is ToolStripMenuItem listen)
+        {
+            listen.Enabled = settings.Voice.Enabled && settings.Voice.PushToTalkOnly && _app.Voice.IsAvailable;
+        }
+    }
+
     private static string FormatSuperSampling(double value) =>
         value <= 0 ? "Off (no override)" : value.ToString("0.0");
 
@@ -1355,6 +1498,78 @@ public sealed class TrayIconHost : IDisposable
                 });
             }
         });
+    }
+
+    private void ShowHotKeysSettings()
+    {
+        if (_hotKeys is null || !_hotKeys.IsLoaded)
+        {
+            _hotKeys = new HotKeysWindow();
+            _hotKeys.Closed += (_, _) => _hotKeys = null;
+        }
+
+        _hotKeys.Show();
+        _hotKeys.Activate();
+        _hotKeys.WindowState = WindowState.Normal;
+    }
+
+    private void ShowVoiceCommands()
+    {
+        if (_voiceCommands is null || !_voiceCommands.IsLoaded)
+        {
+            _voiceCommands = new VoiceCommandsWindow();
+            _voiceCommands.Closed += (_, _) => _voiceCommands = null;
+        }
+
+        _voiceCommands.Show();
+        _voiceCommands.Activate();
+        _voiceCommands.WindowState = WindowState.Normal;
+    }
+
+    private void ToggleHotKeys(bool enabled)
+    {
+        if (_syncingMenu)
+        {
+            return;
+        }
+
+        _app.Settings.Current.HotKeys.Enabled = enabled;
+        _app.Settings.Current.Tray.EnableHotKeys = enabled;
+        _app.Settings.Save();
+        _app.HotKeys.Reload();
+        Notify("HotKeys", enabled ? "HotKeys enabled." : "HotKeys disabled.");
+    }
+
+    private void ToggleVoiceCommands(bool enabled)
+    {
+        if (_syncingMenu)
+        {
+            return;
+        }
+
+        _app.Settings.Current.Voice.Enabled = enabled;
+        _app.Settings.Save();
+        _app.Voice.Reload();
+        Notify("Voice commands", _app.Voice.Status);
+    }
+
+    private void ListenForVoiceCommand()
+    {
+        var voice = _app.Settings.Current.Voice;
+        if (!voice.Enabled)
+        {
+            Notify("Voice commands", "Enable voice commands first.");
+            return;
+        }
+
+        if (!voice.PushToTalkOnly)
+        {
+            Notify("Voice commands", "Voice is already listening continuously.");
+            return;
+        }
+
+        _app.Voice.ListenOnce();
+        Notify("Voice commands", "Listening for one command.");
     }
 
     private void ToggleStartWithWindows(bool enabled)

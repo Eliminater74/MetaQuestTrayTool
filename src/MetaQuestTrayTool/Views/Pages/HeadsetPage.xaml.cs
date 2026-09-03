@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
@@ -250,6 +252,30 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
     private void SendText_Click(object sender, RoutedEventArgs e) =>
         Run(() => App.Instance.Headset.SendText(PasteBox.Text ?? string.Empty, App.Instance.Settings.Current.Headset));
 
+    private void SmartScreenshot_Click(object sender, RoutedEventArgs e) =>
+        RunScreenshot(() => App.Instance.CaptureScreenshot("Headset page"));
+
+    private void HeadsetScreenshot_Click(object sender, RoutedEventArgs e) =>
+        RunScreenshot(() => App.Instance.CaptureHeadsetScreenshot("Headset page"));
+
+    private void OpenScreenshotsFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Directory.CreateDirectory(AppPaths.ScreenshotsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppPaths.ScreenshotsDirectory,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn("Could not open screenshots folder: " + ex.Message);
+            ResultText.Text = ex.Message;
+        }
+    }
+
     private void Trust_Click(object sender, RoutedEventArgs e)
     {
         try
@@ -333,6 +359,26 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         {
             App.Instance.Log.Warn(ex.Message);
             App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Headset action failed. Check Log.");
+            ResultText.Text = ex.Message;
+            UpdateTrustBanner();
+        }
+    }
+
+    private async void RunScreenshot(Func<string> action)
+    {
+        try
+        {
+            Persist_Changed(this, new RoutedEventArgs());
+            ResultText.Text = "Taking screenshot…";
+            var result = await Task.Run(action).ConfigureAwait(true);
+            ResultText.Text = result;
+            App.Instance.Settings.Save();
+            UpdateTrustBanner();
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
             ResultText.Text = ex.Message;
             UpdateTrustBanner();
         }

@@ -130,6 +130,19 @@
                 ToolTip="Record / cast both eyes side-by-side. Useful for VR video; doubles horizontal resolution."/>
       <CheckBox x:Name="FullRateBox" Content="Full-rate capture (native refresh instead of half)" Checked="Persist_Changed" Unchecked="Persist_Changed"
                 ToolTip="Capture at native headset refresh instead of half-rate. Smoother recordings; more encode load."/>
+      <WrapPanel Margin="0,10,0,4">
+        <Button Content="Take screenshot (Quest Link preferred)" Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,8"
+                Click="SmartScreenshot_Click"
+                ToolTip="Use Quest Link mirror capture when an active Meta Link stream is detected; otherwise use headset ADB."/>
+        <Button Content="Take headset screenshot (ADB)" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="HeadsetScreenshot_Click"
+                ToolTip="Capture the current headset view through ADB. Requires a trusted connected headset."/>
+        <Button Content="Open screenshots folder" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="OpenScreenshotsFolder_Click"
+                ToolTip="Open the folder where screenshot PNG files are saved."/>
+      </WrapPanel>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Smart screenshot prefers Quest Link / Air Link mirror capture when active. ADB screenshot is still here for standalone, Steam Link, USB, or wireless ADB."/>
 
       <StackPanel Orientation="Horizontal" Margin="0,16,0,8">
         <Button Content="Apply to headset now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"

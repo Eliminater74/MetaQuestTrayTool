@@ -66,6 +66,27 @@
                 ToolTip="Balloon tips for profile apply/restore, audio switch, updates, and Dash→SteamVR."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
+      <TextBlock Text="HotKeys and voice commands" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Set these before entering VR. Screenshot phrases include “take screenshot”, “take link screenshot”, and “take headset screenshot”; successful captures also speak back in the headset when announcements are enabled."/>
+      <WrapPanel Margin="0,0,0,8">
+        <Button Content="Configure HotKeys" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="HotKeysConfigure_Click"
+                ToolTip="Add, change, or restore global shortcuts. Default screenshot hotkeys use Ctrl+Shift+Num 8 / Num 9."/>
+        <Button Content="Configure voice commands" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="VoiceConfigure_Click"
+                ToolTip="Mic, push-to-talk, always-on mode, confidence, custom phrases, and the built-in phrase list."/>
+        <Button Content="Listen once" Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,8"
+                Click="VoiceListenOnce_Click"
+                ToolTip="Enable voice if needed, then listen for one push-to-talk command now."/>
+        <Button Content="Take screenshot (auto)" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="SmartScreenshot_Click"
+                ToolTip="Quest Link mirror screenshot when Link is active; otherwise headset ADB screenshot."/>
+        <Button Content="Open screenshots folder" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="OpenScreenshotsFolder_Click"
+                ToolTip="Open the folder where screenshot PNG files are saved."/>
+      </WrapPanel>
+
       <TextBlock Text="Headset announcements" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Spoken status in the Quest headset while PCVR is active — so you hear game/profile launches, applied settings, runtime and transport, audio, recovery, connect/disconnect, SteamVR, and important failures even when desktop toasts are not visible."/>

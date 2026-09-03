@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using MetaQuestTrayTool.Models;
@@ -172,6 +174,32 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         LiveStatusText.Text = summary;
     }
 
+    private void QuestLinkScreenshot_Click(object sender, RoutedEventArgs e) =>
+        RunScreenshot("Taking Quest Link mirror screenshot…", () =>
+            App.Instance.CaptureQuestLinkMirrorScreenshot("Quest Link page"));
+
+    private void SmartScreenshot_Click(object sender, RoutedEventArgs e) =>
+        RunScreenshot("Taking screenshot…", () =>
+            App.Instance.CaptureScreenshot("Quest Link page"));
+
+    private void OpenScreenshotsFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Directory.CreateDirectory(AppPaths.ScreenshotsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppPaths.ScreenshotsDirectory,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn("Could not open screenshots folder: " + ex.Message);
+            LiveStatusText.Text = ex.Message;
+        }
+    }
+
     private async void StartSteamVr_Click(object sender, RoutedEventArgs e)
     {
         LiveStatusText.Text = "Starting SteamVR…";
@@ -184,6 +212,22 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
+            LiveStatusText.Text = ex.Message;
+        }
+    }
+
+    private async void RunScreenshot(string progress, Func<string> action)
+    {
+        LiveStatusText.Text = progress;
+        try
+        {
+            var summary = await Task.Run(action).ConfigureAwait(true);
+            LiveStatusText.Text = summary;
+        }
+        catch (Exception ex)
+        {
+            App.Instance.Log.Warn(ex.Message);
+            App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Screenshot failed. Check Log.");
             LiveStatusText.Text = ex.Message;
         }
     }
