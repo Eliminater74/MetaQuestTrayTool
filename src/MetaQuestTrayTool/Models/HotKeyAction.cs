@@ -25,5 +25,6 @@ public enum HotKeyAction
     ApplyGpuPresets,
     TakeScreenshot,
     TakeQuestLinkMirrorScreenshot,
-    TakeHeadsetScreenshot
+    TakeHeadsetScreenshot,
+    ExitApp
 }

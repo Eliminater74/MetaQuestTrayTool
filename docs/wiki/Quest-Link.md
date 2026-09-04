@@ -45,7 +45,7 @@ The tray Status / Info probe also uses USB vendor IDs, Link audio, `rdConnection
 
 ## When Link settings are skipped
 
-If **Steam Link / SteamVR** or **Virtual Desktop** is the live streamer, Meta Link registry + ODT SS/ASW are gated. Change bitrate in Steam / VD instead. Headset ADB still works if you want CPU/GPU/FFR.
+If **Steam Link / SteamVR** or **Virtual Desktop** is the live streamer, live Meta Link registry + ODT SS/ASW writes are gated. You can still edit and save Quest Link presets for the next Meta Link / Air Link session. Change bitrate in Steam / VD instead. Headset ADB still works if you want CPU/GPU/FFR.
 
 Want those Link sliders **and** SteamVR games? Use Link + [[Dash-to-SteamVR]], not the Steam Link app.
 

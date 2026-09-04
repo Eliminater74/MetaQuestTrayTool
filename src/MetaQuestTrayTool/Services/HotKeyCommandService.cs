@@ -43,6 +43,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.TakeScreenshot => ExecuteTakeScreenshot(sourceLabel),
             HotKeyAction.TakeQuestLinkMirrorScreenshot => ExecuteTakeQuestLinkMirrorScreenshot(sourceLabel),
             HotKeyAction.TakeHeadsetScreenshot => ExecuteTakeHeadsetScreenshot(sourceLabel),
+            HotKeyAction.ExitApp => ExecuteExitApp(),
             _ => $"Unknown hotkey action: {action}"
         };
 
@@ -52,12 +53,19 @@ public sealed class HotKeyCommandService
             and not HotKeyAction.RecoverPcvr
             and not HotKeyAction.TakeScreenshot
             and not HotKeyAction.TakeQuestLinkMirrorScreenshot
-            and not HotKeyAction.TakeHeadsetScreenshot)
+            and not HotKeyAction.TakeHeadsetScreenshot
+            and not HotKeyAction.ExitApp)
         {
             AnnounceCommandResult(source, HotKeyCatalog.DescribeAction(action), summary);
         }
 
         return summary;
+    }
+
+    private string ExecuteExitApp()
+    {
+        _app.Dispatcher.BeginInvoke(new Action(() => _app.Shutdown()));
+        return "Exiting Meta Quest Tray Tool.";
     }
 
     private string ExecuteTakeScreenshot(string sourceLabel)

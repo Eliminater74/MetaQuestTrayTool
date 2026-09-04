@@ -8,6 +8,13 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Added a bindable **Exit Meta Quest Tray Tool** action to HotKeys and custom voice-command phrases so users can quit the tray from VR without opening the tray menu.
+
+### Fixed
+- Quest Link presets and saved Link fields stay editable during Steam Link / SteamVR or Virtual Desktop sessions. Live Meta Link registry and ODT writes are still skipped under those streamers, but settings can now be saved for the next Meta Link / Air Link session.
+- Custom Quest Link settings no longer visually fall back to the first preset when reopening the Quest Link page.
+
 ## [1.1.27] - 2026-09-03
 
 ### Fixed

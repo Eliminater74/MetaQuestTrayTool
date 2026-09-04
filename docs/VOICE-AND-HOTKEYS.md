@@ -40,7 +40,7 @@ Default bindings use **Ctrl + Numpad** so they rarely clash with games.
 | Ctrl+Shift+Num 8 | Take screenshot (Quest Link preferred, ADB fallback) |
 | Ctrl+Shift+Num 9 | Take headset screenshot (ADB) |
 
-Assign **Quest Link mirror screenshot**, **Open Oculus Debug Tool**, or **Open SteamVR Home** in Configure if you want a shortcut. Existing installs get the Start SteamVR and screenshot shortcuts on next launch if those actions are not already bound.
+Assign **Quest Link mirror screenshot**, **Open Oculus Debug Tool**, **Open SteamVR Home**, or **Exit Meta Quest Tray Tool** in Configure if you want a shortcut. Existing installs get the Start SteamVR and screenshot shortcuts on next launch if those actions are not already bound. Exit is bindable but has no default chord.
 
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 
@@ -100,7 +100,7 @@ When enabled, Windows TTS says the action name after a successful match (e.g. �
 | take link screenshot / take quest link screenshot / mirror screenshot | Take Quest Link mirror screenshot |
 | take headset screenshot / quest screenshot / ADB screenshot | Take headset screenshot (ADB) |
 
-Custom phrases can be added in Configure (phrase → tray action). New actions above can also be bound as hotkeys in Configure.
+Custom phrases can be added in Configure (phrase → tray action), including **Exit Meta Quest Tray Tool** if you want a deliberate spoken quit phrase. New actions above can also be bound as hotkeys in Configure.
 
 Spell out **A S W**, **H U D**, and **steam v r** — Windows recognition handles that better than “ASW” / “SteamVR” as one word.
 

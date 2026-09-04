@@ -264,6 +264,7 @@ public sealed class VoiceCommandService : IDisposable
                 or HotKeyAction.TakeQuestLinkMirrorScreenshot
                 or HotKeyAction.TakeHeadsetScreenshot =>
                 _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.ScreenshotResult),
+            HotKeyAction.ExitApp => true,
             _ => _app.HeadsetAnnouncer.CanAccept(HeadsetAnnounceKind.VoiceCommandResult)
         };
 

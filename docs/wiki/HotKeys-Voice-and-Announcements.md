@@ -24,7 +24,7 @@ Defaults use **Ctrl + Numpad**:
 | Ctrl+Shift+Num 8 | Take screenshot (Quest Link preferred, ADB fallback) |
 | Ctrl+Shift+Num 9 | Take headset screenshot (ADB) |
 
-Also bindable: Quest Link mirror screenshot, Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets.
+Also bindable: Quest Link mirror screenshot, Open Debug Tool, Open SteamVR Home, Recover PCVR, desktop/VR audio, OpenXR Meta/SteamVR, close overlays, apply GPU presets, Exit Meta Quest Tray Tool. Exit has no default chord.
 
 Record a new chord, or restore defaults, in Configure.
 
@@ -64,7 +64,7 @@ Spell out **A S W**, **H U D**, **steam v r**, **open x r**, **GPU**.
 | take link screenshot / quest link screenshot / mirror screenshot | Quest Link mirror screenshot |
 | take headset screenshot / quest screenshot / ADB screenshot | Headset screenshot (ADB) |
 
-**Custom phrases:** map your wording to any tray action in Configure. **Test listen once** is on that window.
+**Custom phrases:** map your wording to any tray action in Configure, including Exit Meta Quest Tray Tool if you want a deliberate spoken quit phrase. **Test listen once** is on that window.
 
 ## Headset announcements
 

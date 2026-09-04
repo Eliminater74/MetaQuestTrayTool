@@ -28,6 +28,7 @@ public static class HotKeyCatalog
         HotKeyAction.TakeScreenshot => "Take screenshot (Quest Link preferred)",
         HotKeyAction.TakeQuestLinkMirrorScreenshot => "Take Quest Link mirror screenshot",
         HotKeyAction.TakeHeadsetScreenshot => "Take headset screenshot (ADB)",
+        HotKeyAction.ExitApp => "Exit Meta Quest Tray Tool",
         _ => action.ToString()
     };
 

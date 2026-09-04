@@ -194,6 +194,32 @@ public class RuntimeSafetyTests
     }
 
     [Fact]
+    public void HotKeyCatalog_IncludesBindableExitActionWithoutDefaultChord()
+    {
+        Assert.Contains(HotKeyAction.ExitApp, HotKeyCatalog.AllActions);
+        Assert.DoesNotContain(
+            HotKeySettings.CreateDefaultBindings(),
+            item => item.Action == HotKeyAction.ExitApp);
+        Assert.Equal("Exit Meta Quest Tray Tool", HotKeyCatalog.DescribeAction(HotKeyAction.ExitApp));
+    }
+
+    [Fact]
+    public void VrSessionCapabilities_NonMetaSessionsStillAllowSavedLinkPresetEditing()
+    {
+        var caps = VrSessionCapabilities.From(new VrConnectionStatus
+        {
+            Kind = VrConnectionKind.SteamLinkOrSteamVr,
+            SessionActive = true,
+            Summary = "Steam Link"
+        });
+
+        Assert.False(caps.AllowsMetaLinkRegistry);
+        Assert.False(caps.AllowsOculusDebugTool);
+        Assert.Contains("still edit and save Quest Link presets", caps.Banner ?? string.Empty);
+        Assert.Contains("live apply skipped", caps.MetaLinkSkipMessage);
+    }
+
+    [Fact]
     public void HeadsetAnnouncerSettings_DefaultsEnableCommandAndScreenshotResults()
     {
         var settings = new HeadsetAnnouncerSettings();

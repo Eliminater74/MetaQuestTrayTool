@@ -19,7 +19,7 @@ public sealed class VrSessionCapabilities
     public bool RestrictsMetaPipeline => !AllowsMetaLinkRegistry || !AllowsOculusDebugTool;
 
     public string MetaLinkSkipMessage =>
-        $"Quest Link registry skipped — {StreamerLabel} uses its own bitrate/codec settings.";
+        $"Quest Link live apply skipped — {StreamerLabel} uses its own bitrate/codec settings.";
 
     public string OdtSkipMessage =>
         $"Oculus Debug Tool (SS / ASW / FOV) skipped — not applied under {StreamerLabel}.";
@@ -58,7 +58,8 @@ public sealed class VrSessionCapabilities
                 AllowsMetaLinkRegistry = false,
                 AllowsOculusDebugTool = false,
                 Banner =
-                    "Virtual Desktop session detected — Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) are disabled. "
+                    "Virtual Desktop session detected — live Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) apply are paused for this session. "
+                    + "You can still edit and save Quest Link presets for the next Meta Link / Air Link session. "
                     + "Headset ADB, OpenXR, power, and audio still work. Change bitrate/codec in Virtual Desktop's own settings."
             };
         }
@@ -70,7 +71,8 @@ public sealed class VrSessionCapabilities
             AllowsMetaLinkRegistry = false,
             AllowsOculusDebugTool = false,
             Banner =
-                "Steam Link / SteamVR session detected — Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) are disabled. "
+                "Steam Link / SteamVR session detected — live Meta Link registry and Oculus Debug Tool (SS / ASW / FOV) apply are paused for this session. "
+                + "You can still edit and save Quest Link presets for the next Meta Link / Air Link session. "
                 + "Use Steam Link (in-headset) and SteamVR Video settings for bitrate and resolution. "
                 + "OpenXR should be SteamVR for OpenXR games. Headset ADB, power, and audio still work."
         };

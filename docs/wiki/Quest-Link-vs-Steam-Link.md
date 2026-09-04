@@ -69,7 +69,7 @@ SteamVR **cannot click** an elevated tray icon. Set [[HotKeys-Voice-and-Announce
 Quest Link or Air Link + Meta on the PC. Add PreventDashLaunch if you play SteamVR. Add Headset ADB if you also want CPU/GPU/FFR.
 
 **“I only use the Steam Link app. I hate Meta on the PC.”**  
-Uninstall Meta. Use Steam Link + SteamVR. This tray still helps with OpenXR, audio, power, HotKeys. Headset CPU/GPU only if you set up ADB. Ignore SS / ASW / Quest Link pages while Steam Link is the streamer — the Status banner will say they are skipped.
+Uninstall Meta. Use Steam Link + SteamVR. This tray still helps with OpenXR, audio, power, HotKeys. Headset CPU/GPU only if you set up ADB. Ignore live SS / ASW applies while Steam Link is the streamer. Quest Link presets can still be edited and saved for a future Meta Link / Air Link session, but the Status banner will say live Meta writes are skipped.
 
 **“I use Virtual Desktop.”**  
 Same idea as Steam Link for Meta knobs: Link/ODT skipped. ADB / OpenXR / audio / power still work. Bitrate in VD’s own settings.

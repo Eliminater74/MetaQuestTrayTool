@@ -199,7 +199,7 @@ Release **[v1.1.27](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - Switch ActiveRuntime Meta vs SteamVR (global + per-profile); apply preferred on start
 - **Steam Link assist**: force SteamVR OpenXR while Steam Link / SteamVR is active, restore preferred when it ends
-- Under Steam Link / VD, Meta Link registry + ODT are gated (there is no PC command path like Quest Link); ADB / OpenXR / power / audio still apply — [full comparison](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link)
+- Under Steam Link / VD, live Meta Link registry + ODT writes are gated (there is no PC command path like Quest Link); you can still edit and save Quest Link presets for the next Meta Link / Air Link session. ADB / OpenXR / power / audio still apply — [full comparison](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link)
 - Audio auto-switch when Link audio is active (does not steal speakers just because Meta virtual audio is installed); separate **communications** playback/recording pickers
 - Power plan auto-switch, USB selective suspend off, restart `OVRService` after sleep
 
@@ -216,7 +216,7 @@ Release **[v1.1.27](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 ### HotKeys, voice, updates, tools
 
-- HotKeys: default **Ctrl+Numpad 0–9**, **Ctrl+Shift+Num 0** for Start SteamVR, **Ctrl+Shift+Num 8** for smart screenshot, and **Ctrl+Shift+Num 9** for ADB screenshot; configure UI; assign Link mirror screenshot / Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset
+- HotKeys: default **Ctrl+Numpad 0–9**, **Ctrl+Shift+Num 0** for Start SteamVR, **Ctrl+Shift+Num 8** for smart screenshot, and **Ctrl+Shift+Num 9** for ADB screenshot; configure UI; assign Link mirror screenshot / Debug Tool / SteamVR Home / recover / OpenXR / overlays / GPU preset / Exit app
 - Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset, smart / Link mirror / ADB screenshots — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
 - **Headset announcements** (Tray Tool): TTS in the Quest on connect, the wait before SteamVR, SteamVR closed + 10s Meta service stop (spoken *before* OVR drops), profile apply/restore, game/profile launch, manual action, HotKey, voice, screenshot, audio/headset/recovery results, and experimental MSFS outcomes — when desktop toasts are not visible in-headset
 - **Experimental MSFS 2024 VR launch** (opt-in per profile): prepares Meta Link or SteamVR over Link, starts with `-FastLaunch` when no custom arguments are set, then optionally focuses the launched simulator window and sends a configured VR toggle. Best-effort only; it does not click verification dialogs or detect when a flight is ready.

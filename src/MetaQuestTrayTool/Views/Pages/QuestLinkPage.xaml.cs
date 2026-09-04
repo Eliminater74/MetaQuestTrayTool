@@ -108,8 +108,6 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         LiveStatusText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
 
         var caps = App.Instance.LinkConnection.GetCapabilities();
-        MetaLinkPanel.IsEnabled = caps.AllowsMetaLinkRegistry;
-        PresetBox.IsEnabled = caps.AllowsMetaLinkRegistry;
         if (string.IsNullOrWhiteSpace(caps.Banner) || caps.AllowsMetaLinkRegistry)
         {
             SessionBanner.Visibility = Visibility.Collapsed;
@@ -394,6 +392,8 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
                 return;
             }
         }
+
+        PresetBox.SelectedItem = null;
     }
 
     private void UpdatePresetHint()
@@ -404,7 +404,7 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         }
         else
         {
-            PresetHintText.Text = string.Empty;
+            PresetHintText.Text = "Custom saved settings.";
         }
     }
 
