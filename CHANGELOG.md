@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.28] - 2026-09-04
+
 ### Added
 - Added a bindable **Exit Meta Quest Tray Tool** action to HotKeys and custom voice-command phrases so users can quit the tray from VR without opening the tray menu.
 
@@ -251,7 +253,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.27...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.28...HEAD
+[1.1.28]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.28
 [1.1.27]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.27
 [1.1.26]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.26
 [1.1.25]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.25

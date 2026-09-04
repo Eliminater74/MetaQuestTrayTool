@@ -1,10 +1,14 @@
-﻿Meta Quest Tray Tool 1.1.27 - What's new
+Meta Quest Tray Tool 1.1.28 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.27] - 2026-09-03
+[1.1.28] - 2026-09-04
+
+Added
+- Added a bindable Exit Meta Quest Tray Tool action to HotKeys and custom voice-command phrases so users can quit the tray from VR without opening the tray menu.
 
 Fixed
-- Headset announcements now show and honor explicit default-on categories for HotKey action results, Voice command results, and Screenshot taken confirmations. Screenshot success/failure speech no longer depends on the broader headset/ADB bucket, and HotKey/voice command result speech no longer depends on the generic important-action bucket.
+- Quest Link presets and saved Link fields stay editable during Steam Link / SteamVR or Virtual Desktop sessions. Live Meta Link registry and ODT writes still skip under those streamers, but settings can now be saved for the next Meta Link / Air Link session.
+- Custom Quest Link settings no longer visually fall back to the first preset when reopening the Quest Link page.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

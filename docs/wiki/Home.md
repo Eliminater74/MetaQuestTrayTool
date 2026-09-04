@@ -2,9 +2,9 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Current public release:** [v1.1.27](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
-v1.1.27 adds explicit headset announcement toggles for HotKey action results, voice command results, and screenshot confirmations, on top of the Quest Link screenshot flow.
+v1.1.28 keeps Quest Link presets editable while Steam Link / SteamVR or Virtual Desktop is active, preserves custom Link settings on reopen, and adds a bindable Exit action for HotKeys and custom voice phrases.
 
 [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
@@ -46,13 +46,13 @@ v1.1.27 adds explicit headset announcement toggles for HotKey action results, vo
 | Status | Live PCVR Ready chips, session type (Air / wired / Steam Link / VD), SteamVR install |
 | Game settings | Super Sampling, ASW, FOV, HUD via Oculus Debug Tool CLI + GUI |
 | Profiles | Auto-apply on game launch, restore globals on exit, library Launch |
-| Quest Link | Bitrate, encode width, HEVC, sharpening, DBR, Mobile ASW, mirror screenshots |
+| Quest Link | Bitrate, encode width, HEVC, sharpening, DBR, Mobile ASW, editable saved presets, mirror screenshots |
 | Dash → SteamVR | PreventDashLaunch registry (no Meta process killing); auto SteamVR on real Link stream |
 | OVRService | Start / stop / restart; **Manual-at-boot** so Meta does not pop at Windows sign-in |
 | OpenXR | Switch Meta vs SteamVR (global + per-profile); Steam Link assist |
 | Audio / power | Switch to headset on PCVR start, restore desktop on exit; power plan; USB suspend |
 | Headset ADB | CPU/GPU/refresh/FFR; Wireless Pair; VR headsets only; Pause ADB; ADB screenshots |
-| Voice / HotKeys | Ctrl+Numpad, push-to-talk, headset spoken status, smart / Link / ADB screenshot commands |
+| Voice / HotKeys | Ctrl+Numpad, push-to-talk, bindable Exit, headset spoken status, smart / Link / ADB screenshot commands |
 
 ---
 

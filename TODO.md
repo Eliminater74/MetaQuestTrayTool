@@ -2,13 +2,13 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.27](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## Remaining / later
 
-- [ ] Physical Quest validation for v1.1.27 screenshot and headset announcement flow: Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
+- [ ] Physical Quest validation for v1.1.28 Link preset, screenshot, and headset announcement flow: non-Meta streamer preset editing, Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -21,6 +21,15 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.28
+
+- [x] Keep Quest Link presets and saved Link fields editable while Steam Link / SteamVR or Virtual Desktop is active
+- [x] Keep live Meta Link registry and ODT writes gated under non-Meta streamers
+- [x] Show unmatched saved Quest Link settings as custom instead of visually falling back to Meta defaults
+- [x] Add bindable Exit Meta Quest Tray Tool action for HotKeys and custom voice phrases
+- [x] Bump version to **1.1.28**
+- [x] Tag and publish **v1.1.28**
 
 ### v1.1.27
 
@@ -293,6 +302,10 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Tag and publish **v1.1.25**
 - [x] Bump version to **1.1.26**
 - [x] Tag and publish **v1.1.26**
+- [x] Bump version to **1.1.27**
+- [x] Tag and publish **v1.1.27**
+- [x] Bump version to **1.1.28**
+- [x] Tag and publish **v1.1.28**
 
 ### Housekeeping (ongoing)
 

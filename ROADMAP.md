@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.27](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.27)
+## Current product (v1.1.28)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -17,13 +17,23 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Shell | Status (default), Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
 | Status / Ready | Live chips, SteamVR install/version/Stable\|Beta, PCVR Ready checklist, Recover PCVR, session probe (Air/wired/Steam/VD) |
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
-| Link / Dash | RemoteHeadset Link settings + presets, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
+| Link / Dash | RemoteHeadset Link settings + presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, CPU/GPU/refresh/FFR/capture, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
-| Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
+| Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9 plus bindable Exit), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots + bindable Exit), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
 | Updates / polish | In-app GitHub updates, release checksum sidecars, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
+
+---
+
+## v1.1.28 — Quest Link preset editing and exit action
+
+Released work:
+
+- Quest Link preset and field editing remains available while Steam Link / SteamVR or Virtual Desktop is the current PCVR transport; only live Meta Link registry / ODT writes are skipped.
+- Custom saved Quest Link settings display as custom instead of visually falling back to the first preset.
+- Added bindable Exit Meta Quest Tray Tool action for HotKeys and custom voice-command phrases, with no default chord.
 
 ---
 
@@ -161,6 +171,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.25 | Audit/performance hardening: shared/nonblocking probes, serialized ADB, debounced Link-settings saves, stuck-helper repair diagnostics, Quest screenshots, and release checksum sidecars |
 | v1.1.26 | Quest Link mirror screenshots, smart screenshot fallback, screenshot tray/page controls, and HotKeys / Voice menu polish |
 | v1.1.27 | Explicit headset announcement toggles for HotKey results, voice command results, and screenshot confirmations |
+| v1.1.28 | Quest Link presets stay editable under non-Meta streamers; custom Link settings keep their custom state; bindable Exit app action |
 
 ---
 

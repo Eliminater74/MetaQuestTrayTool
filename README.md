@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.27 — MetaQuestTrayTool-Setup-1.1.27.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.27/MetaQuestTrayTool-Setup-1.1.27.exe)
+**Latest:** [v1.1.28 — MetaQuestTrayTool-Setup-1.1.28.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.28/MetaQuestTrayTool-Setup-1.1.28.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,7 +163,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.27](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. This release fixes the Tray Tool headset announcement controls so screenshot confirmations, HotKey action results, and voice command results each have their own visible category.
+Release **[v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. This release keeps Quest Link presets editable while Steam Link / SteamVR / Virtual Desktop is active, preserves custom Link settings on reopen, and adds a bindable Exit action for HotKeys and custom voice phrases.
 
 ### Shell & tray
 
