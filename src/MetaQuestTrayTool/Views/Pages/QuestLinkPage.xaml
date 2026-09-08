@@ -119,7 +119,7 @@
 
         <TextBlock Grid.Row="9" Text="Mobile ASW" Style="{StaticResource SettingLabelStyle}"/>
         <ComboBox x:Name="MobileAswBox" Grid.Row="9" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
-                  ToolTip="Mobile ASW on the headset side of Link. Helps smoothness when PC frame time dips; Off disables headset spacewarp."/>
+                  ToolTip="Legacy Mobile ASW override. Not exposed in the audited ODT build; runtime support and effect are unverified."/>
 
         <TextBlock Grid.Row="10" Text="Apply on start" Style="{StaticResource SettingLabelStyle}"/>
         <CheckBox x:Name="ApplyOnStartBox" Grid.Row="10" Grid.Column="1" Content="Re-apply when the tray tool starts" Margin="0,0,0,10"

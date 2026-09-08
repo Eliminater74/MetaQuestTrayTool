@@ -66,9 +66,9 @@
         <TextBlock Grid.Row="3" Text="FoV Multiplier (H / V)" Style="{StaticResource SettingLabelStyle}"/>
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
           <TextBox x:Name="FovHBox" Width="80" Padding="6" Margin="0,0,8,0"
-                   ToolTip="Horizontal FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50. Saves when you leave the field."/>
+                   ToolTip="Horizontal FOV multiplier for OculusDebugToolCLI. 1.00 restores the full multiplier; typical range 0.50–1.50. Saves when you leave the field."/>
           <TextBox x:Name="FovVBox" Width="80" Padding="6" Margin="0,0,8,0"
-                   ToolTip="Vertical FOV multiplier for OculusDebugToolCLI. 1.00 is unchanged; typical range 0.50–1.50. Saves when you leave the field."/>
+                   ToolTip="Vertical FOV multiplier for OculusDebugToolCLI. 1.00 restores the full multiplier; typical range 0.50–1.50. Saves when you leave the field."/>
         </StackPanel>
 
         <TextBlock Grid.Row="4" Text="OVR Server Priority" Style="{StaticResource SettingLabelStyle}"/>
