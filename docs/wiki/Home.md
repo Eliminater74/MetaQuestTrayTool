@@ -2,9 +2,9 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Current public release:** [v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.29](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
-v1.1.28 keeps Quest Link presets editable while Steam Link / SteamVR or Virtual Desktop is active, preserves custom Link settings on reopen, and adds a bindable Exit action for HotKeys and custom voice phrases.
+v1.1.29 corrects Quest Link and HUD mappings, verifies Link registry writes, preserves custom values and independent FOV axes, and repairs headset button input handling. Physical headset validation remains open; registry verification is separate from runtime application.
 
 [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 

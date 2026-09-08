@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.29](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.28)
+## Current product (v1.1.29)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -24,6 +24,17 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Updates / polish | In-app GitHub updates, release checksum sidecars, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
+
+---
+
+## v1.1.29 — control correctness and interoperability
+
+Corrects Quest Link and HUD mappings, verifies Link registry writes, preserves custom values and independent FOV axes, and repairs headset button input handling.
+
+- Verified Link persistence and ODT interoperability, with exact mismatch reporting.
+- Preserved existing non-Meta session guards and saved settings compatibility.
+- Added a complete control inventory and 42 regression cases (96 total passing tests).
+- Physical headset/restart verification and the tester-specific bitrate report remain open.
 
 ---
 
@@ -172,6 +183,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.26 | Quest Link mirror screenshots, smart screenshot fallback, screenshot tray/page controls, and HotKeys / Voice menu polish |
 | v1.1.27 | Explicit headset announcement toggles for HotKey results, voice command results, and screenshot confirmations |
 | v1.1.28 | Quest Link presets stay editable under non-Meta streamers; custom Link settings keep their custom state; bindable Exit app action |
+| v1.1.29 | Link/HUD mapping, registry verification, custom values, independent FOV persistence/reset, headset input-thread fixes |
 
 ---
 

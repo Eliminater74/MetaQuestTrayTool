@@ -8,6 +8,27 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.29] - 2026-09-08
+
+### Fixed
+- Quest Link sharpening now matches observed ODT DWORD values (Disabled=1, Normal=2, Quality=3); encode-width reads prefer ODT's current value over a stale legacy alias.
+- Link applies verify every attempted registry write/deletion and report mismatches or access failures. Read live registry refreshes the controls without applying stale saved settings.
+- Custom bitrate, width, supersampling and signed dynamic-bitrate offset values survive editor loading and unrelated edits.
+- Separate horizontal/vertical FOV values survive JSON reload, including legacy migration. Profile/global editors expose both axes, reject non-finite input, and applying 1/1 explicitly restores the default multiplier.
+- Performance HUD selections use explicit Meta CLI mappings instead of saved enum ordinals; App Render Timing, Compositor Timing and performance-headroom summary now select the intended modes.
+- Wireless ADB connect/pair and Send text capture WPF input before background work, avoiding cross-thread control access failures.
+
+### Changed
+- Clarified **Start with Windows as Administrator (hands-free)** while preserving the separate current-session elevation command and assignable Exit action with no default shortcut.
+- Marked unverified legacy capture/Mobile ASW behavior clearly; legacy Version HUD remains available with a display-verification qualification.
+
+### Added
+- Read-only Link registry snapshot script and detailed control audit covering 177 inputs / 260 declarative event bindings.
+- 42 regression cases since v1.1.28; full suite passes 96/96.
+
+### Verification limits
+- Rebuilt service and installed ODT synchronized bitrate in both directions (500/450 Mbps). The tester-specific bitrate failure was not reproduced; OVRService restart and active-headset effects remain unverified. Registry read-back does not claim runtime application.
+
 ## [1.1.28] - 2026-09-04
 
 ### Added
@@ -253,7 +274,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.28...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.29...HEAD
+[1.1.29]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.29
 [1.1.28]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.28
 [1.1.27]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.27
 [1.1.26]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.26

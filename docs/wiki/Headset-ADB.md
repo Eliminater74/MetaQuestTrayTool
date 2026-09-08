@@ -2,6 +2,8 @@
 
 SideQuest-style props via **bundled Google platform-tools**. Not the same as Air Link.
 
+v1.1.29 fixes WPF thread-access failures in wireless Connect/Pair and Send text by capturing UI input before background ADB work. Physical headset validation remains open. Device/app-default options stop applying their override; they do not necessarily reset a property already active on the headset. The legacy capture-eye option is experimental and does not promise a specific stereo layout across firmware versions.
+
 ![Headset performance](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/10-headset-performance.png)
 
 ![Headset capture / trust](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/09-headset-capture.png)

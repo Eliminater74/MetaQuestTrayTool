@@ -2,13 +2,15 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.28](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.29](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## Remaining / later
 
-- [ ] Physical Quest validation for v1.1.28 Link preset, screenshot, and headset announcement flow: non-Meta streamer preset editing, Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
+- [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, and wireless/text actions on physical hardware.
+
+- [ ] Physical Quest validation for v1.1.29 Link preset, screenshot, and headset announcement flow: non-Meta streamer preset editing, Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -21,6 +23,13 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.29
+
+- [x] Audit control/value ownership and commit each repair stage.
+- [x] Correct Link/HUD mappings, FOV migration/reset, custom value preservation and headset input threading.
+- [x] Add detailed audit evidence and isolated regressions; full suite 96/96.
+- [x] Update version, installer notes and current release documentation to 1.1.29.
 
 ### v1.1.28
 

@@ -30,6 +30,10 @@ Applied through `OculusDebugToolCLI.exe` (and optionally the GUI from tray / Ser
 
 **Cycle Perf HUD** from the tray or HotKeys. Newer Meta runtimes sometimes **reject** `server:` ASW CLI — check **Log**.
 
+In v1.1.29, horizontal and vertical FOV values remain independent through save/reload and in the profile/global editors. Setting both to 1.00 sends an explicit reset to the full multiplier. Custom numeric values are preserved instead of falling back to the first preset. HUD choices use the observed Meta command mapping; Version is retained as a legacy mode whose display is not exposed in the audited ODT UI.
+
+Quest Link **Read live registry** fills its controls without applying or saving them. Apply verifies registry values and reports mismatches; this does not prove that a running headset stream has adopted the overrides. See the [control audit](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/investigations/v1.1.29-control-audit.md) for evidence and limits.
+
 While **Steam Link / Virtual Desktop** is the active streamer, Meta ODT + Link registry writes are **skipped** (those streamers own bitrate/SS). There is no way to send those without Quest Link / Air Link. ADB, OpenXR, power, and audio still apply. Full comparison: [[Quest-Link-vs-Steam-Link]].
 
 Want Steam games with SS / ASW / Link bitrate? Use Link + [[Dash-to-SteamVR]] — do not start the Steam Link app.
