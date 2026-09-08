@@ -88,6 +88,7 @@ public partial class ProfileEditorWindow : Window
             ? "Scope: Personal app profile (overrides global defaults while this process runs)."
             : "Scope: Global";
         FovBox.Text = profile.Settings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        FovVBox.Text = profile.Settings.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
         CommentsBox.Text = profile.Comments ?? string.Empty;
         CliCommandsBox.Text = profile.CustomCommands.ToCliText();
         AdbCommandsBox.Text = profile.CustomCommands.ToAdbText();
@@ -150,6 +151,7 @@ public partial class ProfileEditorWindow : Window
         }
 
         FovBox.Text = Profile.Settings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        FovVBox.Text = Profile.Settings.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
         CommentsBox.Text = Profile.Comments ?? string.Empty;
         CliCommandsBox.Text = Profile.CustomCommands.ToCliText();
         AdbCommandsBox.Text = Profile.CustomCommands.ToAdbText();
@@ -232,7 +234,8 @@ public partial class ProfileEditorWindow : Window
         }
 
         if (!double.TryParse(FovBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var fov)
-            || fov < 0.5 || fov > 1.5)
+            || !double.TryParse(FovVBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var fovV)
+            || !GameSettings.IsValidFov(fov) || !GameSettings.IsValidFov(fovV))
         {
             System.Windows.MessageBox.Show(this, "FOV multiplier must be a number between 0.50 and 1.50.", App.AppName);
             return;
@@ -283,7 +286,8 @@ public partial class ProfileEditorWindow : Window
         Profile.Settings.AswMode = AswBox.SelectedItem is ComboBoxItem aswItem && aswItem.Tag is AswMode mode
             ? mode
             : AswMode.Inherit;
-        Profile.Settings.FovMultiplier = fov;
+        Profile.Settings.FovMultiplierHorizontal = fov;
+        Profile.Settings.FovMultiplierVertical = fovV;
         Profile.Link.Sharpening = SharpenBox.SelectedItem is ComboBoxItem { Tag: LinkSharpeningMode sharpen }
             ? sharpen
             : LinkSharpeningMode.Default;

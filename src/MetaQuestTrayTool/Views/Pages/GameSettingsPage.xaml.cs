@@ -424,7 +424,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
     {
         if (!double.TryParse(FovHBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var h)
             || !double.TryParse(FovVBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
-            || h < 0.5 || h > 1.5 || v < 0.5 || v > 1.5)
+            || !GameSettings.IsValidFov(h) || !GameSettings.IsValidFov(v))
         {
             if (showErrors)
             {

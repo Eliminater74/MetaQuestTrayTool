@@ -61,10 +61,8 @@ public sealed class OculusDebugToolService
 
         var fovH = settings.FovMultiplierHorizontal;
         var fovV = settings.FovMultiplierVertical;
-        if (Math.Abs(fovH - 1.0) > 0.001 || Math.Abs(fovV - 1.0) > 0.001)
-        {
-            lines.Add($"service set-client-fov-tan-angle-multiplier {FormatNumber(fovH)} {FormatNumber(fovV)}");
-        }
+        // Explicitly restore 1/1 after a profile with a reduced FOV.
+        lines.Add($"service set-client-fov-tan-angle-multiplier {FormatNumber(fovH)} {FormatNumber(fovV)}");
 
         lines.Add($"service enable-adaptive-gpu-perf-scale {FormatBool(settings.AdaptiveGpuScaling)}");
         lines.Add($"service set-force-mip-gen-on-all-layers {FormatBool(settings.ForceMipMapOnLayers)}");

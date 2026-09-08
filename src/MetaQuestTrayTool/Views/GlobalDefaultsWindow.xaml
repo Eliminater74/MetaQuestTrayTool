@@ -56,10 +56,13 @@
       <ComboBox x:Name="AswBox" Margin="0,0,0,16" HorizontalAlignment="Stretch"
                 ToolTip="Default Asynchronous Spacewarp mode via OculusDebugToolCLI."/>
 
-      <TextBlock Text="FOV multiplier" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
+      <TextBlock Text="FOV horizontal multiplier" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBox x:Name="FovBox" Margin="0,0,0,4" HorizontalAlignment="Stretch"
-               ToolTip="FOV multiplier for OculusDebugToolCLI. 1.00 leaves FOV unchanged; typical range 0.50–1.50."/>
-      <TextBlock Text="1.00 leaves FOV unchanged. Typical range is 0.50 – 1.50."
+               ToolTip="FOV multiplier for OculusDebugToolCLI. 1.00 restores the full FOV multiplier; typical range 0.50–1.50."/>
+      <TextBlock Text="FOV vertical multiplier" Style="{StaticResource SettingLabelStyle}" Margin="0,4,0,6"/>
+      <TextBox x:Name="FovVBox" Margin="0,0,0,4" Text="1.00"
+               ToolTip="Vertical FOV multiplier. Range 0.50–1.50; 1.00 restores the full multiplier."/>
+      <TextBlock Text="1.00 restores the full FOV multiplier. Typical range is 0.50 – 1.50."
                  Foreground="{DynamicResource AppMutedBrush}"
                  FontSize="12"
                  Margin="0,0,0,16"/>

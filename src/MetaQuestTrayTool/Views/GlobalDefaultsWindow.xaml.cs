@@ -51,6 +51,7 @@ public partial class GlobalDefaultsWindow : Window
         AswBox.SelectionChanged += (_, _) => PersistIfValid();
         OpenXrBox.SelectionChanged += (_, _) => PersistIfValid();
         FovBox.LostFocus += (_, _) => PersistIfValid();
+        FovVBox.LostFocus += (_, _) => PersistIfValid();
         CliCommandsBox.LostFocus += (_, _) => PersistIfValid();
         AdbCommandsBox.LostFocus += (_, _) => PersistIfValid();
 
@@ -62,6 +63,7 @@ public partial class GlobalDefaultsWindow : Window
             ? OpenXrRuntimeKind.Meta
             : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = defaults.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        FovVBox.Text = defaults.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
         CliCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToCliText();
         AdbCommandsBox.Text = App.Instance.Settings.Current.CustomCommands.ToAdbText();
         _loading = false;
@@ -82,6 +84,7 @@ public partial class GlobalDefaultsWindow : Window
             ? OpenXrRuntimeKind.Meta
             : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = App.Instance.Settings.Current.DefaultGameSettings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
+        FovVBox.Text = App.Instance.Settings.Current.DefaultGameSettings.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
         _loading = false;
         UpdatePresetHint(preset);
         PersistIfValid(applyPreset: true);
@@ -141,7 +144,8 @@ public partial class GlobalDefaultsWindow : Window
     {
         settings = App.Instance.Settings.Current.DefaultGameSettings;
         if (!double.TryParse(FovBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var fov)
-            || fov < 0.5 || fov > 1.5)
+            || !double.TryParse(FovVBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var fovV)
+            || !GameSettings.IsValidFov(fov) || !GameSettings.IsValidFov(fovV))
         {
             if (IsLoaded)
             {
@@ -157,7 +161,8 @@ public partial class GlobalDefaultsWindow : Window
         settings.AswMode = AswBox.SelectedItem is ComboBoxItem aswItem && aswItem.Tag is AswMode mode
             ? mode
             : AswMode.Auto;
-        settings.FovMultiplier = fov;
+        settings.FovMultiplierHorizontal = fov;
+        settings.FovMultiplierVertical = fovV;
         if (OpenXrBox.SelectedItem is ComboBoxItem { Tag: OpenXrRuntimeKind openXr }
             && openXr is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
         {
