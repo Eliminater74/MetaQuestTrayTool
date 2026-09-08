@@ -136,7 +136,7 @@
 
       <Button Content="Read live registry" Style="{StaticResource GhostButtonStyle}" Margin="0,8,0,0"
               HorizontalAlignment="Left" Click="ReadLive_Click"
-              ToolTip="Refresh the status line from the live HKCU RemoteHeadset values Meta is currently using."/>
+              ToolTip="Load HKCU RemoteHeadset overrides into the controls without writing settings. Your next edit applies these values. This does not query the active headset stream."/>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

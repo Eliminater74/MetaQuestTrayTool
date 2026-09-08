@@ -105,7 +105,7 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         SelectMatchingPreset(link);
         LoadFieldsFrom(link);
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
-        LiveStatusText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
+        LiveStatusText.Text = App.Instance.Link.DescribeRegistryStatus();
 
         var caps = App.Instance.LinkConnection.GetCapabilities();
         if (string.IsNullOrWhiteSpace(caps.Banner) || caps.AllowsMetaLinkRegistry)
@@ -250,7 +250,26 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
 
     private void ReadLive_Click(object sender, RoutedEventArgs e)
     {
-        LiveStatusText.Text = "Live: " + App.Instance.Link.ReadCurrent().Describe();
+        try
+        {
+            var current = App.Instance.Link.ReadCurrent();
+            _loading = true;
+            LoadFieldsFrom(current);
+            PresetBox.SelectedItem = null;
+            UpdatePresetHint();
+            PresetHintText.Text = "Loaded registry overrides. Your next edit applies these values.";
+            LiveStatusText.Text = "Read registry overrides: " + current.Describe() + ". Runtime state is not queried.";
+            App.Instance.Log.Info(LiveStatusText.Text);
+        }
+        catch (Exception ex)
+        {
+            LiveStatusText.Text = "Could not read Link registry overrides: " + ex.Message;
+            App.Instance.Log.Error(LiveStatusText.Text);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private void PersistApply(string? prefix = null, bool restartService = false)
@@ -419,7 +438,14 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
             }
         }
 
-        if (box.Items.Count > 0)
+        // ODT accepts values outside our preset list (for example 450 Mbps).
+        if (tag is int value)
+        {
+            var item = new ComboBoxItem { Content = value.ToString(), Tag = value };
+            box.Items.Add(item);
+            box.SelectedItem = item;
+        }
+        else if (box.Items.Count > 0)
         {
             box.SelectedIndex = 0;
         }
