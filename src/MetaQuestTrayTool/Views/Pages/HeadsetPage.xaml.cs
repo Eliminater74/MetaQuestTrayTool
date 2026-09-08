@@ -142,7 +142,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
     private void WirelessConnect_Click(object sender, RoutedEventArgs e)
     {
         Persist_Changed(this, new RoutedEventArgs());
-        Run(() =>
+        RunPrepared(() =>
         {
             var headset = App.Instance.Settings.Current.Headset;
             var host = (WirelessHostBox.Text ?? string.Empty).Trim();
@@ -162,14 +162,16 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
             WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
             WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            return App.Instance.Adb.ConnectWirelessHeadset(headset.WirelessHost!, headset.WirelessPort, headset);
+            var connectHost = headset.WirelessHost!;
+            var connectPort = headset.WirelessPort;
+            return () => App.Instance.Adb.ConnectWirelessHeadset(connectHost, connectPort, headset);
         });
     }
 
     private void WirelessPair_Click(object sender, RoutedEventArgs e)
     {
         Persist_Changed(this, new RoutedEventArgs());
-        Run(() =>
+        RunPrepared(() =>
         {
             var host = (WirelessHostBox.Text ?? string.Empty).Trim();
             if (host.Length == 0)
@@ -186,12 +188,8 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             }
 
             var code = (PairingCodeBox.Text ?? string.Empty).Trim();
-            var summary = App.Instance.Adb.PairWireless(host, pairingPort, code);
-            App.Instance.Settings.Current.Headset.WirelessHost = host;
-            App.Instance.Settings.Save();
-            PairingCodeBox.Text = string.Empty;
-            return summary;
-        });
+            return () => App.Instance.Adb.PairWireless(host, pairingPort, code);
+        }, () => PairingCodeBox.Text = string.Empty);
     }
 
     private void WirelessDisconnect_Click(object sender, RoutedEventArgs e)
@@ -250,7 +248,12 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Run(() => App.Instance.Headset.SetGuardianPaused(false, App.Instance.Settings.Current.Headset));
 
     private void SendText_Click(object sender, RoutedEventArgs e) =>
-        Run(() => App.Instance.Headset.SendText(PasteBox.Text ?? string.Empty, App.Instance.Settings.Current.Headset));
+        RunPrepared(() =>
+        {
+            var text = PasteBox.Text ?? string.Empty;
+            var settings = App.Instance.Settings.Current.Headset;
+            return () => App.Instance.Headset.SendText(text, settings);
+        });
 
     private void SmartScreenshot_Click(object sender, RoutedEventArgs e) =>
         RunScreenshot(() => App.Instance.CaptureScreenshot("Headset page"));
@@ -343,12 +346,17 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         }
     }
 
-    private async void Run(Func<string> action)
+    private void Run(Func<string> action) => RunPrepared(() => action);
+
+    private async void RunPrepared(Func<Func<string>> prepare, Action? completed = null)
     {
         try
         {
             Persist_Changed(this, new RoutedEventArgs());
+            // Capture and validate all WPF input on the UI thread before starting ADB work.
+            var action = prepare();
             var result = await Task.Run(action).ConfigureAwait(true);
+            completed?.Invoke();
             App.Instance.Log.Info(result);
             App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction(result);
             ResultText.Text = result;
