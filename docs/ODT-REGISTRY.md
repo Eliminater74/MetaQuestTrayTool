@@ -96,7 +96,7 @@ Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKille
 
 ## Runtime commands (not RemoteHeadset)
 
-Existing tray commands sent to **OVRService** via `OculusDebugToolCLI.exe` (historical mapping; not re-audited on 2026-09-08):
+The follow-up [v1.1.29 control audit](investigations/v1.1.29-control-audit.md) checked installed CLI help and HUD selection. FOV defaults now send an explicit 1/1 command; separate axes survive saved JSON migration. Other runtime effects still require headset validation.
 
 | ODT setting | CLI / server command |
 | --- | --- |
@@ -108,6 +108,8 @@ Existing tray commands sent to **OVRService** via `OculusDebugToolCLI.exe` (hist
 | Adaptive GPU Perf Scale | `service enable-adaptive-gpu-perf-scale` / `server:EnableAdaptiveGpuPerfScale` |
 | (PC) ASW | `server:asw.Auto`, `asw.off`, `asw.Clock45`, `asw.Sim45`, … |
 | Visual HUD | `perfhud set-mode` / `server:PerfHudModeAll` |
+
+The app's saved HUD enum numbers are **not** CLI mode numbers. Use `VisualHudMapping`: Performance/headroom summary=1, App Render Timing=3, Compositor Render Timing=4, ASW=6. Installed ODT displayed CLI 2 as Latency Timing. Version retains legacy mode 5; its label is absent in this ODT build, so display remains unverified. None sends `perfhud reset`.
 
 Historical reports distinguish transient pixel density from persisted Link overrides. Reboot survival was not tested in this investigation.
 
