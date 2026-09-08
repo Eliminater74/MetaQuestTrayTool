@@ -1,7 +1,7 @@
 namespace MetaQuestTrayTool.Models;
 
 /// <summary>
-/// Oculus Debug Tool Performance HUD. Maps to `perfhud set-mode` / `perfhud reset`.
+/// Persisted application choices. Use VisualHudMapping; these are not Meta CLI mode numbers.
 /// </summary>
 public enum VisualHudMode
 {

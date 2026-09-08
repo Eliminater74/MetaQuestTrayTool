@@ -336,7 +336,7 @@ public sealed class HotKeyCommandService
             return sessionBlock;
         }
 
-        var values = Enum.GetValues<VisualHudMode>();
+        var values = Enum.GetValues<VisualHudMode>().Where(mode => VisualHudMapping.ToCliMode(mode).HasValue).ToArray();
         var game = _app.Settings.Current.DefaultGameSettings;
         var index = Array.IndexOf(values, game.VisualHud);
         if (index < 0)
@@ -352,8 +352,8 @@ public sealed class HotKeyCommandService
             VisualHudMode.Performance => "Performance",
             VisualHudMode.AppRenderTiming => "App render timing",
             VisualHudMode.CompositorTiming => "Compositor timing",
-            VisualHudMode.PerformanceHeadroom => "Performance headroom",
-            VisualHudMode.Version => "Version",
+            VisualHudMode.PerformanceHeadroom => "Performance summary (headroom)",
+            VisualHudMode.Version => "Version (legacy)",
             VisualHudMode.AsynchronousSpacewarp => "ASW",
             _ => game.VisualHud.ToString()
         };

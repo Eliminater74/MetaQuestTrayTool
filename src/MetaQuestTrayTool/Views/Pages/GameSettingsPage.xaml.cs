@@ -47,7 +47,7 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
 
         foreach (VisualHudMode hud in Enum.GetValues<VisualHudMode>())
         {
-            HudBox.Items.Add(new ComboBoxItem { Content = FormatHud(hud), Tag = hud });
+            HudBox.Items.Add(new ComboBoxItem { Content = FormatHud(hud), Tag = hud, IsEnabled = VisualHudMapping.ToCliMode(hud).HasValue });
         }
 
         OpenXrBox.Items.Add(new ComboBoxItem { Content = "Meta / Oculus", Tag = OpenXrRuntimeKind.Meta });
@@ -460,8 +460,8 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         VisualHudMode.Performance => "Performance",
         VisualHudMode.AppRenderTiming => "App render timing",
         VisualHudMode.CompositorTiming => "Compositor timing",
-        VisualHudMode.PerformanceHeadroom => "Performance headroom",
-        VisualHudMode.Version => "Version",
+        VisualHudMode.PerformanceHeadroom => "Performance summary (headroom)",
+        VisualHudMode.Version => "Version (legacy)",
         VisualHudMode.AsynchronousSpacewarp => "ASW",
         _ => mode.ToString()
     };

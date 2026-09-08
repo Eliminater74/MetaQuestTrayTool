@@ -6,6 +6,31 @@ namespace MetaQuestTrayTool.Tests;
 
 public class GameControlTests
 {
+    [Theory]
+    [InlineData(VisualHudMode.Performance, 1)]
+    [InlineData(VisualHudMode.PerformanceHeadroom, 1)]
+    [InlineData(VisualHudMode.AppRenderTiming, 3)]
+    [InlineData(VisualHudMode.CompositorTiming, 4)]
+    [InlineData(VisualHudMode.AsynchronousSpacewarp, 6)]
+    public void HudUsesObservedMetaModeRatherThanSavedEnumOrdinal(VisualHudMode mode, int cliMode)
+    {
+        var service = new OculusDebugToolService(new OculusRuntimeService());
+        Assert.Contains($"perfhud set-mode {cliMode}", service.BuildCommands(new GameSettings { VisualHud = mode }));
+    }
+
+    [Fact]
+    public void UnknownHudIsRejectedBeforeAnyRuntimeCommands()
+    {
+        var service = new OculusDebugToolService(new OculusRuntimeService());
+        var result = service.Apply(new GameSettings { VisualHud = (VisualHudMode)999 });
+        Assert.False(result.Succeeded);
+        Assert.False(result.Started);
+        Assert.Empty(result.Commands);
+        Assert.Contains("unknown", result.Summary);
+        Assert.Equal(5, VisualHudMapping.ToCliMode(VisualHudMode.Version));
+        Assert.Equal(5, (int)VisualHudMode.Version);
+        Assert.Equal(6, (int)VisualHudMode.AsynchronousSpacewarp);
+    }
     [Fact]
     public void SeparateFovAxesSurviveJsonRoundTripWithoutLegacyAlias()
     {

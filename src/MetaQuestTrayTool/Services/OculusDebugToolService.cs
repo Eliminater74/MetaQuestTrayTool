@@ -75,7 +75,9 @@ public sealed class OculusDebugToolService
         }
         else
         {
-            lines.Add($"perfhud set-mode {(int)settings.VisualHud}");
+            var mode = VisualHudMapping.ToCliMode(settings.VisualHud)
+                ?? throw new NotSupportedException("The selected HUD has no verified mapping in the current Oculus Debug Tool. Select another HUD mode.");
+            lines.Add($"perfhud set-mode {mode}");
         }
 
         lines.Add("exit");
@@ -126,6 +128,15 @@ public sealed class OculusDebugToolService
 
     public DebugToolApplyResult Apply(GameSettings settings, IEnumerable<string>? extraCli = null)
     {
+        if (VisualHudMapping.ToCliMode(settings.VisualHud) is null)
+        {
+            LastApplied = null;
+            return LastResult = new DebugToolApplyResult
+            {
+                LooksRejected = true,
+                Summary = "Game settings were not applied: the selected HUD value is unknown. Select a supported HUD mode."
+            };
+        }
         var commands = BuildCommands(settings).ToList();
         if (extraCli is not null)
         {
@@ -150,6 +161,10 @@ public sealed class OculusDebugToolService
         {
             LastApplied = settings.Clone();
             result.Summary = $"Applied {settings.Describe()}.";
+            if (settings.VisualHud == VisualHudMode.Version)
+            {
+                result.Summary += " Version HUD uses a legacy mode not exposed in the audited ODT UI; its display is unverified.";
+            }
         }
         else if (result.LooksRejected)
         {

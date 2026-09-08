@@ -472,6 +472,7 @@ public sealed class TrayIconHost : IDisposable
             var item = new ToolStripMenuItem(FormatHudMode(mode))
             {
                 Name = HudItemName(mode),
+                Enabled = VisualHudMapping.ToCliMode(mode).HasValue,
                 Tag = mode
             };
             var captured = mode;
@@ -534,7 +535,7 @@ public sealed class TrayIconHost : IDisposable
 
     private void CyclePerfHud()
     {
-        var values = Enum.GetValues<VisualHudMode>();
+        var values = Enum.GetValues<VisualHudMode>().Where(mode => VisualHudMapping.ToCliMode(mode).HasValue).ToArray();
         var game = _app.Settings.Current.DefaultGameSettings;
         var index = Array.IndexOf(values, game.VisualHud);
         if (index < 0)
@@ -1460,8 +1461,8 @@ public sealed class TrayIconHost : IDisposable
         VisualHudMode.Performance => "Performance",
         VisualHudMode.AppRenderTiming => "App render timing",
         VisualHudMode.CompositorTiming => "Compositor timing",
-        VisualHudMode.PerformanceHeadroom => "Performance headroom",
-        VisualHudMode.Version => "Version",
+        VisualHudMode.PerformanceHeadroom => "Performance summary (headroom)",
+        VisualHudMode.Version => "Version (legacy)",
         VisualHudMode.AsynchronousSpacewarp => "ASW",
         _ => mode.ToString()
     };
