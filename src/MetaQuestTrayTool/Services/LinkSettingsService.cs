@@ -94,7 +94,7 @@ public sealed class LinkSettingsService
             WriteDistortion(key, settings.DistortionCurvature, deleteUnsetOverrides);
             WriteDynamicBitrate(key, settings.EncodeDynamicBitrate, deleteUnsetOverrides);
             WriteOrClear(key, DynamicBitrateMaxValue, settings.DynamicBitrateMax, deleteUnsetOverrides);
-            WriteOrClear(key, DynamicBitrateOffsetValue, settings.DynamicBitrateOffsetMbps, deleteUnsetOverrides);
+            WriteOrClear(key, DynamicBitrateOffsetValue, settings.DynamicBitrateOffsetMbps, deleteUnsetOverrides, allowNegative: true);
             WriteMobileAsw(key, settings.MobileAsw, deleteUnsetOverrides);
             WriteSharpening(key, settings.Sharpening, deleteUnsetOverrides);
 
@@ -316,9 +316,9 @@ public sealed class LinkSettingsService
         };
     }
 
-    private static void WriteOrClear(ILinkSettingsRegistryKey key, string name, int value, bool deleteWhenZero)
+    private static void WriteOrClear(ILinkSettingsRegistryKey key, string name, int value, bool deleteWhenZero, bool allowNegative = false)
     {
-        if (value > 0)
+        if (value > 0 || allowNegative && value < 0)
         {
             key.SetValue(name, value);
             return;

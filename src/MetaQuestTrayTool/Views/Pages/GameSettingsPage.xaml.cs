@@ -81,19 +81,19 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         {
             var settings = App.Instance.Settings.Current;
             var game = settings.DefaultGameSettings;
-            SelectByTag(SuperSamplingBox, game.SuperSampling);
-            SelectByTag(AswBox, game.AswMode);
-            SelectByTag(AdaptiveGpuBox, game.AdaptiveGpuScaling);
-            SelectByTag(PriorityBox, game.OvrServerPriority);
-            SelectByTag(ForceMipBox, game.ForceMipMapOnLayers);
-            SelectByTag(OffsetMipBox, Math.Abs(game.OffsetMipMapOnLayers) > 0.001 ? 1.0 : 0.0);
-            SelectByTag(FovStencilBox, game.UseFovStencil);
-            SelectByTag(HudBox, game.VisualHud);
+            NumericControlSelection.Select(SuperSamplingBox, game.SuperSampling);
+            NumericControlSelection.Select(AswBox, game.AswMode);
+            NumericControlSelection.Select(AdaptiveGpuBox, game.AdaptiveGpuScaling);
+            NumericControlSelection.Select(PriorityBox, game.OvrServerPriority);
+            NumericControlSelection.Select(ForceMipBox, game.ForceMipMapOnLayers);
+            NumericControlSelection.Select(OffsetMipBox, Math.Abs(game.OffsetMipMapOnLayers) > 0.001 ? 1.0 : 0.0);
+            NumericControlSelection.Select(FovStencilBox, game.UseFovStencil);
+            NumericControlSelection.Select(HudBox, game.VisualHud);
             FovHBox.Text = game.FovMultiplierHorizontal.ToString("0.00", CultureInfo.InvariantCulture);
             FovVBox.Text = game.FovMultiplierVertical.ToString("0.00", CultureInfo.InvariantCulture);
             ApplyOnStartBox.IsChecked = settings.ApplyGameSettingsOnStart;
             AutoApplyBox.IsChecked = settings.AutoApplyProfiles;
-            SelectByTag(OpenXrBox, settings.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+            NumericControlSelection.Select(OpenXrBox, settings.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
                 ? OpenXrRuntimeKind.Meta
                 : settings.OpenXr.PreferredRuntime);
             OpenXrOnStartBox.IsChecked = settings.OpenXr.ApplyOnStart;
@@ -482,22 +482,5 @@ public partial class GameSettingsPage : System.Windows.Controls.UserControl, ISh
         return $"{headsetText}  ·  {aswText}  ·  CLI: {debug.CliPath}";
     }
 
-    private static void SelectByTag(System.Windows.Controls.ComboBox box, object? tag)
-    {
-        foreach (ComboBoxItem item in box.Items)
-        {
-            if (Equals(item.Tag, tag)
-                || (item.Tag is double a && tag is double b && Math.Abs(a - b) < 0.001)
-                || (item.Tag is string s && tag is string t && string.Equals(s, t, StringComparison.OrdinalIgnoreCase)))
-            {
-                box.SelectedItem = item;
-                return;
-            }
-        }
 
-        if (box.Items.Count > 0)
-        {
-            box.SelectedIndex = 0;
-        }
-    }
 }

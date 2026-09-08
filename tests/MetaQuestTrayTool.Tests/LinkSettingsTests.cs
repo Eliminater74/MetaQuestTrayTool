@@ -5,6 +5,19 @@ namespace MetaQuestTrayTool.Tests;
 
 public class LinkSettingsTests
 {
+    [Fact]
+    public void NegativeDynamicOffsetSurvivesApplyAndUnrelatedEdits()
+    {
+        var registry = new FakeRegistry();
+        registry.Values["DBROffsetMbps"] = -25;
+        var service = new LinkSettingsService(registry);
+        var settings = service.ReadCurrent();
+        settings.BitrateMbps = 450;
+        var result = service.Apply(settings, true);
+        Assert.True(result.Succeeded);
+        Assert.Equal(-25, result.Current!.DynamicBitrateOffsetMbps);
+        Assert.Equal(-25, registry.Values["DBROffsetMbps"]);
+    }
     [Theory]
     [InlineData(2912)]
     [InlineData(0)]

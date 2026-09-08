@@ -92,12 +92,12 @@ public partial class ProfileEditorWindow : Window
         CommentsBox.Text = profile.Comments ?? string.Empty;
         CliCommandsBox.Text = profile.CustomCommands.ToCliText();
         AdbCommandsBox.Text = profile.CustomCommands.ToAdbText();
-        SelectByTag(SuperSamplingBox, profile.Settings.SuperSampling);
-        SelectByTag(AswBox, profile.Settings.AswMode);
-        SelectByTag(SharpenBox, profile.Link.Sharpening);
-        SelectNullableInt(BitrateBox, profile.Link.BitrateMbps);
-        SelectNullableInt(EncodeWidthBox, profile.Link.EncodeResolutionWidth);
-        SelectByTag(OpenXrBox, profile.OpenXrRuntime);
+        NumericControlSelection.Select(SuperSamplingBox, profile.Settings.SuperSampling);
+        NumericControlSelection.Select(AswBox, profile.Settings.AswMode);
+        NumericControlSelection.Select(SharpenBox, profile.Link.Sharpening);
+        NumericControlSelection.Select(BitrateBox, profile.Link.BitrateMbps);
+        NumericControlSelection.Select(EncodeWidthBox, profile.Link.EncodeResolutionWidth);
+        NumericControlSelection.Select(OpenXrBox, profile.OpenXrRuntime);
         PriorityBox.SelectedItem = Priorities.Contains(profile.CpuPriority) ? profile.CpuPriority : "Normal";
         LoadPresets(profile.ProcessName);
     }
@@ -155,12 +155,12 @@ public partial class ProfileEditorWindow : Window
         CommentsBox.Text = Profile.Comments ?? string.Empty;
         CliCommandsBox.Text = Profile.CustomCommands.ToCliText();
         AdbCommandsBox.Text = Profile.CustomCommands.ToAdbText();
-        SelectByTag(SuperSamplingBox, Profile.Settings.SuperSampling);
-        SelectByTag(AswBox, Profile.Settings.AswMode);
-        SelectByTag(SharpenBox, Profile.Link.Sharpening);
-        SelectNullableInt(BitrateBox, Profile.Link.BitrateMbps);
-        SelectNullableInt(EncodeWidthBox, Profile.Link.EncodeResolutionWidth);
-        SelectByTag(OpenXrBox, Profile.OpenXrRuntime);
+        NumericControlSelection.Select(SuperSamplingBox, Profile.Settings.SuperSampling);
+        NumericControlSelection.Select(AswBox, Profile.Settings.AswMode);
+        NumericControlSelection.Select(SharpenBox, Profile.Link.Sharpening);
+        NumericControlSelection.Select(BitrateBox, Profile.Link.BitrateMbps);
+        NumericControlSelection.Select(EncodeWidthBox, Profile.Link.EncodeResolutionWidth);
+        NumericControlSelection.Select(OpenXrBox, Profile.OpenXrRuntime);
         PriorityBox.SelectedItem = Priorities.Contains(Profile.CpuPriority) ? Profile.CpuPriority : "Normal";
         UpdatePresetHint(preset);
     }
@@ -310,46 +310,7 @@ public partial class ProfileEditorWindow : Window
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
-    private static void SelectByTag(System.Windows.Controls.ComboBox box, object value)
-    {
-        foreach (ComboBoxItem item in box.Items)
-        {
-            if (item.Tag is double left && value is double right && Math.Abs(left - right) < 0.001)
-            {
-                box.SelectedItem = item;
-                return;
-            }
 
-            if (Equals(item.Tag, value))
-            {
-                box.SelectedItem = item;
-                return;
-            }
-        }
 
-        if (box.Items.Count > 0)
-        {
-            box.SelectedIndex = 0;
-        }
-    }
 
-    private static void SelectNullableInt(System.Windows.Controls.ComboBox box, int? value)
-    {
-        foreach (ComboBoxItem item in box.Items)
-        {
-            if (value is null && item.Tag is null)
-            {
-                box.SelectedItem = item;
-                return;
-            }
-
-            if (value is int selected && item.Tag is int tag && tag == selected)
-            {
-                box.SelectedItem = item;
-                return;
-            }
-        }
-
-        box.SelectedIndex = 0;
-    }
 }

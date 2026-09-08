@@ -331,14 +331,14 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
 
     private void LoadFieldsFrom(LinkSettings link)
     {
-        SelectByTag(EncodeWidthBox, link.EncodeResolutionWidth);
-        SelectByTag(BitrateBox, link.BitrateMbps);
-        SelectByTag(DynamicBox, link.EncodeDynamicBitrate);
-        SelectByTag(DynamicMaxBox, link.DynamicBitrateMax);
-        SelectByTag(DynamicOffsetBox, link.DynamicBitrateOffsetMbps);
-        SelectByTag(SharpenBox, link.Sharpening);
-        SelectByTag(DistortionBox, link.DistortionCurvature);
-        SelectByTag(MobileAswBox, link.MobileAsw);
+        NumericControlSelection.Select(EncodeWidthBox, link.EncodeResolutionWidth);
+        NumericControlSelection.Select(BitrateBox, link.BitrateMbps);
+        NumericControlSelection.Select(DynamicBox, link.EncodeDynamicBitrate);
+        NumericControlSelection.Select(DynamicMaxBox, link.DynamicBitrateMax);
+        NumericControlSelection.Select(DynamicOffsetBox, link.DynamicBitrateOffsetMbps);
+        NumericControlSelection.Select(SharpenBox, link.Sharpening);
+        NumericControlSelection.Select(DistortionBox, link.DistortionCurvature);
+        NumericControlSelection.Select(MobileAswBox, link.MobileAsw);
         HevcBox.IsChecked = link.PreferHevc;
         SlicesBox.IsChecked = link.DisableSlicedEncoding;
     }
@@ -427,27 +427,5 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         }
     }
 
-    private static void SelectByTag(System.Windows.Controls.ComboBox box, object tag)
-    {
-        foreach (ComboBoxItem item in box.Items)
-        {
-            if (Equals(item.Tag, tag))
-            {
-                box.SelectedItem = item;
-                return;
-            }
-        }
 
-        // ODT accepts values outside our preset list (for example 450 Mbps).
-        if (tag is int value)
-        {
-            var item = new ComboBoxItem { Content = value.ToString(), Tag = value };
-            box.Items.Add(item);
-            box.SelectedItem = item;
-        }
-        else if (box.Items.Count > 0)
-        {
-            box.SelectedIndex = 0;
-        }
-    }
 }

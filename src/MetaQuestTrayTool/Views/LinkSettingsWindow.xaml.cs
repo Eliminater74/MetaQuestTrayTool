@@ -90,14 +90,14 @@ public partial class LinkSettingsWindow : Window
     {
         _loading = true;
         var settings = App.Instance.Settings.Current.LinkSettings;
-        SelectByTag(EncodeWidthBox, settings.EncodeResolutionWidth);
-        SelectByTag(BitrateBox, settings.BitrateMbps);
-        SelectByTag(DynamicBox, settings.EncodeDynamicBitrate);
-        SelectByTag(DynamicMaxBox, settings.DynamicBitrateMax);
-        SelectByTag(DynamicOffsetBox, settings.DynamicBitrateOffsetMbps);
-        SelectByTag(SharpenBox, settings.Sharpening);
-        SelectByTag(DistortionBox, settings.DistortionCurvature);
-        SelectByTag(MobileAswBox, settings.MobileAsw);
+        NumericControlSelection.Select(EncodeWidthBox, settings.EncodeResolutionWidth);
+        NumericControlSelection.Select(BitrateBox, settings.BitrateMbps);
+        NumericControlSelection.Select(DynamicBox, settings.EncodeDynamicBitrate);
+        NumericControlSelection.Select(DynamicMaxBox, settings.DynamicBitrateMax);
+        NumericControlSelection.Select(DynamicOffsetBox, settings.DynamicBitrateOffsetMbps);
+        NumericControlSelection.Select(SharpenBox, settings.Sharpening);
+        NumericControlSelection.Select(DistortionBox, settings.DistortionCurvature);
+        NumericControlSelection.Select(MobileAswBox, settings.MobileAsw);
         HevcBox.IsChecked = settings.PreferHevc;
         SlicesBox.IsChecked = settings.DisableSlicedEncoding;
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
@@ -191,20 +191,5 @@ public partial class LinkSettingsWindow : Window
         return settings;
     }
 
-    private static void SelectByTag(System.Windows.Controls.ComboBox box, object tag)
-    {
-        foreach (ComboBoxItem item in box.Items)
-        {
-            if (Equals(item.Tag, tag))
-            {
-                box.SelectedItem = item;
-                return;
-            }
-        }
 
-        if (box.Items.Count > 0)
-        {
-            box.SelectedIndex = 0;
-        }
-    }
 }

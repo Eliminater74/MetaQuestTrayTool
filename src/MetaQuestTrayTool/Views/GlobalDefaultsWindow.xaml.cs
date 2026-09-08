@@ -57,9 +57,9 @@ public partial class GlobalDefaultsWindow : Window
 
         _loading = true;
         var defaults = App.Instance.Settings.Current.DefaultGameSettings;
-        SelectByTag(SuperSamplingBox, defaults.SuperSampling);
-        SelectByTag(AswBox, defaults.AswMode);
-        SelectByTag(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+        NumericControlSelection.Select(SuperSamplingBox, defaults.SuperSampling);
+        NumericControlSelection.Select(AswBox, defaults.AswMode);
+        NumericControlSelection.Select(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
             ? OpenXrRuntimeKind.Meta
             : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = defaults.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
@@ -78,9 +78,9 @@ public partial class GlobalDefaultsWindow : Window
 
         ProfilePresetCatalog.ApplyGlobalPreset(App.Instance.Settings.Current, preset);
         _loading = true;
-        SelectByTag(SuperSamplingBox, App.Instance.Settings.Current.DefaultGameSettings.SuperSampling);
-        SelectByTag(AswBox, App.Instance.Settings.Current.DefaultGameSettings.AswMode);
-        SelectByTag(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
+        NumericControlSelection.Select(SuperSamplingBox, App.Instance.Settings.Current.DefaultGameSettings.SuperSampling);
+        NumericControlSelection.Select(AswBox, App.Instance.Settings.Current.DefaultGameSettings.AswMode);
+        NumericControlSelection.Select(OpenXrBox, App.Instance.Settings.Current.OpenXr.PreferredRuntime == OpenXrRuntimeKind.Inherit
             ? OpenXrRuntimeKind.Meta
             : App.Instance.Settings.Current.OpenXr.PreferredRuntime);
         FovBox.Text = App.Instance.Settings.Current.DefaultGameSettings.FovMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
@@ -174,26 +174,5 @@ public partial class GlobalDefaultsWindow : Window
         return true;
     }
 
-    private static void SelectByTag(System.Windows.Controls.ComboBox box, object value)
-    {
-        foreach (ComboBoxItem item in box.Items)
-        {
-            if (item.Tag is double left && value is double right && Math.Abs(left - right) < 0.001)
-            {
-                box.SelectedItem = item;
-                return;
-            }
 
-            if (Equals(item.Tag, value))
-            {
-                box.SelectedItem = item;
-                return;
-            }
-        }
-
-        if (box.Items.Count > 0)
-        {
-            box.SelectedIndex = 0;
-        }
-    }
 }
