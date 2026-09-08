@@ -101,7 +101,7 @@ public partial class LinkSettingsWindow : Window
         HevcBox.IsChecked = settings.PreferHevc;
         SlicesBox.IsChecked = settings.DisableSlicedEncoding;
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
-        LiveStatusText.Text = "Live registry: " + App.Instance.Link.ReadCurrent().Describe();
+        LiveStatusText.Text = App.Instance.Link.DescribeRegistryStatus();
         _loading = false;
     }
 

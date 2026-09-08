@@ -679,9 +679,7 @@ public partial class App : System.Windows.Application
             {
                 var merged = profile.Link.Overlay(Settings.Current.LinkSettings);
                 var link = Link.Apply(merged, deleteUnsetOverrides: true);
-                parts.Add(link.Succeeded
-                    ? profile.Link.Describe() + " (reconnect Link if the stream does not change)."
-                    : link.Summary);
+                parts.Add(link.Summary);
             }
             else
             {
@@ -886,7 +884,7 @@ public partial class App : System.Windows.Application
         var result = Link.Apply(settings, deleteUnsetOverrides);
         if (result.Succeeded)
         {
-            Log.Info($"Applied Meta Link settings — {result.Summary}");
+            Log.Info(result.Summary);
         }
         else
         {

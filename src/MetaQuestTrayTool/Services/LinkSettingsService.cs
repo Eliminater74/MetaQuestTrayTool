@@ -1,23 +1,21 @@
-using Microsoft.Win32;
 using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
 /// <summary>
 /// Reads and writes Quest Link / Air Link overrides in the Meta RemoteHeadset registry hive.
-/// Value names match OculusDebugTool.exe (see docs/ODT-REGISTRY.md).
+/// Persistence verification is separate from runtime/headset verification (see docs/ODT-REGISTRY.md).
 /// </summary>
 public sealed class LinkSettingsService
 {
     public const string RegistryPath = @"Software\Oculus\RemoteHeadset";
 
-    // ODT GUI registry names from OculusDebugTool.exe string table.
+    // ODT registry mappings and verification scope are documented in docs/ODT-REGISTRY.md.
     private const string BitrateValue = "BitrateMbps";
     private const string EncodeWidthOdtValue = "EncodeWidth";
     private const string EncodeWidthRuntimeValue = "EncodeResolutionWidth";
     private const string HevcValue = "HEVC";
     private const string NumSlicesValue = "NumSlices";
-    private const string NumSlicesAliasValue = "numSlices";
     private const string SharpeningValue = "LinkSharpeningEnabled";
     private const string DistortionValue = "DistortionCurve";
     private const string DynamicBitrateValue = "DBR";
@@ -25,40 +23,49 @@ public sealed class LinkSettingsService
     private const string DynamicBitrateOffsetValue = "DBROffsetMbps";
     private const string MobileAswValue = "MobileASWMode";
 
+    private readonly ILinkSettingsRegistry _registry;
+
+    public LinkSettingsService() : this(new LinkSettingsRegistry()) { }
+
+    public LinkSettingsService(ILinkSettingsRegistry registry) => _registry = registry;
+
     public LinkSettings? LastApplied { get; private set; }
     public LinkApplyResult? LastResult { get; private set; }
 
     public LinkSettings ReadCurrent()
     {
-        using var key = Registry.CurrentUser.OpenSubKey(RegistryPath, writable: false);
+        using var key = _registry.Open(writable: false);
+        return ReadCurrent(key);
+    }
+
+    private static LinkSettings ReadCurrent(ILinkSettingsRegistryKey? key)
+    {
         if (key is null)
         {
             return new LinkSettings();
         }
 
-        var encodeWidth = ReadDword(key, EncodeWidthRuntimeValue);
-        if (encodeWidth <= 0)
-        {
-            encodeWidth = ReadDword(key, EncodeWidthOdtValue);
-        }
+        // ODT edits EncodeWidth only. An explicit zero must also beat a stale legacy alias.
+        var encodeWidth = key.GetValue(EncodeWidthOdtValue) is int odtWidth
+            ? odtWidth
+            : ReadDword(key, EncodeWidthRuntimeValue);
 
         return new LinkSettings
         {
             BitrateMbps = ReadDword(key, BitrateValue),
             EncodeResolutionWidth = encodeWidth,
             PreferHevc = ReadDword(key, HevcValue) == 1,
-            DisableSlicedEncoding = ReadDword(key, NumSlicesValue) == 1
-                                    || ReadDword(key, NumSlicesAliasValue) == 1,
+            DisableSlicedEncoding = ReadDword(key, NumSlicesValue) == 1,
             DistortionCurvature = ReadDistortion(key),
             EncodeDynamicBitrate = ReadDynamicBitrate(key),
             DynamicBitrateMax = ReadDword(key, DynamicBitrateMaxValue),
             DynamicBitrateOffsetMbps = ReadDword(key, DynamicBitrateOffsetValue),
             MobileAsw = ReadMobileAsw(key),
-            Sharpening = ReadDword(key, SharpeningValue) switch
+            Sharpening = key.GetValue(SharpeningValue) switch
             {
-                0 => LinkSharpeningMode.Disabled,
-                1 => LinkSharpeningMode.Normal,
-                2 or 3 => LinkSharpeningMode.Quality,
+                1 => LinkSharpeningMode.Disabled,
+                2 => LinkSharpeningMode.Normal,
+                3 => LinkSharpeningMode.Quality,
                 _ => LinkSharpeningMode.Default
             }
         };
@@ -68,19 +75,19 @@ public sealed class LinkSettingsService
     {
         try
         {
-            using var key = Registry.CurrentUser.CreateSubKey(RegistryPath, writable: true)
-                            ?? throw new InvalidOperationException($"Could not open HKCU\\{RegistryPath}.");
+            using var key = new LinkRegistryWriteBatch(_registry.Open(writable: true)
+                            ?? throw new InvalidOperationException($"Could not open HKCU\\{RegistryPath}."));
 
             WriteOrClear(key, BitrateValue, settings.BitrateMbps, deleteUnsetOverrides);
             WriteEncodeWidth(key, settings.EncodeResolutionWidth, deleteUnsetOverrides);
 
             if (settings.PreferHevc)
             {
-                key.SetValue(HevcValue, 1, RegistryValueKind.DWord);
+                key.SetValue(HevcValue, 1);
             }
             else
             {
-                key.DeleteValue(HevcValue, throwOnMissingValue: false);
+                key.DeleteValue(HevcValue);
             }
 
             WriteSlicedEncoding(key, settings.DisableSlicedEncoding);
@@ -91,24 +98,33 @@ public sealed class LinkSettingsService
             WriteMobileAsw(key, settings.MobileAsw, deleteUnsetOverrides);
             WriteSharpening(key, settings.Sharpening, deleteUnsetOverrides);
 
-            LastApplied = settings.Clone();
-            var current = ReadCurrent();
+            using var readBack = _registry.Open(writable: false);
+            var mismatches = key.Verify(readBack);
+            var current = ReadCurrent(readBack);
+            var verified = mismatches.Count == 0;
+            LastApplied = verified ? settings.Clone() : null;
             LastResult = new LinkApplyResult
             {
-                Succeeded = true,
-                Written = LastApplied,
+                Succeeded = verified,
+                Written = settings.Clone(),
                 Current = current,
-                Summary = $"Wrote Link settings: {settings.Describe()}. Restart Link or OVRService for full effect."
+                Mismatches = mismatches,
+                Summary = verified
+                    ? $"Verified Link registry overrides in HKCU\\{RegistryPath}: {current.Describe()}. "
+                      + "ODT/runtime application is not verified by this read-back. Reopen ODT; reconnect Link or restart OVRService if needed."
+                    : $"Link registry verification failed in HKCU\\{RegistryPath}: {string.Join("; ", mismatches)}. "
+                      + "Some overrides may have changed; refresh before retrying."
             };
             return LastResult;
         }
         catch (Exception ex)
         {
+            LastApplied = null;
+            // Do not repeat a failing registry read in the error handler.
             LastResult = new LinkApplyResult
             {
                 Succeeded = false,
-                Current = ReadCurrent(),
-                Summary = $"Could not write Link settings: {ex.Message}"
+                Summary = $"Could not write/verify Link registry overrides in HKCU\\{RegistryPath}: {ex.Message}. Some overrides may have changed."
             };
             return LastResult;
         }
@@ -116,16 +132,20 @@ public sealed class LinkSettingsService
 
     public string DescribeRegistryStatus()
     {
-        using var key = Registry.CurrentUser.OpenSubKey(RegistryPath, writable: false);
-        if (key is null)
+        try
         {
-            return $"Registry hive HKCU\\{RegistryPath} was not found yet.";
+            using var key = _registry.Open(writable: false);
+            return key is null
+                ? $"Registry key HKCU\\{RegistryPath} was not found yet."
+                : $"Stored Link registry overrides: {ReadCurrent(key).Describe()}. Runtime state is not queried.";
         }
-
-        return $"Live Link registry: {ReadCurrent().Describe()}";
+        catch (Exception ex)
+        {
+            return $"Could not read Link registry overrides: {ex.Message}";
+        }
     }
 
-    private static DistortionCurvature ReadDistortion(RegistryKey key)
+    private static DistortionCurvature ReadDistortion(ILinkSettingsRegistryKey key)
     {
         if (key.GetValue(DistortionValue) is not int value)
         {
@@ -140,7 +160,7 @@ public sealed class LinkSettingsService
         };
     }
 
-    private static EncodeDynamicBitrateMode ReadDynamicBitrate(RegistryKey key)
+    private static EncodeDynamicBitrateMode ReadDynamicBitrate(ILinkSettingsRegistryKey key)
     {
         if (key.GetValue(DynamicBitrateValue) is not int value)
         {
@@ -155,7 +175,7 @@ public sealed class LinkSettingsService
         };
     }
 
-    private static MobileAswMode ReadMobileAsw(RegistryKey key)
+    private static MobileAswMode ReadMobileAsw(ILinkSettingsRegistryKey key)
     {
         if (key.GetValue(MobileAswValue) is not int value)
         {
@@ -170,19 +190,19 @@ public sealed class LinkSettingsService
         };
     }
 
-    private static void WriteEncodeWidth(RegistryKey key, int width, bool deleteWhenZero)
+    private static void WriteEncodeWidth(ILinkSettingsRegistryKey key, int width, bool deleteWhenZero)
     {
         if (width > 0)
         {
-            key.SetValue(EncodeWidthOdtValue, width, RegistryValueKind.DWord);
-            key.SetValue(EncodeWidthRuntimeValue, width, RegistryValueKind.DWord);
+            key.SetValue(EncodeWidthOdtValue, width);
+            key.SetValue(EncodeWidthRuntimeValue, width);
             return;
         }
 
         if (deleteWhenZero)
         {
-            key.DeleteValue(EncodeWidthOdtValue, throwOnMissingValue: false);
-            key.DeleteValue(EncodeWidthRuntimeValue, throwOnMissingValue: false);
+            key.DeleteValue(EncodeWidthOdtValue);
+            key.DeleteValue(EncodeWidthRuntimeValue);
         }
         else
         {
@@ -191,104 +211,102 @@ public sealed class LinkSettingsService
         }
     }
 
-    private static void WriteSlicedEncoding(RegistryKey key, bool disable)
+    private static void WriteSlicedEncoding(ILinkSettingsRegistryKey key, bool disable)
     {
         if (disable)
         {
-            key.SetValue(NumSlicesValue, 1, RegistryValueKind.DWord);
-            key.SetValue(NumSlicesAliasValue, 1, RegistryValueKind.DWord);
+            key.SetValue(NumSlicesValue, 1);
         }
         else
         {
-            key.DeleteValue(NumSlicesValue, throwOnMissingValue: false);
-            key.DeleteValue(NumSlicesAliasValue, throwOnMissingValue: false);
+            key.DeleteValue(NumSlicesValue);
         }
     }
 
-    private static void WriteDistortion(RegistryKey key, DistortionCurvature curvature, bool deleteWhenDefault)
+    private static void WriteDistortion(ILinkSettingsRegistryKey key, DistortionCurvature curvature, bool deleteWhenDefault)
     {
         switch (curvature)
         {
             case DistortionCurvature.Low:
-                key.SetValue(DistortionValue, 0, RegistryValueKind.DWord);
+                key.SetValue(DistortionValue, 0);
                 break;
             case DistortionCurvature.High:
-                key.SetValue(DistortionValue, 1, RegistryValueKind.DWord);
+                key.SetValue(DistortionValue, 1);
                 break;
             default:
                 if (deleteWhenDefault)
                 {
-                    key.DeleteValue(DistortionValue, throwOnMissingValue: false);
+                    key.DeleteValue(DistortionValue);
                 }
 
                 break;
         }
     }
 
-    private static void WriteDynamicBitrate(RegistryKey key, EncodeDynamicBitrateMode mode, bool deleteWhenDefault)
+    private static void WriteDynamicBitrate(ILinkSettingsRegistryKey key, EncodeDynamicBitrateMode mode, bool deleteWhenDefault)
     {
         switch (mode)
         {
             case EncodeDynamicBitrateMode.Disabled:
-                key.SetValue(DynamicBitrateValue, 0, RegistryValueKind.DWord);
+                key.SetValue(DynamicBitrateValue, 0);
                 break;
             case EncodeDynamicBitrateMode.Enabled:
-                key.SetValue(DynamicBitrateValue, 1, RegistryValueKind.DWord);
+                key.SetValue(DynamicBitrateValue, 1);
                 break;
             default:
                 if (deleteWhenDefault)
                 {
-                    key.DeleteValue(DynamicBitrateValue, throwOnMissingValue: false);
+                    key.DeleteValue(DynamicBitrateValue);
                 }
 
                 break;
         }
     }
 
-    private static void WriteMobileAsw(RegistryKey key, MobileAswMode mode, bool deleteWhenDefault)
+    private static void WriteMobileAsw(ILinkSettingsRegistryKey key, MobileAswMode mode, bool deleteWhenDefault)
     {
         switch (mode)
         {
             case MobileAswMode.Disabled:
-                key.SetValue(MobileAswValue, 0, RegistryValueKind.DWord);
+                key.SetValue(MobileAswValue, 0);
                 break;
             case MobileAswMode.Enabled:
-                key.SetValue(MobileAswValue, 1, RegistryValueKind.DWord);
+                key.SetValue(MobileAswValue, 1);
                 break;
             default:
                 if (deleteWhenDefault)
                 {
-                    key.DeleteValue(MobileAswValue, throwOnMissingValue: false);
+                    key.DeleteValue(MobileAswValue);
                 }
 
                 break;
         }
     }
 
-    private static void WriteSharpening(RegistryKey key, LinkSharpeningMode sharpening, bool deleteWhenDefault)
+    private static void WriteSharpening(ILinkSettingsRegistryKey key, LinkSharpeningMode sharpening, bool deleteWhenDefault)
     {
         switch (sharpening)
         {
             case LinkSharpeningMode.Disabled:
-                key.SetValue(SharpeningValue, 0, RegistryValueKind.DWord);
+                key.SetValue(SharpeningValue, 1);
                 break;
             case LinkSharpeningMode.Normal:
-                key.SetValue(SharpeningValue, 1, RegistryValueKind.DWord);
+                key.SetValue(SharpeningValue, 2);
                 break;
             case LinkSharpeningMode.Quality:
-                key.SetValue(SharpeningValue, 3, RegistryValueKind.DWord);
+                key.SetValue(SharpeningValue, 3);
                 break;
             default:
                 if (deleteWhenDefault)
                 {
-                    key.DeleteValue(SharpeningValue, throwOnMissingValue: false);
+                    key.DeleteValue(SharpeningValue);
                 }
 
                 break;
         }
     }
 
-    private static int ReadDword(RegistryKey key, string name)
+    private static int ReadDword(ILinkSettingsRegistryKey key, string name)
     {
         return key.GetValue(name) switch
         {
@@ -298,21 +316,21 @@ public sealed class LinkSettingsService
         };
     }
 
-    private static void WriteOrClear(RegistryKey key, string name, int value, bool deleteWhenZero)
+    private static void WriteOrClear(ILinkSettingsRegistryKey key, string name, int value, bool deleteWhenZero)
     {
         if (value > 0)
         {
-            key.SetValue(name, value, RegistryValueKind.DWord);
+            key.SetValue(name, value);
             return;
         }
 
         if (deleteWhenZero)
         {
-            key.DeleteValue(name, throwOnMissingValue: false);
+            key.DeleteValue(name);
         }
         else if (key.GetValue(name) is not null)
         {
-            key.SetValue(name, 0, RegistryValueKind.DWord);
+            key.SetValue(name, 0);
         }
     }
 }
