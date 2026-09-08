@@ -250,7 +250,7 @@ See [ROADMAP.md](ROADMAP.md) and [TODO.md](TODO.md) for history and remaining ho
 | File | Use when you need to… |
 | --- | --- |
 | [docs/README.md](docs/README.md) | Index of all documentation |
-| [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry keys vs CLI commands (from Meta binaries) |
+| [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md) | ODT registry observations, verification limits, and CLI reference |
 | [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md) | Hotkey shortcuts and voice phrase reference |
 | [docs/media/README.md](docs/media/README.md) | Screenshots and demo video |
 | [docs/SECURITY.md](docs/SECURITY.md) | Update verification and local-data safety notes |

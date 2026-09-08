@@ -1,8 +1,17 @@
 # Oculus Debug Tool — registry & runtime map
 
-Reference extracted from **`OculusDebugTool.exe`** and **`OculusDebugToolCLI.exe`** (Meta Quest PC app, oculus-diagnostics folder). Paths and value names are embedded as strings in those binaries.
+This map combines live ODT/registry observations from **2026-09-08** with older reverse-engineering notes. A binary string is evidence of a name, not proof of its behavior. See [the issue #4 investigation](investigations/issue-4-link-registry.md) for the tested binary identity, observations, fixes, and remaining limits.
 
-Meta Quest Tray Tool uses the same hive for **Quest Link** settings. **Game Settings** (super sampling, ASW, FOV, etc.) still go through `OculusDebugToolCLI.exe` / OVRService — they are not stored under `RemoteHeadset`.
+Meta Quest Tray Tool uses the observed per-user key for **Quest Link** overrides. **Game Settings** (super sampling, PC ASW, FOV, etc.) still go through `OculusDebugToolCLI.exe` / OVRService. Their command path is separate and was not revalidated in this investigation.
+
+## Verification scope
+
+- **Observed persistent configuration:** changing ODT bitrate to 450 created DWORD `BitrateMbps=450` in HKCU. An external DWORD write of 500 appeared in reopened ODT without a service restart. The rebuilt tray service was also used to apply 500; reopened ODT showed it.
+- **Observed mapping defects:** ODT writes sharpening Disabled/Normal/Quality as **1/2/3**. ODT edits `EncodeWidth`; it displayed 2912 even with `EncodeResolutionWidth=3664` present. The tray now prefers `EncodeWidth`, including an explicit zero, and retains the other name for legacy compatibility.
+- **Registry verification:** apply compares every attempted DWORD write and deletion with a fresh registry read. Mismatches and access failures are reported; this verifies persistence only, not the active encoder or an independently running ODT process.
+- **Refresh:** Read live registry loads overrides into the controls, including values outside the preset lists, without writing them or replacing saved settings. The next edit applies the loaded controls. Missing sharpening means no explicit override, not Disabled.
+- **Runtime/reconnect/restart:** no active headset stream was measured. A service restart attempt was denied by Windows in this non-elevated session. Reconnect and restart requirements for individual fields remain unverified; neither is needed merely to reproduce the tested ODT reopen/read of persisted bitrate.
+- **Mobile ASW:** retained for compatibility, but this ODT build does not expose it. No live effect was verified.
 
 ---
 
@@ -10,15 +19,15 @@ Meta Quest Tray Tool uses the same hive for **Quest Link** settings. **Game Sett
 
 **`HKCU\Software\Oculus\RemoteHeadset`**
 
-Also referenced: **`HKLM\Software\Oculus\RemoteHeadset`** (machine-wide; rarely needed).
+Also referenced by older binary analysis: **`HKLM\Software\Oculus\RemoteHeadset`**. Its precedence/use was not established here. The tray does not mirror writes into HKLM or another user's HKCU.
 
 | Registry value | ODT GUI label | Tray tool |
 | --- | --- | --- |
 | `DistortionCurve` | Distortion Curvature | Quest Link page |
 | `HEVC` | Codec (force HEVC / H.265) | Quest Link page |
-| `NumSlices` | Sliced Encoding (`1` = off) | Quest Link page (`numSlices` alias on read/write) |
+| `NumSlices` | Sliced Encoding (`1` = off) | Quest Link page (case-insensitive name) |
 | `EncodeWidth` | Encode Resolution Width | Written with `EncodeResolutionWidth` |
-| `EncodeResolutionWidth` | Same (OVRService alias) | Quest Link page |
+| `EncodeResolutionWidth` | Legacy compatibility name; runtime ownership unverified | Written with `EncodeWidth`; read only when `EncodeWidth` is absent |
 | `DBR` | Encode Dynamic Bitrate | Quest Link page |
 | `DBRMax` | Dynamic Bitrate Max | Quest Link page |
 | `DBROffsetMbps` | Dynamic Bitrate Offset (Mbps) | Quest Link page |
@@ -36,17 +45,17 @@ Also referenced: **`HKLM\Software\Oculus\RemoteHeadset`** (machine-wide; rarely 
 
 **DistortionCurve** (DWORD): `0` = Low, `1` = High. Delete the value for ODT “Default”.
 
-**LinkSharpeningEnabled** (DWORD): `0` = Off, `1` = Normal, `2`/`3` = Quality (tray uses `3` for Quality).
+**LinkSharpeningEnabled** (DWORD): observed ODT mapping is `1` = Disabled, `2` = Normal, `3` = Quality. Delete for no explicit override; ODT displayed Normal when absent on the tested installation. The previous 0/1/3 mapping was incorrect. The tray's saved enum values are unchanged; only registry conversion changed.
 
 **HEVC** (DWORD): `1` = prefer HEVC (common for Air Link). Delete for default / H.264 behavior.
 
-**NumSlices** / **numSlices** (DWORD): `1` = single slice / sliced encoding off (wired Link artifact workaround). Windows registry keys are case-insensitive; ODT string table uses `NumSlices`.
+**NumSlices** / **numSlices** (DWORD): `1` displayed Off in ODT. Windows registry value names are case-insensitive; these are one value, so the tray writes/deletes it once. Any effect on artifacts or latency was not tested.
 
 **DBR** (DWORD): `1` = dynamic bitrate on, `0` = off. Delete for default / automatic.
 
 **DBRMax**, **DBROffsetMbps**, **BitrateMbps**, **EncodeWidth**: `0` or delete often means “automatic” in ODT; tray treats `0` as “no override” and deletes the key when applying global defaults.
 
-Link changes usually need a **Link reconnect** or **OVRService** restart.
+For stream effects, reconnect Link or restart OVRService if needed; this is operational guidance, not a verified per-setting requirement. The observations above establish persisted ODT configuration, not stream behavior.
 
 ---
 
@@ -87,7 +96,7 @@ Documented by [OculusKiller](https://github.com/DevOculus-Meta-Quest/OculusKille
 
 ## Runtime commands (not RemoteHeadset)
 
-These are sent to **OVRService** via `OculusDebugToolCLI.exe` (same mechanism as the ODT GUI for PC VR tweaks):
+Existing tray commands sent to **OVRService** via `OculusDebugToolCLI.exe` (historical mapping; not re-audited on 2026-09-08):
 
 | ODT setting | CLI / server command |
 | --- | --- |
@@ -100,7 +109,7 @@ These are sent to **OVRService** via `OculusDebugToolCLI.exe` (same mechanism as
 | (PC) ASW | `server:asw.Auto`, `asw.off`, `asw.Clock45`, `asw.Sim45`, … |
 | Visual HUD | `perfhud set-mode` / `server:PerfHudModeAll` |
 
-Pixel density often **does not survive a PC reboot**; encode width and distortion usually do.
+Historical reports distinguish transient pixel density from persisted Link overrides. Reboot survival was not tested in this investigation.
 
 ---
 
@@ -125,20 +134,16 @@ Community ASW workarounds sometimes mention `AswDisabled` under `HKCU\Software\O
 ## Rediscover keys after a Meta update
 
 ```powershell
-# Snapshot before changing one ODT control
-Get-ItemProperty 'HKCU:\Software\Oculus\RemoteHeadset' | Out-File before.txt
+# Snapshot only the owned Link value names, with their types and registry views
+.\scripts\Get-LinkRegistrySnapshot.ps1 | ConvertTo-Json -Depth 6 | Set-Content before.json
 
 # Change ONE setting in Oculus Debug Tool
 
-Get-ItemProperty 'HKCU:\Software\Oculus\RemoteHeadset' | Out-File after.txt
-Compare-Object (Get-Content before.txt) (Get-Content after.txt)
+.\scripts\Get-LinkRegistrySnapshot.ps1 | ConvertTo-Json -Depth 6 | Set-Content after.json
+Compare-Object (Get-Content before.json) (Get-Content after.json)
 ```
 
-Or export the hive:
-
-```powershell
-reg export "HKCU\Software\Oculus\RemoteHeadset" RemoteHeadset.reg /y
-```
+Run from the repository root. Compare snapshots taken under the same Windows account as each tool; HKCU belongs to the process account, and using another administrator account changes it. The script is read-only and excludes unrelated subkeys (including Air Link pairing data). A mismatch on another Meta version needs that version's observed ODT write, not a speculative alternate registry path.
 
 ---
 
