@@ -251,7 +251,7 @@ public sealed class TrayIconHost : IDisposable
         startWithWindows.CheckedChanged += (_, _) => ToggleStartWithWindows(startWithWindows.Checked);
         menu.Items.Add(startWithWindows);
 
-        var startAsAdmin = new ToolStripMenuItem("Run as Administrator (hands-free)")
+        var startAsAdmin = new ToolStripMenuItem("Start with Windows as Administrator (hands-free)")
         {
             Name = "StartAsAdministrator",
             CheckOnClick = true,
