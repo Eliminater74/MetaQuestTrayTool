@@ -44,6 +44,8 @@ Assign **Quest Link mirror screenshot**, **Open Oculus Debug Tool**, **Open Stea
 
 You can add bindings, change shortcuts (Record…), and restore defaults in the configure window.
 
+To assign Exit, click **Add binding**, select **Exit Meta Quest Tray Tool** in the **Action** dropdown under **Edit binding**, then click **Record…** and press your chosen shortcut. The editor scrolls on smaller windows; the binding list scrolls separately. Resolve any duplicate shortcut or voice push-to-talk conflict shown in the status before closing. Changes save automatically when valid.
+
 HotKeys require the tray app to be running. They work globally, including in VR.
 
 ---

@@ -2,9 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="HotKeys"
-        Height="560"
+        Height="720"
         Width="760"
-        ResizeMode="NoResize"
+        MinHeight="480"
+        MinWidth="640"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextBrush}"
@@ -20,6 +22,7 @@
               ToolTip="Close (changes already saved as you edit)."/>
     </StackPanel>
 
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel>
       <TextBlock Text="HotKeys"
                  FontSize="22"
@@ -39,6 +42,9 @@
                 Unchecked="Enabled_Changed"
                 ToolTip="Register global hotkeys while the tray runs. Off disables all shortcuts without deleting bindings."/>
 
+      <TextBlock Style="{StaticResource PageHintStyle}"
+                 Text="To assign Exit Meta Quest Tray Tool: Add binding → choose Exit in Action → Record your shortcut. Exit has no default shortcut."/>
+
       <Grid Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
@@ -51,7 +57,7 @@
       </Grid>
 
       <ListView x:Name="BindingsList"
-                MinHeight="280"
+                Height="180"
                 Style="{StaticResource ThemedListViewStyle}"
                 SelectionChanged="BindingsList_SelectionChanged"
                 ToolTip="Select a binding to edit or remove. Double-check chords that games may also use.">
@@ -67,7 +73,7 @@
         <Button Content="Add binding" Style="{StaticResource GhostButtonStyle}" Click="AddBinding_Click"
                 ToolTip="Add a new action ↔ shortcut binding, then Record a chord."/>
         <Button x:Name="RemoveButton" Content="Remove" Style="{StaticResource GhostButtonStyle}" Click="RemoveBinding_Click" IsEnabled="False"
-                ToolTip="Remove the selected binding from the list (Save to persist)."/>
+                ToolTip="Remove the selected binding and save the change automatically."/>
       </StackPanel>
 
       <Border x:Name="RecordPanel"
@@ -95,5 +101,6 @@
         </StackPanel>
       </Border>
     </StackPanel>
+    </ScrollViewer>
   </DockPanel>
 </Window>

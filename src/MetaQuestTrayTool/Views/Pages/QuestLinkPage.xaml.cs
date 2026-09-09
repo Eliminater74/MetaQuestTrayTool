@@ -289,9 +289,12 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
             App.Instance.Settings.SaveSoon();
         }
 
-        if (!App.Instance.LinkConnection.GetCapabilities().AllowsMetaLinkRegistry)
+        var caps = App.Instance.LinkConnection.GetCapabilities();
+        if (!caps.AllowsMetaLinkRegistry)
         {
-            LiveStatusText.Text = (prefix ?? string.Empty) + "Saved to settings (Meta Link registry unavailable for this session).";
+            LiveStatusText.Text = (prefix ?? string.Empty) + "Saved to settings. " + caps.MetaLinkSkipMessage;
+            App.Instance.Log.Info($"{LiveStatusText.Text} Detected session: {caps.Kind}; active: {caps.SessionActive}. "
+                                  + $"Requested: {App.Instance.Settings.Current.LinkSettings.Describe()}.");
             return;
         }
 

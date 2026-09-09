@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj" />
+    <EmbeddedResource Include="..\..\src\MetaQuestTrayTool\Views\HotKeysWindow.xaml" LogicalName="HotKeysLayout.xaml" />
   </ItemGroup>
 
 </Project>
