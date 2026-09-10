@@ -8,6 +8,22 @@ public class AdbSelectionTests
         new() { Serial = serial, State = state, Model = model };
 
     [Fact]
+    public void StartInfoUsesArgumentListForOuterAdbTokens()
+    {
+        var startInfo = AdbService.CreateAdbStartInfo(
+            @"C:\Android Tools\adb.exe",
+            ["-s", "Quest Serial 123", "shell", "setprop", "debug.oculus.capture.bitrate", "40000000"]);
+
+        Assert.Equal(@"C:\Android Tools\adb.exe", startInfo.FileName);
+        Assert.Equal(string.Empty, startInfo.Arguments);
+        Assert.Equal("Quest Serial 123", startInfo.ArgumentList[1]);
+        Assert.Equal("setprop", startInfo.ArgumentList[3]);
+        Assert.False(startInfo.UseShellExecute);
+        Assert.True(startInfo.RedirectStandardOutput);
+        Assert.True(startInfo.RedirectStandardError);
+    }
+
+    [Fact]
     public void TrustedSecondQuestWinsRegardlessOfEnumerationOrder()
     {
         var a = Device("QUEST-A"); var b = Device("QUEST-B");

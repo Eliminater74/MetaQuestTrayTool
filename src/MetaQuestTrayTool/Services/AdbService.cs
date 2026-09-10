@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using MetaQuestTrayTool.Models;
@@ -31,6 +32,9 @@ public sealed class AdbService
     private string? _cachedRuntimeSerial;
     private DateTime _cachedRuntimeUtc = DateTime.MinValue;
     private static readonly TimeSpan RuntimeCache = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan CommandQueueTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan OutputDrainTimeout = TimeSpan.FromSeconds(3);
     private readonly SemaphoreSlim _commandGate = new(1, 1);
 
     public void Refresh()
@@ -152,7 +156,7 @@ public sealed class AdbService
             }
         }
 
-        var output = Run("devices -l");
+        var output = Run("devices", "-l");
         var devices = new List<AdbDevice>();
         foreach (var raw in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
         {
@@ -249,7 +253,7 @@ public sealed class AdbService
     public string ConnectWireless(string host, int port)
     {
         var endpoint = FormatEndpoint(host, port);
-        var output = Run($"connect {endpoint}");
+        var output = Run("connect", endpoint);
         InvalidateDeviceCache();
         if (output.Contains("cannot connect", StringComparison.OrdinalIgnoreCase)
             || output.Contains("failed to connect", StringComparison.OrdinalIgnoreCase)
@@ -321,7 +325,7 @@ public sealed class AdbService
 
         var endpoint = FormatEndpoint(host, pairingPort);
         // adb pair IP:PORT CODE — code is a separate argv, not part of the endpoint.
-        var output = Run($"pair {endpoint} {pairingCode}");
+        var output = Run("pair", endpoint, pairingCode);
         InvalidateDeviceCache();
 
         if (output.Contains("failed", StringComparison.OrdinalIgnoreCase)
@@ -346,7 +350,7 @@ public sealed class AdbService
         if (!string.IsNullOrWhiteSpace(host) && port is int p)
         {
             var endpoint = FormatEndpoint(host, p);
-            output = Run($"disconnect {endpoint}");
+            output = Run("disconnect", endpoint);
             InvalidateDeviceCache();
             return $"Disconnected {endpoint}. {TrimAdbNoise(output)}".Trim();
         }
@@ -372,7 +376,7 @@ public sealed class AdbService
                   ?? throw new InvalidOperationException(
                       "Plug the Quest in over USB (Developer Mode + authorize) before enabling tcpip.");
 
-        Run($"-s {usb.Serial} tcpip {port}");
+        Run("-s", usb.Serial, "tcpip", port.ToString(CultureInfo.InvariantCulture));
         suggestedHost = TryReadLanIp(usb.Serial);
         InvalidateDeviceCache();
 
@@ -445,7 +449,7 @@ public sealed class AdbService
 
             try
             {
-                Run($"disconnect {device.Serial}");
+                Run("disconnect", device.Serial);
                 dropped.Add(VrHeadsetClassifier.DescribeIgnored(device, probe));
             }
             catch
@@ -487,7 +491,7 @@ public sealed class AdbService
 
         try
         {
-            Run($"disconnect {device.Serial}");
+            Run("disconnect", device.Serial);
         }
         catch
         {
@@ -867,17 +871,20 @@ public sealed class AdbService
 
     public string? GetProp(string serial, string name)
     {
-        var value = Run($"-s {serial} shell getprop {name}").Trim();
+        var value = Run("-s", serial, "shell", "getprop", name).Trim();
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
     public string SetProp(string serial, string name, string value)
     {
-        Run($"-s {serial} shell setprop {name} {value}");
+        Run("-s", serial, "shell", "setprop", name, value);
         return $"{name}={value}";
     }
 
-    public string Shell(string serial, string command) => Run($"-s {serial} shell {command}");
+    public string Shell(string serial, string command) => Run("-s", serial, "shell", command);
+
+    public Task<string> ShellAsync(string serial, string command, CancellationToken cancellationToken = default) =>
+        RunAsync(["-s", serial, "shell", command], cancellationToken);
 
     public string SendText(string serial, string text)
     {
@@ -896,7 +903,7 @@ public sealed class AdbService
             .Replace(">", "\\>")
             .Replace("|", "\\|")
             .Replace(";", "\\;");
-        Run($"-s {serial} shell input text \"{escaped}\"");
+        Run("-s", serial, "shell", $"input text \"{escaped}\"");
         return "Sent text to the focused headset field.";
     }
 
@@ -918,7 +925,7 @@ public sealed class AdbService
             Directory.CreateDirectory(folder);
         }
 
-        RunToFile($"-s {serial} exec-out screencap -p", outputPath);
+        RunToFile(["-s", serial, "exec-out", "screencap", "-p"], outputPath);
         if (!IsValidPngFile(outputPath))
         {
             TryDeleteFile(outputPath);
@@ -1043,33 +1050,27 @@ public sealed class AdbService
         }
     }
 
-    private string Run(string arguments)
+    private string Run(params string[] arguments) =>
+        RunAsync(arguments, CancellationToken.None).GetAwaiter().GetResult();
+
+    private async Task<string> RunAsync(IReadOnlyList<string> arguments, CancellationToken cancellationToken = default)
     {
         if (!IsAvailable)
         {
             throw new InvalidOperationException("ADB was not found.");
         }
 
-        if (!_commandGate.Wait(TimeSpan.FromSeconds(30)))
+        var display = FormatAdbCommand(arguments);
+        if (!await _commandGate.WaitAsync(CommandQueueTimeout, cancellationToken).ConfigureAwait(false))
         {
-            throw new TimeoutException($"ADB command queue was busy for 30s: adb {arguments}");
+            throw new TimeoutException($"ADB command queue was busy for 30s: {display}");
         }
 
         try
         {
             using var process = new Process
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = AdbPath,
-                    Arguments = arguments,
-                    WorkingDirectory = Path.GetDirectoryName(AdbPath) ?? AppContext.BaseDirectory,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8
-                }
+                StartInfo = CreateAdbStartInfo(AdbPath!, arguments)
             };
 
             if (!process.Start())
@@ -1079,42 +1080,42 @@ public sealed class AdbService
 
             var stdout = process.StandardOutput.ReadToEndAsync();
             var stderr = process.StandardError.ReadToEndAsync();
-            if (!process.WaitForExit(20_000))
+            using var timeout = new CancellationTokenSource(CommandTimeout);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
+            try
             {
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                catch
-                {
-                    // hung adb.exe
-                }
-
-                try
-                {
-                    process.WaitForExit(3_000);
-                }
-                catch
-                {
-                    // ignore
-                }
-
-                throw new TimeoutException($"ADB timed out after 20s: adb {arguments}");
+                await process.WaitForExitAsync(linked.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                await KillAndReapAsync(process).ConfigureAwait(false);
+                throw new TimeoutException($"ADB timed out after 20s: {display}");
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                await KillAndReapAsync(process).ConfigureAwait(false);
+                throw;
             }
 
-            if (!Task.WaitAll([stdout, stderr], 3_000))
+            string output;
+            string error;
+            try
             {
-                throw new TimeoutException($"ADB output read timed out: adb {arguments}");
+                await Task.WhenAll(stdout, stderr).WaitAsync(OutputDrainTimeout, cancellationToken).ConfigureAwait(false);
+                output = stdout.Result;
+                error = stderr.Result;
+            }
+            catch (TimeoutException ex)
+            {
+                throw new TimeoutException($"ADB output read timed out: {display}", ex);
             }
 
-            var output = stdout.Result;
-            var error = stderr.Result;
             var combined = (output + Environment.NewLine + error).Trim();
             if (process.ExitCode != 0)
             {
                 throw new InvalidOperationException(
                     string.IsNullOrWhiteSpace(combined)
-                        ? $"ADB exited with code {process.ExitCode}: adb {arguments}"
+                        ? $"ADB exited with code {process.ExitCode}: {display}"
                         : $"ADB exited with code {process.ExitCode}: {combined}");
             }
 
@@ -1126,16 +1127,20 @@ public sealed class AdbService
         }
     }
 
-    private void RunToFile(string arguments, string outputPath)
+    private void RunToFile(IReadOnlyList<string> arguments, string outputPath) =>
+        RunToFileAsync(arguments, outputPath, CancellationToken.None).GetAwaiter().GetResult();
+
+    private async Task RunToFileAsync(IReadOnlyList<string> arguments, string outputPath, CancellationToken cancellationToken = default)
     {
         if (!IsAvailable)
         {
             throw new InvalidOperationException("ADB was not found.");
         }
 
-        if (!_commandGate.Wait(TimeSpan.FromSeconds(30)))
+        var display = FormatAdbCommand(arguments);
+        if (!await _commandGate.WaitAsync(CommandQueueTimeout, cancellationToken).ConfigureAwait(false))
         {
-            throw new TimeoutException($"ADB command queue was busy for 30s: adb {arguments}");
+            throw new TimeoutException($"ADB command queue was busy for 30s: {display}");
         }
 
         var tempPath = outputPath + ".tmp";
@@ -1144,70 +1149,63 @@ public sealed class AdbService
             TryDeleteFile(tempPath);
             using var process = new Process
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = AdbPath,
-                    Arguments = arguments,
-                    WorkingDirectory = Path.GetDirectoryName(AdbPath) ?? AppContext.BaseDirectory,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardErrorEncoding = Encoding.UTF8
-                }
+                StartInfo = CreateAdbStartInfo(AdbPath!, arguments)
             };
 
-            using var output = new FileStream(
-                tempPath,
-                FileMode.CreateNew,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 64 * 1024,
-                FileOptions.SequentialScan);
-
-            if (!process.Start())
+            string error;
+            int exitCode;
+            using (var output = new FileStream(
+                       tempPath,
+                       FileMode.CreateNew,
+                       FileAccess.Write,
+                       FileShare.None,
+                       bufferSize: 64 * 1024,
+                       FileOptions.SequentialScan))
             {
-                throw new InvalidOperationException("ADB process could not be started.");
-            }
+                if (!process.Start())
+                {
+                    throw new InvalidOperationException("ADB process could not be started.");
+                }
 
-            var stdout = process.StandardOutput.BaseStream.CopyToAsync(output);
-            var stderr = process.StandardError.ReadToEndAsync();
-            if (!process.WaitForExit(20_000))
-            {
+                var stdout = process.StandardOutput.BaseStream.CopyToAsync(output, cancellationToken);
+                var stderr = process.StandardError.ReadToEndAsync();
+                using var timeout = new CancellationTokenSource(CommandTimeout);
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
                 try
                 {
-                    process.Kill(entireProcessTree: true);
+                    await process.WaitForExitAsync(linked.Token).ConfigureAwait(false);
                 }
-                catch
+                catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                 {
-                    // hung adb.exe
+                    await KillAndReapAsync(process).ConfigureAwait(false);
+                    throw new TimeoutException($"ADB timed out after 20s: {display}");
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    await KillAndReapAsync(process).ConfigureAwait(false);
+                    throw;
                 }
 
                 try
                 {
-                    process.WaitForExit(3_000);
+                    await Task.WhenAll(stdout, stderr).WaitAsync(OutputDrainTimeout, cancellationToken).ConfigureAwait(false);
                 }
-                catch
+                catch (TimeoutException ex)
                 {
-                    // ignore
+                    throw new TimeoutException($"ADB output read timed out: {display}", ex);
                 }
 
-                throw new TimeoutException($"ADB timed out after 20s: adb {arguments}");
+                output.Flush(flushToDisk: true);
+                error = stderr.Result.Trim();
+                exitCode = process.ExitCode;
             }
 
-            if (!Task.WaitAll([stdout, stderr], 3_000))
-            {
-                throw new TimeoutException($"ADB output read timed out: adb {arguments}");
-            }
-
-            output.Flush(flushToDisk: true);
-            var error = stderr.Result.Trim();
-            if (process.ExitCode != 0)
+            if (exitCode != 0)
             {
                 throw new InvalidOperationException(
                     string.IsNullOrWhiteSpace(error)
-                        ? $"ADB exited with code {process.ExitCode}: adb {arguments}"
-                        : $"ADB exited with code {process.ExitCode}: {error}");
+                        ? $"ADB exited with code {exitCode}: {display}"
+                        : $"ADB exited with code {exitCode}: {error}");
             }
 
             File.Move(tempPath, outputPath, overwrite: true);
@@ -1222,6 +1220,58 @@ public sealed class AdbService
             _commandGate.Release();
         }
     }
+
+    internal static ProcessStartInfo CreateAdbStartInfo(string adbPath, IReadOnlyList<string> arguments)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = adbPath,
+            WorkingDirectory = Path.GetDirectoryName(adbPath) ?? AppContext.BaseDirectory,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8
+        };
+
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        return startInfo;
+    }
+
+    private static async Task KillAndReapAsync(Process process)
+    {
+        try
+        {
+            process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+            // hung or already-exited adb.exe
+        }
+
+        try
+        {
+            using var reap = new CancellationTokenSource(OutputDrainTimeout);
+            await process.WaitForExitAsync(reap.Token).ConfigureAwait(false);
+        }
+        catch
+        {
+            // best effort after kill
+        }
+    }
+
+    private static string FormatAdbCommand(IReadOnlyList<string> arguments) =>
+        "adb " + string.Join(" ", arguments.Select(QuoteArgumentForDisplay));
+
+    private static string QuoteArgumentForDisplay(string argument) =>
+        argument.Any(char.IsWhiteSpace) || argument.Contains('"', StringComparison.Ordinal)
+            ? "\"" + argument.Replace("\"", "\\\"", StringComparison.Ordinal) + "\""
+            : argument;
 
     internal static bool IsValidPngFile(string path)
     {
