@@ -57,16 +57,40 @@ jobs:
           dotnet-version: 8.0.424
 
       - name: Install Inno Setup 6
-        run: choco install innosetup -y --no-progress
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP 'innosetup-6.7.1.exe'
+          $expectedHash = '4D11E8050B6185E0D49BD9E8CC661A7A59F44959A621D31D11033124C4E8A7B0'
+          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_1/innosetup-6.7.1.exe' -OutFile $installer
+          $actualHash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash
+          if ($actualHash -ne $expectedHash) {
+            throw "Inno Setup checksum mismatch. Expected $expectedHash but got $actualHash."
+          }
+          $install = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-' -WindowStyle Hidden -Wait -PassThru
+          if ($install.ExitCode -ne 0) {
+            throw "Inno Setup installer failed with exit code $($install.ExitCode)."
+          }
         shell: pwsh
 
       - name: Restore
-        run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --force-evaluate
+        run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --locked-mode
         shell: pwsh
 
       - name: Test
-        run: dotnet test MetaQuestTrayTool.sln -c Release --no-restore
+        run: dotnet test MetaQuestTrayTool.sln -c Release --no-restore --collect:"XPlat Code Coverage" --results-directory artifacts/coverage
         shell: pwsh
+
+      - name: Check test coverage baseline
+        run: .\scripts\Test-Coverage.ps1
+        shell: pwsh
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage
+          path: artifacts/coverage/**/coverage.cobertura.xml
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Check NuGet vulnerabilities
         run: |

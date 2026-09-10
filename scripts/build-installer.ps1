@@ -69,7 +69,7 @@ if (-not $SkipPublish) {
     }
     New-Item -ItemType Directory -Path $publishDir -Force | Out-Null
 
-    & dotnet restore $csproj -r win-x64 --force-evaluate
+    & dotnet restore $csproj -r win-x64 --locked-mode
     if ($LASTEXITCODE -ne 0) {
         throw "dotnet restore failed with exit code $LASTEXITCODE"
     }

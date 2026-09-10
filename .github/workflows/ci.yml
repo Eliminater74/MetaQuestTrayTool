@@ -23,7 +23,7 @@ jobs:
           dotnet-version: 8.0.424
 
       - name: Restore
-        run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --force-evaluate
+        run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --locked-mode
         shell: pwsh
 
       - name: Build
@@ -31,8 +31,21 @@ jobs:
         shell: pwsh
 
       - name: Test
-        run: dotnet test MetaQuestTrayTool.sln -c Release --no-restore --no-build
+        run: dotnet test MetaQuestTrayTool.sln -c Release --no-restore --no-build --collect:"XPlat Code Coverage" --results-directory artifacts/coverage
         shell: pwsh
+
+      - name: Check test coverage baseline
+        run: .\scripts\Test-Coverage.ps1
+        shell: pwsh
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage
+          path: artifacts/coverage/**/coverage.cobertura.xml
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Check NuGet vulnerabilities
         run: |
@@ -45,7 +58,7 @@ jobs:
 
       - name: Publish self-contained (smoke test)
         run: |
-          dotnet restore src/MetaQuestTrayTool/MetaQuestTrayTool.csproj -r win-x64 --force-evaluate
+          dotnet restore src/MetaQuestTrayTool/MetaQuestTrayTool.csproj -r win-x64 --locked-mode
           dotnet publish src/MetaQuestTrayTool/MetaQuestTrayTool.csproj -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false -o publish/ci-smoke --no-restore
         shell: pwsh
 
