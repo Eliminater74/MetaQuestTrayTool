@@ -74,7 +74,9 @@ public enum HeadsetCaptureBitrate
     Mbps5,
     Mbps10,
     Mbps15,
-    Mbps20
+    Mbps20,
+    Mbps30,
+    Mbps40
 }
 
 /// <summary>Standalone Quest tweaks applied over ADB (same properties SideQuest uses).</summary>

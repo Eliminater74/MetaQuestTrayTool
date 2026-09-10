@@ -67,6 +67,8 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(CaptureBitrateBox, "10 Mbps", HeadsetCaptureBitrate.Mbps10);
         Add(CaptureBitrateBox, "15 Mbps", HeadsetCaptureBitrate.Mbps15);
         Add(CaptureBitrateBox, "20 Mbps", HeadsetCaptureBitrate.Mbps20);
+        Add(CaptureBitrateBox, "30 Mbps", HeadsetCaptureBitrate.Mbps30);
+        Add(CaptureBitrateBox, "40 Mbps", HeadsetCaptureBitrate.Mbps40);
     }
 
     public void Refresh()
@@ -278,6 +280,12 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             ResultText.Text = ex.Message;
         }
     }
+
+    private void StartRecording_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.SetRecording(App.Instance.Settings.Current.Headset, true));
+
+    private void StopRecording_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.SetRecording(App.Instance.Settings.Current.Headset, false));
 
     private void Trust_Click(object sender, RoutedEventArgs e)
     {

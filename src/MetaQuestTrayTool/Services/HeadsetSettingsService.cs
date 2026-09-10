@@ -64,6 +64,18 @@ public sealed class HeadsetSettingsService
         return $"Trusted VR headset {identity.Model ?? "headset"} ({identity.Serial}). Commands will not run on phones, tablets, emulators, or any other device.";
     }
 
+    public string SetRecording(HeadsetSettings settings, bool enabled)
+    {
+        var quest = RequireReadyHeadset(settings);
+        _adb.SetProp(quest.Serial, "debug.oculus.enableVideoCapture", enabled ? "1" : "0");
+        var value = _adb.GetProp(quest.Serial, "debug.oculus.enableVideoCapture");
+        if (value != (enabled ? "1" : "0"))
+            throw new InvalidOperationException("Recording request could not be verified. Check capture status inside the headset.");
+        return enabled
+            ? "Start recording requested and property verified. Confirm capture inside the headset; recordings stay on the headset."
+            : "Stop recording requested and property verified. Check the headset for the saved recording.";
+    }
+
     public string Apply(HeadsetSettings settings, IReadOnlyList<string>? extraAdb = null)
     {
         var quest = RequireReadyHeadset(settings);
@@ -150,6 +162,8 @@ public sealed class HeadsetSettingsService
             HeadsetCaptureBitrate.Mbps10 => 10_000_000,
             HeadsetCaptureBitrate.Mbps15 => 15_000_000,
             HeadsetCaptureBitrate.Mbps20 => 20_000_000,
+            HeadsetCaptureBitrate.Mbps30 => 30_000_000,
+            HeadsetCaptureBitrate.Mbps40 => 40_000_000,
             _ => (int?)null
         };
         if (bitrate is not null)
