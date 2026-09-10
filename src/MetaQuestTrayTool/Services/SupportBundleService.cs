@@ -1,5 +1,7 @@
 using System.IO;
 using System.IO.Compression;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using MetaQuestTrayTool.Models;
@@ -12,6 +14,7 @@ public sealed record SupportBundleResult(
     IReadOnlyList<string> Entries)
 {
     public string Summary => $"Created support ZIP ({FormatBytes(Bytes)}) at {FilePath}. Entries: {string.Join(", ", Entries)}.";
+    public string LogSummary => $"Created support ZIP ({FormatBytes(Bytes)}) as {Path.GetFileName(FilePath)}. Entries: {string.Join(", ", Entries)}.";
 
     private static string FormatBytes(long bytes)
     {
@@ -34,6 +37,18 @@ public sealed class SupportBundleService
     private static readonly Regex Ipv4 = new(
         @"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?::\d{1,5})?\b",
         RegexOptions.Compiled);
+
+    private static readonly Regex Ipv6Candidate = new(
+        @"(?<![\w])(?:\[[0-9A-Fa-f:.%]+\](?::\d{1,5})?|(?=[0-9A-Fa-f:.%]*::)[0-9A-Fa-f:.%]+|(?=(?:[0-9A-Fa-f:.%]*:){3,})[0-9A-Fa-f:.%]+)(?![\w])",
+        RegexOptions.Compiled);
+
+    private static readonly Regex MacAddress = new(
+        @"\b(?:(?:[0-9A-F]{2}[:-]){5}[0-9A-F]{2}|[0-9A-F]{4}\.[0-9A-F]{4}\.[0-9A-F]{4})\b",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex EmailAddress = new(
+        @"\b[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}\b",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly Regex LongDeviceToken = new(
         @"\b(?=[A-Z0-9_-]{8,}\b)(?=[A-Z0-9_-]*[A-Z])(?=[A-Z0-9_-]*\d)[A-Z0-9_-]+\b",
@@ -128,6 +143,9 @@ public sealed class SupportBundleService
         }
 
         sanitized = Ipv4.Replace(sanitized, "<ip>");
+        sanitized = MacAddress.Replace(sanitized, "<mac>");
+        sanitized = EmailAddress.Replace(sanitized, "<email>");
+        sanitized = Ipv6Candidate.Replace(sanitized, match => IsIpv6Address(match.Value) ? "<ip>" : match.Value);
         sanitized = LongDeviceToken.Replace(sanitized, "<device-id>");
         return sanitized;
     }
@@ -234,5 +252,28 @@ public sealed class SupportBundleService
         {
             // best-effort cleanup
         }
+    }
+
+    private static bool IsIpv6Address(string value)
+    {
+        var candidate = value.Trim();
+        if (candidate.StartsWith('['))
+        {
+            var close = candidate.IndexOf(']');
+            if (close > 0)
+            {
+                candidate = candidate[1..close];
+            }
+        }
+
+        var zone = candidate.IndexOf('%');
+        if (zone >= 0)
+        {
+            candidate = candidate[..zone];
+        }
+
+        return candidate.Contains(':')
+               && IPAddress.TryParse(candidate, out var address)
+               && address.AddressFamily == AddressFamily.InterNetworkV6;
     }
 }

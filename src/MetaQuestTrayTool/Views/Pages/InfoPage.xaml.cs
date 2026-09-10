@@ -247,7 +247,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             {
                 ReportBox.Text = result.Summary;
             }
-            App.Instance.Log.Info(result.Summary);
+            App.Instance.Log.Info(result.LogSummary);
             System.Windows.MessageBox.Show(Window.GetWindow(this), result.Summary, App.AppName);
         }
         catch (Exception ex)
@@ -257,7 +257,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             {
                 ReportBox.Text = message;
             }
-            App.Instance.Log.Warn(message);
+            App.Instance.Log.Warn(SupportBundleService.SanitizeForSupport(message));
             System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
         }
     }
