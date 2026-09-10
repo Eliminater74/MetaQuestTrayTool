@@ -17,8 +17,8 @@ public static class SystemInfoService
         text.AppendLine($"{AppInfo.ProductName} {AppInfo.Version}");
         text.AppendLine($"By {AppInfo.Author}");
         text.AppendLine($"Elevated: {app.StartupRegistration.IsProcessElevated}");
-        text.AppendLine($"OpenXR: {OpenXrRuntimeService.Label(openXr)}");
-        text.AppendLine($"OpenXR JSON: {app.OpenXr.ReadActivePath() ?? "(none)"}");
+        text.AppendLine(app.OpenXr.Describe());
+        text.AppendLine($"OpenXR JSON (64-bit): {app.OpenXr.ReadActivePath() ?? "(none)"}");
         text.AppendLine(app.Oculus.DescribeStatus());
         text.AppendLine($"Debug Tool CLI: {(app.DebugTool.IsAvailable ? app.DebugTool.CliPath : "not found")}");
         text.AppendLine($"Debug Tool GUI: {(app.Oculus.DebugToolGuiPath is { } gui && File.Exists(gui) ? gui : "not found")}");

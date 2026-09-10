@@ -6,7 +6,7 @@ namespace MetaQuestTrayTool.Services;
 
 /// <summary>
 /// Switches the Windows OpenXR active runtime between Meta / Oculus and SteamVR.
-/// Writes HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime (and the 32-bit WOW6432Node key when a JSON exists).
+/// Writes HKLM\SOFTWARE\Khronos\OpenXR\1\ActiveRuntime through explicit 64-bit and 32-bit registry views.
 /// </summary>
 public sealed class OpenXrRuntimeService
 {
@@ -16,37 +16,55 @@ public sealed class OpenXrRuntimeService
 
     private string? _capturedBeforeProfile;
 
-    public OpenXrRuntimeKind? ReadActiveKind()
+    public OpenXrRuntimeKind? ReadActiveKind() => ReadActiveKind(RegistryView.Registry64);
+
+    internal OpenXrRuntimeKind? ReadActiveKind(RegistryView view)
     {
-        var path = ReadActivePath();
+        var path = ReadActivePath(view);
         return path is null ? null : Classify(path);
     }
 
-    public string? ReadActivePath()
+    public string? ReadActivePath() => ReadActivePath(RegistryView.Registry64);
+
+    internal string? ReadActivePath(RegistryView view)
     {
-        using var key = Registry.LocalMachine.OpenSubKey(RegistryPath, writable: false);
-        return key?.GetValue(ValueName) as string;
+        try
+        {
+            using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+            using var key = root.OpenSubKey(RegistryPath, writable: false);
+            return key?.GetValue(ValueName) as string;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
-    public string Describe()
+    public string Describe() => DescribeViews(ReadRuntimeView(RegistryView.Registry64), ReadRuntimeView(RegistryView.Registry32));
+
+    internal OpenXrRuntimeViewState ReadRuntimeView(RegistryView view)
     {
-        var path = ReadActivePath();
-        if (string.IsNullOrWhiteSpace(path))
+        var path = ReadActivePath(view);
+        return new OpenXrRuntimeViewState(ViewLabel(view), path is null ? null : Classify(path), path);
+    }
+
+    internal static string DescribeViews(OpenXrRuntimeViewState x64, OpenXrRuntimeViewState x86)
+    {
+        if (string.IsNullOrWhiteSpace(x64.Path) && string.IsNullOrWhiteSpace(x86.Path))
         {
             return "OpenXR: no ActiveRuntime is set.";
         }
 
-        var kind = Classify(path);
-        var label = kind switch
+        if (!string.IsNullOrWhiteSpace(x64.Path)
+            && string.Equals(x64.Path, x86.Path, StringComparison.OrdinalIgnoreCase))
         {
-            OpenXrRuntimeKind.Meta => "Meta / Oculus",
-            OpenXrRuntimeKind.SteamVr => "SteamVR",
-            _ => "Unknown"
-        };
-        return $"OpenXR: {label} ({path})";
+            return $"OpenXR: {Label(x64.Kind)} ({x64.Path})";
+        }
+
+        return $"OpenXR: {DescribeView(x64)}; {DescribeView(x86)}";
     }
 
-    public bool IsAvailable(OpenXrRuntimeKind kind) => !string.IsNullOrWhiteSpace(ResolveJson(kind, prefer64: true));
+    public bool IsAvailable(OpenXrRuntimeKind kind) => !string.IsNullOrWhiteSpace(ResolveJson(kind, RegistryView.Registry64));
 
     public string Set(OpenXrRuntimeKind kind) => SetResult(kind).Summary;
 
@@ -57,7 +75,7 @@ public sealed class OpenXrRuntimeService
             return new("OpenXR", ProfileStepStatus.Skipped, "OpenXR inherit - no registry change.");
         }
 
-        var json64 = ResolveJson(kind, prefer64: true);
+        var json64 = ResolveJson(kind, RegistryView.Registry64);
         if (string.IsNullOrWhiteSpace(json64) || !File.Exists(json64))
         {
             return new("OpenXR", ProfileStepStatus.Failed, kind == OpenXrRuntimeKind.SteamVr
@@ -65,20 +83,30 @@ public sealed class OpenXrRuntimeService
                 : "Meta OpenXR JSON was not found. Install the Meta Quest / Oculus PC software.");
         }
 
-        var json32 = ResolveJson(kind, prefer64: false);
+        var json32 = ResolveJson(kind, RegistryView.Registry32);
         if (string.IsNullOrWhiteSpace(json32) || !File.Exists(json32))
         {
             json32 = null;
         }
 
         var write = WriteActiveRuntimes(json64, json32);
-        var current = ReadActiveKind();
-        if (current == kind && write.Succeeded)
+        var active64 = ReadRuntimeView(RegistryView.Registry64);
+        var active32 = ReadRuntimeView(RegistryView.Registry32);
+        var view32Matches = json32 is null
+            ? string.IsNullOrWhiteSpace(active32.Path)
+            : active32.Kind == kind;
+        if (active64.Kind == kind && view32Matches && write.Succeeded)
         {
-            return new("OpenXR", ProfileStepStatus.Succeeded, $"OpenXR runtime set to {Label(kind)}. Restart the game / SteamVR / Link session to pick it up. {write.Summary}");
+            return new(
+                "OpenXR",
+                ProfileStepStatus.Succeeded,
+                $"OpenXR runtime set to {Label(kind)}. Restart the game / SteamVR / Link session to pick it up. {write.Summary}");
         }
 
-        return new("OpenXR", ProfileStepStatus.Failed, $"Tried to set OpenXR to {Label(kind)}. Live value is {Label(current)}. {write.Summary}");
+        return new(
+            "OpenXR",
+            ProfileStepStatus.Failed,
+            $"Tried to set OpenXR to {Label(kind)}. Live values: {DescribeView(active64)}; {DescribeView(active32)}. {write.Summary}");
     }
 
     public void CaptureBeforeProfile()
@@ -132,9 +160,9 @@ public sealed class OpenXrRuntimeService
         return OpenXrRuntimeKind.Inherit;
     }
 
-    private string? ResolveJson(OpenXrRuntimeKind kind, bool prefer64)
+    private string? ResolveJson(OpenXrRuntimeKind kind, RegistryView view)
     {
-        foreach (var candidate in EnumerateCandidates(kind, prefer64))
+        foreach (var candidate in EnumerateCandidates(kind, view))
         {
             if (File.Exists(candidate))
             {
@@ -145,9 +173,9 @@ public sealed class OpenXrRuntimeService
         return null;
     }
 
-    private IEnumerable<string> EnumerateCandidates(OpenXrRuntimeKind kind, bool prefer64)
+    private IEnumerable<string> EnumerateCandidates(OpenXrRuntimeKind kind, RegistryView view)
     {
-        foreach (var registered in ReadAvailableRuntimes())
+        foreach (var registered in ReadAvailableRuntimes(view))
         {
             var classified = Classify(registered);
             if (classified != kind)
@@ -155,13 +183,12 @@ public sealed class OpenXrRuntimeService
                 continue;
             }
 
-            if (prefer64 && registered.Contains("32", StringComparison.OrdinalIgnoreCase)
-                && registered.Contains("openxr_32", StringComparison.OrdinalIgnoreCase))
+            if (view == RegistryView.Registry64 && IsLikely32BitRuntimeJson(registered))
             {
                 continue;
             }
 
-            if (!prefer64 && registered.Contains("openxr_64", StringComparison.OrdinalIgnoreCase))
+            if (view == RegistryView.Registry32 && IsLikely64BitRuntimeJson(registered))
             {
                 continue;
             }
@@ -171,11 +198,11 @@ public sealed class OpenXrRuntimeService
 
         if (kind == OpenXrRuntimeKind.Meta)
         {
-            yield return prefer64
+            yield return view == RegistryView.Registry64
                 ? @"C:\Program Files\Oculus\Support\oculus-runtime\oculus_openxr_64.json"
                 : @"C:\Program Files\Oculus\Support\oculus-runtime\oculus_openxr_32.json";
         }
-        else if (kind == OpenXrRuntimeKind.SteamVr && prefer64)
+        else if (kind == OpenXrRuntimeKind.SteamVr && view == RegistryView.Registry64)
         {
             var steam = new SteamLibraryService().DetectSteamRoot();
             if (!string.IsNullOrWhiteSpace(steam))
@@ -187,34 +214,47 @@ public sealed class OpenXrRuntimeService
         }
     }
 
-    private static IEnumerable<string> ReadAvailableRuntimes()
+    private static IReadOnlyList<string> ReadAvailableRuntimes(RegistryView view)
     {
-        using var key = Registry.LocalMachine.OpenSubKey(RegistryPath + @"\AvailableRuntimes", writable: false);
-        if (key is null)
+        var runtimes = new List<string>();
+        try
         {
-            yield break;
-        }
-
-        foreach (var name in key.GetValueNames())
-        {
-            if (!string.IsNullOrWhiteSpace(name))
+            using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+            using var key = root.OpenSubKey(RegistryPath + @"\AvailableRuntimes", writable: false);
+            if (key is null)
             {
-                yield return name;
+                return runtimes;
+            }
+
+            foreach (var name in key.GetValueNames())
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    runtimes.Add(name);
+                }
             }
         }
+        catch
+        {
+            // Best-effort diagnostics. SetResult still reports write/read-back failures.
+        }
+
+        return runtimes;
     }
 
     private static (bool Succeeded, string Summary) WriteActiveRuntimes(string json64, string? json32)
     {
         try
         {
-            WriteKey(RegistryPath, json64);
+            WriteKey(RegistryView.Registry64, json64);
             if (!string.IsNullOrWhiteSpace(json32))
             {
-                WriteKey(WowRegistryPath, json32);
+                WriteKey(RegistryView.Registry32, json32);
+                return (true, "Wrote 64-bit and 32-bit HKLM OpenXR ActiveRuntime values.");
             }
 
-            return (true, "Wrote HKLM OpenXR ActiveRuntime.");
+            ClearActiveRuntime(RegistryView.Registry32);
+            return (true, "Wrote 64-bit HKLM OpenXR ActiveRuntime and cleared stale 32-bit ActiveRuntime because no matching 32-bit runtime JSON was found.");
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException)
         {
@@ -227,12 +267,38 @@ public sealed class OpenXrRuntimeService
         }
     }
 
-    private static void WriteKey(string keyPath, string jsonPath)
+    private static void WriteKey(RegistryView view, string jsonPath)
     {
-        using var key = Registry.LocalMachine.OpenSubKey(keyPath, writable: true)
-                        ?? Registry.LocalMachine.CreateSubKey(keyPath, writable: true)
-                        ?? throw new UnauthorizedAccessException($"Could not open HKLM\\{keyPath}.");
+        using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+        using var key = root.OpenSubKey(RegistryPath, writable: true)
+                        ?? root.CreateSubKey(RegistryPath, writable: true)
+                        ?? throw new UnauthorizedAccessException($"Could not open HKLM\\{RegistryPath} in {ViewLabel(view)} view.");
         key.SetValue(ValueName, jsonPath, RegistryValueKind.String);
     }
 
+    private static void ClearActiveRuntime(RegistryView view)
+    {
+        using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+        using var key = root.OpenSubKey(RegistryPath, writable: true);
+        key?.DeleteValue(ValueName, throwOnMissingValue: false);
+    }
+
+    private static string DescribeView(OpenXrRuntimeViewState view) => string.IsNullOrWhiteSpace(view.Path)
+        ? $"{view.Name}: not set"
+        : $"{view.Name}: {Label(view.Kind)} ({view.Path})";
+
+    private static string ViewLabel(RegistryView view) => view == RegistryView.Registry32 ? "32-bit" : "64-bit";
+
+    private static bool IsLikely32BitRuntimeJson(string path) =>
+        path.Contains("openxr_32", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("win32", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLikely64BitRuntimeJson(string path) =>
+        path.Contains("openxr_64", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("win64", StringComparison.OrdinalIgnoreCase);
 }
+
+internal readonly record struct OpenXrRuntimeViewState(
+    string Name,
+    OpenXrRuntimeKind? Kind,
+    string? Path);

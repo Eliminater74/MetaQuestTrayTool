@@ -167,8 +167,8 @@ public sealed class SupportBundleService
             text.AppendLine($"  Link kind: {snapshot.Link.Kind}");
             text.AppendLine($"  Link active: {snapshot.Link.SessionActive}");
             text.AppendLine($"  Link detail: {snapshot.Link.Detail ?? "none"}");
-            text.AppendLine($"  OpenXR: {OpenXrRuntimeService.Label(snapshot.OpenXr)}");
-            text.AppendLine($"  OpenXR path: {snapshot.OpenXrPath ?? "none"}");
+            text.AppendLine($"  OpenXR: {_app.OpenXr.Describe()}");
+            text.AppendLine($"  OpenXR path (64-bit): {snapshot.OpenXrPath ?? "none"}");
             text.AppendLine($"  SteamVR installed: {snapshot.SteamVr.IsInstalled}");
             text.AppendLine($"  SteamVR running: {snapshot.SteamVr.IsRunning}");
             text.AppendLine($"  Virtual Desktop running: {snapshot.Link.VirtualDesktopRunning}");
