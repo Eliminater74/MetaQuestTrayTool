@@ -28,8 +28,44 @@ public sealed record HeadsetScreenshotResult(
     }
 }
 
+public sealed record HeadsetRecordingDownloadResult(
+    string FilePath,
+    string RemotePath,
+    long Bytes)
+{
+    public string Summary => $"Downloaded latest headset recording ({FormatBytes(Bytes)}) to {FilePath}. Source: {RemotePath}.";
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes >= 1024 * 1024)
+        {
+            return (bytes / 1024d / 1024d).ToString("0.0 MB", CultureInfo.InvariantCulture);
+        }
+
+        if (bytes >= 1024)
+        {
+            return (bytes / 1024d).ToString("0.0 KB", CultureInfo.InvariantCulture);
+        }
+
+        return bytes.ToString(CultureInfo.InvariantCulture) + " bytes";
+    }
+}
+
+internal sealed record HeadsetRecordingCandidate(
+    long ModifiedUnixSeconds,
+    long Bytes,
+    string RemotePath);
+
 public sealed class HeadsetSettingsService
 {
+    private static readonly string[] RecordingDirectories =
+    [
+        "/sdcard/Oculus/VideoShots",
+        "/sdcard/Movies",
+        "/sdcard/Movies/Oculus",
+        "/sdcard/DCIM/Oculus"
+    ];
+
     private readonly AdbService _adb;
 
     public HeadsetSettingsService(AdbService adb)
@@ -141,6 +177,37 @@ public sealed class HeadsetSettingsService
         return enabled
             ? "Start recording requested and property verified. Confirm capture inside the headset; recordings stay on the headset."
             : "Stop recording requested and property verified. Check the headset for the saved recording.";
+    }
+
+    public string StopAndDownloadLatestRecording(HeadsetSettings settings)
+    {
+        var stop = SetRecording(settings, enabled: false);
+        var download = DownloadLatestRecording(settings);
+        return stop + Environment.NewLine + download.Summary;
+    }
+
+    public HeadsetRecordingDownloadResult DownloadLatestRecording(HeadsetSettings settings)
+    {
+        var quest = RequireReadyHeadset(settings);
+        var listing = _adb.Shell(quest.Serial, BuildRecordingListingCommand());
+        var recording = ParseRecordingListing(listing)
+            .OrderByDescending(item => item.ModifiedUnixSeconds)
+            .ThenByDescending(item => item.Bytes)
+            .FirstOrDefault()
+            ?? throw new InvalidOperationException(
+                "No headset recordings were found. Stop recording in the headset first, then retry. Checked: "
+                + string.Join(", ", RecordingDirectories) + ".");
+
+        var outputPath = CreateRecordingPath(DateTimeOffset.Now, quest.Model, recording.RemotePath);
+        _adb.PullFile(quest.Serial, recording.RemotePath, outputPath);
+        var file = new FileInfo(outputPath);
+        if (!file.Exists || file.Length <= 1024)
+        {
+            TryDelete(outputPath);
+            throw new InvalidOperationException("Downloaded recording was missing or too small to be a valid video.");
+        }
+
+        return new HeadsetRecordingDownloadResult(outputPath, recording.RemotePath, file.Length);
     }
 
     public string CapturePerformanceSample(HeadsetSettings settings, TimeSpan duration)
@@ -382,6 +449,102 @@ public sealed class HeadsetSettingsService
         return $"QuestScreenshot-{timestamp}-{SanitizeFileToken(model)}{suffix}.png";
     }
 
+    private static string CreateRecordingPath(DateTimeOffset capturedAt, string? model, string remotePath)
+    {
+        Directory.CreateDirectory(AppPaths.CapturesDirectory);
+        var extension = Path.GetExtension(remotePath.Replace('\\', '/'));
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            extension = ".mp4";
+        }
+
+        var sourceName = Path.GetFileNameWithoutExtension(remotePath.Replace('\\', '/'));
+        var sourceToken = SanitizeFileToken(sourceName);
+        for (var attempt = 0; attempt < 100; attempt++)
+        {
+            var fileName = BuildRecordingFileName(capturedAt, model, sourceToken, extension, attempt == 0 ? null : attempt + 1);
+            var path = Path.Combine(AppPaths.CapturesDirectory, fileName);
+            if (!File.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        return Path.Combine(
+            AppPaths.CapturesDirectory,
+            BuildRecordingFileName(capturedAt, model, sourceToken, extension, duplicateIndex: null)
+                .Replace(extension, "-" + Guid.NewGuid().ToString("N")[..8] + extension, StringComparison.OrdinalIgnoreCase));
+    }
+
+    internal static string BuildRecordingFileName(
+        DateTimeOffset capturedAt,
+        string? model,
+        string? sourceName,
+        string extension,
+        int? duplicateIndex = null)
+    {
+        var timestamp = capturedAt.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+        var suffix = duplicateIndex is null ? string.Empty : "-" + duplicateIndex.Value.ToString(CultureInfo.InvariantCulture);
+        var source = SanitizeFileToken(sourceName);
+        extension = string.IsNullOrWhiteSpace(extension) ? ".mp4" : extension.Trim();
+        if (!extension.StartsWith(".", StringComparison.Ordinal))
+        {
+            extension = "." + extension;
+        }
+
+        return $"QuestRecording-{timestamp}-{SanitizeFileToken(model)}-{source}{suffix}{extension}";
+    }
+
+    internal static IReadOnlyList<HeadsetRecordingCandidate> ParseRecordingListing(string listing)
+    {
+        var result = new List<HeadsetRecordingCandidate>();
+        foreach (var raw in (listing ?? string.Empty).Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = raw.Split('\t', 3);
+            if (parts.Length != 3)
+            {
+                continue;
+            }
+
+            if (!long.TryParse(parts[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var modified))
+            {
+                modified = 0;
+            }
+
+            if (!long.TryParse(parts[1].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var bytes))
+            {
+                bytes = 0;
+            }
+
+            var remotePath = parts[2].Trim();
+            if (remotePath.Length == 0
+                || !(remotePath.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
+                     || remotePath.EndsWith(".mov", StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            result.Add(new HeadsetRecordingCandidate(modified, bytes, remotePath));
+        }
+
+        return result;
+    }
+
+    private static string BuildRecordingListingCommand()
+    {
+        var dirs = string.Join(" ", RecordingDirectories.Select(QuoteShellSingle));
+        return "for d in " + dirs + "; do "
+               + "if [ -d \"$d\" ]; then "
+               + "for f in \"$d\"/*.mp4 \"$d\"/*.MP4 \"$d\"/*.mov \"$d\"/*.MOV; do "
+               + "[ -f \"$f\" ] || continue; "
+               + "m=$(stat -c %Y \"$f\" 2>/dev/null || echo 0); "
+               + "s=$(stat -c %s \"$f\" 2>/dev/null || echo 0); "
+               + "printf '%s\\t%s\\t%s\\n' \"$m\" \"$s\" \"$f\"; "
+               + "done; "
+               + "fi; "
+               + "done";
+    }
+
     private static string SanitizeFileToken(string? value)
     {
         var token = string.IsNullOrWhiteSpace(value) ? "Quest" : value.Trim();
@@ -402,6 +565,23 @@ public sealed class HeadsetSettingsService
         }
 
         return clean.Length <= 40 ? clean : clean[..40].Trim('-');
+    }
+
+    private static string QuoteShellSingle(string value) => "'" + value.Replace("'", "'\\''", StringComparison.Ordinal) + "'";
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // best-effort cleanup
+        }
     }
 
     private static bool TryTextureSize(HeadsetTexturePreset preset, out int width, out int height)

@@ -281,18 +281,28 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
     private void OpenScreenshotsFolder_Click(object sender, RoutedEventArgs e)
     {
+        OpenFolder(AppPaths.ScreenshotsDirectory, "screenshots");
+    }
+
+    private void OpenCapturesFolder_Click(object sender, RoutedEventArgs e)
+    {
+        OpenFolder(AppPaths.CapturesDirectory, "captures");
+    }
+
+    private void OpenFolder(string folder, string label)
+    {
         try
         {
-            Directory.CreateDirectory(AppPaths.ScreenshotsDirectory);
+            Directory.CreateDirectory(folder);
             Process.Start(new ProcessStartInfo
             {
-                FileName = AppPaths.ScreenshotsDirectory,
+                FileName = folder,
                 UseShellExecute = true
             });
         }
         catch (Exception ex)
         {
-            App.Instance.Log.Warn("Could not open screenshots folder: " + ex.Message);
+            App.Instance.Log.Warn($"Could not open {label} folder: " + ex.Message);
             ResultText.Text = ex.Message;
         }
     }
@@ -302,6 +312,12 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
     private void StopRecording_Click(object sender, RoutedEventArgs e) =>
         Run(() => App.Instance.Headset.SetRecording(App.Instance.Settings.Current.Headset, false));
+
+    private void StopAndDownloadRecording_Click(object sender, RoutedEventArgs e)
+    {
+        ResultText.Text = "Stopping headset recording and downloading the newest video…";
+        Run(() => App.Instance.Headset.StopAndDownloadLatestRecording(App.Instance.Settings.Current.Headset));
+    }
 
     private void PerformanceSample_Click(object sender, RoutedEventArgs e)
     {

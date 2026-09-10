@@ -1018,6 +1018,50 @@ public sealed class AdbService
         return outputPath;
     }
 
+    public string PullFile(string serial, string remotePath, string outputPath)
+    {
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            throw new ArgumentException("ADB serial is required.", nameof(serial));
+        }
+
+        if (string.IsNullOrWhiteSpace(remotePath))
+        {
+            throw new ArgumentException("Remote file path is required.", nameof(remotePath));
+        }
+
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            throw new ArgumentException("Output path is required.", nameof(outputPath));
+        }
+
+        var folder = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        var tempPath = outputPath + ".tmp";
+        TryDeleteFile(tempPath);
+        try
+        {
+            Run("-s", serial, "pull", remotePath, tempPath);
+            var file = new FileInfo(tempPath);
+            if (!file.Exists || file.Length <= 0)
+            {
+                throw new InvalidOperationException("ADB pull did not produce a non-empty file.");
+            }
+
+            File.Move(tempPath, outputPath, overwrite: true);
+            return outputPath;
+        }
+        catch
+        {
+            TryDeleteFile(tempPath);
+            throw;
+        }
+    }
+
     private (bool IsVr, DeviceProbe? Probe) Classify(AdbDevice device)
     {
         if (VrHeadsetClassifier.IsObviousEmulator(device))

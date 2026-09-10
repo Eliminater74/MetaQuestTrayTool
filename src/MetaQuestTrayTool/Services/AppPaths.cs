@@ -12,11 +12,13 @@ public static class AppPaths
     public static string LogFile { get; } = IOPath.Combine(AppDataDirectory, "app.log");
     public static string ArtworkDirectory { get; } = IOPath.Combine(AppDataDirectory, "artwork");
     public static string ScreenshotsDirectory { get; } = IOPath.Combine(AppDataDirectory, "screenshots");
+    public static string CapturesDirectory { get; } = IOPath.Combine(AppDataDirectory, "captures");
 
     public static void EnsureAppDataDirectory()
     {
         System.IO.Directory.CreateDirectory(AppDataDirectory);
         System.IO.Directory.CreateDirectory(ArtworkDirectory);
         System.IO.Directory.CreateDirectory(ScreenshotsDirectory);
+        System.IO.Directory.CreateDirectory(CapturesDirectory);
     }
 }

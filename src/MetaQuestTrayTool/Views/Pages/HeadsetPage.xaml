@@ -163,6 +163,8 @@
         <Button Content="Start headset recording" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="StartRecording_Click"
                 ToolTip="Start capture on the trusted headset. Use Apply to headset now first to change capture settings. Confirm recording in the headset."/>
         <Button Content="Stop headset recording" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="StopRecording_Click"/>
+        <Button Content="Stop &amp; download latest recording" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="StopAndDownloadRecording_Click"
+                ToolTip="Stop headset recording, find the newest MP4/MOV in known Quest recording folders, pull it to the local captures folder, and verify the file is non-empty."/>
         <Button Content="Capture 10-second performance sample" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="PerformanceSample_Click"
                 ToolTip="Read VrApi/runtime logcat stats for 10 seconds and report observed FPS, CPU/GPU levels, utilization, FFR, and SpaceWarp fields when the headset/app emits them."/>
         <Button Content="Take screenshot (Quest Link preferred)" Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,8"
@@ -174,6 +176,9 @@
         <Button Content="Open screenshots folder" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
                 Click="OpenScreenshotsFolder_Click"
                 ToolTip="Open the folder where screenshot PNG files are saved."/>
+        <Button Content="Open captures folder" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8"
+                Click="OpenCapturesFolder_Click"
+                ToolTip="Open the folder where downloaded headset recordings are saved."/>
       </WrapPanel>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
                  Text="Smart screenshot prefers Quest Link / Air Link mirror capture when active. ADB screenshot is still here for standalone, Steam Link, USB, or wireless ADB."/>
