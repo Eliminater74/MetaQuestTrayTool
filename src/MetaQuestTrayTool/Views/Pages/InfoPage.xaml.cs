@@ -225,6 +225,26 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         App.Instance.Log.Info("Copied Info report to the clipboard.");
     }
 
+    private async void CheckMetaCompatibility_Click(object sender, RoutedEventArgs e)
+    {
+        ReportBox.Text = "Checking Meta runtime compatibility...";
+        try
+        {
+            var report = await Task.Run(() => App.Instance.RuntimeCompatibility.Check(
+                remember: true,
+                runDebugToolProbe: true)).ConfigureAwait(true);
+            var text = report.ToDisplayText();
+            ReportBox.Text = text;
+            _fullReportLoaded = true;
+            App.Instance.Log.Info("Meta compatibility check:\n" + text);
+        }
+        catch (Exception ex)
+        {
+            ReportBox.Text = "Could not run Meta compatibility check: " + ex.Message;
+            App.Instance.Log.Warn(ReportBox.Text);
+        }
+    }
+
     private void Trust_Click(object sender, RoutedEventArgs e)
     {
         try

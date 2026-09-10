@@ -36,6 +36,11 @@ public sealed class OculusRuntimeService
             ? null
             : Path.Combine(InstallPath, "Support", "oculus-diagnostics", "OculusMirror.exe");
 
+    public string? RuntimeServerPath =>
+        string.IsNullOrWhiteSpace(InstallPath)
+            ? null
+            : Path.Combine(InstallPath, "Support", "oculus-runtime", "OVRServer_x64.exe");
+
     public void Refresh(bool force = false)
     {
         if (string.IsNullOrWhiteSpace(InstallPath) || force)

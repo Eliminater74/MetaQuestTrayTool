@@ -67,6 +67,7 @@ public partial class App : System.Windows.Application
     public QuestLinkMirrorService QuestLinkMirror { get; }
     public RuntimeSnapshotService RuntimeSnapshots { get; }
     public StatusDashboardService StatusDashboard { get; }
+    public MetaRuntimeCompatibilityService RuntimeCompatibility { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public PowerWatchService? PowerWatch => _powerWatcher;
@@ -100,6 +101,7 @@ public partial class App : System.Windows.Application
         QuestLinkMirror = new QuestLinkMirrorService(this);
         RuntimeSnapshots = new RuntimeSnapshotService(this);
         StatusDashboard = new StatusDashboardService(this);
+        RuntimeCompatibility = new MetaRuntimeCompatibilityService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -196,6 +198,15 @@ public partial class App : System.Windows.Application
         Log.Info(Adb.DescribeStatus());
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
+        var metaCompatibility = RuntimeCompatibility.Check(remember: true, runDebugToolProbe: false);
+        if (metaCompatibility.HasWarnings)
+        {
+            Log.Warn(metaCompatibility.Summary);
+        }
+        else
+        {
+            Log.Info(metaCompatibility.Summary);
+        }
         var openXrAlign = PcvrSetup.SyncSavedOpenXrToSetup(this);
         if (!string.IsNullOrWhiteSpace(openXrAlign))
         {

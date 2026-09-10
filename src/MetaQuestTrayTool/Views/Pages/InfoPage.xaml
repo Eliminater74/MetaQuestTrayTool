@@ -10,7 +10,7 @@
       <TextBlock Style="{StaticResource PageHintStyle}"
                  Text="PCVR Ready checks your PC before you put the headset on. SteamVR-first tips are included because most Steam PCVR games expect SteamVR OpenXR."/>
 
-      <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+      <WrapPanel Margin="0,0,0,12">
         <Button Content="Donate" Style="{StaticResource AccentButtonStyle}" Click="Donate_Click"
                 ToolTip="Open the donation page to support Meta Quest Tray Tool development."/>
         <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click"
@@ -19,7 +19,9 @@
                 ToolTip="Copy the full diagnostics report to the clipboard for support or bug reports."/>
         <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"
                 ToolTip="Remember the connected VR serial as your trusted headset for ADB commands."/>
-      </StackPanel>
+        <Button Content="Check Meta compatibility" Style="{StaticResource GhostButtonStyle}" Click="CheckMetaCompatibility_Click"
+                ToolTip="Run read-only Meta runtime, Oculus Debug Tool, and Link registry checks. Saves the observed Meta/ODT versions for future drift warnings."/>
+      </WrapPanel>
 
       <TextBlock Text="PCVR Ready" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>
       <TextBlock x:Name="ReadySummaryText" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,8"
