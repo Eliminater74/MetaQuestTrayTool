@@ -46,6 +46,7 @@ public sealed class UpdateService
     private readonly App _app;
     private readonly HttpClient _http;
     private int _busy;
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, (string Hash, long Size)> _verifiedDownloads = new(StringComparer.OrdinalIgnoreCase);
 
     public UpdateService(App app)
     {
@@ -233,8 +234,7 @@ public sealed class UpdateService
             throw new InvalidOperationException("Installer metadata is not a trusted GitHub release asset.");
         }
 
-        var folder = IOPath.Combine(IOPath.GetTempPath(), "MetaQuestTrayTool-Updates");
-        Directory.CreateDirectory(folder);
+        var folder = InstallerIntegrity.CreatePrivateDirectory();
         var path = IOPath.Combine(folder, update.InstallerFileName);
 
         using var response = await _http.GetAsync(
@@ -256,7 +256,7 @@ public sealed class UpdateService
         await using var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         await using var output = new FileStream(
             path,
-            FileMode.Create,
+            FileMode.CreateNew,
             FileAccess.Write,
             FileShare.None,
             bufferSize: 81920,
@@ -308,10 +308,12 @@ public sealed class UpdateService
             await SHA256.HashDataAsync(hashFile, cancellationToken)).ToLowerInvariant();
         if (!string.Equals(actualHash, update.InstallerSha256, StringComparison.OrdinalIgnoreCase))
         {
+            await hashFile.DisposeAsync();
             File.Delete(path);
             throw new InvalidOperationException("Installer integrity check failed (SHA-256 does not match GitHub).");
         }
 
+        _verifiedDownloads[IOPath.GetFullPath(path)] = (actualHash, total);
         return path;
     }
 
@@ -320,10 +322,10 @@ public sealed class UpdateService
     /// </summary>
     public void LaunchInstallerAndExit(string installerPath)
     {
-        if (!File.Exists(installerPath))
-        {
-            throw new FileNotFoundException("Installer not found.", installerPath);
-        }
+        installerPath = IOPath.GetFullPath(installerPath);
+        if (!_verifiedDownloads.TryGetValue(installerPath, out var receipt))
+            throw new InvalidOperationException("Installer was not verified by this update session. Download it again.");
+        using var verifiedFile = InstallerIntegrity.VerifyAndLock(installerPath, receipt.Hash, receipt.Size);
 
         // Stop ADB polling first so a tray tick cannot spawn a new adb.exe after kill-server.
         try
