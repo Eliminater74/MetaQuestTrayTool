@@ -886,6 +886,89 @@ public sealed class AdbService
     public Task<string> ShellAsync(string serial, string command, CancellationToken cancellationToken = default) =>
         RunAsync(["-s", serial, "shell", command], cancellationToken);
 
+    public string LogcatForDuration(string serial, TimeSpan duration)
+    {
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            throw new ArgumentException("ADB serial is required.", nameof(serial));
+        }
+
+        if (duration < TimeSpan.FromSeconds(1) || duration > TimeSpan.FromSeconds(30))
+        {
+            throw new ArgumentOutOfRangeException(nameof(duration), "Logcat sample duration must be between 1 and 30 seconds.");
+        }
+
+        Refresh();
+        if (!IsAvailable)
+        {
+            throw new InvalidOperationException("ADB was not found.");
+        }
+
+        if (!_commandGate.Wait(CommandQueueTimeout))
+        {
+            throw new TimeoutException("ADB command queue was busy for 30s.");
+        }
+
+        var arguments = new[]
+        {
+            "-s",
+            serial,
+            "logcat",
+            "-v",
+            "time",
+            "VrApi:D",
+            "VrApiStats:D",
+            "VrRuntime:D",
+            "OVRPlugin:D",
+            "*:S"
+        };
+        var display = FormatAdbCommand(arguments);
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = CreateAdbStartInfo(AdbPath!, arguments)
+            };
+            if (!process.Start())
+            {
+                throw new InvalidOperationException("ADB process could not be started.");
+            }
+
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
+            var completed = process.WaitForExit((int)Math.Ceiling(duration.TotalMilliseconds));
+            if (!completed)
+            {
+                KillAndReapAsync(process).GetAwaiter().GetResult();
+            }
+
+            try
+            {
+                Task.WaitAll([stdout, stderr], OutputDrainTimeout);
+            }
+            catch
+            {
+                // Return whatever was collected before logcat was stopped.
+            }
+
+            var output = stdout.IsCompletedSuccessfully ? stdout.Result : string.Empty;
+            var error = stderr.IsCompletedSuccessfully ? stderr.Result : string.Empty;
+            if (completed && process.ExitCode != 0 && string.IsNullOrWhiteSpace(output))
+            {
+                throw new InvalidOperationException(
+                    string.IsNullOrWhiteSpace(error)
+                        ? $"ADB exited with code {process.ExitCode}: {display}"
+                        : $"ADB exited with code {process.ExitCode}: {error.Trim()}");
+            }
+
+            return (output + Environment.NewLine + error).Trim();
+        }
+        finally
+        {
+            _commandGate.Release();
+        }
+    }
+
     public string SendText(string serial, string text)
     {
         if (string.IsNullOrEmpty(text))

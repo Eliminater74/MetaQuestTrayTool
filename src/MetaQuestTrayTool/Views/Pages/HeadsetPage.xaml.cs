@@ -303,6 +303,12 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
     private void StopRecording_Click(object sender, RoutedEventArgs e) =>
         Run(() => App.Instance.Headset.SetRecording(App.Instance.Settings.Current.Headset, false));
 
+    private void PerformanceSample_Click(object sender, RoutedEventArgs e)
+    {
+        ResultText.Text = "Capturing 10-second headset performance sample…";
+        Run(() => App.Instance.Headset.CapturePerformanceSample(App.Instance.Settings.Current.Headset, TimeSpan.FromSeconds(10)));
+    }
+
     private void Trust_Click(object sender, RoutedEventArgs e)
     {
         try

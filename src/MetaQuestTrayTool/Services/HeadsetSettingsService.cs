@@ -143,6 +143,13 @@ public sealed class HeadsetSettingsService
             : "Stop recording requested and property verified. Check the headset for the saved recording.";
     }
 
+    public string CapturePerformanceSample(HeadsetSettings settings, TimeSpan duration)
+    {
+        var quest = RequireReadyHeadset(settings);
+        var output = _adb.LogcatForDuration(quest.Serial, duration);
+        return HeadsetPerformanceSample.Parse(output, duration).ToDisplayText();
+    }
+
     public string Apply(HeadsetSettings settings, IReadOnlyList<string>? extraAdb = null)
     {
         var quest = RequireReadyHeadset(settings);

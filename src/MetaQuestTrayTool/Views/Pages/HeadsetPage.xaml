@@ -163,6 +163,8 @@
         <Button Content="Start headset recording" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="StartRecording_Click"
                 ToolTip="Start capture on the trusted headset. Use Apply to headset now first to change capture settings. Confirm recording in the headset."/>
         <Button Content="Stop headset recording" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="StopRecording_Click"/>
+        <Button Content="Capture 10-second performance sample" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="PerformanceSample_Click"
+                ToolTip="Read VrApi/runtime logcat stats for 10 seconds and report observed FPS, CPU/GPU levels, utilization, FFR, and SpaceWarp fields when the headset/app emits them."/>
         <Button Content="Take screenshot (Quest Link preferred)" Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,8"
                 Click="SmartScreenshot_Click"
                 ToolTip="Use Quest Link mirror capture when an active Meta Link stream is detected; otherwise use headset ADB."/>
