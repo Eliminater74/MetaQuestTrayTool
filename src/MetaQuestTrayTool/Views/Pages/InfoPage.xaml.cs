@@ -13,6 +13,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<ReadyItemVm> _readyItems = [];
     private bool _fullReportLoaded;
+    private long _reportGeneration;
 
     public InfoPage()
     {
@@ -60,16 +61,16 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         var snapshot = App.Instance.RuntimeSnapshots.Capture(includeHeadset: true, force: true);
         RefreshBanners(snapshot);
         RefreshReadyChecklist(snapshot);
-        ReportBox.Text = "Building report…";
-        _ = LoadFullReportAsync();
+        var generation = BeginReportOperation("Building report…");
+        _ = LoadFullReportAsync(generation);
     }
 
-    private async Task LoadFullReportAsync()
+    private async Task LoadFullReportAsync(long generation)
     {
         try
         {
             var report = await Task.Run(() => SystemInfoService.BuildReport(includeEnumHmd: false));
-            if (IsLoaded)
+            if (IsCurrentReportOperation(generation))
             {
                 ReportBox.Text = report;
                 _fullReportLoaded = true;
@@ -77,7 +78,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         }
         catch (Exception ex)
         {
-            if (IsLoaded)
+            if (IsCurrentReportOperation(generation))
             {
                 ReportBox.Text = "Could not build report: " + ex.Message;
             }
@@ -238,60 +239,91 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
             return;
         }
 
-        ReportBox.Text = "Creating support ZIP...";
+        var generation = BeginReportOperation("Creating support ZIP...");
         try
         {
             var result = await Task.Run(() => App.Instance.SupportBundles.Create(dialog.FileName)).ConfigureAwait(true);
-            ReportBox.Text = result.Summary;
+            if (IsCurrentReportOperation(generation))
+            {
+                ReportBox.Text = result.Summary;
+            }
             App.Instance.Log.Info(result.Summary);
             System.Windows.MessageBox.Show(Window.GetWindow(this), result.Summary, App.AppName);
         }
         catch (Exception ex)
         {
-            ReportBox.Text = "Could not create support ZIP: " + ex.Message;
-            App.Instance.Log.Warn(ReportBox.Text);
+            var message = "Could not create support ZIP: " + ex.Message;
+            if (IsCurrentReportOperation(generation))
+            {
+                ReportBox.Text = message;
+            }
+            App.Instance.Log.Warn(message);
             System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
         }
     }
 
     private async void CheckMetaCompatibility_Click(object sender, RoutedEventArgs e)
     {
-        ReportBox.Text = "Checking Meta runtime compatibility...";
+        var generation = BeginReportOperation("Checking Meta runtime compatibility...");
         try
         {
             var report = await Task.Run(() => App.Instance.RuntimeCompatibility.Check(
                 remember: true,
                 runDebugToolProbe: true)).ConfigureAwait(true);
             var text = report.ToDisplayText();
-            ReportBox.Text = text;
-            _fullReportLoaded = true;
+            if (IsCurrentReportOperation(generation))
+            {
+                ReportBox.Text = text;
+                _fullReportLoaded = true;
+            }
             App.Instance.Log.Info("Meta compatibility check:\n" + text);
         }
         catch (Exception ex)
         {
-            ReportBox.Text = "Could not run Meta compatibility check: " + ex.Message;
-            App.Instance.Log.Warn(ReportBox.Text);
+            var message = "Could not run Meta compatibility check: " + ex.Message;
+            if (IsCurrentReportOperation(generation))
+            {
+                ReportBox.Text = message;
+            }
+            App.Instance.Log.Warn(message);
         }
     }
 
     private async void AcknowledgeMetaVersions_Click(object sender, RoutedEventArgs e)
     {
-        ReportBox.Text = "Acknowledging current Meta runtime versions...";
+        var generation = BeginReportOperation("Acknowledging current Meta runtime versions...");
         try
         {
             var report = await Task.Run(() => App.Instance.RuntimeCompatibility.AcknowledgeCurrentVersions()).ConfigureAwait(true);
             var text = report.ToDisplayText();
-            ReportBox.Text = text + Environment.NewLine + Environment.NewLine
-                             + "Current detected Meta runtime and Oculus Debug Tool versions were saved as the validated baseline.";
-            _fullReportLoaded = true;
+            if (IsCurrentReportOperation(generation))
+            {
+                ReportBox.Text = text + Environment.NewLine + Environment.NewLine
+                                 + "Current detected Meta runtime and Oculus Debug Tool versions were saved as the validated baseline.";
+                _fullReportLoaded = true;
+            }
             App.Instance.Log.Info("Acknowledged current Meta runtime versions.");
         }
         catch (Exception ex)
         {
-            ReportBox.Text = "Could not acknowledge Meta runtime versions: " + ex.Message;
-            App.Instance.Log.Warn(ReportBox.Text);
+            var message = "Could not acknowledge Meta runtime versions: " + ex.Message;
+            if (IsCurrentReportOperation(generation))
+            {
+                ReportBox.Text = message;
+            }
+            App.Instance.Log.Warn(message);
         }
     }
+
+    private long BeginReportOperation(string status)
+    {
+        var generation = ++_reportGeneration;
+        ReportBox.Text = status;
+        return generation;
+    }
+
+    private bool IsCurrentReportOperation(long generation) =>
+        IsLoaded && generation == _reportGeneration;
 
     private void Trust_Click(object sender, RoutedEventArgs e)
     {
