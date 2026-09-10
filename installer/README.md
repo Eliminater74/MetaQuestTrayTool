@@ -16,8 +16,10 @@ Users double-click **`MetaQuestTrayTool-Setup-x.y.z.exe`** and get a normal Wind
 
 ```powershell
 winget install --id JRSoftware.InnoSetup -e --accept-package-agreements --accept-source-agreements
-# or: choco install innosetup -y
 ```
+
+The GitHub Release workflow downloads the pinned upstream Inno Setup installer and verifies its
+SHA-256 digest before running it.
 
 ### 2. Run the build script
 
@@ -43,6 +45,7 @@ Optional flags:
 ### Manual steps (same as the script)
 
 ```powershell
+dotnet restore .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj -r win-x64 --locked-mode
 dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
   -c Release -r win-x64 --self-contained true `
   -p:PublishReadyToRun=true `
@@ -58,8 +61,9 @@ dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
 
 | Workflow | Trigger | Result |
 | --- | --- | --- |
-| **CI** (`.github/workflows/ci.yml`) | Push/PR to `main`, manual | Build + publish smoke test |
-| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (e.g. `v1.0.0`), manual | Setup.exe + SHA-256 sidecar + GitHub Release |
+| **CI** (`.github/workflows/ci.yml`) | Push/PR to `main`, manual | Locked restore + build + tests + coverage gate + publish smoke test |
+| **CodeQL** (`.github/workflows/codeql.yml`) | Push/PR to `main`, weekly, manual | C# security analysis |
+| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (e.g. `v1.0.0`), manual | Pinned Inno Setup + Setup.exe + SHA-256 sidecar + GitHub Release |
 
 Tag a release:
 

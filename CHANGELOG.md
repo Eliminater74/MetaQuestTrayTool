@@ -8,6 +8,30 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Structured profile-apply results now report success, partial success, failed, and skipped steps instead of collapsing multi-system applies into one generic message.
+- Headset ADB controls now include explicit **Start headset recording** / **Stop headset recording**, 30 Mbps and 40 Mbps capture bitrate presets, independent CPU and GPU levels 0-4, headset-aware refresh-rate choices, clearer Quest 2/Pro and Quest 3/3S texture labels, Dynamic vs Fixed foveation, and a collapsed **Experimental headset rendering** section for Quest Pro local dimming plus subsampled foveation.
+- Added **Reset live ADB overrides** for documented texture, refresh, and capture defaults, with reboot guidance for CPU/GPU, foveation, chroma, local dimming, subsampled foveation, custom props, and other temporary values that do not have a proven safe clear.
+- Added read-only Meta runtime compatibility checks that remember last-seen Meta runtime / Oculus Debug Tool versions and warn when local mappings need retesting after a runtime change.
+- Added **Export support ZIP** on the Info page with sanitized summary, settings counts, compatibility status, and recent logs.
+- Added Dependabot, CodeQL, Cobertura coverage collection, and a conservative line-coverage floor for CI and release validation.
+
+### Changed
+- Headset ADB command selection now prefers the trusted physical headset across USB and wireless transports, matching hardware identity before falling back to any ready recognized headset.
+- ADB process launches now use `ProcessStartInfo.ArgumentList` for outer `adb.exe` tokens and async process waiting with timeout/cancellation cleanup.
+- CI, Release, and installer build restores now use locked `win-x64` restore for normal validation instead of refreshing package lock evaluation.
+- The Release workflow now installs a pinned Inno Setup 6.7.1 upstream installer and verifies its SHA-256 digest before running it.
+
+### Security
+- The in-app updater now stores downloads in a private random temp directory, revalidates installer size and SHA-256 immediately before launch, and holds the verified installer handle open while starting Setup so local replacement/tampering is blocked.
+- Support ZIP export applies a second redaction pass for user-profile paths, IP endpoints, labeled serial/fingerprint/SSID values, and long device-like tokens.
+
+### Validation
+- Local suite passes 132/132 after locked restore/build changes.
+
+### Verification limits
+- No physical Quest headset, active Link stream, OVRService restart effect, GitHub Actions run, release tag, installer artifact, or push was performed for these Unreleased commits.
+
 ## [1.1.30] - 2026-09-10
 
 ### Fixed
@@ -291,7 +315,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.29...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.30...HEAD
+[1.1.30]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.30
 [1.1.29]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.29
 [1.1.28]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.28
 [1.1.27]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.27

@@ -8,7 +8,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Remaining / later
 
-- [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, and wireless/text actions on physical hardware.
+- [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
 - [ ] Physical Quest validation for v1.1.30 Link preset, screenshot, and headset announcement flow: non-Meta streamer preset editing, Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
@@ -23,6 +23,23 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### Unreleased after v1.1.30
+
+- [x] Report profile applies as structured success, partial success, failed, and skipped step results.
+- [x] Prefer the trusted Quest headset across USB and wireless ADB transports.
+- [x] Add Start/Stop headset recording and 30/40 Mbps capture bitrate presets.
+- [x] Split CPU and GPU headset levels into independent App default / 0-4 controls.
+- [x] Filter refresh-rate options by headset model and clarify Quest 2/Pro and Quest 3/3S texture defaults.
+- [x] Add Dynamic vs Fixed FFR and preserve App default as no new override.
+- [x] Add collapsed experimental local dimming and subsampled foveation controls with Quest Pro gating for local dimming.
+- [x] Add Reset live ADB overrides for documented defaults, with reboot fallback for unsafe clears.
+- [x] Harden updater installer launch with private temp storage, final hash/size validation, and file-handle locking.
+- [x] Move outer ADB process invocation to ArgumentList and async process waiting/cancellation cleanup.
+- [x] Add pinned Inno Setup release install, CodeQL, Dependabot, coverage reporting, and locked restore to CI/release paths.
+- [x] Add read-only Meta runtime compatibility checks with last-seen Meta/ODT version tracking.
+- [x] Add sanitized support ZIP export from Info.
+- [x] Keep work local only: no version bump, tag, push, GitHub Actions run, or installer publication.
 
 ### v1.1.30
 

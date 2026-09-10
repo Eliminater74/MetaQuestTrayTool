@@ -163,6 +163,10 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
+### Unreleased in this checkout
+
+These local commits after v1.1.30 add structured partial profile-apply results, trusted headset selection across USB/wireless ADB, headset recording start/stop with 30/40 Mbps bitrate presets, independent CPU/GPU levels, headset-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, live ADB override reset, hardened updater launch verification, read-only Meta runtime compatibility checks, sanitized support ZIP export, CodeQL, Dependabot, coverage reporting, and locked-release restore. No tag, push, GitHub Actions run, or installer publication has been performed for this Unreleased work.
+
 Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Fixes clipped HotKeys editing controls and prevents newer idle or weak cached headsets from hiding live Meta Link evidence. Adds explicit logging for skipped Quest Link writes. The tester-specific ODT report remains unconfirmed; existing non-Meta guards are preserved. See the [detection investigation](docs/investigations/issue-4-device-cache-selection.md) for evidence and limits.
 
 ### Shell & tray
@@ -177,7 +181,7 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - Live **Status** chips: PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR armed, GPU, audio
 - **SteamVR install detect** (path, file version, Stable vs Beta) with Install SteamVR action
-- **PCVR Ready** checklist on Info (Steam-biased) with fix actions
+- **PCVR Ready** checklist on Info (Steam-biased) with fix actions; source checkout also includes read-only Meta runtime compatibility checks and sanitized support ZIP export
 - **Recover PCVR** after a Link / Steam / VD drop (tray + Info)
 - Session probe: Meta Air Link vs wired (`DeviceCache` `isUsingAirLink`), Steam Link / SteamVR, Virtual Desktop
 
@@ -205,7 +209,7 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 ### Headset (ADB)
 
-- Bundled Google platform-tools; CPU/GPU, texture size, refresh, FFR, chroma, capture; paste text / proximity / guardian helpers
+- Bundled Google platform-tools; independent CPU/GPU levels, texture size, model-aware refresh, Dynamic/Fixed FFR, chroma, capture settings, recording start/stop, guarded experimental rendering, live documented-default reset, paste text / proximity / guardian helpers
 - Auto-apply on connect (props reset on Quest reboot)
 - **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect (saved IP only — no LAN scan) — SideQuest on the headset can also open an ADB port (often 5555)
 - **VR headsets only** (on by default; Headset page + tray → Headset (ADB)): disconnect phones/tablets/TVs that show up over wireless ADB; uncheck to leave any ADB device connected. Tweaks still never run on non-headsets
@@ -220,7 +224,7 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 - Voice: Windows speech, PTT (**Ctrl+Shift+V**) or always-on, mic picker, min confidence, custom phrases, spoken confirm — recover PCVR, desktop/VR audio, OpenXR meta/steam, close overlays, GPU preset, smart / Link mirror / ADB screenshots — [docs/VOICE-AND-HOTKEYS.md](docs/VOICE-AND-HOTKEYS.md)
 - **Headset announcements** (Tray Tool): TTS in the Quest on connect, the wait before SteamVR, SteamVR closed + 10s Meta service stop (spoken *before* OVR drops), profile apply/restore, game/profile launch, manual action, HotKey, voice, screenshot, audio/headset/recovery results, and experimental MSFS outcomes — when desktop toasts are not visible in-headset
 - **Experimental MSFS 2024 VR launch** (opt-in per profile): prepares Meta Link or SteamVR over Link, starts with `-FastLaunch` when no custom arguments are set, then optionally focuses the launched simulator window and sends a configured VR toggle. Best-effort only; it does not click verification dialogs or detect when a flight is ready.
-- In-app updates from GitHub `v*` (on start, schedule, or Check now) — shows **what's new** before you install; ADB stopped before Setup; Setup itself shows the changelog page. Release installers publish a SHA-256 checksum sidecar
+- In-app updates from GitHub `v*` (on start, schedule, or Check now) — shows **what's new** before you install; ADB stopped before Setup; Setup itself shows the changelog page. Release installers publish a SHA-256 checksum sidecar; source checkout revalidates and locks installer bytes immediately before launch
 - **VR Tools** page + tray: curated third-party links (Play more games, Overlays, Performance, Wireless PCVR, Quest & sideloading, Tracking, Essentials)
 - Backup export/import from Advanced; Donate (PayPal); **quiet tray idle** — adaptive watcher cadence (~30–45s when unused, faster only in PCVR / armed features); timers stop when features are off; Status/Info pause when the shell is hidden to the tray; shared Link probe caches
 
@@ -270,7 +274,7 @@ See [ROADMAP.md](ROADMAP.md) and [TODO.md](TODO.md) for history and remaining ho
 **Command line:**
 
 ```powershell
-dotnet restore .\MetaQuestTrayTool.sln -r win-x64 --force-evaluate
+dotnet restore .\MetaQuestTrayTool.sln -r win-x64 --locked-mode
 dotnet build .\MetaQuestTrayTool.sln -c Release --no-restore
 dotnet test .\MetaQuestTrayTool.sln -c Release --no-restore --no-build
 dotnet run --project .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj
@@ -289,8 +293,9 @@ Output: `dist\MetaQuestTrayTool-Setup-<version>.exe` plus `dist\MetaQuestTrayToo
 
 ### GitHub Actions
 
-- Every push to `main` runs **CI** (build + publish smoke test).
-- Pushing a tag `v*` (or **Actions → Release → Run workflow**) builds Setup.exe and publishes a [GitHub Release](https://github.com/Eliminater74/MetaQuestTrayTool/releases):
+- Every push to `main` runs **CI** (locked restore, build, tests, coverage gate, and publish smoke test).
+- **CodeQL** runs on push, pull request, manual dispatch, and a weekly schedule. **Dependabot** watches NuGet packages and GitHub Actions.
+- Pushing a tag `v*` (or **Actions → Release → Run workflow**) builds Setup.exe with pinned Inno Setup, verifies checksums, and publishes a [GitHub Release](https://github.com/Eliminater74/MetaQuestTrayTool/releases):
 
 ```powershell
 git tag v1.0.1
