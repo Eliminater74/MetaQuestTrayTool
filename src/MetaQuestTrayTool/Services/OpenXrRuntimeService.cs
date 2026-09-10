@@ -48,19 +48,21 @@ public sealed class OpenXrRuntimeService
 
     public bool IsAvailable(OpenXrRuntimeKind kind) => !string.IsNullOrWhiteSpace(ResolveJson(kind, prefer64: true));
 
-    public string Set(OpenXrRuntimeKind kind)
+    public string Set(OpenXrRuntimeKind kind) => SetResult(kind).Summary;
+
+    public ProfileStepResult SetResult(OpenXrRuntimeKind kind)
     {
         if (kind is OpenXrRuntimeKind.Inherit)
         {
-            return "OpenXR inherit — no registry change.";
+            return new("OpenXR", ProfileStepStatus.Skipped, "OpenXR inherit - no registry change.");
         }
 
         var json64 = ResolveJson(kind, prefer64: true);
         if (string.IsNullOrWhiteSpace(json64) || !File.Exists(json64))
         {
-            return kind == OpenXrRuntimeKind.SteamVr
+            return new("OpenXR", ProfileStepStatus.Failed, kind == OpenXrRuntimeKind.SteamVr
                 ? "SteamVR OpenXR JSON was not found. Install SteamVR."
-                : "Meta OpenXR JSON was not found. Install the Meta Quest / Oculus PC software.";
+                : "Meta OpenXR JSON was not found. Install the Meta Quest / Oculus PC software.");
         }
 
         var json32 = ResolveJson(kind, prefer64: false);
@@ -71,12 +73,12 @@ public sealed class OpenXrRuntimeService
 
         var write = WriteActiveRuntimes(json64, json32);
         var current = ReadActiveKind();
-        if (current == kind)
+        if (current == kind && write.Succeeded)
         {
-            return $"OpenXR runtime set to {Label(kind)}. Restart the game / SteamVR / Link session to pick it up. {write}";
+            return new("OpenXR", ProfileStepStatus.Succeeded, $"OpenXR runtime set to {Label(kind)}. Restart the game / SteamVR / Link session to pick it up. {write.Summary}");
         }
 
-        return $"Tried to set OpenXR to {Label(kind)}. Live value is still {Label(current)}. {write}";
+        return new("OpenXR", ProfileStepStatus.Failed, $"Tried to set OpenXR to {Label(kind)}. Live value is {Label(current)}. {write.Summary}");
     }
 
     public void CaptureBeforeProfile()
@@ -202,7 +204,7 @@ public sealed class OpenXrRuntimeService
         }
     }
 
-    private static string WriteActiveRuntimes(string json64, string? json32)
+    private static (bool Succeeded, string Summary) WriteActiveRuntimes(string json64, string? json32)
     {
         try
         {
@@ -212,16 +214,16 @@ public sealed class OpenXrRuntimeService
                 WriteKey(WowRegistryPath, json32);
             }
 
-            return "Wrote HKLM OpenXR ActiveRuntime.";
+            return (true, "Wrote HKLM OpenXR ActiveRuntime.");
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException)
         {
-            return "Cannot change OpenXR without Administrator rights. The tray must already be elevated "
-                   + "(automatic at logon) — Windows will not show a UAC prompt while the headset is on.";
+            return (false, "Cannot change OpenXR without Administrator rights. The tray must already be elevated "
+                   + "(automatic at logon) — Windows will not show a UAC prompt while the headset is on.");
         }
         catch (Exception ex)
         {
-            return $"Could not write OpenXR ActiveRuntime: {ex.Message}";
+            return (false, $"Could not write OpenXR ActiveRuntime: {ex.Message}");
         }
     }
 

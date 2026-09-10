@@ -10,6 +10,20 @@ public sealed class GameLaunchService
 
     public GameLaunchService(App app) => _app = app;
 
+    private ProfileApplyResult ApplyForLaunch(GameProfile profile)
+    {
+        var result = _app.ApplyProfile(profile);
+        _app.Log.Info(result.Summary);
+        if (result.Status == ProfileApplyStatus.Failed)
+            throw new InvalidOperationException(result.Summary);
+        if (result.Status == ProfileApplyStatus.PartialSuccess)
+        {
+            _app.TrayNotify(result.Title, result.Summary);
+            _app.HeadsetAnnouncer.AnnounceProfileResult(profile.Name, result);
+        }
+        return result;
+    }
+
     public string LaunchLibraryGame(LibraryGame game, bool ensureProfile = true, bool applyNow = true)
     {
         ArgumentNullException.ThrowIfNull(game);
@@ -36,7 +50,7 @@ public sealed class GameLaunchService
 
             if (applyNow && profile is not null)
             {
-                var applied = _app.ApplyProfile(profile);
+                var applied = ApplyForLaunch(profile);
                 _app.Log.Info($"Armed profile '{profile.Name}' before launch: {applied}");
             }
 
@@ -96,7 +110,7 @@ public sealed class GameLaunchService
 
             if (applyNow)
             {
-                _app.ApplyProfile(profile);
+                ApplyForLaunch(profile);
             }
 
             if (profile.ExperimentalMsfsVr)

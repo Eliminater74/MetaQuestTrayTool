@@ -652,49 +652,34 @@ public partial class App : System.Windows.Application
         return "Another instance is holding the single-instance lock.";
     }
 
-    public string ApplyProfile(GameProfile profile)
+    public ProfileApplyResult ApplyProfile(GameProfile profile)
     {
         var caps = LinkConnection.GetCapabilities();
-        var parts = new List<string>();
-
-        if (caps.AllowsOculusDebugTool)
+        var coordinator = new ProfileApplyCoordinator();
+        coordinator.Run("ODT", () =>
         {
+            if (!caps.AllowsOculusDebugTool)
+                return new("ODT", ProfileStepStatus.Skipped, caps.OdtSkipMessage);
             var result = DebugTool.Apply(profile.Settings, profile.CustomCommands.CliCommands);
-            parts.Add(result.Summary);
-        }
-        else
-        {
-            parts.Add(caps.OdtSkipMessage);
-            Log.Info(caps.OdtSkipMessage);
-        }
-
+            return new("ODT", result.Succeeded ? ProfileStepStatus.Succeeded : ProfileStepStatus.Failed, result.Summary);
+        });
         if (profile.CustomCommands.AdbCommands.Count > 0)
-        {
-            parts.Add(TryApplyCustomAdb(profile.CustomCommands.AdbCommands));
-        }
-
+            coordinator.Run("ADB", () => ApplyCustomAdbResult(profile.CustomCommands.AdbCommands));
         if (profile.Link.HasAny)
-        {
-            if (caps.AllowsMetaLinkRegistry)
+            coordinator.Run("Link", () =>
             {
-                var merged = profile.Link.Overlay(Settings.Current.LinkSettings);
-                var link = Link.Apply(merged, deleteUnsetOverrides: true);
-                parts.Add(link.Summary);
-            }
-            else
-            {
-                parts.Add(caps.MetaLinkSkipMessage);
-                Log.Info(caps.MetaLinkSkipMessage);
-            }
-        }
-
+                if (!caps.AllowsMetaLinkRegistry)
+                    return new("Link", ProfileStepStatus.Skipped, caps.MetaLinkSkipMessage);
+                var result = Link.Apply(profile.Link.Overlay(Settings.Current.LinkSettings), deleteUnsetOverrides: true);
+                return new("Link", result.Succeeded ? ProfileStepStatus.Succeeded : ProfileStepStatus.Failed, result.Summary);
+            });
         if (profile.OpenXrRuntime is OpenXrRuntimeKind.Meta or OpenXrRuntimeKind.SteamVr)
-        {
-            OpenXr.CaptureBeforeProfile();
-            parts.Add(OpenXr.Set(profile.OpenXrRuntime));
-        }
-
-        return string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
+            coordinator.Run("OpenXR", () =>
+            {
+                OpenXr.CaptureBeforeProfile();
+                return OpenXr.SetResult(profile.OpenXrRuntime);
+            });
+        return coordinator.Result;
     }
 
     /// <summary>
@@ -925,11 +910,13 @@ public partial class App : System.Windows.Application
         return summary;
     }
 
-    private string TryApplyCustomAdb(IReadOnlyList<string> commands)
+    private string TryApplyCustomAdb(IReadOnlyList<string> commands) => ApplyCustomAdbResult(commands).Summary;
+
+    private ProfileStepResult ApplyCustomAdbResult(IReadOnlyList<string> commands)
     {
         if (commands.Count == 0)
         {
-            return string.Empty;
+            return new("ADB", ProfileStepStatus.Skipped, string.Empty);
         }
 
         try
@@ -937,23 +924,23 @@ public partial class App : System.Windows.Application
             var quest = Headset.ReadIdentity(Settings.Current.Headset);
             if (!quest.IsVrHeadset || !quest.IsReady || quest.IsRogue || string.IsNullOrWhiteSpace(quest.AdbSerial))
             {
-                return quest.IsIgnored
+                return new("ADB", ProfileStepStatus.Skipped, quest.IsIgnored
                     ? "Custom ADB skipped (not a VR headset)."
                     : quest.IsRogue
                         ? "Custom ADB skipped (untrusted headset)."
-                        : "Custom ADB skipped (no VR headset).";
+                        : "Custom ADB skipped (no VR headset).");
             }
 
             if (Settings.Current.Headset.RequireTrustedHeadset && !quest.IsTrusted)
             {
-                return "Custom ADB skipped (trust this headset first, or disable the trusted-headset requirement).";
+                return new("ADB", ProfileStepStatus.Skipped, "Custom ADB skipped (trust this headset first, or disable the trusted-headset requirement).");
             }
 
-            return CustomCommands.ApplyAdb(commands, quest.AdbSerial);
+            return new("ADB", ProfileStepStatus.Succeeded, CustomCommands.ApplyAdb(commands, quest.AdbSerial));
         }
         catch (Exception ex)
         {
-            return "Custom ADB skipped: " + ex.Message;
+            return new("ADB", ProfileStepStatus.Failed, ex.Message);
         }
     }
 }

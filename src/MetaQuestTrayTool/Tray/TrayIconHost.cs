@@ -676,7 +676,7 @@ public sealed class TrayIconHost : IDisposable
             {
                 var summary = _app.ApplyProfile(captured);
                 _app.Log.Info($"Applied profile '{captured.Name}': {summary}");
-                Notify("Profile", summary);
+                Notify(summary.Title, summary.Summary);
                 _shell?.RefreshActivePage();
             })
             {

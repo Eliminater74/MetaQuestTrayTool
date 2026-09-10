@@ -313,27 +313,16 @@ public sealed class ProcessWatcherService : IDisposable
 
     private void ApplyProfile(GameProfile profile, string processName)
     {
-        string summary;
-        try
-        {
-            summary = _app.ApplyProfile(profile);
-        }
-        catch (Exception ex)
-        {
-            _app.Log.Error($"Detected {processName}.exe — profile '{profile.Name}' failed to apply.", ex);
-            Notify("Profile apply failed", $"{profile.Name} could not be applied to {processName}.exe.");
-            _app.HeadsetAnnouncer.AnnounceProfileApplyFailed(profile.Name);
-            return;
-        }
-
-        TrySetPriority(processName, profile.CpuPriority);
+        var result = _app.ApplyProfile(profile);
+        // Latch even a failed attempt until process exit: do not retry writes every poll,
+        // and restore the baseline after any partially completed operation.
         _activeProcess = processName;
         _activeProfileName = profile.Name;
-        _app.Log.Info($"Detected {processName}.exe — applied profile '{profile.Name}'. {summary}");
-        Notify(
-            "Profile applied",
-            $"{profile.Name} is now active for {processName}.exe.\nGlobal defaults will return when you close the game.");
-        _app.HeadsetAnnouncer.AnnounceProfileDetected(profile.Name, summary);
+        if (result.Status != ProfileApplyStatus.Failed)
+            TrySetPriority(processName, profile.CpuPriority);
+        _app.Log.Info($"Detected {processName}.exe � profile '{profile.Name}': {result.Summary}");
+        Notify(result.Title, $"{profile.Name}: {result.Summary}\nGlobal defaults will return when you close the game.");
+        _app.HeadsetAnnouncer.AnnounceProfileResult(profile.Name, result);
         ApplyCadence();
     }
 

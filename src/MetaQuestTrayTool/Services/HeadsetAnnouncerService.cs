@@ -215,6 +215,12 @@ public sealed class HeadsetAnnouncerService : IDisposable
             playbackDeviceId: playbackDeviceId);
     }
 
+    public void AnnounceProfileResult(string profileName, ProfileApplyResult result)
+    {
+        Enqueue(HeadsetAnnounceKind.ProfileApplied,
+            $"{SanitizeName(profileName)}. {result.Title}. Check Log for component results.");
+    }
+
     public void AnnounceProfileApplied(string profileName)
     {
         AnnounceProfileApplied(profileName, summary: null);
