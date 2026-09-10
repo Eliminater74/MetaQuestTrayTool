@@ -31,6 +31,19 @@ public class HeadsetOverrideTests
         Assert.Throws<InvalidOperationException>(() => HeadsetSettingsService.PerformanceOverrides(settings));
     }
 
+    [Fact]
+    public void DynamicDoesNotForceFixedLevelAndDefaultDoesNotWrite()
+    {
+        var settings = new HeadsetSettings { Ffr = HeadsetFfrLevel.High };
+        Assert.Equal("3", HeadsetSettingsService.FoveationOverrides(settings)["debug.oculus.foveation.level"]);
+        settings.FoveationMode = HeadsetFoveationMode.Dynamic;
+        var dynamic = HeadsetSettingsService.FoveationOverrides(settings);
+        Assert.Single(dynamic);
+        Assert.Equal("1", dynamic["debug.oculus.foveation.dynamic"]);
+        settings.FoveationMode = HeadsetFoveationMode.AppDefault;
+        Assert.Empty(HeadsetSettingsService.FoveationOverrides(settings));
+    }
+
     [Theory]
     [InlineData("Quest Pro", HeadsetRefreshRate.Hz120, false)]
     [InlineData("Quest 3S", HeadsetRefreshRate.Hz60, false)]

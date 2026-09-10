@@ -32,7 +32,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(TextureBox, "2560", HeadsetTexturePreset.Square2560);
         Add(TextureBox, "3072", HeadsetTexturePreset.Square3072);
 
-        Add(FfrBox, "Device / app default", HeadsetFfrLevel.DeviceDefault);
+        Add(FoveationModeBox, "App default (no new override)", HeadsetFoveationMode.AppDefault);
+        Add(FoveationModeBox, "Dynamic", HeadsetFoveationMode.Dynamic);
+        Add(FoveationModeBox, "Fixed", HeadsetFoveationMode.Fixed);
         Add(FfrBox, "Off (best quality)", HeadsetFfrLevel.Off);
         Add(FfrBox, "Low", HeadsetFfrLevel.Low);
         Add(FfrBox, "Medium", HeadsetFfrLevel.Medium);
@@ -74,7 +76,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         UpdateRefreshOptions(headset.TrustedModel);
         Select(TextureBox, headset.TextureSize);
         Select(RefreshBox, headset.RefreshRate);
-        Select(FfrBox, headset.Ffr);
+        Select(FoveationModeBox, headset.EffectiveFoveationMode);
+        Select(FfrBox, headset.Ffr == HeadsetFfrLevel.DeviceDefault ? HeadsetFfrLevel.Off : headset.Ffr);
+        FfrBox.IsEnabled = headset.EffectiveFoveationMode == HeadsetFoveationMode.Fixed;
         Select(ChromaBox, headset.ChromaticAberration);
         Select(CaptureSizeBox, headset.CaptureSize);
         Select(CaptureFpsBox, headset.CaptureFps);
@@ -111,7 +115,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.CpuGpuLevel = HeadsetCpuGpuLevel.AppDefault;
         headset.TextureSize = Read<HeadsetTexturePreset>(TextureBox, headset.TextureSize);
         headset.RefreshRate = Read<HeadsetRefreshRate>(RefreshBox, headset.RefreshRate);
+        headset.FoveationMode = Read<HeadsetFoveationMode>(FoveationModeBox, headset.EffectiveFoveationMode);
         headset.Ffr = Read<HeadsetFfrLevel>(FfrBox, headset.Ffr);
+        FfrBox.IsEnabled = headset.EffectiveFoveationMode == HeadsetFoveationMode.Fixed;
         headset.ChromaticAberration = Read<HeadsetChromaMode>(ChromaBox, headset.ChromaticAberration);
         headset.CaptureSize = Read<HeadsetCaptureSize>(CaptureSizeBox, headset.CaptureSize);
         headset.CaptureFps = Read<HeadsetCaptureFps>(CaptureFpsBox, headset.CaptureFps);

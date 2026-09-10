@@ -98,8 +98,12 @@
                   ToolTip="Display refresh rate (Hz) via ADB. Higher is smoother; needs a headset that supports the mode."/>
 
         <TextBlock Grid.Row="3" Text="FFR" VerticalAlignment="Center" Margin="0,0,0,8"/>
-        <ComboBox x:Name="FfrBox" Grid.Row="3" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
-                  ToolTip="Fixed Foveated Rendering level. Higher FFR saves GPU at the cost of softer peripheral pixels."/>
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
+          <ComboBox x:Name="FoveationModeBox" Padding="6" SelectionChanged="ComboPersist_Changed"
+                    ToolTip="Dynamic allows runtime adjustment in supported apps. App default does not clear a live override; reboot to clear."/>
+          <ComboBox x:Name="FfrBox" Padding="6" Margin="8,0,0,0" SelectionChanged="ComboPersist_Changed"
+                    ToolTip="Fixed mode only. Higher levels reduce peripheral detail to save GPU work."/>
+        </StackPanel>
 
         <TextBlock Grid.Row="4" Text="Chromatic aberration" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <ComboBox x:Name="ChromaBox" Grid.Row="4" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"

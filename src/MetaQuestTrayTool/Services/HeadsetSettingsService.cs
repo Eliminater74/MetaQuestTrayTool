@@ -64,6 +64,22 @@ public sealed class HeadsetSettingsService
         return $"Trusted VR headset {identity.Model ?? "headset"} ({identity.Serial}). Commands will not run on phones, tablets, emulators, or any other device.";
     }
 
+    internal static IReadOnlyDictionary<string, string> FoveationOverrides(HeadsetSettings settings)
+    {
+        var mode = settings.EffectiveFoveationMode;
+        if (!Enum.IsDefined(mode)) throw new InvalidOperationException("Unknown foveation mode.");
+        if (mode == HeadsetFoveationMode.AppDefault) return new Dictionary<string, string>();
+        if (mode == HeadsetFoveationMode.Dynamic)
+            return new Dictionary<string, string> { ["debug.oculus.foveation.dynamic"] = "1" };
+        var level = settings.Ffr == HeadsetFfrLevel.DeviceDefault ? 0 : (int)settings.Ffr - 1;
+        if (level is < 0 or > 4) throw new InvalidOperationException("Unknown fixed foveation level.");
+        return new Dictionary<string, string>
+        {
+            ["debug.oculus.foveation.dynamic"] = "0",
+            ["debug.oculus.foveation.level"] = level.ToString(CultureInfo.InvariantCulture)
+        };
+    }
+
     internal static IReadOnlyDictionary<string, string> PerformanceOverrides(HeadsetSettings settings)
     {
         var result = new Dictionary<string, string>();
@@ -118,20 +134,8 @@ public sealed class HeadsetSettingsService
             applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.refreshRate", refresh.Value.ToString()));
         }
 
-        var ffr = settings.Ffr switch
-        {
-            HeadsetFfrLevel.Off => 0,
-            HeadsetFfrLevel.Low => 1,
-            HeadsetFfrLevel.Medium => 2,
-            HeadsetFfrLevel.High => 3,
-            HeadsetFfrLevel.HighTop => 4,
-            _ => (int?)null
-        };
-        if (ffr is not null)
-        {
-            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.foveation.level", ffr.Value.ToString()));
-            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.foveation.dynamic", "0"));
-        }
+        foreach (var (name, value) in FoveationOverrides(settings))
+            applied.Add(_adb.SetProp(quest.Serial, name, value));
 
         switch (settings.ChromaticAberration)
         {

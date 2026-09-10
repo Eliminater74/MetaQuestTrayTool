@@ -35,6 +35,8 @@ public enum HeadsetRefreshRate
     Hz120
 }
 
+public enum HeadsetFoveationMode { AppDefault, Dynamic, Fixed }
+
 public enum HeadsetFfrLevel
 {
     DeviceDefault,
@@ -101,6 +103,10 @@ public sealed class HeadsetSettings
     };
     public HeadsetTexturePreset TextureSize { get; set; } = HeadsetTexturePreset.DeviceDefault;
     public HeadsetRefreshRate RefreshRate { get; set; } = HeadsetRefreshRate.DeviceDefault;
+    public HeadsetFoveationMode? FoveationMode { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public HeadsetFoveationMode EffectiveFoveationMode => FoveationMode
+        ?? (Ffr == HeadsetFfrLevel.DeviceDefault ? HeadsetFoveationMode.AppDefault : HeadsetFoveationMode.Fixed);
     public HeadsetFfrLevel Ffr { get; set; } = HeadsetFfrLevel.DeviceDefault;
     public HeadsetChromaMode ChromaticAberration { get; set; } = HeadsetChromaMode.AppSelected;
     public HeadsetCaptureSize CaptureSize { get; set; } = HeadsetCaptureSize.DeviceDefault;
