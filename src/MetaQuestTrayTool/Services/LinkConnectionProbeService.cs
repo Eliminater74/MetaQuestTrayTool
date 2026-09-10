@@ -250,7 +250,7 @@ public sealed class LinkConnectionProbeService
     /// are not enough while SteamVR or Virtual Desktop is running — audio switcher often routes
     /// the Quest as Windows default under Steam Link too.
     /// </summary>
-    private static bool LooksLikeStrongMetaSession(
+    internal static bool LooksLikeStrongMetaSession(
         HeadsetCacheEntry? cache,
         bool metaHmd,
         bool audioLink,
@@ -742,49 +742,59 @@ public sealed class LinkConnectionProbeService
                 FileAccess.Read,
                 FileShare.ReadWrite | FileShare.Delete);
             using var doc = JsonDocument.Parse(stream);
-            if (!doc.RootElement.TryGetProperty("devices", out var devices)
-                || devices.ValueKind != JsonValueKind.Array)
-            {
-                return null;
-            }
-
-            HeadsetCacheEntry? best = null;
-            foreach (var device in devices.EnumerateArray())
-            {
-                if (!device.TryGetProperty("type", out var typeEl)
-                    || !string.Equals(typeEl.GetString(), "headset", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                var entry = new HeadsetCacheEntry
-                {
-                    SerialNumber = GetString(device, "serialNumber") ?? GetString(device, "id"),
-                    ConnectionState = GetString(device, "connectionState"),
-                    RdConnectionState = GetString(device, "rdConnectionState"),
-                    IsUsingAirLink = GetBool(device, "isUsingAirLink"),
-                    LastSeenAt = GetInt64(device, "lastSeenAt") ?? 0,
-                    SupportsOculusLink = GetBool(device, "supportsOculusLink"),
-                    PowerState = GetString(device, "powerState"),
-                    OperationalState = GetString(device, "operationalState"),
-                    PrimaryState = GetString(device, "primaryState")
-                };
-
-                if (best is null
-                    || entry.LastSeenAt > best.LastSeenAt
-                    || (LooksLikeActiveMetaSession(entry, metaHmd: false, audioLink: false)
-                        && !LooksLikeActiveMetaSession(best, metaHmd: false, audioLink: false)))
-                {
-                    best = entry;
-                }
-            }
-
-            return best;
+            return ParseHeadsetCache(doc.RootElement);
         }
         catch
         {
             return null;
         }
+    }
+
+    internal static HeadsetCacheEntry? ParseHeadsetCache(JsonElement root)
+    {
+        if (!root.TryGetProperty("devices", out var devices)
+            || devices.ValueKind != JsonValueKind.Array)
+        {
+            return null;
+        }
+
+        HeadsetCacheEntry? best = null;
+        var bestEvidence = -1;
+        foreach (var device in devices.EnumerateArray())
+        {
+            if (!device.TryGetProperty("type", out var typeEl)
+                || !string.Equals(typeEl.GetString(), "headset", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var entry = new HeadsetCacheEntry
+            {
+                SerialNumber = GetString(device, "serialNumber") ?? GetString(device, "id"),
+                ConnectionState = GetString(device, "connectionState"),
+                RdConnectionState = GetString(device, "rdConnectionState"),
+                IsUsingAirLink = GetBool(device, "isUsingAirLink"),
+                LastSeenAt = GetInt64(device, "lastSeenAt") ?? 0,
+                SupportsOculusLink = GetBool(device, "supportsOculusLink"),
+                PowerState = GetString(device, "powerState"),
+                OperationalState = GetString(device, "operationalState"),
+                PrimaryState = GetString(device, "primaryState")
+            };
+
+            // Select by the same evidence used by the transport classifier first.
+            // A newer idle/weak entry must not hide a live Link headset and make
+            // SteamVR over Link fall through to the non-Meta write guard.
+            var evidence = LooksLikeLiveMetaLinkStream(entry) ? 2
+                : LooksLikeActiveMetaSession(entry, metaHmd: false, audioLink: false) ? 1 : 0;
+            if (best is null || evidence > bestEvidence
+                || (evidence == bestEvidence && entry.LastSeenAt > best.LastSeenAt))
+            {
+                best = entry;
+                bestEvidence = evidence;
+            }
+        }
+
+        return best;
     }
 
     private static string? GetString(JsonElement el, string name) =>
@@ -820,7 +830,7 @@ public sealed class LinkConnectionProbeService
         return null;
     }
 
-    private sealed class HeadsetCacheEntry
+    internal sealed class HeadsetCacheEntry
     {
         public string? SerialNumber { get; init; }
         public string? ConnectionState { get; init; }
