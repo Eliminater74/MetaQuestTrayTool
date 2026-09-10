@@ -225,6 +225,35 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         App.Instance.Log.Info("Copied Info report to the clipboard.");
     }
 
+    private async void ExportSupportBundle_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Export Meta Quest Tray Tool support ZIP",
+            Filter = "ZIP archive (*.zip)|*.zip",
+            FileName = $"MetaQuestTrayTool-support-{DateTime.Now:yyyyMMdd-HHmmss}.zip"
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        ReportBox.Text = "Creating support ZIP...";
+        try
+        {
+            var result = await Task.Run(() => App.Instance.SupportBundles.Create(dialog.FileName)).ConfigureAwait(true);
+            ReportBox.Text = result.Summary;
+            App.Instance.Log.Info(result.Summary);
+            System.Windows.MessageBox.Show(Window.GetWindow(this), result.Summary, App.AppName);
+        }
+        catch (Exception ex)
+        {
+            ReportBox.Text = "Could not create support ZIP: " + ex.Message;
+            App.Instance.Log.Warn(ReportBox.Text);
+            System.Windows.MessageBox.Show(Window.GetWindow(this), ex.Message, App.AppName);
+        }
+    }
+
     private async void CheckMetaCompatibility_Click(object sender, RoutedEventArgs e)
     {
         ReportBox.Text = "Checking Meta runtime compatibility...";

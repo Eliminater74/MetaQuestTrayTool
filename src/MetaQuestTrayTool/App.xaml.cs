@@ -68,6 +68,7 @@ public partial class App : System.Windows.Application
     public RuntimeSnapshotService RuntimeSnapshots { get; }
     public StatusDashboardService StatusDashboard { get; }
     public MetaRuntimeCompatibilityService RuntimeCompatibility { get; }
+    public SupportBundleService SupportBundles { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public PowerWatchService? PowerWatch => _powerWatcher;
@@ -102,6 +103,7 @@ public partial class App : System.Windows.Application
         RuntimeSnapshots = new RuntimeSnapshotService(this);
         StatusDashboard = new StatusDashboardService(this);
         RuntimeCompatibility = new MetaRuntimeCompatibilityService(this);
+        SupportBundles = new SupportBundleService(this);
     }
 
     protected override void OnStartup(StartupEventArgs e)

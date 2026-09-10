@@ -17,6 +17,8 @@
                 ToolTip="Re-read Link, OpenXR, headset, ADB, and PCVR Ready status."/>
         <Button Content="Copy" Style="{StaticResource GhostButtonStyle}" Click="Copy_Click"
                 ToolTip="Copy the full diagnostics report to the clipboard for support or bug reports."/>
+        <Button Content="Export support ZIP" Style="{StaticResource GhostButtonStyle}" Click="ExportSupportBundle_Click"
+                ToolTip="Create a local ZIP with sanitized diagnostics, settings summary, compatibility status, and recent logs."/>
         <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"
                 ToolTip="Remember the connected VR serial as your trusted headset for ADB commands."/>
         <Button Content="Check Meta compatibility" Style="{StaticResource GhostButtonStyle}" Click="CheckMetaCompatibility_Click"
