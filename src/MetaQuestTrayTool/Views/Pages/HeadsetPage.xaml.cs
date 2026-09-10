@@ -45,6 +45,13 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(ChromaBox, "On", HeadsetChromaMode.On);
         Add(ChromaBox, "Off", HeadsetChromaMode.Off);
 
+        foreach (var box in new[] { LocalDimmingBox, SubsampledFoveationBox })
+        {
+            Add(box, "App default (no new override)", HeadsetExperimentalOverride.AppDefault);
+            Add(box, "Force off", HeadsetExperimentalOverride.ForceOff);
+            Add(box, "Force on", HeadsetExperimentalOverride.ForceOn);
+        }
+
         Add(CaptureSizeBox, "Device default (1024×1024)", HeadsetCaptureSize.DeviceDefault);
         Add(CaptureSizeBox, "640 × 480", HeadsetCaptureSize.Size640x480);
         Add(CaptureSizeBox, "1280 × 720", HeadsetCaptureSize.Size1280x720);
@@ -80,6 +87,8 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Select(FfrBox, headset.Ffr == HeadsetFfrLevel.DeviceDefault ? HeadsetFfrLevel.Off : headset.Ffr);
         FfrBox.IsEnabled = headset.EffectiveFoveationMode == HeadsetFoveationMode.Fixed;
         Select(ChromaBox, headset.ChromaticAberration);
+        Select(LocalDimmingBox, headset.LocalDimming);
+        Select(SubsampledFoveationBox, headset.SubsampledFoveation);
         Select(CaptureSizeBox, headset.CaptureSize);
         Select(CaptureFpsBox, headset.CaptureFps);
         Select(CaptureBitrateBox, headset.CaptureBitrate);
@@ -119,6 +128,8 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.Ffr = Read<HeadsetFfrLevel>(FfrBox, headset.Ffr);
         FfrBox.IsEnabled = headset.EffectiveFoveationMode == HeadsetFoveationMode.Fixed;
         headset.ChromaticAberration = Read<HeadsetChromaMode>(ChromaBox, headset.ChromaticAberration);
+        headset.LocalDimming = Read<HeadsetExperimentalOverride>(LocalDimmingBox, headset.LocalDimming);
+        headset.SubsampledFoveation = Read<HeadsetExperimentalOverride>(SubsampledFoveationBox, headset.SubsampledFoveation);
         headset.CaptureSize = Read<HeadsetCaptureSize>(CaptureSizeBox, headset.CaptureSize);
         headset.CaptureFps = Read<HeadsetCaptureFps>(CaptureFpsBox, headset.CaptureFps);
         headset.CaptureBitrate = Read<HeadsetCaptureBitrate>(CaptureBitrateBox, headset.CaptureBitrate);
@@ -243,6 +254,8 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
     private void Apply_Click(object sender, RoutedEventArgs e) =>
         Run(() => App.Instance.Headset.Apply(App.Instance.Settings.Current.Headset));
+    private void ResetOverrides_Click(object sender, RoutedEventArgs e) =>
+        Run(() => App.Instance.Headset.ResetDocumentedOverrides(App.Instance.Settings.Current.Headset));
     private void ProxOn_Click(object sender, RoutedEventArgs e) =>
         Run(() => App.Instance.Headset.SetProximitySensor(true, App.Instance.Settings.Current.Headset));
     private void ProxOff_Click(object sender, RoutedEventArgs e) =>

@@ -37,6 +37,8 @@ public enum HeadsetRefreshRate
 
 public enum HeadsetFoveationMode { AppDefault, Dynamic, Fixed }
 
+public enum HeadsetExperimentalOverride { AppDefault, ForceOff, ForceOn }
+
 public enum HeadsetFfrLevel
 {
     DeviceDefault,
@@ -114,6 +116,8 @@ public sealed class HeadsetSettings
     public HeadsetCaptureBitrate CaptureBitrate { get; set; } = HeadsetCaptureBitrate.DeviceDefault;
     public bool StereoCapture { get; set; }
     public bool FullRateCapture { get; set; }
+    public HeadsetExperimentalOverride LocalDimming { get; set; } = HeadsetExperimentalOverride.AppDefault;
+    public HeadsetExperimentalOverride SubsampledFoveation { get; set; } = HeadsetExperimentalOverride.AppDefault;
     public bool RequireTrustedHeadset { get; set; } = true;
     public string? TrustedSerial { get; set; }
     public string? TrustedModel { get; set; }

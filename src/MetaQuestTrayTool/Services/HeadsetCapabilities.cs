@@ -4,9 +4,12 @@ namespace MetaQuestTrayTool.Services;
 
 public static class HeadsetCapabilities
 {
+    public static bool SupportsLocalDimming(string? model) =>
+        NormalizeModel(model).Contains("Quest Pro", StringComparison.OrdinalIgnoreCase);
+
     public static IReadOnlyList<HeadsetRefreshRate> RefreshRates(string? model)
     {
-        var name = (model ?? "").Replace('_', ' ').Trim();
+        var name = NormalizeModel(model);
         if (name.Contains("Quest Pro", StringComparison.OrdinalIgnoreCase))
             return [HeadsetRefreshRate.DeviceDefault, HeadsetRefreshRate.Hz72, HeadsetRefreshRate.Hz80, HeadsetRefreshRate.Hz90];
         if (name.Contains("Quest 3", StringComparison.OrdinalIgnoreCase))
@@ -20,4 +23,6 @@ public static class HeadsetCapabilities
             return [HeadsetRefreshRate.DeviceDefault, HeadsetRefreshRate.Hz60, HeadsetRefreshRate.Hz72];
         return [HeadsetRefreshRate.DeviceDefault];
     }
+
+    private static string NormalizeModel(string? model) => (model ?? "").Replace('_', ' ').Trim();
 }

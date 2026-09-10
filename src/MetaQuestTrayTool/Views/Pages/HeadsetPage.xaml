@@ -110,6 +110,27 @@
                   ToolTip="Chromatic aberration correction. On is usually correct; Off can look sharper but may show color fringing."/>
       </Grid>
 
+      <Expander Header="Experimental headset rendering" IsExpanded="False" Margin="0,4,0,12">
+        <Grid Margin="0,10,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+
+          <TextBlock Grid.Row="0" Text="Quest Pro local dimming" VerticalAlignment="Center" Margin="0,0,0,8"/>
+          <ComboBox x:Name="LocalDimmingBox" Grid.Row="0" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
+                    ToolTip="Experimental Meta runtime property for Quest Pro local dimming. Applying is blocked on other headset models."/>
+
+          <TextBlock Grid.Row="1" Text="Subsampled foveation" VerticalAlignment="Center" Margin="0,0,0,8"/>
+          <ComboBox x:Name="SubsampledFoveationBox" Grid.Row="1" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
+                    ToolTip="Experimental Meta runtime property for subsampled fixed foveation layout. Leave on App default unless you are testing rendering behavior."/>
+        </Grid>
+      </Expander>
+
       <TextBlock Text="Capture" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,8"/>
       <Grid>
         <Grid.ColumnDefinitions>
@@ -158,6 +179,8 @@
       <StackPanel Orientation="Horizontal" Margin="0,16,0,8">
         <Button Content="Apply to headset now" Style="{StaticResource AccentButtonStyle}" Click="Apply_Click"
                 ToolTip="Push all quality, capture, and custom ADB commands to the connected trusted headset now."/>
+        <Button Content="Reset live ADB overrides" Style="{StaticResource GhostButtonStyle}" Click="ResetOverrides_Click"
+                ToolTip="Write only documented defaults for texture, refresh, and capture props. Reboot clears overrides where Meta does not document a safe default."/>
         <Button Content="Enable proximity" Style="{StaticResource GhostButtonStyle}" Click="ProxOn_Click"
                 ToolTip="Re-enable the proximity sensor so the headset sleeps when you take it off."/>
         <Button Content="Disable proximity" Style="{StaticResource GhostButtonStyle}" Click="ProxOff_Click"

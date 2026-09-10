@@ -92,6 +92,45 @@ public sealed class HeadsetSettingsService
         return result;
     }
 
+    internal static IReadOnlyDictionary<string, string> ExperimentalOverrides(HeadsetSettings settings, string? model)
+    {
+        var result = new Dictionary<string, string>();
+        AddExperimentalBool(
+            result,
+            settings.LocalDimming,
+            "debug.oculus.localDimming",
+            "Local dimming is only exposed for Quest Pro.",
+            HeadsetCapabilities.SupportsLocalDimming(model));
+        AddExperimentalBool(
+            result,
+            settings.SubsampledFoveation,
+            "debug.oculus.foveation.subsampled",
+            null,
+            supported: true);
+        return result;
+    }
+
+    internal static IReadOnlyDictionary<string, string> DocumentedDefaultOverrides(string? model)
+    {
+        var result = new Dictionary<string, string>
+        {
+            ["debug.oculus.capture.width"] = "1024",
+            ["debug.oculus.capture.height"] = "1024",
+            ["debug.oculus.capture.bitrate"] = "5000000",
+            ["debug.oculus.fullRateCapture"] = "0",
+            ["debug.oculus.enableVideoCapture"] = "0"
+        };
+
+        if (TryDefaultTextureSize(model, out var width, out var height))
+        {
+            result["debug.oculus.textureWidth"] = width.ToString(CultureInfo.InvariantCulture);
+            result["debug.oculus.textureHeight"] = height.ToString(CultureInfo.InvariantCulture);
+            result["debug.oculus.refreshRate"] = "72";
+        }
+
+        return result;
+    }
+
     public string SetRecording(HeadsetSettings settings, bool enabled)
     {
         var quest = RequireReadyHeadset(settings);
@@ -111,7 +150,11 @@ public sealed class HeadsetSettingsService
 
         if (!HeadsetCapabilities.RefreshRates(quest.Model).Contains(settings.RefreshRate))
             throw new InvalidOperationException("The saved refresh rate is not supported by this headset model. Choose a supported rate or Device default.");
-        foreach (var (name, value) in PerformanceOverrides(settings))
+        var performance = PerformanceOverrides(settings);
+        var foveation = FoveationOverrides(settings);
+        var experimental = ExperimentalOverrides(settings, quest.Model);
+
+        foreach (var (name, value) in performance)
             applied.Add(_adb.SetProp(quest.Serial, name, value));
 
         if (TryTextureSize(settings.TextureSize, out var width, out var height))
@@ -134,7 +177,10 @@ public sealed class HeadsetSettingsService
             applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.refreshRate", refresh.Value.ToString()));
         }
 
-        foreach (var (name, value) in FoveationOverrides(settings))
+        foreach (var (name, value) in foveation)
+            applied.Add(_adb.SetProp(quest.Serial, name, value));
+
+        foreach (var (name, value) in experimental)
             applied.Add(_adb.SetProp(quest.Serial, name, value));
 
         switch (settings.ChromaticAberration)
@@ -212,6 +258,17 @@ public sealed class HeadsetSettingsService
         return applied.Count == 0
             ? $"Headset {label} connected — all headset overrides are Device/App default (nothing to push)."
             : $"Applied {applied.Count} headset ADB command(s) on {label}.";
+    }
+
+    public string ResetDocumentedOverrides(HeadsetSettings settings)
+    {
+        var quest = RequireReadyHeadset(settings);
+        var defaults = DocumentedDefaultOverrides(quest.Model);
+        foreach (var (name, value) in defaults)
+            _adb.SetProp(quest.Serial, name, value);
+
+        var label = quest.Model ?? quest.Serial;
+        return $"Reset {defaults.Count} documented ADB override(s) on {label}. Recording was stopped. Reboot the headset to clear CPU/GPU levels, foveation, chromatic aberration, local dimming, subsampled foveation, and any custom properties with no proven safe default.";
     }
 
     public string SetProximitySensor(bool enabled, HeadsetSettings settings)
@@ -358,6 +415,36 @@ public sealed class HeadsetSettingsService
             _ => (0, 0)
         };
         return width > 0;
+    }
+
+    private static bool TryDefaultTextureSize(string? model, out int width, out int height)
+    {
+        var name = (model ?? "").Replace('_', ' ').Trim();
+        (width, height) = name switch
+        {
+            var m when m.Contains("Quest Pro", StringComparison.OrdinalIgnoreCase) => (1440, 1584),
+            var m when m.Contains("Quest 3", StringComparison.OrdinalIgnoreCase) => (1680, 1760),
+            var m when m.Contains("Quest 2", StringComparison.OrdinalIgnoreCase) => (1440, 1584),
+            var m when m.Equals("Quest", StringComparison.OrdinalIgnoreCase)
+                || m.Equals("Oculus Quest", StringComparison.OrdinalIgnoreCase)
+                || m.Equals("Meta Quest", StringComparison.OrdinalIgnoreCase)
+                || m.Contains("Quest 1", StringComparison.OrdinalIgnoreCase) => (1216, 1344),
+            _ => (0, 0)
+        };
+        return width > 0;
+    }
+
+    private static void AddExperimentalBool(
+        IDictionary<string, string> result,
+        HeadsetExperimentalOverride value,
+        string property,
+        string? unsupportedMessage,
+        bool supported)
+    {
+        if (!Enum.IsDefined(value)) throw new InvalidOperationException("Unknown experimental headset override.");
+        if (value == HeadsetExperimentalOverride.AppDefault) return;
+        if (!supported) throw new InvalidOperationException(unsupportedMessage ?? "This experimental headset override is not supported by the connected model.");
+        result[property] = value == HeadsetExperimentalOverride.ForceOn ? "1" : "0";
     }
 
     private static bool TryCaptureSize(HeadsetCaptureSize size, out int width, out int height)
