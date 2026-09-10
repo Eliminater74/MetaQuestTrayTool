@@ -245,40 +245,21 @@ public sealed class HeadsetSettingsService
     private AdbDevice RequireReadyHeadset(HeadsetSettings settings)
     {
         ForgetInvalidTrust(settings);
-        var quest = _adb.FindQuest();
-        if (quest is null)
+        var identity = ReadIdentity(settings);
+        if (!identity.IsVrHeadset || !identity.IsReady || string.IsNullOrWhiteSpace(identity.AdbSerial))
+            throw new InvalidOperationException("Connect a recognized VR headset and authorize USB debugging first.");
+        if (settings.RequireTrustedHeadset)
         {
-            var ignored = _adb.DescribeIgnoredDevices();
-            throw new InvalidOperationException(ignored is null
-                ? $"No VR headset was found over ADB. Connect a {VrHeadsetClassifier.AllowedHeadsetList} with Developer Mode."
-                : ignored);
-        }
-
-        if (quest.NeedsAuthorization)
-        {
-            throw new InvalidOperationException("Headset USB debugging is not authorized. Accept the prompt inside the headset.");
-        }
-
-        if (!quest.IsReady)
-        {
-            throw new InvalidOperationException($"Headset ADB state is '{quest.State}'.");
-        }
-
-        if (settings.RequireTrustedHeadset && string.IsNullOrWhiteSpace(settings.TrustedSerial))
-        {
-            TrustCurrentHeadset(settings);
-        }
-
-        if (settings.RequireTrustedHeadset && !string.IsNullOrWhiteSpace(settings.TrustedSerial))
-        {
-            var identity = _adb.ReadIdentity(settings.TrustedSerial);
-            if (identity.IsRogue)
+            if (string.IsNullOrWhiteSpace(settings.TrustedSerial))
             {
-                throw new InvalidOperationException(
-                    $"Blocked untrusted headset {identity.Model} ({identity.Serial}). Trusted device is {settings.TrustedModel} ({settings.TrustedSerial}).");
+                // Trust exactly the identity selected above, never a second enumeration.
+                settings.TrustedSerial = identity.Serial;
+                settings.TrustedModel = identity.Model;
             }
+            else if (!identity.IsTrusted)
+                throw new InvalidOperationException("Blocked untrusted headset. Connect the trusted headset or explicitly trust this device.");
         }
-
+        var quest = new AdbDevice { Serial = identity.AdbSerial, State = "device", Model = identity.Model };
         return quest;
     }
 

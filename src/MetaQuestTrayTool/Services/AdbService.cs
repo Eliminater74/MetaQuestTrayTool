@@ -552,14 +552,24 @@ public sealed class AdbService
         return line.Length > 160 ? line[..160] + "…" : line;
     }
 
-    public AdbDevice? FindQuest()
+    public AdbDevice? FindQuest(string? trustedSerial = null) => SelectQuest(
+        ListDevices(), trustedSerial, device => Classify(device).IsVr,
+        device => device.IsReady
+            ? GetProp(device.Serial, "ro.serialno") ?? GetProp(device.Serial, "ro.boot.serialno") ?? device.Serial
+            : device.Serial);
+
+    internal static AdbDevice? SelectQuest(IEnumerable<AdbDevice> devices, string? trustedSerial,
+        Func<AdbDevice, bool> isHeadset, Func<AdbDevice, string> hardwareSerial)
     {
-        var devices = ListDevices();
-        return devices.FirstOrDefault(device => Classify(device).IsVr)
-               // USB only: an unauthorized wireless phone must not be treated as a Quest.
-               ?? devices.FirstOrDefault(device => device.NeedsAuthorization
-                                                 && !LooksLikeWirelessSerial(device.Serial)
-                                                 && !VrHeadsetClassifier.IsObviousEmulator(device));
+        var headsets = devices.Where(isHeadset).ToArray();
+        if (!string.IsNullOrWhiteSpace(trustedSerial)
+            && !VrHeadsetClassifier.LooksLikeNonHeadsetSerial(trustedSerial))
+        {
+            var trusted = headsets.Where(d => string.Equals(hardwareSerial(d), trustedSerial,
+                StringComparison.OrdinalIgnoreCase)).OrderByDescending(d => d.IsReady).FirstOrDefault();
+            if (trusted is not null) return trusted;
+        }
+        return headsets.FirstOrDefault(d => d.IsReady) ?? headsets.FirstOrDefault();
     }
 
     public string? DescribeIgnoredDevices()
@@ -658,7 +668,8 @@ public sealed class AdbService
     {
         var devices = ListDevices();
         var classified = devices.Select(device => (device, kind: Classify(device))).ToList();
-        var headset = classified.FirstOrDefault(item => item.kind.IsVr).device;
+        var headset = SelectQuest(devices, trustedSerial, d => classified.Any(c => c.device == d && c.kind.IsVr),
+            d => d.IsReady ? GetProp(d.Serial, "ro.serialno") ?? GetProp(d.Serial, "ro.boot.serialno") ?? d.Serial : d.Serial);
         if (headset is null)
         {
             var ignored = classified.FirstOrDefault().device;
