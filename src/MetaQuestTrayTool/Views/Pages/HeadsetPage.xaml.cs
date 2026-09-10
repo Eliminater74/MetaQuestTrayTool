@@ -39,7 +39,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(FfrBox, "Low", HeadsetFfrLevel.Low);
         Add(FfrBox, "Medium", HeadsetFfrLevel.Medium);
         Add(FfrBox, "High", HeadsetFfrLevel.High);
-        Add(FfrBox, "High Top (best performance)", HeadsetFfrLevel.HighTop);
+        Add(FfrBox, "High Top — legacy/VrApi (OpenXR behaves as High)", HeadsetFfrLevel.HighTop);
 
         Add(ChromaBox, "App selected (default)", HeadsetChromaMode.AppSelected);
         Add(ChromaBox, "On", HeadsetChromaMode.On);
@@ -60,9 +60,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(CaptureSizeBox, "1600 × 1600", HeadsetCaptureSize.Size1600x1600);
 
         Add(CaptureFpsBox, "Device default", HeadsetCaptureFps.DeviceDefault);
-        Add(CaptureFpsBox, "24 fps", HeadsetCaptureFps.Fps24);
-        Add(CaptureFpsBox, "30 fps", HeadsetCaptureFps.Fps30);
-        Add(CaptureFpsBox, "60 fps", HeadsetCaptureFps.Fps60);
+        Add(CaptureFpsBox, "24 fps — legacy / firmware-dependent", HeadsetCaptureFps.Fps24);
+        Add(CaptureFpsBox, "30 fps — legacy / firmware-dependent", HeadsetCaptureFps.Fps30);
+        Add(CaptureFpsBox, "60 fps — legacy / firmware-dependent", HeadsetCaptureFps.Fps60);
 
         Add(CaptureBitrateBox, "Device default (5 Mbps)", HeadsetCaptureBitrate.DeviceDefault);
         Add(CaptureBitrateBox, "5 Mbps", HeadsetCaptureBitrate.Mbps5);

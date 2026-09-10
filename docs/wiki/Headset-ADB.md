@@ -23,7 +23,7 @@ Only **real VR headsets** are trusted. Phones, tablets, and emulators never rece
 
 ## What you can set
 
-Independent CPU and GPU levels, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers.
+Independent CPU and GPU levels, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers. High Top FFR is labelled legacy/VrApi because OpenXR treats it as High, and Capture FPS is labelled legacy/firmware-dependent until physical headset validation proves current firmware honors `debug.oculus.capture.fps`.
 
 ## Headset ADB screenshots
 

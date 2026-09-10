@@ -102,7 +102,7 @@
           <ComboBox x:Name="FoveationModeBox" Padding="6" SelectionChanged="ComboPersist_Changed"
                     ToolTip="Dynamic allows runtime adjustment in supported apps. App default does not clear a live override; reboot to clear."/>
           <ComboBox x:Name="FfrBox" Padding="6" Margin="8,0,0,0" SelectionChanged="ComboPersist_Changed"
-                    ToolTip="Fixed mode only. Higher levels reduce peripheral detail to save GPU work."/>
+                    ToolTip="Fixed mode only. Higher levels reduce peripheral detail to save GPU work. High Top is legacy/VrApi; OpenXR treats it like High."/>
         </StackPanel>
 
         <TextBlock Grid.Row="4" Text="Chromatic aberration" VerticalAlignment="Center" Margin="0,0,0,8"/>
@@ -147,9 +147,9 @@
         <ComboBox x:Name="CaptureSizeBox" Grid.Row="0" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
                   ToolTip="Headset capture / casting resolution. Higher looks better when recording; uses more encode bandwidth."/>
 
-        <TextBlock Grid.Row="1" Text="Capture FPS" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBlock Grid.Row="1" Text="Capture FPS (legacy / firmware-dependent)" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <ComboBox x:Name="CaptureFpsBox" Grid.Row="1" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
-                  ToolTip="Capture frame rate. Pair with Full-rate capture if you want native refresh instead of half."/>
+                  ToolTip="Legacy debug.oculus.capture.fps override. Firmware support is unverified; pair with Full-rate capture if you have confirmed your headset honors it."/>
 
         <TextBlock Grid.Row="2" Text="Capture bitrate" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <ComboBox x:Name="CaptureBitrateBox" Grid.Row="2" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
