@@ -22,7 +22,9 @@
         <Button Content="Trust this headset" Style="{StaticResource GhostButtonStyle}" Click="Trust_Click"
                 ToolTip="Remember the connected VR serial as your trusted headset for ADB commands."/>
         <Button Content="Check Meta compatibility" Style="{StaticResource GhostButtonStyle}" Click="CheckMetaCompatibility_Click"
-                ToolTip="Run read-only Meta runtime, Oculus Debug Tool, and Link registry checks. Saves the observed Meta/ODT versions for future drift warnings."/>
+                ToolTip="Run read-only Meta runtime, Oculus Debug Tool, and Link registry checks. Saves the observed Meta/ODT versions as the validated baseline for future drift warnings."/>
+        <Button Content="Acknowledge Meta versions" Style="{StaticResource GhostButtonStyle}" Click="AcknowledgeMetaVersions_Click"
+                ToolTip="Mark the currently detected Meta runtime and Oculus Debug Tool versions as externally verified without running the CLI read probe."/>
       </WrapPanel>
 
       <TextBlock Text="PCVR Ready" Style="{StaticResource SettingLabelStyle}" Margin="0,0,0,6"/>

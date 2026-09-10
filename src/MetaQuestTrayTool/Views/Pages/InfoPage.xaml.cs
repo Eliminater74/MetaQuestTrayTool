@@ -274,6 +274,25 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         }
     }
 
+    private async void AcknowledgeMetaVersions_Click(object sender, RoutedEventArgs e)
+    {
+        ReportBox.Text = "Acknowledging current Meta runtime versions...";
+        try
+        {
+            var report = await Task.Run(() => App.Instance.RuntimeCompatibility.AcknowledgeCurrentVersions()).ConfigureAwait(true);
+            var text = report.ToDisplayText();
+            ReportBox.Text = text + Environment.NewLine + Environment.NewLine
+                             + "Current detected Meta runtime and Oculus Debug Tool versions were saved as the validated baseline.";
+            _fullReportLoaded = true;
+            App.Instance.Log.Info("Acknowledged current Meta runtime versions.");
+        }
+        catch (Exception ex)
+        {
+            ReportBox.Text = "Could not acknowledge Meta runtime versions: " + ex.Message;
+            App.Instance.Log.Warn(ReportBox.Text);
+        }
+    }
+
     private void Trust_Click(object sender, RoutedEventArgs e)
     {
         try

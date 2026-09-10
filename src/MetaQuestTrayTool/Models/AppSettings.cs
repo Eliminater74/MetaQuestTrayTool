@@ -72,8 +72,16 @@ public sealed class AppSettings
 
     /// <summary>Re-apply global defaults when a VR headset connects over ADB (unless a game profile is active).</summary>
     public bool ApplyGlobalWhenHeadsetConnects { get; set; } = true;
+    public string? LastDetectedMetaRuntimeVersion { get; set; }
+    public string? LastDetectedMetaRuntimePath { get; set; }
+    public string? LastValidatedMetaRuntimeVersion { get; set; }
+    public string? LastValidatedMetaRuntimePath { get; set; }
     public string? LastSeenMetaRuntimeVersion { get; set; }
     public string? LastSeenMetaRuntimePath { get; set; }
+    public string? LastDetectedOculusDebugToolVersion { get; set; }
+    public string? LastDetectedOculusDebugToolPath { get; set; }
+    public string? LastValidatedOculusDebugToolVersion { get; set; }
+    public string? LastValidatedOculusDebugToolPath { get; set; }
     public string? LastSeenOculusDebugToolVersion { get; set; }
     public string? LastSeenOculusDebugToolPath { get; set; }
     public TrayToolSettings Tray { get; set; } = new();

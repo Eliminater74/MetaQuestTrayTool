@@ -34,6 +34,60 @@ public class MetaRuntimeCompatibilityTests
     }
 
     [Fact]
+    public void FullCompatibilityCheckCanValidateChangedVersion()
+    {
+        var finding = MetaRuntimeCompatibilityService.EvaluateObservedComponent(
+            "Oculus Debug Tool",
+            "78.0.0.1",
+            @"C:\Program Files\Oculus\Support\oculus-diagnostics\OculusDebugToolCLI.exe",
+            "77.0.0.1",
+            @"C:\Program Files\Oculus\Support\oculus-diagnostics\OculusDebugToolCLI.exe",
+            acknowledgeCurrentVersion: true);
+
+        Assert.Equal(MetaCompatibilityLevel.Info, finding.Level);
+        Assert.Contains("validated", finding.Title);
+        Assert.Contains("validated baseline", finding.Detail);
+    }
+
+    [Fact]
+    public void StartupDetectionDoesNotReplaceExistingValidatedBaseline()
+    {
+        var remembered = MetaRuntimeCompatibilityService.BuildRememberedComponent(
+            "82.0.0.1",
+            @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            detectedVersion: "81.0.0.1",
+            detectedPath: @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            validatedVersion: "81.0.0.1",
+            validatedPath: @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            legacySeenVersion: "81.0.0.1",
+            legacySeenPath: @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            validateCurrent: false);
+
+        Assert.Equal("82.0.0.1", remembered.DetectedVersion);
+        Assert.Equal("81.0.0.1", remembered.ValidatedVersion);
+        Assert.Equal("81.0.0.1", remembered.LegacySeenVersion);
+    }
+
+    [Fact]
+    public void FullCompatibilityCheckPromotesDetectedVersionToValidatedBaseline()
+    {
+        var remembered = MetaRuntimeCompatibilityService.BuildRememberedComponent(
+            "82.0.0.1",
+            @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            detectedVersion: "81.0.0.1",
+            detectedPath: @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            validatedVersion: "81.0.0.1",
+            validatedPath: @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            legacySeenVersion: "81.0.0.1",
+            legacySeenPath: @"C:\Program Files\Oculus\Support\oculus-runtime\OVRServer_x64.exe",
+            validateCurrent: true);
+
+        Assert.Equal("82.0.0.1", remembered.DetectedVersion);
+        Assert.Equal("82.0.0.1", remembered.ValidatedVersion);
+        Assert.Equal("82.0.0.1", remembered.LegacySeenVersion);
+    }
+
+    [Fact]
     public void MissingRuntimeExecutableIsWarning()
     {
         var finding = MetaRuntimeCompatibilityService.EvaluateObservedComponent(

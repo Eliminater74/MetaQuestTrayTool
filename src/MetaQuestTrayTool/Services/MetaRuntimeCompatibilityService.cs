@@ -55,8 +55,13 @@ public sealed class MetaRuntimeCompatibilityService
             "Meta runtime",
             runtimeVersion,
             runtimePath,
-            _app.Settings.Current.LastSeenMetaRuntimeVersion,
-            _app.Settings.Current.LastSeenMetaRuntimePath));
+            FirstNonEmpty(
+                _app.Settings.Current.LastValidatedMetaRuntimeVersion,
+                _app.Settings.Current.LastSeenMetaRuntimeVersion),
+            FirstNonEmpty(
+                _app.Settings.Current.LastValidatedMetaRuntimePath,
+                _app.Settings.Current.LastSeenMetaRuntimePath),
+            remember && runDebugToolProbe));
 
         var debugToolPath = ExistingPath(_app.Oculus.DebugToolCliPath) ?? ExistingPath(_app.Oculus.DebugToolGuiPath);
         var debugToolVersion = ReadFileVersion(debugToolPath);
@@ -64,8 +69,13 @@ public sealed class MetaRuntimeCompatibilityService
             "Oculus Debug Tool",
             debugToolVersion,
             debugToolPath,
-            _app.Settings.Current.LastSeenOculusDebugToolVersion,
-            _app.Settings.Current.LastSeenOculusDebugToolPath));
+            FirstNonEmpty(
+                _app.Settings.Current.LastValidatedOculusDebugToolVersion,
+                _app.Settings.Current.LastSeenOculusDebugToolVersion),
+            FirstNonEmpty(
+                _app.Settings.Current.LastValidatedOculusDebugToolPath,
+                _app.Settings.Current.LastSeenOculusDebugToolPath),
+            remember && runDebugToolProbe));
 
         AddLinkRegistryFindings(findings);
         if (runDebugToolProbe)
@@ -93,7 +103,7 @@ public sealed class MetaRuntimeCompatibilityService
 
         if (remember)
         {
-            Remember(runtimeVersion, runtimePath, debugToolVersion, debugToolPath);
+            Remember(runtimeVersion, runtimePath, debugToolVersion, debugToolPath, validateCurrent: runDebugToolProbe);
         }
 
         return report;
@@ -104,7 +114,22 @@ public sealed class MetaRuntimeCompatibilityService
         string? currentVersion,
         string? currentPath,
         string? lastVersion,
-        string? lastPath)
+        string? lastPath) =>
+        EvaluateObservedComponent(
+            name,
+            currentVersion,
+            currentPath,
+            lastVersion,
+            lastPath,
+            acknowledgeCurrentVersion: false);
+
+    internal static MetaCompatibilityFinding EvaluateObservedComponent(
+        string name,
+        string? currentVersion,
+        string? currentPath,
+        string? lastVersion,
+        string? lastPath,
+        bool acknowledgeCurrentVersion)
     {
         if (string.IsNullOrWhiteSpace(currentVersion) || string.IsNullOrWhiteSpace(currentPath))
         {
@@ -124,15 +149,31 @@ public sealed class MetaRuntimeCompatibilityService
 
         if (!string.Equals(currentVersion, lastVersion, StringComparison.OrdinalIgnoreCase))
         {
+            if (acknowledgeCurrentVersion)
+            {
+                return new MetaCompatibilityFinding(
+                    MetaCompatibilityLevel.Info,
+                    name + " validated after version change",
+                    $"{name} is {currentVersion}; previously validated was {lastVersion}. This check saved the current version as the validated baseline.");
+            }
+
             return new MetaCompatibilityFinding(
                 MetaCompatibilityLevel.Warn,
-                name + " changed since last check",
-                $"{name} is {currentVersion}; last seen was {lastVersion}. Re-test ODT/Link behavior before treating older mapping results as current.");
+                name + " changed since last validated check",
+                $"{name} is {currentVersion}; validated baseline is {lastVersion}. Re-test with Check Meta compatibility, or acknowledge the new runtime after external validation, before treating older mapping results as current.");
         }
 
         if (!string.IsNullOrWhiteSpace(lastPath)
             && !string.Equals(currentPath, lastPath, StringComparison.OrdinalIgnoreCase))
         {
+            if (acknowledgeCurrentVersion)
+            {
+                return new MetaCompatibilityFinding(
+                    MetaCompatibilityLevel.Info,
+                    name + " path validated",
+                    $"{name} is still {currentVersion}, and this check saved the current executable path as the validated baseline.");
+            }
+
             return new MetaCompatibilityFinding(
                 MetaCompatibilityLevel.Info,
                 name + " path changed",
@@ -196,21 +237,100 @@ public sealed class MetaRuntimeCompatibilityService
             detail));
     }
 
-    private void Remember(string? runtimeVersion, string? runtimePath, string? debugToolVersion, string? debugToolPath)
+    public MetaRuntimeCompatibilityReport AcknowledgeCurrentVersions()
     {
-        if (!string.IsNullOrWhiteSpace(runtimeVersion) && !string.IsNullOrWhiteSpace(runtimePath))
-        {
-            _app.Settings.Current.LastSeenMetaRuntimeVersion = runtimeVersion;
-            _app.Settings.Current.LastSeenMetaRuntimePath = runtimePath;
-        }
+        var report = Check(remember: false, runDebugToolProbe: false);
+        var runtimePath = ExistingPath(_app.Oculus.RuntimeServerPath) ?? ExistingPath(_app.Oculus.ResolveClientExePath());
+        var runtimeVersion = ReadFileVersion(runtimePath);
+        var debugToolPath = ExistingPath(_app.Oculus.DebugToolCliPath) ?? ExistingPath(_app.Oculus.DebugToolGuiPath);
+        var debugToolVersion = ReadFileVersion(debugToolPath);
 
-        if (!string.IsNullOrWhiteSpace(debugToolVersion) && !string.IsNullOrWhiteSpace(debugToolPath))
-        {
-            _app.Settings.Current.LastSeenOculusDebugToolVersion = debugToolVersion;
-            _app.Settings.Current.LastSeenOculusDebugToolPath = debugToolPath;
-        }
+        Remember(runtimeVersion, runtimePath, debugToolVersion, debugToolPath, validateCurrent: true);
+        return report;
+    }
+
+    private void Remember(
+        string? runtimeVersion,
+        string? runtimePath,
+        string? debugToolVersion,
+        string? debugToolPath,
+        bool validateCurrent)
+    {
+        var runtime = BuildRememberedComponent(
+            runtimeVersion,
+            runtimePath,
+            _app.Settings.Current.LastDetectedMetaRuntimeVersion,
+            _app.Settings.Current.LastDetectedMetaRuntimePath,
+            _app.Settings.Current.LastValidatedMetaRuntimeVersion,
+            _app.Settings.Current.LastValidatedMetaRuntimePath,
+            _app.Settings.Current.LastSeenMetaRuntimeVersion,
+            _app.Settings.Current.LastSeenMetaRuntimePath,
+            validateCurrent);
+        _app.Settings.Current.LastDetectedMetaRuntimeVersion = runtime.DetectedVersion;
+        _app.Settings.Current.LastDetectedMetaRuntimePath = runtime.DetectedPath;
+        _app.Settings.Current.LastValidatedMetaRuntimeVersion = runtime.ValidatedVersion;
+        _app.Settings.Current.LastValidatedMetaRuntimePath = runtime.ValidatedPath;
+        _app.Settings.Current.LastSeenMetaRuntimeVersion = runtime.LegacySeenVersion;
+        _app.Settings.Current.LastSeenMetaRuntimePath = runtime.LegacySeenPath;
+
+        var debugTool = BuildRememberedComponent(
+            debugToolVersion,
+            debugToolPath,
+            _app.Settings.Current.LastDetectedOculusDebugToolVersion,
+            _app.Settings.Current.LastDetectedOculusDebugToolPath,
+            _app.Settings.Current.LastValidatedOculusDebugToolVersion,
+            _app.Settings.Current.LastValidatedOculusDebugToolPath,
+            _app.Settings.Current.LastSeenOculusDebugToolVersion,
+            _app.Settings.Current.LastSeenOculusDebugToolPath,
+            validateCurrent);
+        _app.Settings.Current.LastDetectedOculusDebugToolVersion = debugTool.DetectedVersion;
+        _app.Settings.Current.LastDetectedOculusDebugToolPath = debugTool.DetectedPath;
+        _app.Settings.Current.LastValidatedOculusDebugToolVersion = debugTool.ValidatedVersion;
+        _app.Settings.Current.LastValidatedOculusDebugToolPath = debugTool.ValidatedPath;
+        _app.Settings.Current.LastSeenOculusDebugToolVersion = debugTool.LegacySeenVersion;
+        _app.Settings.Current.LastSeenOculusDebugToolPath = debugTool.LegacySeenPath;
 
         _app.Settings.Save();
+    }
+
+    internal static MetaVersionMemoryUpdate BuildRememberedComponent(
+        string? currentVersion,
+        string? currentPath,
+        string? detectedVersion,
+        string? detectedPath,
+        string? validatedVersion,
+        string? validatedPath,
+        string? legacySeenVersion,
+        string? legacySeenPath,
+        bool validateCurrent)
+    {
+        var observedVersion = FirstNonEmpty(detectedVersion);
+        var observedPath = FirstNonEmpty(detectedPath);
+        var effectiveValidatedVersion = FirstNonEmpty(validatedVersion, legacySeenVersion);
+        var effectiveValidatedPath = FirstNonEmpty(validatedPath, legacySeenPath);
+        var effectiveLegacyVersion = FirstNonEmpty(legacySeenVersion, effectiveValidatedVersion);
+        var effectiveLegacyPath = FirstNonEmpty(legacySeenPath, effectiveValidatedPath);
+
+        if (!string.IsNullOrWhiteSpace(currentVersion) && !string.IsNullOrWhiteSpace(currentPath))
+        {
+            observedVersion = currentVersion;
+            observedPath = currentPath;
+            if (validateCurrent || string.IsNullOrWhiteSpace(effectiveValidatedVersion))
+            {
+                effectiveValidatedVersion = currentVersion;
+                effectiveValidatedPath = currentPath;
+                effectiveLegacyVersion = currentVersion;
+                effectiveLegacyPath = currentPath;
+            }
+        }
+
+        return new MetaVersionMemoryUpdate(
+            observedVersion,
+            observedPath,
+            effectiveValidatedVersion,
+            effectiveValidatedPath,
+            effectiveLegacyVersion,
+            effectiveLegacyPath);
     }
 
     private static string? ReadFileVersion(string? path)
@@ -246,3 +366,11 @@ public sealed class MetaRuntimeCompatibilityService
         return line.Length <= 240 ? line : line[..240] + "...";
     }
 }
+
+public readonly record struct MetaVersionMemoryUpdate(
+    string? DetectedVersion,
+    string? DetectedPath,
+    string? ValidatedVersion,
+    string? ValidatedPath,
+    string? LegacySeenVersion,
+    string? LegacySeenPath);
