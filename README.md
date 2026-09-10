@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.29 — MetaQuestTrayTool-Setup-1.1.29.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.29/MetaQuestTrayTool-Setup-1.1.29.exe)
+**Latest:** [v1.1.30 — MetaQuestTrayTool-Setup-1.1.30.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.30/MetaQuestTrayTool-Setup-1.1.30.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,7 +163,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-Release **[v1.1.29](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Corrects Quest Link and HUD mappings, verifies Link registry writes, preserves custom values and independent FOV axes, and repairs headset button input handling. See the [control audit](docs/investigations/v1.1.29-control-audit.md) for observed behavior and physical-validation limits.
+Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Fixes clipped HotKeys editing controls and prevents newer idle or weak cached headsets from hiding live Meta Link evidence. Adds explicit logging for skipped Quest Link writes. The tester-specific ODT report remains unconfirmed; existing non-Meta guards are preserved. See the [detection investigation](docs/investigations/issue-4-device-cache-selection.md) for evidence and limits.
 
 ### Shell & tray
 

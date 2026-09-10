@@ -8,6 +8,23 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.30] - 2026-09-10
+
+### Fixed
+- HotKeys configuration now resizes and scrolls, with a bounded binding list, so Add binding and the Action/Record editor remain reachable. Added guidance for assigning Exit without introducing a default quit shortcut.
+- Meta device-cache selection prioritizes live Link evidence over newer idle or weak headset entries. This prevents those entries from incorrectly routing SteamVR-over-Link through the non-Meta registry-write guard.
+
+### Changed
+- Quest Link skips identify the detected streamer and log the session state and requested settings.
+- Updated hotkey instructions and documented the reproduced detection defect and its verification limits.
+
+### Validation
+- Ten new regression cases since v1.1.29; full suite passes 106/106. Release build has zero warnings/errors.
+- Original-layout checks failed both new layout cases; the original cache-selection algorithm failed three detection cases. All pass with the repairs.
+
+### Verification limits
+- The multi-headset detection defect is reproduced with synthetic cache records. Whether it explains the tester's ODT failure remains unconfirmed; physical headset verification is still open. Registry mappings and non-Meta session guards remain unchanged.
+
 ## [1.1.29] - 2026-09-08
 
 ### Fixed

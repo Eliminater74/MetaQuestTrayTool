@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.29](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current product (v1.1.29)
+## Current product (v1.1.30)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -24,6 +24,15 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Updates / polish | In-app GitHub updates, release checksum sidecars, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
+
+---
+
+## v1.1.30 — reachable hotkey editing and Meta Link detection
+
+Fixes clipped HotKeys editing controls and prevents newer idle or weak cached headsets from hiding live Meta Link evidence. Adds explicit logging for skipped Quest Link writes. The tester-specific ODT report remains unconfirmed; existing non-Meta guards are preserved.
+
+- Ten new regression cases; 106 total passing tests.
+- Physical confirmation of the tester-specific failure remains open.
 
 ---
 
@@ -183,6 +192,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.26 | Quest Link mirror screenshots, smart screenshot fallback, screenshot tray/page controls, and HotKeys / Voice menu polish |
 | v1.1.27 | Explicit headset announcement toggles for HotKey results, voice command results, and screenshot confirmations |
 | v1.1.28 | Quest Link presets stay editable under non-Meta streamers; custom Link settings keep their custom state; bindable Exit app action |
+| v1.1.30 | Scrollable hotkey editor, active-headset cache selection, skipped-write diagnostics |
 | v1.1.29 | Link/HUD mapping, registry verification, custom values, independent FOV persistence/reset, headset input-thread fixes |
 
 ---

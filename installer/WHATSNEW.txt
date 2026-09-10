@@ -1,26 +1,22 @@
-﻿Meta Quest Tray Tool 1.1.29 - What's new
+﻿Meta Quest Tray Tool 1.1.30 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.29] - 2026-09-08
+[1.1.30] - 2026-09-10
 
 Fixed
-- Quest Link sharpening now matches observed ODT DWORD values (Disabled=1, Normal=2, Quality=3); encode-width reads prefer ODT's current value over a stale legacy alias.
-- Link applies verify every attempted registry write/deletion and report mismatches or access failures. Read live registry refreshes the controls without applying stale saved settings.
-- Custom bitrate, width, supersampling and signed dynamic-bitrate offset values survive editor loading and unrelated edits.
-- Separate horizontal/vertical FOV values survive JSON reload, including legacy migration. Profile/global editors expose both axes, reject non-finite input, and applying 1/1 explicitly restores the default multiplier.
-- Performance HUD selections use explicit Meta CLI mappings instead of saved enum ordinals; App Render Timing, Compositor Timing and performance-headroom summary now select the intended modes.
-- Wireless ADB connect/pair and Send text capture WPF input before background work, avoiding cross-thread control access failures.
+- HotKeys configuration now resizes and scrolls, with a bounded binding list, so Add binding and the Action/Record editor remain reachable. Added guidance for assigning Exit without introducing a default quit shortcut.
+- Meta device-cache selection prioritizes live Link evidence over newer idle or weak headset entries. This prevents those entries from incorrectly routing SteamVR-over-Link through the non-Meta registry-write guard.
 
 Changed
-- Clarified Start with Windows as Administrator (hands-free) while preserving the separate current-session elevation command and assignable Exit action with no default shortcut.
-- Marked unverified legacy capture/Mobile ASW behavior clearly; legacy Version HUD remains available with a display-verification qualification.
+- Quest Link skips identify the detected streamer and log the session state and requested settings.
+- Updated hotkey instructions and documented the reproduced detection defect and its verification limits.
 
-Added
-- Read-only Link registry snapshot script and detailed control audit covering 177 inputs / 260 declarative event bindings.
-- 42 regression cases since v1.1.28; full suite passes 96/96.
+Validation
+- Ten new regression cases since v1.1.29; full suite passes 106/106. Release build has zero warnings/errors.
+- Original-layout checks failed both new layout cases; the original cache-selection algorithm failed three detection cases. All pass with the repairs.
 
 Verification limits
-- Rebuilt service and installed ODT synchronized bitrate in both directions (500/450 Mbps). The tester-specific bitrate failure was not reproduced; OVRService restart and active-headset effects remain unverified. Registry read-back does not claim runtime application.
+- The multi-headset detection defect is reproduced with synthetic cache records. Whether it explains the tester's ODT failure remains unconfirmed; physical headset verification is still open. Registry mappings and non-Meta session guards remain unchanged.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
