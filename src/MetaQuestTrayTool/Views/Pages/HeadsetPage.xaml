@@ -81,9 +81,13 @@
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="CPU / GPU level" VerticalAlignment="Center" Margin="0,0,0,8"/>
-        <ComboBox x:Name="CpuGpuBox" Grid.Row="0" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
-                  ToolTip="ADB CPU/GPU performance level. Higher = more sustained performance and heat/battery use. Does not survive reboot."/>
+        <TextBlock Grid.Row="0" Text="CPU / GPU levels" VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
+          <TextBlock Text="CPU" VerticalAlignment="Center" Margin="0,0,6,0"/>
+          <ComboBox x:Name="CpuBox" Padding="6" SelectionChanged="ComboPersist_Changed"/>
+          <TextBlock Text="GPU" VerticalAlignment="Center" Margin="12,0,6,0"/>
+          <ComboBox x:Name="GpuBox" Padding="6" SelectionChanged="ComboPersist_Changed"/>
+        </StackPanel>
 
         <TextBlock Grid.Row="1" Text="Texture size" VerticalAlignment="Center" Margin="0,0,0,8"/>
         <ComboBox x:Name="TextureBox" Grid.Row="1" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"

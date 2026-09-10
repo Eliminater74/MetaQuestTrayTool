@@ -15,14 +15,14 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
     public HeadsetPage()
     {
         InitializeComponent();
-        Add(CpuGpuBox, "Set by app (default)", HeadsetCpuGpuLevel.AppDefault);
-        Add(CpuGpuBox, "Level 2", HeadsetCpuGpuLevel.Level2);
-        Add(CpuGpuBox, "Level 4", HeadsetCpuGpuLevel.Level4);
+        foreach (var box in new[] { CpuBox, GpuBox })
+            foreach (var level in Enum.GetValues<HeadsetPerformanceLevel>())
+                Add(box, level == HeadsetPerformanceLevel.AppDefault ? "App default (no new override)" : $"Level {(int)level}", level);
 
         Add(TextureBox, "Device default", HeadsetTexturePreset.DeviceDefault);
         Add(TextureBox, "Default — Quest 1 (1216×1344)", HeadsetTexturePreset.Quest1);
-        Add(TextureBox, "Default — Quest 2 (1440×1584)", HeadsetTexturePreset.Quest2);
-        Add(TextureBox, "Default — Quest 3 (1680×1760)", HeadsetTexturePreset.Quest3);
+        Add(TextureBox, "Default — Quest 2 / Pro (1440×1584)", HeadsetTexturePreset.Quest2);
+        Add(TextureBox, "Default — Quest 3 / 3S (1680×1760)", HeadsetTexturePreset.Quest3);
         Add(TextureBox, "512", HeadsetTexturePreset.Square512);
         Add(TextureBox, "768", HeadsetTexturePreset.Square768);
         Add(TextureBox, "1024", HeadsetTexturePreset.Square1024);
@@ -31,13 +31,6 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(TextureBox, "2048", HeadsetTexturePreset.Square2048);
         Add(TextureBox, "2560", HeadsetTexturePreset.Square2560);
         Add(TextureBox, "3072", HeadsetTexturePreset.Square3072);
-
-        Add(RefreshBox, "Device default (usually 72Hz)", HeadsetRefreshRate.DeviceDefault);
-        Add(RefreshBox, "60Hz", HeadsetRefreshRate.Hz60);
-        Add(RefreshBox, "72Hz", HeadsetRefreshRate.Hz72);
-        Add(RefreshBox, "80Hz", HeadsetRefreshRate.Hz80);
-        Add(RefreshBox, "90Hz", HeadsetRefreshRate.Hz90);
-        Add(RefreshBox, "120Hz", HeadsetRefreshRate.Hz120);
 
         Add(FfrBox, "Device / app default", HeadsetFfrLevel.DeviceDefault);
         Add(FfrBox, "Off (best quality)", HeadsetFfrLevel.Off);
@@ -76,7 +69,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         _loading = true;
         var headset = App.Instance.Settings.Current.Headset;
         ApplyOnConnectBox.IsChecked = headset.ApplyWhenHeadsetConnects;
-        Select(CpuGpuBox, headset.CpuGpuLevel);
+        Select(CpuBox, headset.EffectiveCpuLevel);
+        Select(GpuBox, headset.EffectiveGpuLevel);
+        UpdateRefreshOptions(headset.TrustedModel);
         Select(TextureBox, headset.TextureSize);
         Select(RefreshBox, headset.RefreshRate);
         Select(FfrBox, headset.Ffr);
@@ -111,7 +106,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
         var headset = App.Instance.Settings.Current.Headset;
         headset.ApplyWhenHeadsetConnects = ApplyOnConnectBox.IsChecked == true;
-        headset.CpuGpuLevel = Read<HeadsetCpuGpuLevel>(CpuGpuBox, headset.CpuGpuLevel);
+        headset.CpuLevel = Read<HeadsetPerformanceLevel>(CpuBox, headset.EffectiveCpuLevel);
+        headset.GpuLevel = Read<HeadsetPerformanceLevel>(GpuBox, headset.EffectiveGpuLevel);
+        headset.CpuGpuLevel = HeadsetCpuGpuLevel.AppDefault;
         headset.TextureSize = Read<HeadsetTexturePreset>(TextureBox, headset.TextureSize);
         headset.RefreshRate = Read<HeadsetRefreshRate>(RefreshBox, headset.RefreshRate);
         headset.Ffr = Read<HeadsetFfrLevel>(FfrBox, headset.Ffr);
@@ -329,7 +326,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
                 var runtime = identity.IsReady && identity.IsVrHeadset
                     ? "Battery / Wi‑Fi: " + (identity.Runtime?.Summary ?? "reading…")
                     : "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
-                return (identity.Summary, status, runtime);
+                return (identity.Summary, status, runtime, identity.Model);
             }).ConfigureAwait(true);
 
             if (!IsLoaded || version != _trustRefreshVersion)
@@ -340,6 +337,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             TrustText.Text = result.Summary;
             StatusText.Text = result.status;
             RuntimeText.Text = result.runtime;
+            UpdateRefreshOptions(result.Model);
         }
         catch (Exception ex)
         {
@@ -352,6 +350,24 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             StatusText.Text = ex.Message;
             RuntimeText.Text = "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
         }
+    }
+
+    private void UpdateRefreshOptions(string? model)
+    {
+        var wasLoading = _loading;
+        _loading = true;
+        try
+        {
+            RefreshBox.Items.Clear();
+            var saved = App.Instance.Settings.Current.Headset.RefreshRate;
+            var supported = HeadsetCapabilities.RefreshRates(model);
+            foreach (var rate in supported)
+                Add(RefreshBox, rate == HeadsetRefreshRate.DeviceDefault ? "Device default (no new override)" : rate.ToString()[2..] + " Hz", rate);
+            if (!supported.Contains(saved))
+                RefreshBox.Items.Add(new ComboBoxItem { Content = $"Saved {saved} (unsupported for this model)", Tag = saved, IsEnabled = false });
+            Select(RefreshBox, saved);
+        }
+        finally { _loading = wasLoading; }
     }
 
     private void Run(Func<string> action) => RunPrepared(() => action);

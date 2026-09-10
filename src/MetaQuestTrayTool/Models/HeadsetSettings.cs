@@ -1,5 +1,7 @@
 namespace MetaQuestTrayTool.Models;
 
+public enum HeadsetPerformanceLevel { AppDefault = -1, Level0 = 0, Level1, Level2, Level3, Level4 }
+
 public enum HeadsetCpuGpuLevel
 {
     AppDefault,
@@ -84,6 +86,19 @@ public sealed class HeadsetSettings
 {
     public bool ApplyWhenHeadsetConnects { get; set; } = true;
     public HeadsetCpuGpuLevel CpuGpuLevel { get; set; } = HeadsetCpuGpuLevel.AppDefault;
+    // Null means an older settings file: preserve its combined CPU/GPU choice.
+    public HeadsetPerformanceLevel? CpuLevel { get; set; }
+    public HeadsetPerformanceLevel? GpuLevel { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public HeadsetPerformanceLevel EffectiveCpuLevel => CpuLevel ?? LegacyPerformanceLevel;
+    [System.Text.Json.Serialization.JsonIgnore]
+    public HeadsetPerformanceLevel EffectiveGpuLevel => GpuLevel ?? LegacyPerformanceLevel;
+    private HeadsetPerformanceLevel LegacyPerformanceLevel => CpuGpuLevel switch
+    {
+        HeadsetCpuGpuLevel.Level2 => HeadsetPerformanceLevel.Level2,
+        HeadsetCpuGpuLevel.Level4 => HeadsetPerformanceLevel.Level4,
+        _ => HeadsetPerformanceLevel.AppDefault
+    };
     public HeadsetTexturePreset TextureSize { get; set; } = HeadsetTexturePreset.DeviceDefault;
     public HeadsetRefreshRate RefreshRate { get; set; } = HeadsetRefreshRate.DeviceDefault;
     public HeadsetFfrLevel Ffr { get; set; } = HeadsetFfrLevel.DeviceDefault;

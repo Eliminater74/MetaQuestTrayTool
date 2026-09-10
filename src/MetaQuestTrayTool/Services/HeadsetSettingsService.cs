@@ -64,6 +64,18 @@ public sealed class HeadsetSettingsService
         return $"Trusted VR headset {identity.Model ?? "headset"} ({identity.Serial}). Commands will not run on phones, tablets, emulators, or any other device.";
     }
 
+    internal static IReadOnlyDictionary<string, string> PerformanceOverrides(HeadsetSettings settings)
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var (name, level) in new[] { ("cpuLevel", settings.EffectiveCpuLevel), ("gpuLevel", settings.EffectiveGpuLevel) })
+        {
+            if (!Enum.IsDefined(level)) throw new InvalidOperationException("CPU/GPU levels must be App Default or 0-4.");
+            if (level != HeadsetPerformanceLevel.AppDefault)
+                result["debug.oculus." + name] = ((int)level).ToString(CultureInfo.InvariantCulture);
+        }
+        return result;
+    }
+
     public string SetRecording(HeadsetSettings settings, bool enabled)
     {
         var quest = RequireReadyHeadset(settings);
@@ -81,17 +93,10 @@ public sealed class HeadsetSettingsService
         var quest = RequireReadyHeadset(settings);
         var applied = new List<string>();
 
-        switch (settings.CpuGpuLevel)
-        {
-            case HeadsetCpuGpuLevel.Level2:
-                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.cpuLevel", "2"));
-                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.gpuLevel", "2"));
-                break;
-            case HeadsetCpuGpuLevel.Level4:
-                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.cpuLevel", "4"));
-                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.gpuLevel", "4"));
-                break;
-        }
+        if (!HeadsetCapabilities.RefreshRates(quest.Model).Contains(settings.RefreshRate))
+            throw new InvalidOperationException("The saved refresh rate is not supported by this headset model. Choose a supported rate or Device default.");
+        foreach (var (name, value) in PerformanceOverrides(settings))
+            applied.Add(_adb.SetProp(quest.Serial, name, value));
 
         if (TryTextureSize(settings.TextureSize, out var width, out var height))
         {
