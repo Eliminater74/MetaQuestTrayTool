@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.30 — MetaQuestTrayTool-Setup-1.1.30.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.30/MetaQuestTrayTool-Setup-1.1.30.exe)
+**Latest:** [v1.1.31 — MetaQuestTrayTool-Setup-1.1.31.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.31/MetaQuestTrayTool-Setup-1.1.31.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,11 +163,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### Unreleased in this checkout
+### v1.1.31 current release
 
-These local commits after v1.1.30 add structured profile-apply results with a no-change outcome for skipped-only applies, trusted headset selection across USB/wireless ADB, headset recording start/stop plus stop-and-download with 30/40 Mbps bitrate presets, a 10-second logcat performance sampler, independent CPU/GPU levels, headset-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, live ADB override reset, hardened updater launch verification, persistent detected-vs-validated Meta runtime compatibility checks, view-aware 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked-release restore. No version bump, release tag, GitHub Actions release run, installer publication, or physical headset validation has been performed for this Unreleased work.
-
-Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Fixes clipped HotKeys editing controls and prevents newer idle or weak cached headsets from hiding live Meta Link evidence. Adds explicit logging for skipped Quest Link writes. The tester-specific ODT report remains unconfirmed; existing non-Meta guards are preserved. See the [detection investigation](docs/investigations/issue-4-device-cache-selection.md) for evidence and limits.
+Release **[v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Adds structured profile apply outcomes, trusted USB/wireless headset selection, headset recording start/stop/download, 30/40 Mbps capture presets, a 10-second runtime performance sampler, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental rendering, documented live ADB reset actions, hardened updater launch verification, persistent Meta runtime compatibility checks, explicit 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked release restores. Physical Quest headset behavior, active Link stream adoption, and OVRService restart effects remain unverified.
 
 ### Shell & tray
 
@@ -181,7 +179,7 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - Live **Status** chips: PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR armed, GPU, audio
 - **SteamVR install detect** (path, file version, Stable vs Beta) with Install SteamVR action
-- **PCVR Ready** checklist on Info (Steam-biased) with fix actions; source checkout also includes persistent read-only Meta runtime compatibility checks and sanitized support ZIP export
+- **PCVR Ready** checklist on Info (Steam-biased) with fix actions; v1.1.31 includes persistent read-only Meta runtime compatibility checks and sanitized support ZIP export
 - **Recover PCVR** after a Link / Steam / VD drop (tray + Info)
 - Session probe: Meta Air Link vs wired (`DeviceCache` `isUsingAirLink`), Steam Link / SteamVR, Virtual Desktop
 

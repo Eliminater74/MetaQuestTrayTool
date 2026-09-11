@@ -6,7 +6,7 @@ The in-app updater accepts only the exact `MetaQuestTrayTool-Setup-{version}.exe
 the project's HTTPS GitHub release URL. Before it launches an installer, it validates the
 release tag, download size, and GitHub-published SHA-256 digest.
 
-Unreleased source builds also download into a private random temp directory, re-check the
+v1.1.31+ builds also download into a private random temp directory, re-check the
 installer size and SHA-256 immediately before launch, and hold the verified installer handle
 open while starting Setup so a local process cannot replace the file between download and run.
 

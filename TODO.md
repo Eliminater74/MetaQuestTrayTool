@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -10,7 +10,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
-- [ ] Physical Quest validation for v1.1.30 Link preset, screenshot, and headset announcement flow: non-Meta streamer preset editing, Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
+- [ ] Physical Quest validation for v1.1.31 Link, screenshot, headset-announcement, recording/download, performance-sample, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -25,7 +25,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Shipped checklist (history)
 
-### Unreleased after v1.1.30
+### v1.1.31
 
 - [x] Report profile applies as structured success, partial success, failed, skipped, and skipped-only no-change results.
 - [x] Prefer the trusted Quest headset across USB and wireless ADB transports.
@@ -49,7 +49,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Label High Top FFR as legacy/VrApi and Capture FPS as legacy/firmware-dependent.
 - [x] Add a 10-second headset runtime logcat performance sampler.
 - [x] Add Stop & download latest headset recording into the local captures folder.
-- [x] Keep work unreleased: no version bump, tag, GitHub Actions release run, or installer publication.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.31.
 
 ### v1.1.30
 

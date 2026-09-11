@@ -8,6 +8,10 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+No unreleased changes yet.
+
+## [1.1.31] - 2026-09-10
+
 ### Added
 - Structured profile-apply results now report success, partial success, failed, skipped, and no-change outcomes instead of collapsing multi-system applies into one generic message.
 - Headset ADB controls now include explicit **Start headset recording** / **Stop headset recording**, **Stop & download latest recording**, **Capture 10-second performance sample**, 30 Mbps and 40 Mbps capture bitrate presets, independent CPU and GPU levels 0-4, headset-aware refresh-rate choices, clearer Quest 2/Pro and Quest 3/3S texture labels, Dynamic vs Fixed foveation, and a collapsed **Experimental headset rendering** section for Quest Pro local dimming plus subsampled foveation.
@@ -32,7 +36,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Local suite passes 145/145 after locked restore/build changes and the second-pass regressions.
 
 ### Verification limits
-- No physical Quest headset, active Link stream, OVRService restart effect, GitHub Actions run, release tag, installer artifact, or release publication was performed for these Unreleased commits.
+- Physical Quest headset behavior, active Link stream adoption, and OVRService restart effects remain unverified for this release; local source validation and hosted installer checksum verification are tracked separately from active-headset proof.
 
 ## [1.1.30] - 2026-09-10
 
@@ -317,7 +321,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.30...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.31...HEAD
+[1.1.31]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.31
 [1.1.30]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.30
 [1.1.29]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.29
 [1.1.28]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.28

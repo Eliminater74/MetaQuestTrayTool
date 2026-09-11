@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current source checkout (public v1.1.30 + Unreleased local work)
+## Current source checkout (public v1.1.31)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -27,12 +27,12 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ---
 
-## Unreleased source checkout after v1.1.30
+## v1.1.31 — headset controls, release hardening, and diagnostics
 
-Local commits after v1.1.30 add profile partial-success/no-change reporting, trusted USB/wireless headset selection, headset recording start/stop/download, a 10-second logcat performance sampler, 30/40 Mbps capture bitrates, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, reset of documented live ADB defaults, private revalidated updater installs, persistent Meta runtime compatibility checks, 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked release restores.
+Adds profile partial-success/no-change reporting, trusted USB/wireless headset selection, headset recording start/stop/download, a 10-second logcat performance sampler, 30/40 Mbps capture bitrates, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, reset of documented live ADB defaults, private revalidated updater installs, persistent Meta runtime compatibility checks, 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked release restores.
 
-- Current local validation: 145 passing tests.
-- No public release tag, GitHub Actions release run, installer artifact, or physical headset validation has been performed for these Unreleased changes.
+- Local source validation: 145 passing tests before release publication.
+- Physical Quest headset behavior, active Link stream adoption, and OVRService restart effects remain open for hardware validation.
 
 ---
 
@@ -201,8 +201,9 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.26 | Quest Link mirror screenshots, smart screenshot fallback, screenshot tray/page controls, and HotKeys / Voice menu polish |
 | v1.1.27 | Explicit headset announcement toggles for HotKey results, voice command results, and screenshot confirmations |
 | v1.1.28 | Quest Link presets stay editable under non-Meta streamers; custom Link settings keep their custom state; bindable Exit app action |
-| v1.1.30 | Scrollable hotkey editor, active-headset cache selection, skipped-write diagnostics |
 | v1.1.29 | Link/HUD mapping, registry verification, custom values, independent FOV persistence/reset, headset input-thread fixes |
+| v1.1.30 | Scrollable hotkey editor, active-headset cache selection, skipped-write diagnostics |
+| v1.1.31 | Headset control expansion, updater/release hardening, Meta runtime/OpenXR diagnostics, support ZIP redaction |
 
 ---
 
