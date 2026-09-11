@@ -8,7 +8,9 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
-No unreleased changes yet.
+### Fixed
+- **Read live registry** on the Quest Link page now stays read-only while it loads controls, so queued selection changes cannot save/apply settings or replace the read result with a non-Meta streamer skip message.
+- Live operable Meta Link cache evidence now beats resident Virtual Desktop desktop processes, while stale/inoperable Meta cache records still leave Virtual Desktop / Steam Link guards in place.
 
 ## [1.1.31] - 2026-09-10
 

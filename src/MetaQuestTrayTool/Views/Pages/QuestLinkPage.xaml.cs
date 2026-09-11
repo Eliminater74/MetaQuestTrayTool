@@ -10,6 +10,7 @@ namespace MetaQuestTrayTool.Views.Pages;
 public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShellPage
 {
     private bool _loading;
+    private bool _suppressLiveApply;
 
     public QuestLinkPage()
     {
@@ -248,18 +249,31 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         PersistApply(restartService: true);
     }
 
-    private void ReadLive_Click(object sender, RoutedEventArgs e)
+    private async void ReadLive_Click(object sender, RoutedEventArgs e)
     {
+        var suppressing = false;
         try
         {
             var current = App.Instance.Link.ReadCurrent();
-            _loading = true;
-            LoadFieldsFrom(current);
-            PresetBox.SelectedItem = null;
-            UpdatePresetHint();
+
+            suppressing = true;
+            _suppressLiveApply = true;
+            try
+            {
+                _loading = true;
+                LoadFieldsFrom(current);
+                PresetBox.SelectedItem = null;
+                UpdatePresetHint();
+            }
+            finally
+            {
+                _loading = false;
+            }
+
             PresetHintText.Text = "Loaded registry overrides. Your next edit applies these values.";
             LiveStatusText.Text = "Read registry overrides: " + current.Describe() + ". Runtime state is not queried.";
             App.Instance.Log.Info(LiveStatusText.Text);
+            await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
         catch (Exception ex)
         {
@@ -268,13 +282,16 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         }
         finally
         {
-            _loading = false;
+            if (suppressing)
+            {
+                _suppressLiveApply = false;
+            }
         }
     }
 
     private void PersistApply(string? prefix = null, bool restartService = false)
     {
-        if (_loading || !IsLoaded)
+        if (_loading || _suppressLiveApply || !IsLoaded)
         {
             return;
         }

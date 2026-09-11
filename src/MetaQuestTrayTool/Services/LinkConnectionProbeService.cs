@@ -85,8 +85,9 @@ public sealed class LinkConnectionProbeService
 
     private VrConnectionStatus ProbeCore(bool includeEnumHmd, bool includeAudioLink)
     {
-        // Live Meta Link must beat leftover SteamVR processes. Otherwise a previous vrserver
-        // session is labeled "Steam Link" and PreventDash never starts SteamVR on Air Link.
+        // Live Meta Link must beat leftover SteamVR / Virtual Desktop desktop processes.
+        // Otherwise a resident streamer/service process can hide the active Link session and
+        // route Quest Link controls through the non-Meta skip path.
         var steamVr = (IsProcessRunning("vrserver")
                        && (IsProcessRunning("vrcompositor") || IsProcessRunning("vrdashboard")))
                       || (IsProcessRunning("vrmonitor") && IsProcessRunning("vrcompositor"));
@@ -111,7 +112,8 @@ public sealed class LinkConnectionProbeService
 
         // Healthy Meta Link wins only with a strong live signal. Meta often auto-connects when
         // the headset wakes on Wi‑Fi (DeviceCache connected/primary) without launching Link —
-        // that must not hide an active Steam Link / SteamVR or Virtual Desktop session.
+        // weak cache, EnumHmd and audio-only signals must not hide an active Steam Link / SteamVR
+        // or Virtual Desktop session.
         // EnumHmd / Link-audio alone are also weak while SteamVR or VD is up (same headset
         // endpoint after audio auto-switch).
         // RemoteDesktopCompanion is NOT used here — it often stays running while the Quest is
@@ -259,9 +261,10 @@ public sealed class LinkConnectionProbeService
     {
         var competingRuntime = steamVrRunning || virtualDesktopRunning;
 
-        // Real Air Link / wired Link stream — even if leftover vrserver is still on the PC.
-        // Steam Link's DeviceCache is typically inoperable/disconnected, not operable+connected.
-        if (!virtualDesktopRunning && LooksLikeLiveMetaLinkStream(cache))
+        // Real Air Link / wired Link stream — even if leftover SteamVR or Virtual Desktop
+        // desktop components are still on the PC. Steam Link / VD stale cache is typically
+        // inoperable/disconnected, not operable+connected.
+        if (LooksLikeLiveMetaLinkStream(cache))
         {
             return true;
         }

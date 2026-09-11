@@ -54,6 +54,17 @@ public class LinkDetectionTests
         var selected = Select(Headset("stale", 200, "connected", "inoperable", "primary"));
         Assert.False(LinkConnectionProbeService.LooksLikeStrongMetaSession(
             selected, metaHmd: false, audioLink: true, steamVrRunning: true));
+        Assert.False(LinkConnectionProbeService.LooksLikeStrongMetaSession(
+            selected, metaHmd: false, audioLink: true, steamVrRunning: false, virtualDesktopRunning: true));
+    }
+
+    [Fact]
+    public void LiveMetaHeadsetWinsOverResidentVirtualDesktopProcess()
+    {
+        var selected = Select(Headset("live", 200, "connected", "operable", "primary"));
+
+        Assert.True(LinkConnectionProbeService.LooksLikeStrongMetaSession(
+            selected, metaHmd: false, audioLink: false, steamVrRunning: false, virtualDesktopRunning: true));
     }
 
     [Fact]
