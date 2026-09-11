@@ -165,7 +165,7 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ### Unreleased in this checkout
 
-These local commits after v1.1.30 add structured partial profile-apply results, trusted headset selection across USB/wireless ADB, headset recording start/stop with 30/40 Mbps bitrate presets, independent CPU/GPU levels, headset-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, live ADB override reset, hardened updater launch verification, read-only Meta runtime compatibility checks, sanitized support ZIP export, CodeQL, Dependabot, coverage reporting, and locked-release restore. No tag, push, GitHub Actions run, or installer publication has been performed for this Unreleased work.
+These local commits after v1.1.30 add structured profile-apply results with a no-change outcome for skipped-only applies, trusted headset selection across USB/wireless ADB, headset recording start/stop plus stop-and-download with 30/40 Mbps bitrate presets, a 10-second logcat performance sampler, independent CPU/GPU levels, headset-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, live ADB override reset, hardened updater launch verification, persistent detected-vs-validated Meta runtime compatibility checks, view-aware 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked-release restore. No version bump, release tag, GitHub Actions release run, installer publication, or physical headset validation has been performed for this Unreleased work.
 
 Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Fixes clipped HotKeys editing controls and prevents newer idle or weak cached headsets from hiding live Meta Link evidence. Adds explicit logging for skipped Quest Link writes. The tester-specific ODT report remains unconfirmed; existing non-Meta guards are preserved. See the [detection investigation](docs/investigations/issue-4-device-cache-selection.md) for evidence and limits.
 
@@ -181,7 +181,7 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - Live **Status** chips: PCVR Ready, SteamVR install/running/Stable|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR armed, GPU, audio
 - **SteamVR install detect** (path, file version, Stable vs Beta) with Install SteamVR action
-- **PCVR Ready** checklist on Info (Steam-biased) with fix actions; source checkout also includes read-only Meta runtime compatibility checks and sanitized support ZIP export
+- **PCVR Ready** checklist on Info (Steam-biased) with fix actions; source checkout also includes persistent read-only Meta runtime compatibility checks and sanitized support ZIP export
 - **Recover PCVR** after a Link / Steam / VD drop (tray + Info)
 - Session probe: Meta Air Link vs wired (`DeviceCache` `isUsingAirLink`), Steam Link / SteamVR, Virtual Desktop
 
@@ -201,7 +201,7 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 ### OpenXR / audio / power
 
-- Switch ActiveRuntime Meta vs SteamVR (global + per-profile); apply preferred on start
+- Switch ActiveRuntime Meta vs SteamVR (global + per-profile); apply preferred on start; 64-bit and 32-bit OpenXR registry views are reported separately when they differ
 - **Steam Link assist**: force SteamVR OpenXR while Steam Link / SteamVR is active, restore preferred when it ends
 - Under Steam Link / VD, live Meta Link registry + ODT writes are gated (there is no PC command path like Quest Link); you can still edit and save Quest Link presets for the next Meta Link / Air Link session. ADB / OpenXR / power / audio still apply — [full comparison](https://github.com/Eliminater74/MetaQuestTrayTool/wiki/Quest-Link-vs-Steam-Link)
 - Audio auto-switch when Link audio is active (does not steal speakers just because Meta virtual audio is installed); separate **communications** playback/recording pickers
@@ -209,12 +209,13 @@ Release **[v1.1.30](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 ### Headset (ADB)
 
-- Bundled Google platform-tools; independent CPU/GPU levels, texture size, model-aware refresh, Dynamic/Fixed FFR, chroma, capture settings, recording start/stop, guarded experimental rendering, live documented-default reset, paste text / proximity / guardian helpers
+- Bundled Google platform-tools; independent CPU/GPU levels 0–4, texture size, model-aware refresh, Dynamic/Fixed FFR, chroma, capture settings, recording start/stop/download, 10-second runtime logcat performance samples, guarded experimental rendering, live documented-default reset, paste text / proximity / guardian helpers
 - Auto-apply on connect (props reset on Quest reboot)
 - **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect (saved IP only — no LAN scan) — SideQuest on the headset can also open an ADB port (often 5555)
 - **VR headsets only** (on by default; Headset page + tray → Headset (ADB)): disconnect phones/tablets/TVs that show up over wireless ADB; uncheck to leave any ADB device connected. Tweaks still never run on non-headsets
 - **Pause ADB** (tray → Headset (ADB)): stop polling / reconnect / disconnect until you resume, or for 2 hours — use while debugging a phone or TV without quitting the tray
 - **Take screenshot** (tray **Screenshots**, Headset / Quest Link / Tray Tool pages, **Ctrl+Shift+Num 8**, or voice “take screenshot”): prefers Quest Link mirror capture while Meta Link is actively streaming, then falls back to trusted-headset ADB. **Ctrl+Shift+Num 9** or voice “take headset screenshot” forces ADB. PNGs save to `%AppData%\MetaQuestTrayTool\screenshots\` and the app says **“Screenshot taken.”** in the Quest when headset announcements can reach the audio path
+- **Stop & download latest recording** stops headset capture, finds the newest MP4/MOV in known Quest recording folders, pulls it into `%AppData%\MetaQuestTrayTool\captures\`, and verifies the file is non-empty before reporting success
 - Trusted VR headset serial only — phones / tablets / emulators ignored
 - Battery / charge / Wi‑Fi status via ADB dumpsys
 

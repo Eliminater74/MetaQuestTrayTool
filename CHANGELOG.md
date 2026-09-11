@@ -9,14 +9,16 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 ## [Unreleased]
 
 ### Added
-- Structured profile-apply results now report success, partial success, failed, and skipped steps instead of collapsing multi-system applies into one generic message.
-- Headset ADB controls now include explicit **Start headset recording** / **Stop headset recording**, 30 Mbps and 40 Mbps capture bitrate presets, independent CPU and GPU levels 0-4, headset-aware refresh-rate choices, clearer Quest 2/Pro and Quest 3/3S texture labels, Dynamic vs Fixed foveation, and a collapsed **Experimental headset rendering** section for Quest Pro local dimming plus subsampled foveation.
+- Structured profile-apply results now report success, partial success, failed, skipped, and no-change outcomes instead of collapsing multi-system applies into one generic message.
+- Headset ADB controls now include explicit **Start headset recording** / **Stop headset recording**, **Stop & download latest recording**, **Capture 10-second performance sample**, 30 Mbps and 40 Mbps capture bitrate presets, independent CPU and GPU levels 0-4, headset-aware refresh-rate choices, clearer Quest 2/Pro and Quest 3/3S texture labels, Dynamic vs Fixed foveation, and a collapsed **Experimental headset rendering** section for Quest Pro local dimming plus subsampled foveation.
 - Added **Reset live ADB overrides** for documented texture, refresh, and capture defaults, with reboot guidance for CPU/GPU, foveation, chroma, local dimming, subsampled foveation, custom props, and other temporary values that do not have a proven safe clear.
-- Added read-only Meta runtime compatibility checks that remember last-seen Meta runtime / Oculus Debug Tool versions and warn when local mappings need retesting after a runtime change.
-- Added **Export support ZIP** on the Info page with sanitized summary, settings counts, compatibility status, and recent logs.
+- Added read-only Meta runtime compatibility checks that separate detected Meta runtime / Oculus Debug Tool versions from the validated baseline, keeping runtime-change warnings pending until the user runs the full check or acknowledges externally validated versions.
+- Added **Export support ZIP** on the Info page with sanitized summary, settings counts, compatibility status, and recent logs. Successful export logs now avoid the full chosen output path.
 - Added Dependabot, CodeQL, Cobertura coverage collection, and a conservative line-coverage floor for CI and release validation.
 
 ### Changed
+- OpenXR switching now reads and writes the 64-bit and 32-bit HKLM registry views explicitly, clearing stale 32-bit ActiveRuntime values when the selected runtime has no matching 32-bit JSON and showing mixed-view diagnostics in reports.
+- Headset UI labels now call out High Top FFR as legacy/VrApi behavior where OpenXR behaves as High, and Capture FPS as legacy/firmware-dependent until physical Quest validation confirms current support.
 - Headset ADB command selection now prefers the trusted physical headset across USB and wireless transports, matching hardware identity before falling back to any ready recognized headset.
 - ADB process launches now use `ProcessStartInfo.ArgumentList` for outer `adb.exe` tokens and async process waiting with timeout/cancellation cleanup.
 - CI, Release, and installer build restores now use locked `win-x64` restore for normal validation instead of refreshing package lock evaluation.
@@ -24,13 +26,13 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ### Security
 - The in-app updater now stores downloads in a private random temp directory, revalidates installer size and SHA-256 immediately before launch, and holds the verified installer handle open while starting Setup so local replacement/tampering is blocked.
-- Support ZIP export applies a second redaction pass for user-profile paths, IP endpoints, labeled serial/fingerprint/SSID values, and long device-like tokens.
+- Support ZIP export applies a second redaction pass for user-profile paths, IPv4/IPv6 endpoints, MAC/BSSID values, email-address-looking strings, labeled serial/fingerprint/SSID values, and long device-like tokens.
 
 ### Validation
-- Local suite passes 132/132 after locked restore/build changes.
+- Local suite passes 145/145 after locked restore/build changes and the second-pass regressions.
 
 ### Verification limits
-- No physical Quest headset, active Link stream, OVRService restart effect, GitHub Actions run, release tag, installer artifact, or push was performed for these Unreleased commits.
+- No physical Quest headset, active Link stream, OVRService restart effect, GitHub Actions run, release tag, installer artifact, or release publication was performed for these Unreleased commits.
 
 ## [1.1.30] - 2026-09-10
 

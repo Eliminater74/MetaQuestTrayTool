@@ -19,9 +19,9 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
 | Link / Dash | RemoteHeadset Link settings + presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
-| Headset ADB | Wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
+| Headset ADB | Wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop/download, 10-second logcat performance sampler, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
 | Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9 plus bindable Exit), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots + bindable Exit), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
-| Updates / polish | In-app GitHub updates, private revalidated installer launch, release checksum sidecars, CodeQL, Dependabot, coverage gate, sanitized support ZIP, read-only Meta compatibility check, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
+| Updates / polish | In-app GitHub updates, private revalidated installer launch, release checksum sidecars, CodeQL, Dependabot, coverage gate, expanded sanitized support ZIP, persistent read-only Meta compatibility check, 64-bit/32-bit OpenXR diagnostics, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
@@ -29,10 +29,10 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ## Unreleased source checkout after v1.1.30
 
-Local commits after v1.1.30 add profile partial-success reporting, trusted USB/wireless headset selection, headset recording start/stop, 30/40 Mbps capture bitrates, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, reset of documented live ADB defaults, private revalidated updater installs, read-only Meta runtime compatibility checks, sanitized support ZIP export, CodeQL, Dependabot, coverage reporting, and locked release restores.
+Local commits after v1.1.30 add profile partial-success/no-change reporting, trusted USB/wireless headset selection, headset recording start/stop/download, a 10-second logcat performance sampler, 30/40 Mbps capture bitrates, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental headset rendering, reset of documented live ADB defaults, private revalidated updater installs, persistent Meta runtime compatibility checks, 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked release restores.
 
-- Current local validation: 132 passing tests.
-- No public tag, push, GitHub Actions run, installer artifact, or physical headset validation has been performed for these Unreleased changes.
+- Current local validation: 145 passing tests.
+- No public release tag, GitHub Actions release run, installer artifact, or physical headset validation has been performed for these Unreleased changes.
 
 ---
 

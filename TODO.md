@@ -8,13 +8,14 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Remaining / later
 
-- [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
+- [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
 - [ ] Physical Quest validation for v1.1.30 Link preset, screenshot, and headset announcement flow: non-Meta streamer preset editing, Quest Link mirror capture, smart screenshot fallback, USB ADB, wireless ADB, voice command, default hotkeys, tray/page commands, and headset “Screenshot taken” audio path.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
 - [ ] More built-in presets as people request process names
+- [ ] Later experimental VrRuntime Lab: research accepted values before exposing swap interval, dynamic-resolution scaling, colorspace, layer filters, force SpaceWarp, GFR, and higher conditional CPU/GPU levels. Keep normal CPU/GPU dropdowns at safer 0–4 until prerequisites and runtime evidence are verified.
 
 **Not doing (non-goals):** Permanent AirLink; Dash Manager–style dash replace; revive Oculus Home / Homeless; macOS / Linux. See [ROADMAP.md](ROADMAP.md).
 
@@ -26,7 +27,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ### Unreleased after v1.1.30
 
-- [x] Report profile applies as structured success, partial success, failed, and skipped step results.
+- [x] Report profile applies as structured success, partial success, failed, skipped, and skipped-only no-change results.
 - [x] Prefer the trusted Quest headset across USB and wireless ADB transports.
 - [x] Add Start/Stop headset recording and 30/40 Mbps capture bitrate presets.
 - [x] Split CPU and GPU headset levels into independent App default / 0-4 controls.
@@ -37,9 +38,18 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 - [x] Harden updater installer launch with private temp storage, final hash/size validation, and file-handle locking.
 - [x] Move outer ADB process invocation to ArgumentList and async process waiting/cancellation cleanup.
 - [x] Add pinned Inno Setup release install, CodeQL, Dependabot, coverage reporting, and locked restore to CI/release paths.
-- [x] Add read-only Meta runtime compatibility checks with last-seen Meta/ODT version tracking.
+- [x] Add read-only Meta runtime compatibility checks with separate detected and validated Meta/ODT version tracking.
 - [x] Add sanitized support ZIP export from Info.
-- [x] Keep work local only: no version bump, tag, push, GitHub Actions run, or installer publication.
+
+- [x] Keep skipped-only profile applies from aborting launches under Steam Link / Virtual Desktop.
+- [x] Keep Meta runtime drift warnings pending until the user runs the compatibility check or acknowledges externally validated versions.
+- [x] Prevent older Info refresh tasks from overwriting newer compatibility/export results.
+- [x] Handle OpenXR ActiveRuntime through explicit 64-bit and 32-bit registry views.
+- [x] Expand support ZIP sanitization for IPv6, MAC/BSSID, email-looking strings, and filename-only export logging.
+- [x] Label High Top FFR as legacy/VrApi and Capture FPS as legacy/firmware-dependent.
+- [x] Add a 10-second headset runtime logcat performance sampler.
+- [x] Add Stop & download latest headset recording into the local captures folder.
+- [x] Keep work unreleased: no version bump, tag, GitHub Actions release run, or installer publication.
 
 ### v1.1.30
 

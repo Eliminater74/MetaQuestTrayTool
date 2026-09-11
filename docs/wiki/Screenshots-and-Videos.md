@@ -13,6 +13,11 @@ GitHub wiki does not inline-play large MP4s — open the download link (VLC / br
 
 Repo gallery index: [docs/media/README.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/media/README.md)
 
+
+## Headset recordings
+
+Downloaded headset recordings are written to `%AppData%\MetaQuestTrayTool\captures\`. On the Headset page, **Stop & download latest recording** stops the recording property, finds the newest MP4/MOV in known Quest recording folders, pulls it with ADB, and verifies the local file is non-empty before reporting success.
+
 ## Quest screenshots
 
 Screenshot PNGs are written to `%AppData%\MetaQuestTrayTool\screenshots\`.
