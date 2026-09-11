@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```text
-[PC] Meta Quest Tray Tool v1.1.31 — free modern OTT-style tray app for Quest Link / SteamVR (headset controls, diagnostics, and safer updates)
+[PC] Meta Quest Tray Tool v1.1.32 — free modern OTT-style tray app for Quest Link / SteamVR (Read Live and active Link detection fix)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.31** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.32** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,11 +54,11 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What changed in v1.1.31
+### What changed in v1.1.32
 
-Adds structured profile apply results, trusted USB/wireless headset selection, headset recording start/stop/download, 30/40 Mbps capture presets, a 10-second runtime performance sampler, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental rendering controls, live ADB reset actions, hardened updater/release validation, persistent Meta runtime compatibility checks, explicit OpenXR registry-view handling, expanded support ZIP redaction, CodeQL, Dependabot, coverage reporting, and locked release restores. Physical Quest headset behavior remains open for hardware validation.
+Fixes the remaining Quest Link settings report: **Read live registry** now stays read-only while controls load, so queued UI changes cannot save/apply settings or replace the read result with a Virtual Desktop / Steam Link skip message. Live operable Meta Link cache evidence now beats resident Virtual Desktop desktop processes, while stale/inoperable Meta cache records still keep the non-Meta guards.
 
-### What works now (v1.1.31)
+### What works now (v1.1.32)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -224,5 +224,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.31) — expanded headset controls, recording/download, runtime performance samples, safer updater/release validation, Meta runtime/OpenXR diagnostics, and support ZIP redaction; Quest Link presets stay editable under Steam Link / Virtual Desktop sessions for the next Meta Link / Air Link run, custom Link settings no longer visually reset to Meta defaults, and Exit app is now bindable as a hotkey/custom voice action; plus Quest Link mirror screenshots, smart screenshot fallback, Ctrl+Shift+Num 8 / Num 9 screenshot hotkeys, voice screenshot phrases, explicit headset announcement toggles, helper repair/copy diagnostics, shared/nonblocking status probes, serialized ADB, verified installer checksum sidecars, expanded headset voice coverage, MSFS 2024 VR launch automation, stale helper recovery, settings backup restore, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.32) — Read Live stays read-only, active Meta Link detection beats resident Virtual Desktop desktop processes when the Meta cache is live, plus expanded headset controls, recording/download, runtime performance samples, safer updater/release validation, Meta runtime/OpenXR diagnostics, and support ZIP redaction; Quest Link presets stay editable under Steam Link / Virtual Desktop sessions for the next Meta Link / Air Link run, custom Link settings no longer visually reset to Meta defaults, and Exit app is now bindable as a hotkey/custom voice action; plus Quest Link mirror screenshots, smart screenshot fallback, Ctrl+Shift+Num 8 / Num 9 screenshot hotkeys, voice screenshot phrases, explicit headset announcement toggles, helper repair/copy diagnostics, shared/nonblocking status probes, serialized ADB, verified installer checksum sidecars, expanded headset voice coverage, MSFS 2024 VR launch automation, stale helper recovery, settings backup restore, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

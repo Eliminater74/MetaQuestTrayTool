@@ -1,33 +1,11 @@
-﻿Meta Quest Tray Tool 1.1.31 - What's new
+﻿Meta Quest Tray Tool 1.1.32 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.31] - 2026-09-10
+[1.1.32] - 2026-09-11
 
-Added
-- Structured profile-apply results now report success, partial success, failed, skipped, and no-change outcomes instead of collapsing multi-system applies into one generic message.
-- Headset ADB controls now include explicit Start headset recording / Stop headset recording, Stop & download latest recording, Capture 10-second performance sample, 30 Mbps and 40 Mbps capture bitrate presets, independent CPU and GPU levels 0-4, headset-aware refresh-rate choices, clearer Quest 2/Pro and Quest 3/3S texture labels, Dynamic vs Fixed foveation, and a collapsed Experimental headset rendering section for Quest Pro local dimming plus subsampled foveation.
-- Added Reset live ADB overrides for documented texture, refresh, and capture defaults, with reboot guidance for CPU/GPU, foveation, chroma, local dimming, subsampled foveation, custom props, and other temporary values that do not have a proven safe clear.
-- Added read-only Meta runtime compatibility checks that separate detected Meta runtime / Oculus Debug Tool versions from the validated baseline, keeping runtime-change warnings pending until the user runs the full check or acknowledges externally validated versions.
-- Added Export support ZIP on the Info page with sanitized summary, settings counts, compatibility status, and recent logs. Successful export logs now avoid the full chosen output path.
-- Added Dependabot, CodeQL, Cobertura coverage collection, and a conservative line-coverage floor for CI and release validation.
-
-Changed
-- OpenXR switching now reads and writes the 64-bit and 32-bit HKLM registry views explicitly, clearing stale 32-bit ActiveRuntime values when the selected runtime has no matching 32-bit JSON and showing mixed-view diagnostics in reports.
-- Headset UI labels now call out High Top FFR as legacy/VrApi behavior where OpenXR behaves as High, and Capture FPS as legacy/firmware-dependent until physical Quest validation confirms current support.
-- Headset ADB command selection now prefers the trusted physical headset across USB and wireless transports, matching hardware identity before falling back to any ready recognized headset.
-- ADB process launches now use ProcessStartInfo.ArgumentList for outer adb.exe tokens and async process waiting with timeout/cancellation cleanup.
-- CI, Release, and installer build restores now use locked win-x64 restore for normal validation instead of refreshing package lock evaluation.
-- The Release workflow now installs a pinned Inno Setup 6.7.1 upstream installer and verifies its SHA-256 digest before running it.
-
-Security
-- The in-app updater now stores downloads in a private random temp directory, revalidates installer size and SHA-256 immediately before launch, and holds the verified installer handle open while starting Setup so local replacement/tampering is blocked.
-- Support ZIP export applies a second redaction pass for user-profile paths, IPv4/IPv6 endpoints, MAC/BSSID values, email-address-looking strings, labeled serial/fingerprint/SSID values, and long device-like tokens.
-
-Validation
-- Local suite passes 145/145 after locked restore/build changes and the second-pass regressions.
-
-Verification limits
-- Physical Quest headset behavior, active Link stream adoption, and OVRService restart effects remain unverified for this release; local source validation and hosted installer checksum verification are tracked separately from active-headset proof.
+Fixed
+- Read live registry on the Quest Link page now stays read-only while it loads controls, so queued selection changes cannot save/apply settings or replace the read result with a non-Meta streamer skip message.
+- Live operable Meta Link cache evidence now beats resident Virtual Desktop desktop processes, while stale/inoperable Meta cache records still leave Virtual Desktop / Steam Link guards in place.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

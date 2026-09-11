@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -10,7 +10,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
-- [ ] Physical Quest validation for v1.1.31 Link, screenshot, headset-announcement, recording/download, performance-sample, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
+- [ ] Physical Quest validation for v1.1.32 Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, recording/download, performance-sample, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -24,6 +24,12 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.32
+
+- [x] Keep Quest Link **Read live registry** read-only while controls load, preventing queued UI events from saving/applying settings.
+- [x] Let live operable Meta Link cache evidence beat resident Virtual Desktop desktop processes while preserving stale/inoperable non-Meta guards.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.32.
 
 ### v1.1.31
 

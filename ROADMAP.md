@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current source checkout (public v1.1.31)
+## Current source checkout (public v1.1.32)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -24,6 +24,15 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Updates / polish | In-app GitHub updates, private revalidated installer launch, release checksum sidecars, CodeQL, Dependabot, coverage gate, expanded sanitized support ZIP, persistent read-only Meta compatibility check, 64-bit/32-bit OpenXR diagnostics, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
+
+---
+
+## v1.1.32 — Read Live and active Meta Link detection
+
+**Read live registry** now stays read-only while controls load, so queued UI selection changes cannot save/apply Link settings or replace the read result with a non-Meta streamer skip message. Live operable Meta Link cache evidence now beats resident Virtual Desktop desktop processes, while stale/inoperable Meta cache records still keep Virtual Desktop / Steam Link guards in place.
+
+- Local validation: 146 passing tests.
+- Physical Quest Link / Virtual Desktop background-process behavior still needs hardware confirmation.
 
 ---
 
@@ -204,6 +213,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.29 | Link/HUD mapping, registry verification, custom values, independent FOV persistence/reset, headset input-thread fixes |
 | v1.1.30 | Scrollable hotkey editor, active-headset cache selection, skipped-write diagnostics |
 | v1.1.31 | Headset control expansion, updater/release hardening, Meta runtime/OpenXR diagnostics, support ZIP redaction |
+| v1.1.32 | Read Live remains read-only; live Meta Link cache beats resident Virtual Desktop desktop processes |
 
 ---
 

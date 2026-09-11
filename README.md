@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.31 — MetaQuestTrayTool-Setup-1.1.31.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.31/MetaQuestTrayTool-Setup-1.1.31.exe)
+**Latest:** [v1.1.32 — MetaQuestTrayTool-Setup-1.1.32.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.32/MetaQuestTrayTool-Setup-1.1.32.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,9 +163,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### v1.1.31 current release
+### v1.1.32 current release
 
-Release **[v1.1.31](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Adds structured profile apply outcomes, trusted USB/wireless headset selection, headset recording start/stop/download, 30/40 Mbps capture presets, a 10-second runtime performance sampler, independent CPU/GPU levels, model-aware refresh choices, Dynamic FFR, guarded experimental rendering, documented live ADB reset actions, hardened updater launch verification, persistent Meta runtime compatibility checks, explicit 64-bit/32-bit OpenXR registry handling, expanded support ZIP sanitization, CodeQL, Dependabot, coverage reporting, and locked release restores. Physical Quest headset behavior, active Link stream adoption, and OVRService restart effects remain unverified.
+Release **[v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. **Read live registry** on the Quest Link page now stays read-only while controls load, preventing queued selection changes from saving/applying settings or replacing the read result with a non-Meta streamer skip message. Live operable Meta Link cache evidence now beats resident Virtual Desktop desktop processes, while stale or inoperable Meta cache records still keep Virtual Desktop / Steam Link guards in place. Physical Quest Link / Virtual Desktop background-process behavior still needs hardware confirmation.
 
 ### Shell & tray
 
