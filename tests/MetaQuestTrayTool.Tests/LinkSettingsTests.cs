@@ -71,6 +71,55 @@ public class LinkSettingsTests
     }
 
     [Fact]
+    public void StartupPreflightReadFailureBlocksAutomaticLinkApply()
+    {
+        var registry = new FakeRegistry { FailRead = true };
+        registry.Values["BitrateMbps"] = 960;
+        registry.Values["DBRMax"] = 960;
+        var service = new LinkSettingsService(registry);
+        var saved = new LinkSettings
+        {
+            BitrateMbps = 500,
+            DynamicBitrateMax = 500
+        };
+
+        var preflight = service.PreflightStartupLinkApply(saved);
+        if (preflight.CanApplyLinkSettings)
+        {
+            service.Apply(preflight.ResolvedSettings, deleteUnsetOverrides: true);
+        }
+
+        Assert.False(preflight.CanApplyLinkSettings);
+        Assert.False(preflight.ShouldSaveResolvedSettings);
+        Assert.Same(saved, preflight.ResolvedSettings);
+        Assert.Contains("Skipped startup Link apply", preflight.Summary);
+        Assert.Equal(960, registry.Values["BitrateMbps"]);
+        Assert.Equal(960, registry.Values["DBRMax"]);
+        Assert.Equal(1, registry.ReadOpens);
+        Assert.Null(service.LastResult);
+    }
+
+    [Fact]
+    public void StartupPreflightAllowsApplyWhenReadSucceedsWithoutPreservation()
+    {
+        var registry = new FakeRegistry();
+        registry.Values["BitrateMbps"] = 500;
+        registry.Values["DBRMax"] = 500;
+        var saved = new LinkSettings
+        {
+            BitrateMbps = 500,
+            DynamicBitrateMax = 500
+        };
+
+        var preflight = new LinkSettingsService(registry).PreflightStartupLinkApply(saved);
+
+        Assert.True(preflight.CanApplyLinkSettings);
+        Assert.False(preflight.ShouldSaveResolvedSettings);
+        Assert.Same(saved, preflight.ResolvedSettings);
+        Assert.Null(preflight.Summary);
+    }
+
+    [Fact]
     public void NegativeDynamicOffsetSurvivesApplyAndUnrelatedEdits()
     {
         var registry = new FakeRegistry();

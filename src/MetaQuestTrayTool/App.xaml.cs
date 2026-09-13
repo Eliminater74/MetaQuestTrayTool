@@ -812,14 +812,17 @@ public partial class App : System.Windows.Application
         {
             if (caps.AllowsMetaLinkRegistry)
             {
-                var preserved = PreserveExternalHighLinkBitratesForStartup();
-                if (!string.IsNullOrWhiteSpace(preserved))
+                var preflight = PreflightStartupLinkApply();
+                if (!string.IsNullOrWhiteSpace(preflight.Summary))
                 {
-                    parts.Add(preserved);
+                    parts.Add(preflight.Summary);
                 }
 
-                var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
-                parts.Add(link.Summary);
+                if (preflight.CanApplyLinkSettings)
+                {
+                    var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
+                    parts.Add(link.Summary);
+                }
             }
             else
             {
@@ -847,29 +850,21 @@ public partial class App : System.Windows.Application
         return summary.Length == 0 ? "Global baseline ready (nothing to push)." : summary;
     }
 
-    private string? PreserveExternalHighLinkBitratesForStartup()
+    private LinkStartupApplyPreflightResult PreflightStartupLinkApply()
     {
-        try
+        var preflight = Link.PreflightStartupLinkApply(Settings.Current.LinkSettings);
+        if (preflight.ShouldSaveResolvedSettings)
         {
-            var resolved = LinkSettingsService.PreserveExternalHighBitratesForStartup(
-                Settings.Current.LinkSettings,
-                Link.ReadCurrent(),
-                out var summary);
-            if (summary is null)
-            {
-                return null;
-            }
-
-            Settings.Current.LinkSettings = resolved;
+            Settings.Current.LinkSettings = preflight.ResolvedSettings;
             Settings.SaveSoon();
-            Log.Info(summary);
-            return summary;
+            Log.Info(preflight.Summary ?? "Preserved existing ODT Link startup bitrate values.");
         }
-        catch (Exception ex)
+        else if (!preflight.CanApplyLinkSettings)
         {
-            Log.Warn("Could not check existing Link registry bitrate before startup apply: " + ex.Message);
-            return null;
+            Log.Warn(preflight.Summary ?? "Skipped startup Link apply because existing Link registry values could not be checked.");
         }
+
+        return preflight;
     }
 
     public string ApplyGlobalGameSettings(bool includeOdt = true)

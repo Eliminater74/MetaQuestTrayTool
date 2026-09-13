@@ -8,7 +8,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 ## Remaining / later
 
-- [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
+- [ ] Post-fix physical regression validation from issue #4 and the open issue #11 bitrate report: verify 960 fixed bitrate, DBR enabled + DBRMax 960, OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
 - [ ] Physical Quest validation for v1.1.34 high Link bitrate and DBRMax startup preservation, recording/download finalization, performance-sample parsing, active stream bitrate adoption, OVRService restart effects, Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)

@@ -8,7 +8,11 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
-No unreleased changes yet.
+### Fixed
+- Startup Link auto-apply now skips the automatic Link registry write if the preflight read fails, avoiding a possible downgrade of unknown high ODT fixed bitrate or DBRMax values.
+
+### Docs
+- Renamed the old issue #4 reproduction TODO to post-fix physical regression validation now that the tracked issue has shipped fixes.
 
 ## [1.1.34] - 2026-09-13
 

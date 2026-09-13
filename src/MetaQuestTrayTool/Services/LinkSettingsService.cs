@@ -2,6 +2,12 @@ using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
+internal sealed record LinkStartupApplyPreflightResult(
+    bool CanApplyLinkSettings,
+    bool ShouldSaveResolvedSettings,
+    LinkSettings ResolvedSettings,
+    string? Summary);
+
 /// <summary>
 /// Reads and writes Quest Link / Air Link overrides in the Meta RemoteHeadset registry hive.
 /// Persistence verification is separate from runtime/headset verification (see docs/ODT-REGISTRY.md).
@@ -31,6 +37,29 @@ public sealed class LinkSettingsService
 
     public LinkSettings? LastApplied { get; private set; }
     public LinkApplyResult? LastResult { get; private set; }
+
+    internal LinkStartupApplyPreflightResult PreflightStartupLinkApply(LinkSettings saved)
+    {
+        try
+        {
+            var resolved = PreserveExternalHighBitratesForStartup(saved, ReadCurrent(), out var summary);
+            return new LinkStartupApplyPreflightResult(
+                CanApplyLinkSettings: true,
+                ShouldSaveResolvedSettings: summary is not null,
+                ResolvedSettings: resolved,
+                Summary: summary);
+        }
+        catch (Exception ex)
+        {
+            return new LinkStartupApplyPreflightResult(
+                CanApplyLinkSettings: false,
+                ShouldSaveResolvedSettings: false,
+                ResolvedSettings: saved,
+                Summary: "Skipped startup Link apply because existing ODT Link bitrate/DBRMax could not be checked: "
+                         + ex.Message
+                         + ". This avoids overwriting an unknown high ODT value.");
+        }
+    }
 
     internal static LinkSettings PreserveExternalHighBitratesForStartup(
         LinkSettings saved,
