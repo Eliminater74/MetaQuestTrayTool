@@ -812,7 +812,7 @@ public partial class App : System.Windows.Application
         {
             if (caps.AllowsMetaLinkRegistry)
             {
-                var preserved = PreserveExternalHighLinkBitrateForStartup();
+                var preserved = PreserveExternalHighLinkBitratesForStartup();
                 if (!string.IsNullOrWhiteSpace(preserved))
                 {
                     parts.Add(preserved);
@@ -847,11 +847,11 @@ public partial class App : System.Windows.Application
         return summary.Length == 0 ? "Global baseline ready (nothing to push)." : summary;
     }
 
-    private string? PreserveExternalHighLinkBitrateForStartup()
+    private string? PreserveExternalHighLinkBitratesForStartup()
     {
         try
         {
-            var resolved = LinkSettingsService.PreserveExternalHighBitrateForStartup(
+            var resolved = LinkSettingsService.PreserveExternalHighBitratesForStartup(
                 Settings.Current.LinkSettings,
                 Link.ReadCurrent(),
                 out var summary);

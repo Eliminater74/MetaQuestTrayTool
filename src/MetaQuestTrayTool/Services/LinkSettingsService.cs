@@ -32,24 +32,42 @@ public sealed class LinkSettingsService
     public LinkSettings? LastApplied { get; private set; }
     public LinkApplyResult? LastResult { get; private set; }
 
-    internal static LinkSettings PreserveExternalHighBitrateForStartup(
+    internal static LinkSettings PreserveExternalHighBitratesForStartup(
         LinkSettings saved,
         LinkSettings current,
         out string? summary)
     {
         summary = null;
-        if (current.BitrateMbps <= LinkSettings.LegacyBitratePresetCeilingMbps
-            || saved.BitrateMbps > LinkSettings.LegacyBitratePresetCeilingMbps)
+        var preserveBitrate = ShouldPreserveExternalHighBitrate(saved.BitrateMbps, current.BitrateMbps);
+        var preserveDynamicMax = ShouldPreserveExternalHighBitrate(saved.DynamicBitrateMax, current.DynamicBitrateMax);
+        if (!preserveBitrate && !preserveDynamicMax)
         {
             return saved;
         }
 
         var merged = saved.Clone();
-        merged.BitrateMbps = current.BitrateMbps;
+        var fields = new List<string>();
+        if (preserveBitrate)
+        {
+            merged.BitrateMbps = current.BitrateMbps;
+            fields.Add($"bitrate {current.BitrateMbps} Mbps");
+        }
+
+        if (preserveDynamicMax)
+        {
+            merged.DynamicBitrateMax = current.DynamicBitrateMax;
+            fields.Add($"DBR max {current.DynamicBitrateMax} Mbps");
+        }
+
         merged.PresetName = "Custom";
-        summary = $"Preserved existing ODT Link bitrate {current.BitrateMbps} Mbps instead of applying the older {saved.BitrateMbps} Mbps saved baseline.";
+        summary = "Preserved existing ODT Link " + string.Join(" and ", fields)
+                  + " instead of applying the older saved baseline.";
         return merged;
     }
+
+    private static bool ShouldPreserveExternalHighBitrate(int saved, int current) =>
+        current > LinkSettings.LegacyBitratePresetCeilingMbps
+        && saved <= LinkSettings.LegacyBitratePresetCeilingMbps;
 
     public LinkSettings ReadCurrent()
     {

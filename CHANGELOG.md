@@ -8,7 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
-No unreleased changes yet.
+### Fixed
+- Startup high-bitrate preservation now covers Dynamic Bitrate Max (`DBRMax`) as well as fixed Link bitrate, so a saved baseline from the old 500 Mbps preset range cannot silently downgrade an existing high DBR ceiling.
 
 ## [1.1.33] - 2026-09-12
 

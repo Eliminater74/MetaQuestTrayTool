@@ -30,33 +30,44 @@ public class LinkSettingsTests
     }
 
     [Theory]
-    [InlineData(0, 960, 960)]
-    [InlineData(500, 960, 960)]
-    [InlineData(600, 960, 600)]
-    [InlineData(500, 500, 500)]
-    public void StartupPreservesExternalHighOdtBitrateOverLegacySavedBaseline(
+    [InlineData(500, 0, 960, 0, 960, 0, true)]
+    [InlineData(500, 500, 500, 960, 500, 960, true)]
+    [InlineData(500, 500, 960, 960, 960, 960, true)]
+    [InlineData(700, 0, 960, 0, 700, 0, false)]
+    [InlineData(0, 700, 0, 960, 0, 700, false)]
+    [InlineData(500, 500, 500, 500, 500, 500, false)]
+    public void StartupPreservesExternalHighOdtBitratesOverLegacySavedBaseline(
         int savedBitrate,
+        int savedDynamicMax,
         int currentBitrate,
-        int expectedBitrate)
+        int currentDynamicMax,
+        int expectedBitrate,
+        int expectedDynamicMax,
+        bool expectedSummary)
     {
         var saved = new LinkSettings
         {
             PresetName = "Saved",
             BitrateMbps = savedBitrate,
+            DynamicBitrateMax = savedDynamicMax,
             EncodeResolutionWidth = 2912,
             Sharpening = LinkSharpeningMode.Quality
         };
-        var current = new LinkSettings { BitrateMbps = currentBitrate };
+        var current = new LinkSettings
+        {
+            BitrateMbps = currentBitrate,
+            DynamicBitrateMax = currentDynamicMax
+        };
 
-        var resolved = LinkSettingsService.PreserveExternalHighBitrateForStartup(saved, current, out var summary);
+        var resolved = LinkSettingsService.PreserveExternalHighBitratesForStartup(saved, current, out var summary);
 
         Assert.Equal(expectedBitrate, resolved.BitrateMbps);
+        Assert.Equal(expectedDynamicMax, resolved.DynamicBitrateMax);
         Assert.Equal(2912, resolved.EncodeResolutionWidth);
         Assert.Equal(LinkSharpeningMode.Quality, resolved.Sharpening);
-        Assert.Equal(savedBitrate <= LinkSettings.LegacyBitratePresetCeilingMbps
-                     && currentBitrate > LinkSettings.LegacyBitratePresetCeilingMbps,
-            summary is not null);
+        Assert.Equal(expectedSummary, summary is not null);
         Assert.Equal(savedBitrate, saved.BitrateMbps);
+        Assert.Equal(savedDynamicMax, saved.DynamicBitrateMax);
     }
 
     [Fact]
