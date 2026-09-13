@@ -4,6 +4,21 @@ namespace MetaQuestTrayTool.Tests;
 
 public class HeadsetPerformanceSampleTests
 {
+    [Theory]
+    [InlineData("VrRuntime: CPUUtil=82%,GPUUtil=91%")]
+    [InlineData("OVRPlugin: SpaceWarp=Off")]
+    public void ParsesRuntimeMetricsWithoutFpsOrVrApi(string line)
+    {
+        Assert.Single(HeadsetPerformanceSample.Parse(line, TimeSpan.FromSeconds(10)).Samples);
+    }
+
+    [Fact]
+    public void LogcatStartsAtDeviceTimeWithoutClearingHistory()
+    {
+        Assert.Contains("date +%s.%N", AdbService.PerformanceLogcatCommand);
+        Assert.Contains("logcat -T \"$start\"", AdbService.PerformanceLogcatCommand);
+        Assert.DoesNotContain(" -c", AdbService.PerformanceLogcatCommand);
+    }
     [Fact]
     public void ParsesVrApiFpsFoveationAndUtilizationFields()
     {

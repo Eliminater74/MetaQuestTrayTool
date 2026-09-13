@@ -886,6 +886,10 @@ public sealed class AdbService
     public Task<string> ShellAsync(string serial, string command, CancellationToken cancellationToken = default) =>
         RunAsync(["-s", serial, "shell", command], cancellationToken);
 
+    // Establish the boundary on the device, avoiding host clock skew and buffered history.
+    internal const string PerformanceLogcatCommand =
+        "start=$(date +%s.%N) && exec logcat -T \"$start\" -v time VrApi:D VrApiStats:D VrRuntime:D OVRPlugin:D '*:S'";
+
     public string LogcatForDuration(string serial, TimeSpan duration)
     {
         if (string.IsNullOrWhiteSpace(serial))
@@ -913,14 +917,8 @@ public sealed class AdbService
         {
             "-s",
             serial,
-            "logcat",
-            "-v",
-            "time",
-            "VrApi:D",
-            "VrApiStats:D",
-            "VrRuntime:D",
-            "OVRPlugin:D",
-            "*:S"
+            "shell",
+            PerformanceLogcatCommand
         };
         var display = FormatAdbCommand(arguments);
         try

@@ -4,8 +4,32 @@ namespace MetaQuestTrayTool.Tests;
 
 public class MetaRuntimeCompatibilityTests
 {
+    [Theory]
+    [InlineData(true, true, true, false, true)]
+    [InlineData(true, true, false, false, false)]
+    [InlineData(true, true, true, true, false)]
+    [InlineData(true, false, false, false, false)]
+    [InlineData(false, true, true, false, false)]
+    public void OnlySuccessfulRequiredChecksPromoteBaseline(bool remember, bool requested, bool succeeded, bool warning, bool expected)
+    {
+        var validate = MetaRuntimeCompatibilityService.CanAutomaticallyValidate(remember, requested, succeeded,
+            [new(warning ? MetaCompatibilityLevel.Warn : MetaCompatibilityLevel.Ok, "Probe", "Result")]);
+        var state = MetaRuntimeCompatibilityService.BuildRememberedComponent("82", "runtime.exe", null, null, "81", "runtime.exe", "81", "runtime.exe", validate);
+        Assert.Equal(expected ? "82" : "81", state.ValidatedVersion);
+        Assert.Equal("82", state.DetectedVersion);
+    }
+
     [Fact]
-    public void FirstObservedVersionRecordsBaselineWithoutWarning()
+    public void FailedFirstCheckDoesNotCreateValidatedOrLegacyBaseline()
+    {
+        var state = MetaRuntimeCompatibilityService.BuildRememberedComponent("82", "runtime.exe", null, null, null, null, null, null, false);
+        Assert.Equal("82", state.DetectedVersion);
+        Assert.Null(state.ValidatedVersion);
+        Assert.Null(state.LegacySeenVersion);
+    }
+
+    [Fact]
+    public void FirstObservedVersionRequiresValidation()
     {
         var finding = MetaRuntimeCompatibilityService.EvaluateObservedComponent(
             "Meta runtime",
@@ -15,7 +39,7 @@ public class MetaRuntimeCompatibilityTests
             lastPath: null);
 
         Assert.Equal(MetaCompatibilityLevel.Info, finding.Level);
-        Assert.Contains("baseline recorded", finding.Title);
+        Assert.Contains("validation pending", finding.Title);
     }
 
     [Fact]

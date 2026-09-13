@@ -181,9 +181,34 @@ public sealed class HeadsetSettingsService
 
     public string StopAndDownloadLatestRecording(HeadsetSettings settings)
     {
+        var quest = RequireReadyHeadset(settings);
+        IReadOnlyList<HeadsetRecordingCandidate> ReadRecordings() =>
+            ParseRecordingListing(_adb.Shell(quest.Serial, BuildRecordingListingCommand()));
+        var beforeStop = ReadRecordings();
         var stop = SetRecording(settings, enabled: false);
-        var download = DownloadLatestRecording(settings);
+        var recording = WaitForFinalizedRecording(beforeStop, ReadRecordings, Thread.Sleep);
+        var download = DownloadRecording(quest.Serial, quest.Model, recording);
         return stop + Environment.NewLine + download.Summary;
+    }
+
+    internal static HeadsetRecordingCandidate WaitForFinalizedRecording(
+        IReadOnlyList<HeadsetRecordingCandidate> beforeStop,
+        Func<IReadOnlyList<HeadsetRecordingCandidate>> read,
+        Action<TimeSpan> delay)
+    {
+        HeadsetRecordingCandidate? previous = null;
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            delay(TimeSpan.FromSeconds(1));
+            var newest = read().OrderByDescending(item => item.ModifiedUnixSeconds)
+                .ThenByDescending(item => item.Bytes).FirstOrDefault();
+            if (newest is { Bytes: > 1024, ModifiedUnixSeconds: > 0 }
+                && !beforeStop.Contains(newest) && newest == previous)
+                return newest;
+            previous = newest;
+        }
+
+        throw new TimeoutException("The just-stopped recording has not appeared or stabilized yet. Wait for capture to finish in the headset, then use Download latest recording.");
     }
 
     public HeadsetRecordingDownloadResult DownloadLatestRecording(HeadsetSettings settings)
@@ -198,8 +223,13 @@ public sealed class HeadsetSettingsService
                 "No headset recordings were found. Stop recording in the headset first, then retry. Checked: "
                 + string.Join(", ", RecordingDirectories) + ".");
 
-        var outputPath = CreateRecordingPath(DateTimeOffset.Now, quest.Model, recording.RemotePath);
-        _adb.PullFile(quest.Serial, recording.RemotePath, outputPath);
+        return DownloadRecording(quest.Serial, quest.Model, recording);
+    }
+
+    private HeadsetRecordingDownloadResult DownloadRecording(string serial, string? model, HeadsetRecordingCandidate recording)
+    {
+        var outputPath = CreateRecordingPath(DateTimeOffset.Now, model, recording.RemotePath);
+        _adb.PullFile(serial, recording.RemotePath, outputPath);
         var file = new FileInfo(outputPath);
         if (!file.Exists || file.Length <= 1024)
         {

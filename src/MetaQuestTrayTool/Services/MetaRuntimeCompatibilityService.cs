@@ -49,8 +49,27 @@ public sealed class MetaRuntimeCompatibilityService
         var findings = new List<MetaCompatibilityFinding>();
         _app.Oculus.Refresh(force: true);
 
+        AddLinkRegistryFindings(findings);
+        var probeSucceeded = false;
+        if (runDebugToolProbe)
+        {
+            probeSucceeded = AddDebugToolProbe(findings);
+        }
+        else
+        {
+            findings.Add(new MetaCompatibilityFinding(
+                MetaCompatibilityLevel.Info,
+                "Oculus Debug Tool read probe skipped",
+                "Startup records file versions only. Use Check Meta compatibility on the Info page to run the read-only CLI probe."));
+        }
+
         var runtimePath = ExistingPath(_app.Oculus.RuntimeServerPath) ?? ExistingPath(_app.Oculus.ResolveClientExePath());
         var runtimeVersion = ReadFileVersion(runtimePath);
+        var debugToolPath = ExistingPath(_app.Oculus.DebugToolCliPath) ?? ExistingPath(_app.Oculus.DebugToolGuiPath);
+        var debugToolVersion = ReadFileVersion(debugToolPath);
+        var validateCurrent = CanAutomaticallyValidate(remember, runDebugToolProbe, probeSucceeded, findings)
+            && !string.IsNullOrWhiteSpace(runtimeVersion) && !string.IsNullOrWhiteSpace(runtimePath)
+            && !string.IsNullOrWhiteSpace(debugToolVersion) && !string.IsNullOrWhiteSpace(debugToolPath);
         findings.Add(EvaluateObservedComponent(
             "Meta runtime",
             runtimeVersion,
@@ -61,10 +80,8 @@ public sealed class MetaRuntimeCompatibilityService
             FirstNonEmpty(
                 _app.Settings.Current.LastValidatedMetaRuntimePath,
                 _app.Settings.Current.LastSeenMetaRuntimePath),
-            remember && runDebugToolProbe));
+            validateCurrent));
 
-        var debugToolPath = ExistingPath(_app.Oculus.DebugToolCliPath) ?? ExistingPath(_app.Oculus.DebugToolGuiPath);
-        var debugToolVersion = ReadFileVersion(debugToolPath);
         findings.Add(EvaluateObservedComponent(
             "Oculus Debug Tool",
             debugToolVersion,
@@ -75,20 +92,7 @@ public sealed class MetaRuntimeCompatibilityService
             FirstNonEmpty(
                 _app.Settings.Current.LastValidatedOculusDebugToolPath,
                 _app.Settings.Current.LastSeenOculusDebugToolPath),
-            remember && runDebugToolProbe));
-
-        AddLinkRegistryFindings(findings);
-        if (runDebugToolProbe)
-        {
-            AddDebugToolProbe(findings);
-        }
-        else
-        {
-            findings.Add(new MetaCompatibilityFinding(
-                MetaCompatibilityLevel.Info,
-                "Oculus Debug Tool read probe skipped",
-                "Startup records file versions only. Use Check Meta compatibility on the Info page to run the read-only CLI probe."));
-        }
+            validateCurrent));
 
         findings.Add(new MetaCompatibilityFinding(
             MetaCompatibilityLevel.Info,
@@ -103,11 +107,17 @@ public sealed class MetaRuntimeCompatibilityService
 
         if (remember)
         {
-            Remember(runtimeVersion, runtimePath, debugToolVersion, debugToolPath, validateCurrent: runDebugToolProbe);
+            Remember(runtimeVersion, runtimePath, debugToolVersion, debugToolPath, validateCurrent: validateCurrent);
         }
 
         return report;
     }
+
+    internal static bool CanAutomaticallyValidate(
+        bool remember, bool probeRequested, bool probeSucceeded,
+        IReadOnlyList<MetaCompatibilityFinding> requiredFindings) =>
+        remember && probeRequested && probeSucceeded
+        && requiredFindings.All(item => item.Level != MetaCompatibilityLevel.Warn);
 
     internal static MetaCompatibilityFinding EvaluateObservedComponent(
         string name,
@@ -143,8 +153,8 @@ public sealed class MetaRuntimeCompatibilityService
         {
             return new MetaCompatibilityFinding(
                 MetaCompatibilityLevel.Info,
-                name + " baseline recorded",
-                $"{name} {currentVersion} at {currentPath}. Future checks will warn if this changes.");
+                name + (acknowledgeCurrentVersion ? " baseline recorded" : " detected; validation pending"),
+                $"{name} {currentVersion} at {currentPath}. " + (acknowledgeCurrentVersion ? "Future checks will warn if this changes." : "Run a successful compatibility check or explicitly acknowledge this version to record a validated baseline."));
         }
 
         if (!string.Equals(currentVersion, lastVersion, StringComparison.OrdinalIgnoreCase))
@@ -215,7 +225,7 @@ public sealed class MetaRuntimeCompatibilityService
         }
     }
 
-    private void AddDebugToolProbe(List<MetaCompatibilityFinding> findings)
+    private bool AddDebugToolProbe(List<MetaCompatibilityFinding> findings)
     {
         var result = _app.DebugTool.RunExtraCommands(["server:asw.Mode"]);
         if (result.Succeeded)
@@ -225,7 +235,7 @@ public sealed class MetaRuntimeCompatibilityService
                 MetaCompatibilityLevel.Ok,
                 "Oculus Debug Tool read probe succeeded",
                 "server:asw.Mode returned: " + OneLine(output)));
-            return;
+            return true;
         }
 
         var detail = string.IsNullOrWhiteSpace(result.Output + result.Error)
@@ -235,6 +245,7 @@ public sealed class MetaRuntimeCompatibilityService
             result.CliFound ? MetaCompatibilityLevel.Warn : MetaCompatibilityLevel.Info,
             result.CliFound ? "Oculus Debug Tool read probe did not succeed" : "Oculus Debug Tool CLI not found",
             detail));
+        return false;
     }
 
     public MetaRuntimeCompatibilityReport AcknowledgeCurrentVersions()
@@ -315,7 +326,7 @@ public sealed class MetaRuntimeCompatibilityService
         {
             observedVersion = currentVersion;
             observedPath = currentPath;
-            if (validateCurrent || string.IsNullOrWhiteSpace(effectiveValidatedVersion))
+            if (validateCurrent)
             {
                 effectiveValidatedVersion = currentVersion;
                 effectiveValidatedPath = currentPath;

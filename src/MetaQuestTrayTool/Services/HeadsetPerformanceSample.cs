@@ -116,10 +116,7 @@ public sealed record HeadsetPerformanceLogSample(
 
     internal static HeadsetPerformanceLogSample? TryParse(string line)
     {
-        if (string.IsNullOrWhiteSpace(line)
-            || (!line.Contains("VrApi", StringComparison.OrdinalIgnoreCase)
-                && !line.Contains("FPS=", StringComparison.OrdinalIgnoreCase)
-                && !line.Contains("Fov=", StringComparison.OrdinalIgnoreCase)))
+        if (string.IsNullOrWhiteSpace(line))
         {
             return null;
         }

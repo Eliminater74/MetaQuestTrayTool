@@ -5,6 +5,42 @@ namespace MetaQuestTrayTool.Tests;
 public class HeadsetRecordingDownloadTests
 {
     [Fact]
+    public void WaitsPastPreviousRecordingAndGrowingNewFile()
+    {
+        var old = new HeadsetRecordingCandidate(100, 5000, "/old.mp4");
+        var growing = new HeadsetRecordingCandidate(101, 2000, "/new.mp4");
+        var ready = growing with { Bytes = 6000, ModifiedUnixSeconds = 102 };
+        var reads = new Queue<IReadOnlyList<HeadsetRecordingCandidate>>(
+            new IReadOnlyList<HeadsetRecordingCandidate>[] { [old], [old], [old, growing], [old, ready], [old, ready] });
+        Assert.Equal(ready, HeadsetSettingsService.WaitForFinalizedRecording([old], () => reads.Dequeue(), _ => { }));
+        Assert.Empty(reads);
+    }
+
+    [Fact]
+    public void DoesNotDownloadUnchangedPreviousRecording()
+    {
+        var old = new HeadsetRecordingCandidate(100, 5000, "/old.mp4");
+        Assert.Throws<TimeoutException>(() => HeadsetSettingsService.WaitForFinalizedRecording([old], () => [old], _ => { }));
+    }
+
+    [Fact]
+    public void ExistingFileMustChangeThenStabilize()
+    {
+        var old = new HeadsetRecordingCandidate(100, 5000, "/current.mp4");
+        var ready = old with { Bytes = 6000 };
+        Assert.Equal(ready, HeadsetSettingsService.WaitForFinalizedRecording([old], () => [ready], _ => { }));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void MissingOrContinuouslyGrowingVideoTimesOut(bool growing)
+    {
+        var size = 2000;
+        Assert.Throws<TimeoutException>(() => HeadsetSettingsService.WaitForFinalizedRecording(
+            [], () => growing ? [new HeadsetRecordingCandidate(100, size++, "/new.mp4")] : [], _ => { }));
+    }
+    [Fact]
     public void ParseRecordingListingKeepsOnlyVideoFiles()
     {
         var listing = string.Join(Environment.NewLine,
