@@ -12,13 +12,13 @@ Settings are written to:
 
 | Option | Notes |
 | --- | --- |
-| Bitrate (Mbps) | `0` / empty = no override (Meta default); presets include high values through 960 Mbps |
+| Bitrate (Mbps) | `0` / empty = no override (Meta default); presets include high values through 960 Mbps; startup preserves external high fixed-bitrate values when the saved baseline is still old-capped |
 | Encode resolution width | e.g. 3664; `0` = no override |
 | HEVC | Prefer H.265 for Air Link |
 | Sliced encoding | `NumSlices` — `1` often used to reduce wired artifacts |
 | Link sharpening | Off / Normal / Quality |
 | Distortion curve | Low / High / default |
-| Dynamic bitrate (DBR) | On/off + max + offset |
+| Dynamic bitrate (DBR) | On/off + max + offset; startup also preserves external high DBRMax values when the saved baseline is still old-capped |
 | Mobile ASW | Headset-side ASW |
 
 GPU-tier **Apply recommended presets** fills Link + global game settings from the detected GPU.

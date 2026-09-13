@@ -8,8 +8,18 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+No unreleased changes yet.
+
+## [1.1.34] - 2026-09-13
+
 ### Fixed
 - Startup high-bitrate preservation now covers Dynamic Bitrate Max (`DBRMax`) as well as fixed Link bitrate, so a saved baseline from the old 500 Mbps preset range cannot silently downgrade an existing high DBR ceiling.
+
+### Validation
+- Local suite passes 168/168.
+
+### Verification limits
+- Physical Quest confirmation of the active Link stream bitrate and DBR ceiling still needs hardware validation; this release verifies startup merge behavior and saved-setting precedence with local regression coverage.
 
 ## [1.1.33] - 2026-09-12
 
@@ -17,7 +27,7 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Performance samples start logcat at the headset's current timestamp without clearing its log buffer. VrRuntime and OVRPlugin metric lines no longer require FPS or VrApi text to be parsed.
 - Stop & download waits for a new or changed recording to have matching size and timestamp across two reads, polling up to ten times at one-second intervals. If nothing stabilizes, it reports a retry instead of downloading an unchanged previous recording.
 - Automatic Meta compatibility validation requires a successful Debug Tool read probe, readable component versions, and no registry/probe warnings. First detection remains pending, and explicit acknowledgement remains available.
-- Quest Link bitrate controls now expose high presets through 960 Mbps, and startup preserves an existing ODT bitrate above the old 500 Mbps preset ceiling instead of downgrading it to a stale saved cap.
+- Quest Link bitrate controls now expose high presets through 960 Mbps, and startup preserves an existing fixed ODT bitrate above the old 500 Mbps preset ceiling instead of downgrading it to a stale saved cap.
 
 ### Validation
 - Local suite passes 166/166.
@@ -342,7 +352,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.33...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.34...HEAD
+[1.1.34]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.34
 [1.1.33]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.33
 [1.1.32]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.32
 [1.1.31]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.31

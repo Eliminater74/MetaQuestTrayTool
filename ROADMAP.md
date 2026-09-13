@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.33](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.34](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current source checkout (public v1.1.33)
+## Current source checkout (public v1.1.34)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -17,7 +17,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Shell | Status (default), Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
 | Status / Ready | Live chips, SteamVR install/version/Stable\|Beta, PCVR Ready checklist, Recover PCVR, session probe (Air/wired/Steam/VD) |
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
-| Link / Dash | RemoteHeadset Link settings + high bitrate presets through 960 Mbps, startup protection for externally set high ODT bitrate values, presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
+| Link / Dash | RemoteHeadset Link settings + high bitrate presets through 960 Mbps, startup protection for externally set high fixed ODT bitrate and DBRMax values, presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop/download, 10-second logcat performance sampler, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
 | Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9 plus bindable Exit), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots + bindable Exit), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
@@ -27,9 +27,18 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ---
 
+## v1.1.34 — DBRMax high-bitrate preservation
+
+Startup high-bitrate preservation now covers Dynamic Bitrate Max (`DBRMax`) as well as fixed Link bitrate. When ODT already has either value above the old 500 Mbps preset ceiling and the saved tray baseline is still old-capped, startup auto-apply keeps the higher ODT value instead of downgrading it.
+
+- Local validation: 168 passing tests.
+- Physical active-stream bitrate and DBR ceiling behavior still need hardware confirmation; local tests verify startup merge behavior and saved-setting precedence.
+
+---
+
 ## v1.1.33 — high Link bitrate and headset diagnostics
 
-Adds Quest Link bitrate presets through 960 Mbps and preserves existing ODT bitrate values above the old 500 Mbps preset ceiling during startup auto-apply. Performance sampling starts at the headset's current log time without clearing history, Stop & download waits for a new or changed recording to stabilize, and Meta compatibility auto-baselines now require a successful Debug Tool read probe, readable versions, and no prerequisite warnings.
+Adds Quest Link bitrate presets through 960 Mbps and preserves existing fixed ODT bitrate values above the old 500 Mbps preset ceiling during startup auto-apply. Performance sampling starts at the headset's current log time without clearing history, Stop & download waits for a new or changed recording to stabilize, and Meta compatibility auto-baselines now require a successful Debug Tool read probe, readable versions, and no prerequisite warnings.
 
 - Local validation: 166 passing tests.
 - Physical Quest recording finalization, current-firmware performance output, active Link stream bitrate adoption, and OVRService restart effects still need hardware confirmation.
@@ -224,6 +233,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.31 | Headset control expansion, updater/release hardening, Meta runtime/OpenXR diagnostics, support ZIP redaction |
 | v1.1.32 | Read Live remains read-only; live Meta Link cache beats resident Virtual Desktop desktop processes |
 | v1.1.33 | 960 Mbps Link bitrate presets, high-ODT startup preservation, recording/performance diagnostics, stricter Meta validation baselines |
+| v1.1.34 | DBRMax high-bitrate startup preservation |
 
 ---
 

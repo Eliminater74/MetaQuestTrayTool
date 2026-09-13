@@ -13,7 +13,7 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | **Service & Startup** | Start/Stop/Restart OVRService, Manual-at-boot, PreventDashLaunch, CoreChannel, SteamVR Home. |
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |
 | **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI, stuck-helper repair and process diagnostics. |
-| **Quest Link** | RemoteHeadset bitrate presets through 960 Mbps, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets, Quest Link mirror screenshots. |
+| **Quest Link** | RemoteHeadset bitrate presets through 960 Mbps, startup protection for high fixed bitrate and DBRMax values, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets, Quest Link mirror screenshots. |
 | **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, ADB screenshots, **VR headsets only**, **Pause ADB**. |
 | **VR Tools** | Curated third-party links (overlays, wireless PCVR, tracking, essentials). |
 | **Info** | PCVR Ready checklist, Recover PCVR, session probe, system dump. |

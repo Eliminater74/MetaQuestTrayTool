@@ -15,7 +15,7 @@
 | [GitHub Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) | Published wiki |
 | [../ROADMAP.md](../ROADMAP.md) | Current product summary, done phases, later / non-goals |
 | [../TODO.md](../TODO.md) | Remaining work + shipped checklist |
-| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.1.33) |
+| [../REDDIT.md](../REDDIT.md) | Reddit announcement draft (copy-paste for v1.1.34) |
 | [../installer/README.md](../installer/README.md) | Build the Windows Setup.exe |
 
 Settings and profiles live in `%AppData%\MetaQuestTrayTool\` (`settings.json`, `profiles.json`, activity log).

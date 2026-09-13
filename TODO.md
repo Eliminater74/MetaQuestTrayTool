@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.33](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.34](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -10,7 +10,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
-- [ ] Physical Quest validation for v1.1.33 high Link bitrate startup preservation, recording/download finalization, performance-sample parsing, active stream bitrate adoption, OVRService restart effects, Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
+- [ ] Physical Quest validation for v1.1.34 high Link bitrate and DBRMax startup preservation, recording/download finalization, performance-sample parsing, active stream bitrate adoption, OVRService restart effects, Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -24,6 +24,15 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.34
+
+- [x] Preserve Dynamic Bitrate Max (`DBRMax`) values above the old 500 Mbps preset ceiling during startup auto-apply when the saved baseline is still old-capped.
+- [x] Keep explicitly saved high fixed bitrate and DBRMax values authoritative over external ODT values.
+- [x] Add regression coverage for fixed-only, DBRMax-only, both-high, saved-high-wins, and legacy-ceiling no-op cases.
+- [x] Full local suite 168/168.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.34.
+- [x] Tag and publish **v1.1.34**.
 
 ### v1.1.33
 
