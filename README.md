@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.32 — MetaQuestTrayTool-Setup-1.1.32.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.32/MetaQuestTrayTool-Setup-1.1.32.exe)
+**Latest:** [v1.1.33 — MetaQuestTrayTool-Setup-1.1.33.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.33/MetaQuestTrayTool-Setup-1.1.33.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,9 +163,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### v1.1.32 current release
+### v1.1.33 current release
 
-Release **[v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. **Read live registry** on the Quest Link page now stays read-only while controls load, preventing queued selection changes from saving/applying settings or replacing the read result with a non-Meta streamer skip message. Live operable Meta Link cache evidence now beats resident Virtual Desktop desktop processes, while stale or inoperable Meta cache records still keep Virtual Desktop / Steam Link guards in place. Physical Quest Link / Virtual Desktop background-process behavior still needs hardware confirmation.
+Release **[v1.1.33](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Quest Link bitrate presets now include high values through 960 Mbps, and startup preserves an existing ODT bitrate above the old 500 Mbps preset ceiling instead of downgrading it to a stale saved cap. Headset performance sampling starts at the headset's current log time without clearing history, Stop & download waits for the new recording to stabilize, and Meta runtime compatibility baselines now require a successful Debug Tool probe plus clean prerequisite checks before automatic validation. Physical Quest recording, current-firmware performance output, active Link stream bitrate adoption, and OVRService restart behavior still need hardware confirmation.
 
 ### Shell & tray
 
@@ -192,7 +192,7 @@ Release **[v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 ### Quest Link / Dash → SteamVR
 
-- Link registry (`RemoteHeadset`): bitrate, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
+- Link registry (`RemoteHeadset`): bitrate presets through 960 Mbps, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
 - **PreventDashLaunch → SteamVR over Link**: registry blocks Dash (no Meta process killing); auto-start SteamVR on Meta Link connect; optional restart OVRService when SteamVR exits (tray / Ctrl+Num 0 / voice “dash to steam v r”)
 - **SteamVR Home** (`steamtours.exe`) on demand — Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
 - **Open Meta Horizon Link** from tray / hotkey / voice

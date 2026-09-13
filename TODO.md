@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.32](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.33](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -10,7 +10,7 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [ ] Reproduce issue #4 bitrate behavior on the affected tester installation; verify OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
-- [ ] Physical Quest validation for v1.1.32 Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, recording/download, performance-sample, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
+- [ ] Physical Quest validation for v1.1.33 high Link bitrate startup preservation, recording/download finalization, performance-sample parsing, active stream bitrate adoption, OVRService restart effects, Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -24,6 +24,16 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.33
+
+- [x] Add Quest Link bitrate presets through 960 Mbps.
+- [x] Preserve an existing ODT bitrate above the old 500 Mbps preset ceiling during startup auto-apply when the saved baseline is still old-capped.
+- [x] Start performance logcat at the headset's current timestamp without clearing history and parse VrRuntime / OVRPlugin metric lines without FPS text.
+- [x] Wait for a new or changed headset recording to stabilize before Stop & download pulls it.
+- [x] Require successful Debug Tool probing, readable versions, and no prerequisite warnings before automatic Meta compatibility baseline promotion.
+- [x] Full local suite 166/166.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.33.
 
 ### v1.1.32
 

@@ -38,7 +38,7 @@ Run **as Administrator**. Use Restart as Administrator or the logon elevation ta
 
 ## Link bitrate did not change
 
-Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Steam Link/VD.
+Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Steam Link/VD. v1.1.33 adds high bitrate presets through 960 Mbps and preserves an existing ODT bitrate above the old 500 Mbps preset ceiling during startup auto-apply; older builds can overwrite that value if their saved Quest Link baseline is still capped.
 
 ## Headset ADB not connecting
 
