@@ -25,6 +25,24 @@ GPU-tier **Apply recommended presets** fills Link + global game settings from th
 
 **Apply** usually needs a **Link reconnect** or **Restart OVRService**.
 
+## High bitrate and DBRMax preservation
+
+Current public release **v1.1.34** protects old saved baselines during startup. If Oculus Debug Tool already has fixed bitrate or `DBRMax` above 500 Mbps and the tray still has an old 500 Mbps saved value, startup auto-apply keeps the higher ODT value instead of downgrading it. Each field is evaluated independently:
+
+- high fixed bitrate only: fixed bitrate is preserved
+- high DBRMax only: DBRMax is preserved
+- both high: both are preserved
+- explicitly saved high values in the tray remain authoritative
+- 500/500 stays a no-op
+
+This is registry and startup-merge protection. A running headset stream may still need reconnect or OVRService restart before Meta adopts the value.
+
+## Read live registry and saved presets
+
+**Read live registry** fills the Quest Link controls from `RemoteHeadset` without applying or saving those values back over themselves. **Apply** verifies the registry values it wrote and reports mismatches; that proves persistence, not active-headset adoption.
+
+Saved presets remain editable even when Steam Link / SteamVR or Virtual Desktop is the active streamer. In those sessions, live Meta Link registry and ODT writes are skipped on purpose because the active streamer owns its own bitrate path.
+
 Registry reference (value names from Meta’s Debug Tool binaries): see [ODT-REGISTRY.md in the repo](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/docs/ODT-REGISTRY.md).
 
 ## Quest Link screenshots

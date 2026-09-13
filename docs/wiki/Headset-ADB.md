@@ -2,7 +2,7 @@
 
 SideQuest-style props via **bundled Google platform-tools**. Not the same as Air Link.
 
-v1.1.31 adds trusted USB/wireless headset selection, independent CPU/GPU levels, headset-aware refresh choices, Dynamic FFR, recording start/stop/download, 10-second runtime logcat performance samples, guarded experimental rendering controls, and reset of documented live ADB defaults. v1.1.33 starts performance logcat at the headset's current timestamp without clearing history and waits for a newly stopped recording to stabilize before downloading. Physical headset validation remains open. Device/app-default options stop applying their override; they do not necessarily reset a property already active on the headset. Use **Reset live ADB overrides** where documented defaults exist, and reboot the headset for temporary overrides that do not have a proven safe clear. The legacy capture-eye option is experimental and does not promise a specific stereo layout across firmware versions.
+Current builds include trusted USB/wireless headset selection, independent CPU/GPU levels, headset-aware refresh choices, Dynamic FFR, recording start/stop/download, 10-second runtime logcat performance samples, guarded experimental rendering controls, and reset of documented live ADB defaults. v1.1.33 starts performance logcat at the headset's current timestamp without clearing history and waits for a newly stopped recording to stabilize before downloading. Physical headset validation remains open. Device/app-default options stop applying their override; they do not necessarily reset a property already active on the headset. Use **Reset live ADB overrides** where documented defaults exist, and reboot the headset for temporary overrides that do not have a proven safe clear. The legacy capture-eye option is experimental and does not promise a specific stereo layout across firmware versions.
 
 ![Headset performance](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/10-headset-performance.png)
 
@@ -23,14 +23,18 @@ Only **real VR headsets** are trusted. Phones, tablets, and emulators never rece
 
 ## What you can set
 
-Independent CPU and GPU levels, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop/download, 10-second runtime logcat performance samples, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers. High Top FFR is labelled legacy/VrApi because OpenXR treats it as High, and Capture FPS is labelled legacy/firmware-dependent until physical headset validation proves current firmware honors `debug.oculus.capture.fps`.
+Independent CPU and GPU levels, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop/download, 10-second runtime logcat performance samples, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers.
+
+High Top FFR is labelled legacy/VrApi because OpenXR treats it as High. Capture FPS is labelled legacy/firmware-dependent until physical headset validation proves current firmware honors `debug.oculus.capture.fps`.
 
 
 ## Headset recordings and performance samples
 
-**Stop & download latest recording** stops the headset recording property, checks known Quest recording folders for the newest MP4/MOV, pulls it into `%AppData%\MetaQuestTrayTool\captures\`, and verifies the downloaded file is non-empty before reporting success. If the headset has not finalized a recording yet, wait a moment or stop the recording inside the headset and retry.
+**Stop & download latest recording** snapshots known Quest recording folders before Stop, disables the recording property, then waits for a new or changed MP4/MOV whose size and timestamp stabilize before pulling it into `%AppData%\MetaQuestTrayTool\captures\`. The download is checked for a non-empty local file before reporting success.
 
-**Capture 10-second performance sample** reads filtered VrApi/runtime logcat output for FPS, CPU/GPU levels, utilization, FFR/foveation, and SpaceWarp fields. It reports only fields that the active app/firmware actually emits. This is runtime log evidence, not proof from `setprop` read-back; physical Quest validation is still required before treating it as a release guarantee.
+If the headset does not finalize a recording before the timeout, the app reports that instead of downloading a stale or still-growing file. Stop the recording inside the headset, wait a moment, and retry.
+
+**Capture 10-second performance sample** starts at the headset's current log timestamp and reads filtered VrApi / VrRuntime / OVRPlugin output for FPS, CPU/GPU levels, utilization, FFR/foveation, and SpaceWarp fields. It reports only fields that the active app/firmware actually emits. This is runtime log evidence, not proof from `setprop` read-back; physical Quest validation is still required before treating it as a release guarantee.
 
 Normal CPU/GPU controls stay at App default and Levels 0–4. Higher conditional Meta levels are left for a later experimental flow because current Meta guidance ties them to headset model, dynamic resolution, tracking modes, thermal state, and runtime restrictions.
 

@@ -16,7 +16,7 @@ Repo gallery index: [docs/media/README.md](https://github.com/Eliminater74/MetaQ
 
 ## Headset recordings
 
-Downloaded headset recordings are written to `%AppData%\MetaQuestTrayTool\captures\`. On the Headset page, **Stop & download latest recording** stops the recording property, finds the newest MP4/MOV in known Quest recording folders, pulls it with ADB, and verifies the local file is non-empty before reporting success.
+Downloaded headset recordings are written to `%AppData%\MetaQuestTrayTool\captures\`. On the Headset page, **Stop & download latest recording** snapshots known Quest recording folders before Stop, disables the recording property, waits for a new or changed MP4/MOV to stabilize, pulls it with ADB, and verifies the local file is non-empty before reporting success.
 
 ## Quest screenshots
 
@@ -66,5 +66,6 @@ When **Speak status in headset** can reach the Quest audio path, the app says **
 ## Related
 
 - [[Home]]
+- [[What-s-New|What's New]]
 - [[Getting-Started]]
 - [[Shell-and-Tray]]

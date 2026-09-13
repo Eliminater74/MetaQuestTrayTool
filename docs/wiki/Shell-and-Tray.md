@@ -8,15 +8,15 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | --- | --- |
 | **Status** | Default home. Live chips: PCVR Ready, SteamVR install/running/Stable\|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR, GPU, audio. |
 | **Game Settings** | Global Super Sampling, ASW, FOV, HUD, OpenXR, overlay-close list. Opens Profiles / Global defaults. |
-| **Tray Tool** | Start with Windows, elevation, audio switcher, HotKeys, voice, screenshot controls, headset announcements, updates, theme, notifications. |
+| **Tray Tool** | Start with Windows, elevation, audio switcher, HotKeys, voice, screenshot controls, headset announcements, verified updates, theme, notifications. |
 | **Power Options** | VR vs desktop power plan, USB selective suspend, restart OVRService after sleep. |
 | **Service & Startup** | Start/Stop/Restart OVRService, Manual-at-boot, PreventDashLaunch, CoreChannel, SteamVR Home. |
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |
-| **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI, stuck-helper repair and process diagnostics. |
+| **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI, stuck-helper repair, process diagnostics, sanitized support ZIP. |
 | **Quest Link** | RemoteHeadset bitrate presets through 960 Mbps, startup protection for high fixed bitrate and DBRMax values, encode width, HEVC, slices, sharpening, DBR, Mobile ASW, GPU presets, Quest Link mirror screenshots. |
 | **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, ADB screenshots, **VR headsets only**, **Pause ADB**. |
 | **VR Tools** | Curated third-party links (overlays, wireless PCVR, tracking, essentials). |
-| **Info** | PCVR Ready checklist, Recover PCVR, session probe, system dump. |
+| **Info** | PCVR Ready checklist, persistent Meta runtime compatibility status, Recover PCVR, session probe, system dump. |
 | **Donate / About** | PayPal + version / credits. |
 
 ![Status dashboard](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/00-status.png)
@@ -53,8 +53,15 @@ hidden-process cleanup cases.
 
 Watchers poll slowly when nothing is connected (~30–45s) and faster during PCVR. Disabled features stop their timers. Status/Info pause when the shell is hidden to the tray.
 
+## Updates and diagnostics
+
+The updater downloads the exact GitHub `Setup.exe` asset, checks the published SHA-256 sidecar and expected size, locks the installer bytes before launching, and only stops this app's bundled `adb.exe` so other Android tools are not disturbed.
+
+Use **Advanced → Copy diagnostics** or **Info → Copy system info** when reporting a problem. Support exports redact local identifiers such as user paths, machine names, serial-like values, Wi-Fi SSIDs, and saved wireless ADB endpoints.
+
 ## Related
 
 - [[Getting-Started]]
+- [[What-s-New|What's New]]
 - [[Service-and-Startup]]
 - [[HotKeys-Voice-and-Announcements]]

@@ -2,6 +2,7 @@
 
 - [[Home]]
 - [[Getting-Started]]
+- [[What-s-New|What's New]]
 - [[Quest-Link-vs-Steam-Link]]
 - [[Shell-and-Tray]]
 - [[Game-Settings-and-Profiles]]

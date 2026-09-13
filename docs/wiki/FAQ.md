@@ -38,6 +38,12 @@ After a sudden power cut, if options look wiped, check `settings.json.bak` / `se
 
 Quest Link mirror and ADB screenshots save under `%AppData%\MetaQuestTrayTool\screenshots\`.
 
+Headset recordings downloaded by the Headset page save under `%AppData%\MetaQuestTrayTool\captures\`.
+
+## Why does the wiki say some things still need physical validation?
+
+Some local checks prove registry persistence, command routing, parsing, or CI behavior, but not that a specific headset firmware and active PCVR stream adopted the value. For Link bitrate, DBRMax, Mobile ASW, capture, and performance-sample behavior, real headset confirmation is still the final proof.
+
 ## macOS / Linux?
 
 Not planned. Windows 10/11 only.
@@ -53,5 +59,6 @@ See the [GitHub repository](https://github.com/Eliminater74/MetaQuestTrayTool). 
 ## Related
 
 - [[Quest-Link-vs-Steam-Link]]
+- [[What-s-New|What's New]]
 - [[Getting-Started]]
 - [[Troubleshooting]]

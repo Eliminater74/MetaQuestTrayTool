@@ -6,7 +6,7 @@ Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OT
 
 v1.1.34 completes the high-bitrate startup protection by preserving Dynamic Bitrate Max (`DBRMax`) as well as fixed Link bitrate when ODT already has a value above the old 500 Mbps cap. Quest Link bitrate presets still reach 960 Mbps; headset performance sampling starts from the headset's current log time; recording download waits for stabilization; and Meta runtime compatibility baselines stay pending until the read probe and prerequisite checks are clean.
 
-[Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
+[[What-s-New|What's new since the old wiki]] · [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
 ---
 
@@ -31,9 +31,10 @@ v1.1.34 completes the high-bitrate startup protection by preserving Dynamic Bitr
 
 1. **Pick your pipe** — [[Quest-Link-vs-Steam-Link]] (Quest Link vs the Steam Link app — they are not the same)
 2. [[Getting-Started|Install and first launch]]
-3. Set [[Game-Settings-and-Profiles|global defaults + per-game profiles]]
-4. Tune [[Quest-Link]] bitrate / encode, then [[Dash-to-SteamVR]] if you want SteamVR games **over Link** (full tweaks). Skip this if you only use the Steam Link app.
-5. Configure [[HotKeys-Voice-and-Announcements]] **before** you put the headset on
+3. Skim [[What-s-New|What's new]] if you last used the app around v1.1.18 or earlier
+4. Set [[Game-Settings-and-Profiles|global defaults + per-game profiles]]
+5. Tune [[Quest-Link]] bitrate / encode, then [[Dash-to-SteamVR]] if you want SteamVR games **over Link** (full tweaks). Skip this if you only use the Steam Link app.
+6. Configure [[HotKeys-Voice-and-Announcements]] **before** you put the headset on
 
 **SteamVR cannot click an elevated tray menu.** Mid-session control is HotKeys, voice, and automation — not the tray icon.
 
@@ -43,16 +44,17 @@ v1.1.34 completes the high-bitrate startup protection by preserving Dynamic Bitr
 
 | Area | Highlights |
 | --- | --- |
-| Status | Live PCVR Ready chips, session type (Air / wired / Steam Link / VD), SteamVR install |
-| Game settings | Super Sampling, ASW, FOV, HUD via Oculus Debug Tool CLI + GUI |
+| Status | Live PCVR Ready chips, session type (Air / wired / Steam Link / VD), SteamVR install, GPU, battery/Wi-Fi, support diagnostics |
+| Game settings | Super Sampling, ASW, FOV, HUD via Oculus Debug Tool CLI + GUI, observed mapping fixes |
 | Profiles | Auto-apply on game launch, restore globals on exit, library Launch |
-| Quest Link | Bitrate, encode width, HEVC, sharpening, DBR, Mobile ASW, editable saved presets, mirror screenshots |
+| Quest Link | Bitrate presets through 960 Mbps, encode width, HEVC, sharpening, DBR/DBRMax preservation, Mobile ASW, editable saved presets, mirror screenshots |
 | Dash → SteamVR | PreventDashLaunch registry (no Meta process killing); auto SteamVR on real Link stream |
 | OVRService | Start / stop / restart; **Manual-at-boot** so Meta does not pop at Windows sign-in |
 | OpenXR | Switch Meta vs SteamVR (global + per-profile); Steam Link assist |
 | Audio / power | Switch to headset on PCVR start, restore desktop on exit; power plan; USB suspend |
-| Headset ADB | CPU/GPU/refresh/FFR; Wireless Pair; VR headsets only; Pause ADB; ADB screenshots |
+| Headset ADB | CPU/GPU/refresh/FFR; recording/download; performance samples; Wireless Pair; VR headsets only; Pause ADB; ADB screenshots |
 | Voice / HotKeys | Ctrl+Numpad, push-to-talk, bindable Exit, headset spoken status, smart / Link / ADB screenshot commands |
+| Updates / support | Private checked installer download, SHA-256 sidecars, sanitized support ZIP, durable settings backups |
 
 ---
 
@@ -70,6 +72,7 @@ Installer is **self-contained** (.NET 8 included). Settings live in `%AppData%\M
 ## Wiki map
 
 - [[Getting-Started]]
+- [[What-s-New|What's New]]
 - [[Quest-Link-vs-Steam-Link]]
 - [[Shell-and-Tray]]
 - [[Game-Settings-and-Profiles]]

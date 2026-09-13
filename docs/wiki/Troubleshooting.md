@@ -40,6 +40,8 @@ Run **as Administrator**. Use Restart as Administrator or the logon elevation ta
 
 Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Steam Link/VD. v1.1.34 preserves existing ODT fixed bitrate and DBRMax values above the old 500 Mbps preset ceiling during startup auto-apply; older builds can overwrite those values if their saved Quest Link baseline is still capped.
 
+**Important limit:** registry read-back proves the value was written or preserved. It does not prove the active headset stream adopted the new bitrate. For that, reconnect Link or restart OVRService, then validate in a real session.
+
 ## Headset ADB not connecting
 
 Developer Mode + USB debugging **or** Wireless Pair. Same Wi‑Fi for wireless. Phones/emulators never get Quest tweaks. Props reset on Quest reboot — leave apply-on-connect on.
@@ -53,6 +55,14 @@ If a **phone** or **TV** keeps disappearing from `adb devices`, **VR headsets on
 **Quest Link mirror screenshot** needs an active Meta Quest Link / Air Link stream and Meta's `OculusMirror.exe` under the Meta install folder. If it says Link is not streaming, connect Quest Link / Air Link first and try **Quest Link → Take Quest Link mirror screenshot** again.
 
 **Headset screenshot (ADB)** needs a trusted, ready Quest over ADB. Check Headset status for unauthorized/disconnected/ignored devices, then try **Headset (ADB) → Take headset screenshot (ADB)** again. PNG files save to `%AppData%\MetaQuestTrayTool\screenshots\`; corrupt output is deleted instead of reported as success.
+
+## Recording download fails or finds the wrong file
+
+Use **Stop & download latest recording** after starting a recording from the Headset page or from the Quest UI. The tray waits for a new or changed recording to stabilize before downloading. If the headset has not finalized the file yet, wait a moment and retry; the app should not report success for a stale, empty, or still-growing file.
+
+## Performance sample is missing fields
+
+The 10-second sample only reports fields emitted by the active app, headset firmware, and runtime logs during that window. Run it while a VR app is active. Missing FPS, utilization, or SpaceWarp lines usually means the firmware/app did not log them in that sample, not that the command failed.
 
 ## Meta will not start after Manual-at-boot
 
@@ -73,3 +83,5 @@ Info page or tray: restarts OVRService, re-applies Link + globals + audio. Voice
 ## SmartScreen / unsigned installer
 
 Setup.exe is not Authenticode-signed yet. Windows may warn; that is a known limit until signing budget exists.
+
+The release page also publishes `MetaQuestTrayTool-Setup-<version>.exe.sha256.txt`. The in-app updater uses the GitHub asset metadata and checksum before launching the installer.
