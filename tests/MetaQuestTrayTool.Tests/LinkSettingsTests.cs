@@ -6,6 +6,60 @@ namespace MetaQuestTrayTool.Tests;
 public class LinkSettingsTests
 {
     [Fact]
+    public void BitratePresetsExposeOdt960()
+    {
+        Assert.Contains(960, LinkSettings.BitratePresets);
+        Assert.Equal(LinkSettings.BitratePresets.Order().Distinct(), LinkSettings.BitratePresets);
+    }
+
+    [Fact]
+    public void HighOdtBitrateWritesAndReadsBack()
+    {
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(new LinkSettings
+        {
+            BitrateMbps = 960,
+            DynamicBitrateMax = 960
+        }, true);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(960, registry.Values["BitrateMbps"]);
+        Assert.Equal(960, registry.Values["DBRMax"]);
+        Assert.Equal(960, result.Current!.BitrateMbps);
+        Assert.Equal(960, result.Current.DynamicBitrateMax);
+    }
+
+    [Theory]
+    [InlineData(0, 960, 960)]
+    [InlineData(500, 960, 960)]
+    [InlineData(600, 960, 600)]
+    [InlineData(500, 500, 500)]
+    public void StartupPreservesExternalHighOdtBitrateOverLegacySavedBaseline(
+        int savedBitrate,
+        int currentBitrate,
+        int expectedBitrate)
+    {
+        var saved = new LinkSettings
+        {
+            PresetName = "Saved",
+            BitrateMbps = savedBitrate,
+            EncodeResolutionWidth = 2912,
+            Sharpening = LinkSharpeningMode.Quality
+        };
+        var current = new LinkSettings { BitrateMbps = currentBitrate };
+
+        var resolved = LinkSettingsService.PreserveExternalHighBitrateForStartup(saved, current, out var summary);
+
+        Assert.Equal(expectedBitrate, resolved.BitrateMbps);
+        Assert.Equal(2912, resolved.EncodeResolutionWidth);
+        Assert.Equal(LinkSharpeningMode.Quality, resolved.Sharpening);
+        Assert.Equal(savedBitrate <= LinkSettings.LegacyBitratePresetCeilingMbps
+                     && currentBitrate > LinkSettings.LegacyBitratePresetCeilingMbps,
+            summary is not null);
+        Assert.Equal(savedBitrate, saved.BitrateMbps);
+    }
+
+    [Fact]
     public void NegativeDynamicOffsetSurvivesApplyAndUnrelatedEdits()
     {
         var registry = new FakeRegistry();

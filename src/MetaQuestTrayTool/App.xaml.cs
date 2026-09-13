@@ -812,6 +812,12 @@ public partial class App : System.Windows.Application
         {
             if (caps.AllowsMetaLinkRegistry)
             {
+                var preserved = PreserveExternalHighLinkBitrateForStartup();
+                if (!string.IsNullOrWhiteSpace(preserved))
+                {
+                    parts.Add(preserved);
+                }
+
                 var link = Link.Apply(Settings.Current.LinkSettings, deleteUnsetOverrides: true);
                 parts.Add(link.Summary);
             }
@@ -839,6 +845,31 @@ public partial class App : System.Windows.Application
         }
 
         return summary.Length == 0 ? "Global baseline ready (nothing to push)." : summary;
+    }
+
+    private string? PreserveExternalHighLinkBitrateForStartup()
+    {
+        try
+        {
+            var resolved = LinkSettingsService.PreserveExternalHighBitrateForStartup(
+                Settings.Current.LinkSettings,
+                Link.ReadCurrent(),
+                out var summary);
+            if (summary is null)
+            {
+                return null;
+            }
+
+            Settings.Current.LinkSettings = resolved;
+            Settings.SaveSoon();
+            Log.Info(summary);
+            return summary;
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("Could not check existing Link registry bitrate before startup apply: " + ex.Message);
+            return null;
+        }
     }
 
     public string ApplyGlobalGameSettings(bool includeOdt = true)

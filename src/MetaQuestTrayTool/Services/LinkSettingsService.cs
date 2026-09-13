@@ -32,6 +32,25 @@ public sealed class LinkSettingsService
     public LinkSettings? LastApplied { get; private set; }
     public LinkApplyResult? LastResult { get; private set; }
 
+    internal static LinkSettings PreserveExternalHighBitrateForStartup(
+        LinkSettings saved,
+        LinkSettings current,
+        out string? summary)
+    {
+        summary = null;
+        if (current.BitrateMbps <= LinkSettings.LegacyBitratePresetCeilingMbps
+            || saved.BitrateMbps > LinkSettings.LegacyBitratePresetCeilingMbps)
+        {
+            return saved;
+        }
+
+        var merged = saved.Clone();
+        merged.BitrateMbps = current.BitrateMbps;
+        merged.PresetName = "Custom";
+        summary = $"Preserved existing ODT Link bitrate {current.BitrateMbps} Mbps instead of applying the older {saved.BitrateMbps} Mbps saved baseline.";
+        return merged;
+    }
+
     public LinkSettings ReadCurrent()
     {
         using var key = _registry.Open(writable: false);

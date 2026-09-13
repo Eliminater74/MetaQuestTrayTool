@@ -6,9 +6,12 @@ namespace MetaQuestTrayTool.Models;
 /// </summary>
 public sealed class LinkSettings
 {
+    public const int LegacyBitratePresetCeilingMbps = 500;
+
     public static readonly int[] BitratePresets =
     [
-        0, 50, 75, 100, 150, 200, 250, 300, 350, 400, 500
+        0, 50, 75, 100, 150, 200, 250, 300, 350, 400,
+        LegacyBitratePresetCeilingMbps, 600, 700, 800, 900, 960
     ];
 
     public static readonly int[] EncodeWidthPresets =

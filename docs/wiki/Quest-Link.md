@@ -12,7 +12,7 @@ Settings are written to:
 
 | Option | Notes |
 | --- | --- |
-| Bitrate (Mbps) | `0` / empty = no override (Meta default) |
+| Bitrate (Mbps) | `0` / empty = no override (Meta default); presets include high values through 960 Mbps |
 | Encode resolution width | e.g. 3664; `0` = no override |
 | HEVC | Prefer H.265 for Air Link |
 | Sliced encoding | `NumSlices` — `1` often used to reduce wired artifacts |
