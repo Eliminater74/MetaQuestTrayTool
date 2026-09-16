@@ -69,6 +69,7 @@ public partial class App : System.Windows.Application
     public StatusDashboardService StatusDashboard { get; }
     public MetaRuntimeCompatibilityService RuntimeCompatibility { get; }
     public SupportBundleService SupportBundles { get; }
+    public SessionFlightRecorder SessionTrace { get; }
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public PowerWatchService? PowerWatch => _powerWatcher;
@@ -104,6 +105,8 @@ public partial class App : System.Windows.Application
         StatusDashboard = new StatusDashboardService(this);
         RuntimeCompatibility = new MetaRuntimeCompatibilityService(this);
         SupportBundles = new SupportBundleService(this);
+        SessionTrace = new SessionFlightRecorder(Log, SessionFlightRecorder.DefaultFilePath);
+        SessionFlightRecorder.Current = SessionTrace;
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -158,6 +161,11 @@ public partial class App : System.Windows.Application
         Settings.Load();
         ThemeService.Apply(Settings.Current.Tray.Theme);
         Log.Info($"{AppName} {GetVersion()} started.");
+        SessionFlightRecorder.State(
+            "app",
+            "started",
+            $"{AppName} {GetVersion()}",
+            nameof(App));
         if (Settings.RestoredFromBackup)
         {
             Log.Warn(
@@ -245,7 +253,7 @@ public partial class App : System.Windows.Application
 
         if (Settings.Current.ApplyGameSettingsOnStart || Settings.Current.ApplyLinkSettingsOnStart)
         {
-            Log.Info(ApplyGlobalBaseline());
+            Log.Info(ApplyGlobalBaseline(reason: "startup"));
         }
         else
         {
@@ -667,6 +675,11 @@ public partial class App : System.Windows.Application
 
     public ProfileApplyResult ApplyProfile(GameProfile profile)
     {
+        SessionFlightRecorder.Mutation(
+            "profile",
+            "ApplyProfile",
+            $"name={profile.Name} process={profile.ProcessName} hasLink={profile.Link.HasAny}",
+            nameof(ApplyProfile));
         var caps = LinkConnection.GetCapabilities();
         var coordinator = new ProfileApplyCoordinator();
         coordinator.Run("ODT", () =>
@@ -735,6 +748,11 @@ public partial class App : System.Windows.Application
 
     public string RestoreGlobalDefaults()
     {
+        SessionFlightRecorder.Mutation(
+            "profile",
+            "RestoreGlobalDefaults",
+            "restoring ODT + Link + OpenXR globals after profile",
+            nameof(RestoreGlobalDefaults));
         var caps = LinkConnection.GetCapabilities();
         var parts = new List<string>();
 
@@ -782,15 +800,28 @@ public partial class App : System.Windows.Application
         return summary;
     }
 
-    public string ApplyGlobalBaseline(bool includeLink = true, bool includeOpenXrRestore = false, bool notify = false)
+    public string ApplyGlobalBaseline(bool includeLink = true, bool includeOpenXrRestore = false, bool notify = false, string? reason = null)
     {
         if (IsGameProfileActive)
         {
+            SessionFlightRecorder.State(
+                "global-baseline",
+                "skipped-profile-active",
+                $"reason={reason ?? "unspecified"} profile={ActiveProfileName ?? "profile"}",
+                reason);
             return "Global baseline skipped — a personal profile is active.";
         }
 
         var caps = LinkConnection.GetCapabilities();
         var parts = new List<string>();
+        SessionFlightRecorder.Mutation(
+            "global-baseline",
+            "ApplyGlobalBaseline",
+            $"reason={reason ?? "unspecified"} includeLink={includeLink} includeOpenXrRestore={includeOpenXrRestore} "
+            + $"applyGame={Settings.Current.ApplyGameSettingsOnStart} applyLink={Settings.Current.ApplyLinkSettingsOnStart} "
+            + $"allowsLink={caps.AllowsMetaLinkRegistry} allowsOdt={caps.AllowsOculusDebugTool} "
+            + $"sessionKind={caps.Kind} sessionActive={caps.SessionActive}",
+            reason);
         if (Settings.Current.ApplyGameSettingsOnStart)
         {
             if (caps.AllowsOculusDebugTool && DebugTool.IsAvailable)

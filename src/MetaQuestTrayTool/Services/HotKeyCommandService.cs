@@ -242,7 +242,7 @@ public sealed class HotKeyCommandService
 
     private string ExecuteApplyGlobal()
     {
-        var summary = _app.ApplyGlobalBaseline(notify: false);
+        var summary = _app.ApplyGlobalBaseline(notify: false, reason: "hotkey");
         return summary.Length == 0 ? "Global defaults applied." : summary;
     }
 

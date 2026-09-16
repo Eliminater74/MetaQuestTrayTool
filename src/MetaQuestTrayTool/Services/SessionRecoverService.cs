@@ -26,6 +26,11 @@ public sealed class SessionRecoverService
             LastDropLabel = label;
         }
 
+        SessionFlightRecorder.State(
+            "session-recover",
+            "NotifySessionEnded",
+            $"kind={kind} label={label} autoRecover=false",
+            nameof(SessionRecoverService));
         _app.Log.Info($"{label} — Recover PCVR is available on Info / tray if the stream does not come back.");
         _app.TrayNotify(
             "PCVR session ended",
@@ -40,6 +45,12 @@ public sealed class SessionRecoverService
             LastDropLabel = null;
             LastDropKind = null;
         }
+
+        SessionFlightRecorder.State(
+            "session-recover",
+            "NotifySessionStarted",
+            "cleared drop suggestion",
+            nameof(SessionRecoverService));
     }
 
     public bool ShouldSuggestRecover(VrConnectionStatus? status = null)
@@ -77,6 +88,11 @@ public sealed class SessionRecoverService
     public string Recover(string reason = "manual")
     {
         var parts = new List<string> { $"Recover PCVR ({reason})" };
+        SessionFlightRecorder.Mutation(
+            "session-recover",
+            "Recover",
+            $"reason={reason} lastDrop={LastDropLabel ?? "none"} lastKind={LastDropKind}",
+            nameof(SessionRecoverService));
 
         _app.Oculus.Refresh();
         if (_app.Oculus.ServiceExists)

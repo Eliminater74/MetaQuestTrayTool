@@ -78,7 +78,8 @@ public sealed class SupportBundleService
             ["summary.txt"] = BuildSummary(),
             ["settings-summary.txt"] = BuildSettingsSummary(_app.Settings.Current),
             ["meta-compatibility.txt"] = _app.RuntimeCompatibility.Check(remember: false, runDebugToolProbe: false).ToDisplayText(),
-            ["recent-log.txt"] = BuildRecentLog()
+            ["recent-log.txt"] = BuildRecentLog(),
+            ["session-trace.txt"] = BuildSessionTrace()
         };
 
         try
@@ -218,6 +219,28 @@ public sealed class SupportBundleService
             .Select(entry => entry.ToString());
         var text = string.Join(Environment.NewLine, entries);
         return string.IsNullOrWhiteSpace(text) ? "No in-memory log entries." : text;
+    }
+
+    private string BuildSessionTrace()
+    {
+        try
+        {
+            var snapshot = _app.SessionTrace.FormatSnapshot();
+            if (File.Exists(SessionFlightRecorder.DefaultFilePath))
+            {
+                var onDisk = File.ReadAllText(SessionFlightRecorder.DefaultFilePath);
+                if (!string.IsNullOrWhiteSpace(onDisk))
+                {
+                    return "session-trace.log" + Environment.NewLine + onDisk.TrimEnd();
+                }
+            }
+
+            return snapshot;
+        }
+        catch (Exception ex)
+        {
+            return "Could not read session trace: " + ex.Message;
+        }
     }
 
     private IReadOnlyList<LogEntry> SnapshotLogEntries()

@@ -102,6 +102,7 @@ public sealed class LinkSessionWatchService : IDisposable
     {
         var status = _app.LinkConnection.Probe(includeEnumHmd: false);
         var live = IsLivePcvrSession(status);
+        SessionFlightRecorder.ObserveLink(status, caller: nameof(LinkSessionWatchService));
         _app.Dispatcher.BeginInvoke(() => ApplyCadence(live || status.SessionActive));
         var fingerprint = BuildFingerprint(status);
 
@@ -131,6 +132,11 @@ public sealed class LinkSessionWatchService : IDisposable
             _endConfirmPolls = 0;
             _lastFingerprint = fingerprint;
             _lastActiveKind = status.Kind;
+            SessionFlightRecorder.State(
+                "link-session",
+                previousActive is null ? "started" : "fingerprint-while-live",
+                $"kind={status.Kind} previous={previous ?? "(none)"} current={fingerprint}",
+                nameof(LinkSessionWatchService));
             _app.Dispatcher.BeginInvoke(() =>
             {
                 _app.SessionRecover.NotifySessionStarted();
@@ -154,6 +160,11 @@ public sealed class LinkSessionWatchService : IDisposable
             _endConfirmPolls = 0;
             _lastFingerprint = fingerprint;
             _lastActiveKind = null;
+            SessionFlightRecorder.State(
+                "link-session",
+                "ended",
+                $"previousKind={previousActive} current={fingerprint} banner={status.InfoBanner}",
+                nameof(LinkSessionWatchService));
             _app.Dispatcher.BeginInvoke(() => LogSessionEnded(previousActive, status));
             return;
         }
@@ -222,7 +233,7 @@ public sealed class LinkSessionWatchService : IDisposable
         }
     }
 
-    private static string BuildFingerprint(VrConnectionStatus status)
+    internal static string BuildFingerprint(VrConnectionStatus status)
     {
         if (!IsLivePcvrSession(status))
         {
@@ -241,7 +252,7 @@ public sealed class LinkSessionWatchService : IDisposable
     /// <summary>
     /// Real PCVR stream — not DeviceCache Wi‑Fi auto-connect / EnumHmd ghosts that flip on sleep/wake.
     /// </summary>
-    private static bool IsLivePcvrSession(VrConnectionStatus status)
+    internal static bool IsLivePcvrSession(VrConnectionStatus status)
     {
         if (!status.SessionActive)
         {

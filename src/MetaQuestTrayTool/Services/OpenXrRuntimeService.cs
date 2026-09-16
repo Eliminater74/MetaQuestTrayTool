@@ -90,6 +90,11 @@ public sealed class OpenXrRuntimeService
         }
 
         var write = WriteActiveRuntimes(json64, json32);
+        SessionFlightRecorder.Mutation(
+            "openxr",
+            "ActiveRuntime",
+            $"kind={kind} succeeded={write.Succeeded} {write.Summary}",
+            nameof(OpenXrRuntimeService));
         var active64 = ReadRuntimeView(RegistryView.Registry64);
         var active32 = ReadRuntimeView(RegistryView.Registry32);
         var view32Matches = json32 is null

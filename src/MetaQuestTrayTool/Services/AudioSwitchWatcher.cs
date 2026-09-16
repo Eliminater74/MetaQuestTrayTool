@@ -70,12 +70,14 @@ public sealed class AudioSwitchWatcher : IDisposable
     }
 
     /// <summary>Immediate restore when Link / SteamVR session drop is detected elsewhere.</summary>
-    public void NotifyPcvrSessionEnded(string reason)
+        public void NotifyPcvrSessionEnded(string reason)
     {
         if (!_vrDevicesApplied)
         {
             return;
         }
+
+        SessionFlightRecorder.State("audio", "NotifyPcvrSessionEnded", reason, nameof(AudioSwitchWatcher));
 
         _deadSessionHits = 0;
         _baselineHardware = false;
@@ -279,6 +281,7 @@ public sealed class AudioSwitchWatcher : IDisposable
         _deadSessionHits = 0;
         _baselineHardware = true;
         _baselineHeadsetAudio = true;
+        SessionFlightRecorder.Mutation("audio", "SwitchToVr", result, nameof(AudioSwitchWatcher));
         _app.Log.Info($"{reason} Switched to VR audio. {result}");
     }
 
@@ -286,6 +289,7 @@ public sealed class AudioSwitchWatcher : IDisposable
     {
         var result = _app.Audio.RestoreFallbackDevices(_app.Settings.Current.Audio);
         _vrDevicesApplied = false;
+        SessionFlightRecorder.Mutation("audio", "RestoreFallback", $"{reason} {result}", nameof(AudioSwitchWatcher));
         _app.Log.Info($"{reason} {result}");
         if (result.Contains("No fallback", StringComparison.OrdinalIgnoreCase)
             || result.Contains("Could not", StringComparison.OrdinalIgnoreCase))

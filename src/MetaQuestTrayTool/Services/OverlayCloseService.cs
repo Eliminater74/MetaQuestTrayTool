@@ -93,6 +93,7 @@ public sealed class OverlayCloseService
             ? string.Empty
             : $" Forced termination was required for: {string.Join(", ", forcedUnique)}; child processes were left running.";
         var summary = $"Closed overlays on {reason}: {string.Join(", ", unique)}.{forcedSummary}";
+        SessionFlightRecorder.Mutation("overlay", "CloseConfiguredOverlays", summary, nameof(OverlayCloseService));
         _app.Log.Info(summary);
         return summary;
     }

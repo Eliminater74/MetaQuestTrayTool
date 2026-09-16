@@ -172,6 +172,11 @@ public sealed class OculusDebugToolService
         }
 
         LastResult = result;
+        SessionFlightRecorder.Mutation(
+            "odt",
+            "Apply",
+            result.Summary + " commands=" + string.Join("; ", commands.Where(line => !line.Equals("exit", StringComparison.OrdinalIgnoreCase))),
+            nameof(OculusDebugToolService));
         return result;
     }
 

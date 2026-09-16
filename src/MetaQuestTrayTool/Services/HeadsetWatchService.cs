@@ -177,6 +177,21 @@ public sealed class HeadsetWatchService : IDisposable
         _app.RefreshTrayUi();
     }
 
+    /// <summary>
+    /// True when ADB lists a different transport serial than the last poll.
+    /// USB hardware serials and wireless host:port strings are distinct, so a
+    /// USB↔wireless flip is treated as a new headset connection.
+    /// </summary>
+    internal static bool IsNewAdbConnection(string? lastSerial, string serial) =>
+        !string.Equals(lastSerial, serial, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Current policy: globals (Link/ODT) re-apply on every ADB apply, including reconnects,
+    /// unless a personal game profile is already latched.
+    /// </summary>
+    internal static bool ShouldApplyGlobalBaselineOnAdbApply(bool gameProfileActive, bool applyGlobalWhenHeadsetConnects) =>
+        !gameProfileActive && applyGlobalWhenHeadsetConnects;
+
     /// <summary>Clears an expired timed pause. Returns true when pause flags were cleared.</summary>
     private bool ExpireTimedPauseIfNeeded()
     {
@@ -294,6 +309,7 @@ public sealed class HeadsetWatchService : IDisposable
         var serial = quest?.IsReady == true ? quest.Serial : null;
         if (serial is null)
         {
+            SessionFlightRecorder.ObserveAdb(null, wireless: false, caller: nameof(HeadsetWatchService));
             if (_lastSerial is not null)
             {
                 var was = _lastSerial;
@@ -316,11 +332,13 @@ public sealed class HeadsetWatchService : IDisposable
 
         _lastIgnoredMessage = null;
 
-        var connected = !string.Equals(_lastSerial, serial, StringComparison.OrdinalIgnoreCase);
+        var connected = IsNewAdbConnection(_lastSerial, serial);
+        var wireless = AdbService.LooksLikeWirelessSerial(serial);
+        SessionFlightRecorder.ObserveAdb(serial, wireless, caller: nameof(HeadsetWatchService));
         _lastSerial = serial;
         if (connected)
         {
-            var transport = AdbService.LooksLikeWirelessSerial(serial) ? "wireless" : "USB";
+            var transport = wireless ? "wireless" : "USB";
             var label = string.IsNullOrWhiteSpace(quest?.Model) ? serial : $"{quest!.Model} ({serial})";
             _app.Dispatcher.BeginInvoke(() =>
                 _app.Log.Info($"ADB headset connected ({transport}) — {label}."));
@@ -351,11 +369,19 @@ public sealed class HeadsetWatchService : IDisposable
         try
         {
             var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+            SessionFlightRecorder.Mutation(
+                "headset-adb",
+                "Apply",
+                result,
+                connected ? "HeadsetWatchService.connect" : "HeadsetWatchService.reapply");
             string? global = null;
-            if (!_app.IsGameProfileActive
-                && _app.Settings.Current.ApplyGlobalWhenHeadsetConnects)
+            if (ShouldApplyGlobalBaselineOnAdbApply(
+                    _app.IsGameProfileActive,
+                    _app.Settings.Current.ApplyGlobalWhenHeadsetConnects))
             {
-                global = _app.ApplyGlobalBaseline(notify: connected);
+                global = _app.ApplyGlobalBaseline(
+                    notify: connected,
+                    reason: connected ? "adb-connect" : "adb-reapply");
             }
 
             _appliedForSerial = true;

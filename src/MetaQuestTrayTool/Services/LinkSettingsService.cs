@@ -181,6 +181,13 @@ public sealed class LinkSettingsService
                     : $"Link registry verification failed in HKCU\\{RegistryPath}: {string.Join("; ", mismatches)}. "
                       + "Some overrides may have changed; refresh before retrying."
             };
+            SessionFlightRecorder.Mutation(
+                "link-registry",
+                verified ? "WRITE" : "WRITE-FAILED",
+                $"bitrate={settings.BitrateMbps} dbr={settings.EncodeDynamicBitrate} dbrMax={settings.DynamicBitrateMax} "
+                + $"encodeWidth={settings.EncodeResolutionWidth} hevc={settings.PreferHevc} "
+                + $"verified={verified} current={current.Describe()}",
+                nameof(LinkSettingsService));
             return LastResult;
         }
         catch (Exception ex)
@@ -192,6 +199,11 @@ public sealed class LinkSettingsService
                 Succeeded = false,
                 Summary = $"Could not write/verify Link registry overrides in HKCU\\{RegistryPath}: {ex.Message}. Some overrides may have changed."
             };
+            SessionFlightRecorder.Mutation(
+                "link-registry",
+                "WRITE-FAILED",
+                LastResult.Summary,
+                nameof(LinkSettingsService));
             return LastResult;
         }
     }

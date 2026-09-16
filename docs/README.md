@@ -2,6 +2,7 @@
 
 | Document | Description |
 | --- | --- |
+| [investigations/issue-12-link-freeze.md](investigations/issue-12-link-freeze.md) | Issue #12 freeze call-path audit; ADB reconnect and session-edge suspects; no proven compositor freeze |
 | [investigations/issue-4-device-cache-selection.md](investigations/issue-4-device-cache-selection.md) | v1.1.30 detection repair, regressions and remaining tester-validation limits |
 | [investigations/issue-4-v1.1.29-follow-up.md](investigations/issue-4-v1.1.29-follow-up.md) | Hotkey layout repair and skipped-write diagnostics |
 | [investigations/v1.1.29-control-audit.md](investigations/v1.1.29-control-audit.md) | Control inventory, fixes, observed CLI/ODT values and verification limits |

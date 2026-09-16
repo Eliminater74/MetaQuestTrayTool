@@ -8,10 +8,14 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Bounded session flight recorder logs Link fingerprint / ADB / mutating Link-ODT-OVRService-profile-audio-power edges only (not every poll) to `%AppData%\MetaQuestTrayTool\session-trace.log` and support ZIP, without writing Link state. Use this to timeline issue #12 freezes on a physical Quest 3.
+
 ### Fixed
 - Startup Link auto-apply now skips the automatic Link registry write if the preflight read fails, avoiding a possible downgrade of unknown high ODT fixed bitrate or DBRMax values.
 
 ### Docs
+- Recorded the issue #12 freeze call-path audit: no proven app-side compositor freeze; ADB reconnect can still re-apply globals during a live Meta Link session.
 - Renamed the old issue #4 reproduction TODO to post-fix physical regression validation now that the tracked issue has shipped fixes.
 
 ## [1.1.34] - 2026-09-13

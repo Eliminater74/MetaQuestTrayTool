@@ -145,6 +145,7 @@ public sealed class PowerWatchService : IDisposable
         var planResult = _app.Power.ApplyVrPlan(settings);
         _app.Settings.Save();
         _vrPlanActive = true;
+        SessionFlightRecorder.Mutation("power", "ApplyVrPlan", $"{reason} {planResult}", nameof(PowerWatchService));
         _app.Log.Info($"{reason} {planResult}");
 
         if (settings.DisableUsbSelectiveSuspendWhileRunning)
@@ -159,6 +160,7 @@ public sealed class PowerWatchService : IDisposable
         var usbResult = _app.Power.RestoreUsbSelectiveSuspend(_usbSuspendBaseline);
         _usbSuspendBaseline = null;
         _vrPlanActive = false;
+        SessionFlightRecorder.Mutation("power", "RestorePlan", $"{reason} {result} {usbResult}", nameof(PowerWatchService));
         _app.Log.Info($"{reason} {result} {usbResult}");
     }
 
@@ -181,6 +183,11 @@ public sealed class PowerWatchService : IDisposable
             }
 
             _app.Log.Info("System resumed from sleep — restarting OVRService.");
+            SessionFlightRecorder.Mutation(
+                "ovrservice",
+                "Restart",
+                "reason=system-resume",
+                nameof(PowerWatchService));
             Task.Run(() =>
             {
                 try

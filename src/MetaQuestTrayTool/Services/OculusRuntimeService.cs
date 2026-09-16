@@ -256,6 +256,12 @@ public sealed class OculusRuntimeService
             settle = TimeSpan.FromSeconds(10);
         }
 
+        SessionFlightRecorder.Mutation(
+            "ovrservice",
+            "RestartForLinkDrop",
+            $"holdSeconds={(int)settle.TotalSeconds}",
+            nameof(OculusRuntimeService));
+
         var parts = new List<string>();
 
         if (IsServiceRunning)
@@ -518,7 +524,13 @@ public sealed class OculusRuntimeService
             }
 
             Refresh(force: true);
-            return $"{ServiceName} is now {ServiceStatus}.";
+            var summary = $"{ServiceName} is now {ServiceStatus}.";
+            SessionFlightRecorder.Mutation(
+                "ovrservice",
+                start ? "Start" : "Stop",
+                summary,
+                nameof(OculusRuntimeService));
+            return summary;
         }
         catch (InvalidOperationException ex) when (ex.InnerException is System.ComponentModel.Win32Exception win32
                                                    && win32.NativeErrorCode is 5)
