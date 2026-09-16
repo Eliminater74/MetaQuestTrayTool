@@ -2,7 +2,7 @@
 
 Date: 2026-09-16. Related reports: [GitHub issue #12](https://github.com/Eliminater74/MetaQuestTrayTool/issues/12) (open), [issue #11](https://github.com/Eliminater74/MetaQuestTrayTool/issues/11) (960 Mbps), [issue #4](https://github.com/Eliminater74/MetaQuestTrayTool/issues/4) (Quest Link apply).
 
-Reviewed HEAD: `e9fe5f39d5eac38e800eda7bb4acba2abbea0ecb` (`main`). Public release: **v1.1.34**. Two unreleased commits after the tag: startup Link preflight skip-on-read-failure, and wiki refresh. This investigation did **not** assume 960 Mbps is the defect, did not bump the version, and did not change Link/ODT apply behavior.
+Reviewed HEAD: `e9fe5f39d5eac38e800eda7bb4acba2abbea0ecb` (`main` at investigation start). Diagnostics later shipped in **v1.1.35**. This investigation did **not** assume 960 Mbps is the defect and did **not** change Link/ODT apply/restore/recovery behavior.
 
 ## Reporter facts that can be used
 

@@ -27,7 +27,7 @@ GPU-tier **Apply recommended presets** fills Link + global game settings from th
 
 ## High bitrate and DBRMax preservation
 
-Current public release **v1.1.34** protects old saved baselines during startup. If Oculus Debug Tool already has fixed bitrate or `DBRMax` above 500 Mbps and the tray still has an old 500 Mbps saved value, startup auto-apply keeps the higher ODT value instead of downgrading it. Each field is evaluated independently:
+Current public release **v1.1.35** still protects old saved baselines during startup. If Oculus Debug Tool already has fixed bitrate or `DBRMax` above 500 Mbps and the tray still has an old 500 Mbps saved value, startup auto-apply keeps the higher ODT value instead of downgrading it. If the preflight read of those existing values fails, startup now **skips** the Link registry write instead of guessing. Each field is evaluated independently:
 
 - high fixed bitrate only: fixed bitrate is preserved
 - high DBRMax only: DBRMax is preserved

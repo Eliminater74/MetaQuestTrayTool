@@ -2,9 +2,9 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Current public release:** [v1.1.34](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
-v1.1.34 completes the high-bitrate startup protection by preserving Dynamic Bitrate Max (`DBRMax`) as well as fixed Link bitrate when ODT already has a value above the old 500 Mbps cap. Quest Link bitrate presets still reach 960 Mbps; headset performance sampling starts from the headset's current log time; recording download waits for stabilization; and Meta runtime compatibility baselines stay pending until the read probe and prerequisite checks are clean.
+v1.1.35 adds a bounded session flight recorder for freeze diagnosis (Link fingerprint, ADB reconnect, and mutating apply/restore/OVRService edges, not every poll) and skips startup Link registry apply if the high-bitrate preflight read fails. Issue #12 is audited in source, not claimed fixed. High-bitrate/DBRMax preservation, 960 Mbps presets, recording download, and Meta compatibility checks from v1.1.33/v1.1.34 remain.
 
 [[What-s-New|What's new since the old wiki]] · [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 

@@ -2,7 +2,7 @@
 
 ## Check the log first
 
-**Log Window** (or `%AppData%\MetaQuestTrayTool\`). Look for profile apply, Link writes, voice recognition, Dash → SteamVR, and “system resumed”.
+**Log Window** (or `%AppData%\MetaQuestTrayTool\`). Look for profile apply, Link writes, voice recognition, Dash → SteamVR, “system resumed”, and `[TRACE]` session-flight-recorder lines.
 
 ![Log](https://raw.githubusercontent.com/Eliminater74/MetaQuestTrayTool/main/docs/media/06-log-window.png)
 
@@ -38,9 +38,22 @@ Run **as Administrator**. Use Restart as Administrator or the logon elevation ta
 
 ## Link bitrate did not change
 
-Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Steam Link/VD. v1.1.34 preserves existing ODT fixed bitrate and DBRMax values above the old 500 Mbps preset ceiling during startup auto-apply; older builds can overwrite those values if their saved Quest Link baseline is still capped.
+Reconnect Link or **Restart OVRService**. Confirm you are on Meta Link, not Steam Link/VD. v1.1.34+ preserves existing ODT fixed bitrate and DBRMax values above the old 500 Mbps preset ceiling during startup auto-apply; v1.1.35 skips that write entirely if the preflight read fails. Older builds can overwrite those values if their saved Quest Link baseline is still capped.
 
 **Important limit:** registry read-back proves the value was written or preserved. It does not prove the active headset stream adopted the new bitrate. For that, reconnect Link or restart OVRService, then validate in a real session.
+
+## Link freezes after minutes of play
+
+Issue #12: last frame stays on the headset and Oculus services have to be closed. Source audit found **no proven compositor freeze** and no periodic Link rewrite on a stable session. ADB reconnect can still re-apply globals (Link + ODT) during a live stream.
+
+Use **v1.1.35+**. After a freeze, copy:
+
+- `%AppData%\MetaQuestTrayTool\session-trace.log`
+- `%AppData%\MetaQuestTrayTool\app.log`
+
+or **Info → Export support ZIP**. Look for `MUTATION` lines (`ApplyGlobalBaseline`, `link-registry WRITE`, `odt Apply`, `headset-adb reconnect`) immediately before the hang. Quiet traces with no mutations mean the tray was observing, not rewriting.
+
+To test whether ADB reconnect is involved, **Pause ADB** before entering Link and compare.
 
 ## Headset ADB not connecting
 

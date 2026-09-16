@@ -1,20 +1,28 @@
 # What's new
 
-This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.34**.
+This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.35**.
 
 Download: [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
 Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)
 
-## Current release: v1.1.34
+## Current release: v1.1.35
 
-v1.1.34 completes the high-bitrate startup protection on the Quest Link path. Startup auto-apply now preserves both:
+v1.1.35 is a diagnostics and safer-startup release for the open Meta Link freeze report (issue #12):
+
+- A bounded **session flight recorder** logs Link fingerprint changes, ADB reconnects, and mutating Link/ODT/OVRService/profile/audio/power actions only (not every poll)
+- Events go to `%AppData%\MetaQuestTrayTool\session-trace.log`, `[TRACE]` lines in `app.log`, and the Info support ZIP
+- The recorder never writes Link, ODT, ADB, or OVRService state
+- Startup Link auto-apply skips the registry write if the high-bitrate preflight read fails
+- Source audit found no proven compositor freeze; ADB reconnect can still re-apply globals during a live Meta Link session
+
+Physical Quest 3 reproduction is still required. This release does not claim the freeze is fixed.
+
+v1.1.34 already completed high-bitrate startup protection on the Quest Link path. Startup auto-apply preserves both:
 
 - fixed Link bitrate values above the old 500 Mbps preset ceiling
 - Dynamic Bitrate Max (`DBRMax`) values above that old ceiling
 
 If your saved tray baseline is still an old 500 Mbps value but Oculus Debug Tool already has a higher value such as 960 Mbps, startup no longer silently lowers it. If you explicitly saved a high value in the tray, that saved value remains the source of truth.
-
-Physical confirmation from issue #11 is still useful: the public build is shipped and locally regression-tested, but the reporter still needs to confirm the 960 Mbps startup path on their real Quest installation.
 
 ## Quest Link and streamer detection
 
@@ -106,7 +114,7 @@ The app now has stronger maintenance and support tooling:
 - CodeQL and Dependabot coverage in hosted GitHub checks
 - locked restore and release packaging checks
 - coverage gate raised to 8%
-- sanitized support ZIP export
+- sanitized support ZIP export, including `session-trace.log`
 - persistent read-only Meta runtime compatibility checks
 - nonblocking Status/Info/tray probes
 - shared runtime snapshots to avoid repeated expensive probes
@@ -120,7 +128,7 @@ Use [[Troubleshooting]] when something does not apply, and include the sanitized
 
 Local tests and CI are green for the public release, but some behavior depends on Meta runtime, firmware, headset model, and the active stream. The current open physical checks are:
 
-- 960 Mbps fixed Link bitrate on a real Link / Air Link session
+- issue #12 Meta Link freeze after minutes of play (use `session-trace.log` / support ZIP from v1.1.35)
 - DBR enabled with DBRMax 960
 - active-stream bitrate adoption after reconnect or OVRService restart
 - headset recording finalization on current firmware

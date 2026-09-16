@@ -1,16 +1,23 @@
-﻿Meta Quest Tray Tool 1.1.34 - What's new
+﻿Meta Quest Tray Tool 1.1.35 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.34] - 2026-09-13
+[1.1.35] - 2026-09-16
+
+Added
+- Bounded session flight recorder logs Link fingerprint / ADB / mutating Link-ODT-OVRService-profile-audio-power edges only (not every poll) to %AppData%\MetaQuestTrayTool\session-trace.log and support ZIP, without writing Link state. Use this to timeline issue #12 freezes on a physical Quest 3.
 
 Fixed
-- Startup high-bitrate preservation now covers Dynamic Bitrate Max (DBRMax) as well as fixed Link bitrate, so a saved baseline from the old 500 Mbps preset range cannot silently downgrade an existing high DBR ceiling.
+- Startup Link auto-apply now skips the automatic Link registry write if the preflight read fails, avoiding a possible downgrade of unknown high ODT fixed bitrate or DBRMax values.
+
+Docs
+- Recorded the issue #12 freeze call-path audit: no proven app-side compositor freeze; ADB reconnect can still re-apply globals during a live Meta Link session.
+- Renamed the old issue #4 reproduction TODO to post-fix physical regression validation now that the tracked issue has shipped fixes.
 
 Validation
-- Local suite passes 168/168.
+- Local suite passes 183/183.
 
 Verification limits
-- Physical Quest confirmation of the active Link stream bitrate and DBR ceiling still needs hardware validation; this release verifies startup merge behavior and saved-setting precedence with local regression coverage.
+- Physical Quest 3 confirmation of the reported Meta Link freeze still needs hardware reproduction. This release ships diagnostics and the startup preflight skip; it does not claim the freeze is fixed.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

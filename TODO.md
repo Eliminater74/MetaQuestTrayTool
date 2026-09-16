@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.34](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -10,7 +10,8 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
 - [ ] Post-fix physical regression validation from issue #4 and the open issue #11 bitrate report: verify 960 fixed bitrate, DBR enabled + DBRMax 960, OVRService restart and stream effects, Mobile ASW, legacy HUD/capture support, headset recording/download, performance sampling, reset live ADB defaults, experimental rendering props, and wireless/text actions on physical hardware.
 
-- [ ] Physical Quest validation for v1.1.34 high Link bitrate and DBRMax startup preservation, recording/download finalization, performance-sample parsing, active stream bitrate adoption, OVRService restart effects, Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
+- [ ] Physical Quest 3 reproduction of issue #12 (Meta Link freeze after minutes) using v1.1.35 session-trace.log / support ZIP. Confirm whether a freeze lines up with ADB reconnect `ApplyGlobalBaseline`, profile restore, or a quiet observer.
+- [ ] Physical Quest validation for v1.1.34/v1.1.35 high Link bitrate and DBRMax startup preservation, recording/download finalization, performance-sample parsing, active stream bitrate adoption, OVRService restart effects, Read Live, active Meta Link detection with resident Virtual Desktop processes, Link, screenshot, headset-announcement, reset-defaults, experimental-rendering, USB ADB, wireless ADB, voice command, default hotkey, and tray/page command flows.
 - [ ] Authenticode code signing for Setup.exe (+ published exe) in the Release workflow — reduces SmartScreen friction; wait until budget allows (OV cert + timestamp; prefer cloud signing / Actions secrets, not a key in the repo)
 - [ ] Optional dedicated elevated helper process (tray can already start elevated via scheduled task)
 - [ ] Hotkey profiles per game (global only today)
@@ -24,6 +25,15 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.35
+
+- [x] Add a bounded session flight recorder for Link fingerprint, ADB reconnect, and mutating apply/restore/OVRService/audio/power edges without rewriting Link state.
+- [x] Skip startup Link registry apply when the high-bitrate preflight read fails.
+- [x] Record the issue #12 freeze call-path audit (no proven compositor freeze).
+- [x] Full local suite 183/183.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.35.
+- [x] Tag and publish **v1.1.35**.
 
 ### v1.1.34
 

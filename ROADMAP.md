@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.34](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current source checkout (public v1.1.34)
+## Current source checkout (public v1.1.35)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -21,11 +21,18 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop/download, 10-second logcat performance sampler, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
 | Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9 plus bindable Exit), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots + bindable Exit), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
-| Updates / polish | In-app GitHub updates, private revalidated installer launch, release checksum sidecars, CodeQL, Dependabot, coverage gate, expanded sanitized support ZIP, persistent read-only Meta compatibility check, 64-bit/32-bit OpenXR diagnostics, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
+| Updates / polish | In-app GitHub updates, private revalidated installer launch, release checksum sidecars, CodeQL, Dependabot, coverage gate, expanded sanitized support ZIP including session-trace.log, persistent read-only Meta compatibility check, 64-bit/32-bit OpenXR diagnostics, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
 ---
+
+## v1.1.35 — freeze diagnostics and safer startup Link preflight
+
+Adds a bounded session flight recorder so Link fingerprint, ADB reconnect, and mutating Link/ODT/OVRService/profile/audio/power edges can be timeline-diagnosed for issue #12 without rewriting Link state. Startup Link auto-apply now skips the registry write if the high-bitrate preflight read fails.
+
+- Local validation: 183 passing tests.
+- Physical Quest 3 freeze reproduction is still required; this release does not claim the freeze is fixed.
 
 ## v1.1.34 — DBRMax high-bitrate preservation
 
@@ -234,6 +241,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.32 | Read Live remains read-only; live Meta Link cache beats resident Virtual Desktop desktop processes |
 | v1.1.33 | 960 Mbps Link bitrate presets, high-ODT startup preservation, recording/performance diagnostics, stricter Meta validation baselines |
 | v1.1.34 | DBRMax high-bitrate startup preservation |
+| v1.1.35 | Session freeze diagnostics and safer startup Link preflight |
 
 ---
 

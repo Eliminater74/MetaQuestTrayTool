@@ -8,6 +8,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.35] - 2026-09-16
+
 ### Added
 - Bounded session flight recorder logs Link fingerprint / ADB / mutating Link-ODT-OVRService-profile-audio-power edges only (not every poll) to `%AppData%\MetaQuestTrayTool\session-trace.log` and support ZIP, without writing Link state. Use this to timeline issue #12 freezes on a physical Quest 3.
 
@@ -17,6 +19,12 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 ### Docs
 - Recorded the issue #12 freeze call-path audit: no proven app-side compositor freeze; ADB reconnect can still re-apply globals during a live Meta Link session.
 - Renamed the old issue #4 reproduction TODO to post-fix physical regression validation now that the tracked issue has shipped fixes.
+
+### Validation
+- Local suite passes 183/183.
+
+### Verification limits
+- Physical Quest 3 confirmation of the reported Meta Link freeze still needs hardware reproduction. This release ships diagnostics and the startup preflight skip; it does not claim the freeze is fixed.
 
 ## [1.1.34] - 2026-09-13
 
@@ -360,7 +368,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.34...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.35...HEAD
+[1.1.35]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.35
 [1.1.34]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.34
 [1.1.33]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.33
 [1.1.32]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.32

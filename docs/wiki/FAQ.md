@@ -42,7 +42,11 @@ Headset recordings downloaded by the Headset page save under `%AppData%\MetaQues
 
 ## Why does the wiki say some things still need physical validation?
 
-Some local checks prove registry persistence, command routing, parsing, or CI behavior, but not that a specific headset firmware and active PCVR stream adopted the value. For Link bitrate, DBRMax, Mobile ASW, capture, and performance-sample behavior, real headset confirmation is still the final proof.
+Some local checks prove registry persistence, command routing, parsing, or CI behavior, but not that a specific headset firmware and active PCVR stream adopted the value. For Link bitrate, DBRMax, Mobile ASW, capture, performance-sample behavior, and the issue #12 freeze, real headset confirmation is still the final proof.
+
+## Link froze after a few minutes with the tray running. Is that fixed?
+
+Not claimed. v1.1.35 adds a session flight recorder and a source audit. Export a support ZIP after a freeze (or copy `session-trace.log`) so the timeline of Link fingerprint / ADB / mutating applies can be checked. Pausing ADB before Link is a useful A/B test.
 
 ## macOS / Linux?
 
