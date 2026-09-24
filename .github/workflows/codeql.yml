@@ -26,4 +26,4 @@ jobs:
           build-mode: manual
       - run: dotnet restore MetaQuestTrayTool.sln -r win-x64 --locked-mode
       - run: dotnet build MetaQuestTrayTool.sln -c Release --no-restore
-      - uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+      - uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
