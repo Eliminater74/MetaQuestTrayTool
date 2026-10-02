@@ -4,6 +4,12 @@ namespace MetaQuestTrayTool.Models;
 public sealed class TrayToolSettings
 {
     public bool StartMinimized { get; set; } = true;
+
+    /// <summary>
+    /// When true, startup opens or activates Meta Horizon Link once.
+    /// False by default so an upgrade does not launch the Meta client.
+    /// </summary>
+    public bool OpenMetaLinkOnStart { get; set; }
     public bool MinimizeOnClose { get; set; } = true;
     public bool HideFromAltTab { get; set; }
     public bool CheckForUpdatesOnStart { get; set; } = true;

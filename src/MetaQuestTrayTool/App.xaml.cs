@@ -328,6 +328,27 @@ public partial class App : System.Windows.Application
         {
             _ = CheckForUpdatesOnStartAsync();
         }
+
+        ScheduleOpenMetaHorizonLinkOnStart();
+    }
+
+    private void ScheduleOpenMetaHorizonLinkOnStart()
+    {
+        if (!Settings.Current.Tray.OpenMetaLinkOnStart)
+        {
+            return;
+        }
+
+        // ShowMetaHorizonLink uses SessionHelperClient, which starts the unelevated
+        // helper when this process is elevated. Keep that off the UI thread.
+        _ = Task.Run(() =>
+        {
+            MetaLinkStartupLauncher.LaunchIfEnabled(
+                enabled: true,
+                open: () => Oculus.ShowMetaHorizonLink(),
+                info: message => Dispatcher.BeginInvoke(() => Log.Info(message)),
+                warn: message => Dispatcher.BeginInvoke(() => Log.Warn(message)));
+        });
     }
 
     private async Task CheckForUpdatesOnStartAsync()
