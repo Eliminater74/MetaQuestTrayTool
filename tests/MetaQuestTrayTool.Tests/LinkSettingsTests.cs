@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using MetaQuestTrayTool.Models;
 using MetaQuestTrayTool.Services;
 
@@ -271,8 +273,161 @@ public class LinkSettingsTests
         Assert.Equal(DistortionCurvature.Low, result.Current.DistortionCurvature);
         Assert.Equal(EncodeDynamicBitrateMode.Enabled, result.Current.EncodeDynamicBitrate);
         Assert.Equal(MobileAswMode.Enabled, result.Current.MobileAsw);
+        Assert.Equal(1, registry.Values["HEVC"]);
+        Assert.Equal(1, registry.Values["NumSlices"]);
+        Assert.Equal(LinkCodecMode.Hevc, result.Current.Codec);
+        Assert.Equal(SlicedEncodingMode.Disabled, result.Current.SlicedEncoding);
+    }
+
+    [Fact]
+    public void LegacyPreferHevcTrueMigratesToHevcAndWritesHevcDword()
+    {
+        var settings = DeserializeLink("""{"PreferHevc":true,"BitrateMbps":200}""");
+        Assert.Equal(LinkCodecMode.Hevc, settings.Codec);
+        Assert.Equal(200, settings.BitrateMbps);
+        Assert.True(settings.PreferHevc);
+
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(settings, deleteUnsetOverrides: false);
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, registry.Values["HEVC"]);
+        Assert.Equal(LinkCodecMode.Hevc, result.Current!.Codec);
+        Assert.DoesNotContain("PreferHevc", JsonSerializer.Serialize(settings, SettingsJson));
+    }
+
+    [Fact]
+    public void LegacyPreferHevcFalseStaysDefaultAndDoesNotForceH264()
+    {
+        var settings = DeserializeLink("""{"PreferHevc":false,"DisableSlicedEncoding":false}""");
+        Assert.Equal(LinkCodecMode.Default, settings.Codec);
+        Assert.Equal(SlicedEncodingMode.Default, settings.SlicedEncoding);
+        Assert.False(settings.PreferHevc);
+        Assert.False(settings.DisableSlicedEncoding);
+    }
+
+    [Fact]
+    public void ExplicitCodecWinsOverLegacyPreferHevcBool()
+    {
+        var settings = DeserializeLink("""{"Codec":"H264","PreferHevc":true}""");
+        Assert.Equal(LinkCodecMode.H264, settings.Codec);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void H264RemovesHevcOverrideWithoutWritingZero(bool deleteUnsetOverrides)
+    {
+        var registry = new FakeRegistry();
+        registry.Values["HEVC"] = 1;
+        registry.Values["UnrelatedMetaSetting"] = 7;
+        var result = new LinkSettingsService(registry).Apply(new LinkSettings
+        {
+            Codec = LinkCodecMode.H264
+        }, deleteUnsetOverrides);
+
+        Assert.True(result.Succeeded);
         Assert.False(registry.Values.ContainsKey("HEVC"));
+        Assert.DoesNotContain(registry.Values, pair => pair.Key.Equals("HEVC", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(7, registry.Values["UnrelatedMetaSetting"]);
+        Assert.Equal(LinkCodecMode.H264, result.Written!.Codec);
+        Assert.Equal(LinkCodecMode.Default, result.Current!.Codec);
+        Assert.Contains("codec H.264", result.Written.Describe());
+    }
+
+    [Fact]
+    public void HevcModeWritesObservedHevcDword()
+    {
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(new LinkSettings
+        {
+            Codec = LinkCodecMode.Hevc
+        }, deleteUnsetOverrides: false);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, registry.Values["HEVC"]);
+        Assert.Equal(LinkCodecMode.Hevc, result.Current!.Codec);
+    }
+
+    [Fact]
+    public void DefaultCodecDeletesHevcOnlyForGlobalDefaults()
+    {
+        var registry = new FakeRegistry();
+        registry.Values["HEVC"] = 1;
+        var service = new LinkSettingsService(registry);
+
+        Assert.True(service.Apply(new LinkSettings { Codec = LinkCodecMode.Default }, false).Succeeded);
+        Assert.Equal(1, registry.Values["HEVC"]);
+
+        Assert.True(service.Apply(new LinkSettings { Codec = LinkCodecMode.Default }, true).Succeeded);
+        Assert.False(registry.Values.ContainsKey("HEVC"));
+    }
+
+    [Fact]
+    public void AbsentOrNonOneHevcReadsAsDefaultNotH264()
+    {
+        var registry = new FakeRegistry();
+        var service = new LinkSettingsService(registry);
+        Assert.Equal(LinkCodecMode.Default, service.ReadCurrent().Codec);
+
+        registry.Values["HEVC"] = 0;
+        Assert.Equal(LinkCodecMode.Default, service.ReadCurrent().Codec);
+        Assert.NotEqual(LinkCodecMode.H264, service.ReadCurrent().Codec);
+    }
+
+    [Fact]
+    public void LegacyDisableSlicedEncodingTrueKeepsNumSlicesOne()
+    {
+        var settings = DeserializeLink("""{"DisableSlicedEncoding":true}""");
+        Assert.Equal(SlicedEncodingMode.Disabled, settings.SlicedEncoding);
+        Assert.True(settings.DisableSlicedEncoding);
+
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(settings, false);
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, registry.Values["NumSlices"]);
+        Assert.Equal(SlicedEncodingMode.Disabled, result.Current!.SlicedEncoding);
+        Assert.DoesNotContain("DisableSlicedEncoding", JsonSerializer.Serialize(settings, SettingsJson));
+    }
+
+    [Fact]
+    public void DefaultSlicedEncodingDeletesNumSlicesOnlyForGlobalDefaults()
+    {
+        var registry = new FakeRegistry();
+        registry.Values["NumSlices"] = 1;
+        var service = new LinkSettingsService(registry);
+
+        Assert.True(service.Apply(new LinkSettings(), false).Succeeded);
+        Assert.Equal(1, registry.Values["NumSlices"]);
+
+        Assert.True(service.Apply(new LinkSettings(), true).Succeeded);
         Assert.False(registry.Values.ContainsKey("NumSlices"));
+    }
+
+    [Fact]
+    public void UnknownNumSlicesValueIsNotRewrittenAsEnabled()
+    {
+        var registry = new FakeRegistry();
+        registry.Values["NumSlices"] = 4;
+        var service = new LinkSettingsService(registry);
+        Assert.Equal(SlicedEncodingMode.Default, service.ReadCurrent().SlicedEncoding);
+
+        Assert.True(service.Apply(new LinkSettings { SlicedEncoding = SlicedEncodingMode.Default }, false).Succeeded);
+        Assert.Equal(4, registry.Values["NumSlices"]);
+        Assert.Single(registry.Values);
+    }
+
+    [Fact]
+    public void DisabledSlicedEncodingWritesOnlyObservedNumSlicesOne()
+    {
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(new LinkSettings
+        {
+            SlicedEncoding = SlicedEncodingMode.Disabled
+        }, false);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, registry.Values["NumSlices"]);
+        Assert.Equal(SlicedEncodingMode.Disabled, result.Current!.SlicedEncoding);
     }
 
     [Fact]
@@ -368,6 +523,15 @@ public class LinkSettingsTests
         Assert.Equal(allowed, caps.AllowsMetaLinkRegistry);
         Assert.Equal(allowed, caps.AllowsOculusDebugTool);
     }
+
+    private static readonly JsonSerializerOptions SettingsJson = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
+    private static LinkSettings DeserializeLink(string json) =>
+        JsonSerializer.Deserialize<LinkSettings>(json, SettingsJson)!;
 
     private static LinkSettings DistinctiveSettings() => new()
     {

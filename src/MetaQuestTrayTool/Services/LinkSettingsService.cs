@@ -120,8 +120,10 @@ public sealed class LinkSettingsService
         {
             BitrateMbps = ReadDword(key, BitrateValue),
             EncodeResolutionWidth = encodeWidth,
-            PreferHevc = ReadDword(key, HevcValue) == 1,
-            DisableSlicedEncoding = ReadDword(key, NumSlicesValue) == 1,
+            Codec = ReadDword(key, HevcValue) == 1 ? LinkCodecMode.Hevc : LinkCodecMode.Default,
+            SlicedEncoding = ReadDword(key, NumSlicesValue) == 1
+                ? SlicedEncodingMode.Disabled
+                : SlicedEncodingMode.Default,
             DistortionCurvature = ReadDistortion(key),
             EncodeDynamicBitrate = ReadDynamicBitrate(key),
             DynamicBitrateMax = ReadDword(key, DynamicBitrateMaxValue),
@@ -147,16 +149,8 @@ public sealed class LinkSettingsService
             WriteOrClear(key, BitrateValue, settings.BitrateMbps, deleteUnsetOverrides);
             WriteEncodeWidth(key, settings.EncodeResolutionWidth, deleteUnsetOverrides);
 
-            if (settings.PreferHevc)
-            {
-                key.SetValue(HevcValue, 1);
-            }
-            else
-            {
-                key.DeleteValue(HevcValue);
-            }
-
-            WriteSlicedEncoding(key, settings.DisableSlicedEncoding);
+            WriteCodec(key, settings.Codec, deleteUnsetOverrides);
+            WriteSlicedEncoding(key, settings.SlicedEncoding, deleteUnsetOverrides);
             WriteDistortion(key, settings.DistortionCurvature, deleteUnsetOverrides);
             WriteDynamicBitrate(key, settings.EncodeDynamicBitrate, deleteUnsetOverrides);
             WriteOrClear(key, DynamicBitrateMaxValue, settings.DynamicBitrateMax, deleteUnsetOverrides);
@@ -185,7 +179,7 @@ public sealed class LinkSettingsService
                 "link-registry",
                 verified ? "WRITE" : "WRITE-FAILED",
                 $"bitrate={settings.BitrateMbps} dbr={settings.EncodeDynamicBitrate} dbrMax={settings.DynamicBitrateMax} "
-                + $"encodeWidth={settings.EncodeResolutionWidth} hevc={settings.PreferHevc} "
+                + $"encodeWidth={settings.EncodeResolutionWidth} codec={settings.Codec} sliced={settings.SlicedEncoding} "
                 + $"verified={verified} current={current.Describe()}",
                 nameof(LinkSettingsService));
             return LastResult;
@@ -289,15 +283,42 @@ public sealed class LinkSettingsService
         }
     }
 
-    private static void WriteSlicedEncoding(ILinkSettingsRegistryKey key, bool disable)
+    private static void WriteCodec(ILinkSettingsRegistryKey key, LinkCodecMode codec, bool deleteWhenDefault)
     {
-        if (disable)
+        switch (codec)
         {
-            key.SetValue(NumSlicesValue, 1);
+            case LinkCodecMode.Hevc:
+                key.SetValue(HevcValue, 1);
+                break;
+            case LinkCodecMode.H264:
+                // Deletion is the observed way ODT returns to Default / H.264.
+                // HEVC=0 was not observed and is not written.
+                key.DeleteValue(HevcValue);
+                break;
+            default:
+                if (deleteWhenDefault)
+                {
+                    key.DeleteValue(HevcValue);
+                }
+
+                break;
         }
-        else
+    }
+
+    private static void WriteSlicedEncoding(ILinkSettingsRegistryKey key, SlicedEncodingMode mode, bool deleteWhenDefault)
+    {
+        switch (mode)
         {
-            key.DeleteValue(NumSlicesValue);
+            case SlicedEncodingMode.Disabled:
+                key.SetValue(NumSlicesValue, 1);
+                break;
+            default:
+                if (deleteWhenDefault)
+                {
+                    key.DeleteValue(NumSlicesValue);
+                }
+
+                break;
         }
     }
 

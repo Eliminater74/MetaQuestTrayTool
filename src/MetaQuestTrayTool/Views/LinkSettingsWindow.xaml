@@ -77,13 +77,13 @@
           <ComboBox x:Name="DistortionBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6"
                     ToolTip="Lens distortion curvature for the Link compositor. Leave default unless you need a custom curve."/>
 
-          <TextBlock Grid.Row="7" Text="Prefer HEVC" Foreground="{DynamicResource AppMutedBrush}" VerticalAlignment="Center"/>
-          <CheckBox x:Name="HevcBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Content="Prefer HEVC (H.265)"
-                    ToolTip="Prefer HEVC (H.265) encode. Often better quality at the same bitrate; needs a capable encoder."/>
+          <TextBlock Grid.Row="7" Text="Video codec" Foreground="{DynamicResource AppMutedBrush}" VerticalAlignment="Center"/>
+          <ComboBox x:Name="CodecBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6"
+                    ToolTip="Select the Meta Link encoder preference. H.265 / HEVC writes the observed HEVC=1 override. H.264 removes that override. Deleting HEVC is the verified way ODT shows Default; an explicit DWORD that forces H.264 was not observed, so H.264 does not write HEVC=0."/>
 
           <TextBlock Grid.Row="8" Text="Sliced encoding" Foreground="{DynamicResource AppMutedBrush}" VerticalAlignment="Center"/>
-          <CheckBox x:Name="SlicesBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Content="Disable sliced encoding (numSlices = 1)"
-                    ToolTip="Force NumSlices = 1 (disable sliced encoding). Can help quality/latency on some GPUs."/>
+          <ComboBox x:Name="SlicesBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6"
+                    ToolTip="Default leaves sliced encoding to Meta and removes NumSlices only when applying defaults. Disabled writes NumSlices=1, which ODT displayed as Off. An explicit registry value that forces sliced encoding On was not observed, so Enabled is not offered."/>
 
           <TextBlock Grid.Row="9" Text="Mobile ASW" Foreground="{DynamicResource AppMutedBrush}" VerticalAlignment="Center"/>
           <ComboBox x:Name="MobileAswBox" Grid.Row="9" Grid.Column="1" Margin="0,0,0,10" Padding="6"

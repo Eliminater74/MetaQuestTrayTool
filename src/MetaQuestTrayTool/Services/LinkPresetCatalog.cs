@@ -35,8 +35,8 @@ public static class LinkPresetCatalog
                 Sharpening = LinkSharpeningMode.Normal,
                 EncodeDynamicBitrate = EncodeDynamicBitrateMode.Enabled,
                 DynamicBitrateMax = 350,
-                PreferHevc = true,
-                DisableSlicedEncoding = true,
+                Codec = LinkCodecMode.Hevc,
+                SlicedEncoding = SlicedEncodingMode.Disabled,
                 DistortionCurvature = DistortionCurvature.Low
             }
         },
@@ -53,8 +53,8 @@ public static class LinkPresetCatalog
                 Sharpening = LinkSharpeningMode.Disabled,
                 EncodeDynamicBitrate = EncodeDynamicBitrateMode.Enabled,
                 DynamicBitrateMax = 250,
-                PreferHevc = true,
-                DisableSlicedEncoding = true,
+                Codec = LinkCodecMode.Hevc,
+                SlicedEncoding = SlicedEncodingMode.Disabled,
                 DistortionCurvature = DistortionCurvature.Low
             }
         },
@@ -71,8 +71,8 @@ public static class LinkPresetCatalog
                 Sharpening = LinkSharpeningMode.Quality,
                 EncodeDynamicBitrate = EncodeDynamicBitrateMode.Enabled,
                 DynamicBitrateMax = 500,
-                PreferHevc = true,
-                DisableSlicedEncoding = true,
+                Codec = LinkCodecMode.Hevc,
+                SlicedEncoding = SlicedEncodingMode.Disabled,
                 DistortionCurvature = DistortionCurvature.Low
             }
         },
@@ -89,8 +89,8 @@ public static class LinkPresetCatalog
                 Sharpening = LinkSharpeningMode.Normal,
                 EncodeDynamicBitrate = EncodeDynamicBitrateMode.Enabled,
                 DynamicBitrateMax = 400,
-                PreferHevc = true,
-                DisableSlicedEncoding = true,
+                Codec = LinkCodecMode.Hevc,
+                SlicedEncoding = SlicedEncodingMode.Disabled,
                 DistortionCurvature = DistortionCurvature.Low
             }
         },
@@ -106,8 +106,8 @@ public static class LinkPresetCatalog
                 EncodeResolutionWidth = 3664,
                 Sharpening = LinkSharpeningMode.Quality,
                 EncodeDynamicBitrate = EncodeDynamicBitrateMode.Disabled,
-                PreferHevc = false,
-                DisableSlicedEncoding = true,
+                Codec = LinkCodecMode.H264,
+                SlicedEncoding = SlicedEncodingMode.Disabled,
                 DistortionCurvature = DistortionCurvature.Low
             }
         },
@@ -124,8 +124,8 @@ public static class LinkPresetCatalog
                 Sharpening = LinkSharpeningMode.Quality,
                 EncodeDynamicBitrate = EncodeDynamicBitrateMode.Enabled,
                 DynamicBitrateMax = 500,
-                PreferHevc = true,
-                DisableSlicedEncoding = true,
+                Codec = LinkCodecMode.Hevc,
+                SlicedEncoding = SlicedEncodingMode.Disabled,
                 DistortionCurvature = DistortionCurvature.Low
             }
         }

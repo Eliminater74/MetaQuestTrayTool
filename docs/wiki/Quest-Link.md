@@ -13,9 +13,9 @@ Settings are written to:
 | Option | Notes |
 | --- | --- |
 | Bitrate (Mbps) | `0` / empty = no override (Meta default); presets include high values through 960 Mbps; startup preserves external high fixed-bitrate values when the saved baseline is still old-capped |
-| Encode resolution width | e.g. 3664; `0` = no override |
-| HEVC | Prefer H.265 for Air Link |
-| Sliced encoding | `NumSlices` — `1` often used to reduce wired artifacts |
+| Encode resolution width | Presets include 3664 and 4128; `0` = no override. Values outside the list still apply |
+| Video codec | Default / Meta controlled, H.264 (removes the HEVC override), or H.265 / HEVC (`HEVC=1`). No observed DWORD forces H.264 |
+| Sliced encoding | Default / Meta controlled, or Disabled (`NumSlices=1`, observed Off in ODT). Enabled is not offered because no On value was observed |
 | Link sharpening | Off / Normal / Quality |
 | Distortion curve | Low / High / default |
 | Dynamic bitrate (DBR) | On/off + max + offset; startup also preserves external high DBRMax values when the saved baseline is still old-capped |

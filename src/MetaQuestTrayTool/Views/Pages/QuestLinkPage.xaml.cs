@@ -83,6 +83,16 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
             MobileAswBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
         }
 
+        foreach (LinkCodecMode mode in Enum.GetValues<LinkCodecMode>())
+        {
+            CodecBox.Items.Add(new ComboBoxItem { Content = LinkCodecModeLabels.Describe(mode), Tag = mode });
+        }
+
+        foreach (SlicedEncodingMode mode in Enum.GetValues<SlicedEncodingMode>())
+        {
+            SlicesBox.Items.Add(new ComboBoxItem { Content = SlicedEncodingModeLabels.Describe(mode), Tag = mode });
+        }
+
         WireLivePersist(EncodeWidthBox);
         WireLivePersist(BitrateBox);
         WireLivePersist(DynamicBox);
@@ -91,10 +101,8 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         WireLivePersist(SharpenBox);
         WireLivePersist(DistortionBox);
         WireLivePersist(MobileAswBox);
-        HevcBox.Checked += (_, _) => PersistApply();
-        HevcBox.Unchecked += (_, _) => PersistApply();
-        SlicesBox.Checked += (_, _) => PersistApply();
-        SlicesBox.Unchecked += (_, _) => PersistApply();
+        WireLivePersist(CodecBox);
+        WireLivePersist(SlicesBox);
         ApplyOnStartBox.Checked += (_, _) => PersistApply();
         ApplyOnStartBox.Unchecked += (_, _) => PersistApply();
     }
@@ -359,8 +367,8 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
         NumericControlSelection.Select(SharpenBox, link.Sharpening);
         NumericControlSelection.Select(DistortionBox, link.DistortionCurvature);
         NumericControlSelection.Select(MobileAswBox, link.MobileAsw);
-        HevcBox.IsChecked = link.PreferHevc;
-        SlicesBox.IsChecked = link.DisableSlicedEncoding;
+        NumericControlSelection.Select(CodecBox, link.Codec);
+        NumericControlSelection.Select(SlicesBox, link.SlicedEncoding);
     }
 
     private void WriteToSettings()
@@ -406,8 +414,15 @@ public partial class QuestLinkPage : System.Windows.Controls.UserControl, IShell
             link.MobileAsw = mobileAsw;
         }
 
-        link.PreferHevc = HevcBox.IsChecked == true;
-        link.DisableSlicedEncoding = SlicesBox.IsChecked == true;
+        if (CodecBox.SelectedItem is ComboBoxItem { Tag: LinkCodecMode codec })
+        {
+            link.Codec = codec;
+        }
+
+        if (SlicesBox.SelectedItem is ComboBoxItem { Tag: SlicedEncodingMode slices })
+        {
+            link.SlicedEncoding = slices;
+        }
         if (PresetBox.SelectedItem is ComboBoxItem { Tag: LinkPreset preset })
         {
             link.PresetName = preset.Name;

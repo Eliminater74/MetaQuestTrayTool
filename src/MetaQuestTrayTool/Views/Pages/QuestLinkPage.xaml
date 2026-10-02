@@ -109,13 +109,13 @@
         <ComboBox x:Name="DistortionBox" Grid.Row="6" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
                   ToolTip="Lens distortion curvature used by the Link compositor. Leave default unless you know you need a custom curve."/>
 
-        <TextBlock Grid.Row="7" Text="Prefer HEVC" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="HevcBox" Grid.Row="7" Grid.Column="1" Content="Prefer HEVC (H.265)" Margin="0,0,0,10"
-                  ToolTip="Prefer HEVC (H.265) encode for Link. Often better quality at the same bitrate; needs a capable NVENC/Quick Sync path."/>
+        <TextBlock Grid.Row="7" Text="Video Codec" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="CodecBox" Grid.Row="7" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="Select the Meta Link encoder preference. H.265 / HEVC writes the observed HEVC=1 override. H.264 removes that override. Deleting HEVC is the verified way ODT shows Default; an explicit DWORD that forces H.264 was not observed, so H.264 does not write HEVC=0."/>
 
-        <TextBlock Grid.Row="8" Text="Sliced encoding" Style="{StaticResource SettingLabelStyle}"/>
-        <CheckBox x:Name="SlicesBox" Grid.Row="8" Grid.Column="1" Content="Disable sliced encoding (NumSlices = 1)" Margin="0,0,0,10"
-                  ToolTip="Force NumSlices = 1 (disable sliced encoding). Can improve quality or latency on some GPUs; leave off if you see encode stalls."/>
+        <TextBlock Grid.Row="8" Text="Sliced Encoding" Style="{StaticResource SettingLabelStyle}"/>
+        <ComboBox x:Name="SlicesBox" Grid.Row="8" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"
+                  ToolTip="Default leaves sliced encoding to Meta and removes NumSlices only when applying defaults. Disabled writes NumSlices=1, which ODT displayed as Off. An explicit registry value that forces sliced encoding On was not observed, so Enabled is not offered."/>
 
         <TextBlock Grid.Row="9" Text="Mobile ASW" Style="{StaticResource SettingLabelStyle}"/>
         <ComboBox x:Name="MobileAswBox" Grid.Row="9" Grid.Column="1" Margin="0,0,0,10" Padding="6" MaxWidth="280" HorizontalAlignment="Left"

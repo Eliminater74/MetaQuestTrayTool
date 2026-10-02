@@ -65,6 +65,16 @@ public partial class LinkSettingsWindow : Window
             MobileAswBox.Items.Add(new ComboBoxItem { Content = mode.ToString(), Tag = mode });
         }
 
+        foreach (LinkCodecMode mode in Enum.GetValues<LinkCodecMode>())
+        {
+            CodecBox.Items.Add(new ComboBoxItem { Content = LinkCodecModeLabels.Describe(mode), Tag = mode });
+        }
+
+        foreach (SlicedEncodingMode mode in Enum.GetValues<SlicedEncodingMode>())
+        {
+            SlicesBox.Items.Add(new ComboBoxItem { Content = SlicedEncodingModeLabels.Describe(mode), Tag = mode });
+        }
+
         WireLivePersist(EncodeWidthBox);
         WireLivePersist(BitrateBox);
         WireLivePersist(DynamicBox);
@@ -73,10 +83,8 @@ public partial class LinkSettingsWindow : Window
         WireLivePersist(SharpenBox);
         WireLivePersist(DistortionBox);
         WireLivePersist(MobileAswBox);
-        HevcBox.Checked += (_, _) => PersistApply();
-        HevcBox.Unchecked += (_, _) => PersistApply();
-        SlicesBox.Checked += (_, _) => PersistApply();
-        SlicesBox.Unchecked += (_, _) => PersistApply();
+        WireLivePersist(CodecBox);
+        WireLivePersist(SlicesBox);
         ApplyOnStartBox.Checked += (_, _) => PersistApply();
         ApplyOnStartBox.Unchecked += (_, _) => PersistApply();
 
@@ -98,8 +106,8 @@ public partial class LinkSettingsWindow : Window
         NumericControlSelection.Select(SharpenBox, settings.Sharpening);
         NumericControlSelection.Select(DistortionBox, settings.DistortionCurvature);
         NumericControlSelection.Select(MobileAswBox, settings.MobileAsw);
-        HevcBox.IsChecked = settings.PreferHevc;
-        SlicesBox.IsChecked = settings.DisableSlicedEncoding;
+        NumericControlSelection.Select(CodecBox, settings.Codec);
+        NumericControlSelection.Select(SlicesBox, settings.SlicedEncoding);
         ApplyOnStartBox.IsChecked = App.Instance.Settings.Current.ApplyLinkSettingsOnStart;
         LiveStatusText.Text = App.Instance.Link.DescribeRegistryStatus();
         _loading = false;
@@ -186,8 +194,12 @@ public partial class LinkSettingsWindow : Window
         settings.MobileAsw = MobileAswBox.SelectedItem is ComboBoxItem { Tag: MobileAswMode mobileAsw }
             ? mobileAsw
             : MobileAswMode.Default;
-        settings.PreferHevc = HevcBox.IsChecked == true;
-        settings.DisableSlicedEncoding = SlicesBox.IsChecked == true;
+        settings.Codec = CodecBox.SelectedItem is ComboBoxItem { Tag: LinkCodecMode codec }
+            ? codec
+            : LinkCodecMode.Default;
+        settings.SlicedEncoding = SlicesBox.SelectedItem is ComboBoxItem { Tag: SlicedEncodingMode slices }
+            ? slices
+            : SlicedEncodingMode.Default;
         return settings;
     }
 

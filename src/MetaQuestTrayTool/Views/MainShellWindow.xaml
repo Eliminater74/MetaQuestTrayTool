@@ -100,7 +100,7 @@
                          ToolTip="Library import, backup/restore, audio devices, and updates."/>
             <RadioButton x:Name="NavLink" Content="Quest Link" Style="{StaticResource NavButtonStyle}"
                          GroupName="ShellNav" Checked="Nav_Checked" Tag="Link"
-                         ToolTip="RemoteHeadset encode width, bitrate, DBR, sharpen, HEVC, and Mobile ASW."/>
+                         ToolTip="RemoteHeadset encode width, bitrate, DBR, sharpen, video codec, sliced encoding, and Mobile ASW."/>
             <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
                          GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"
                          ToolTip="ADB tweaks for your trusted Quest. Props do not survive reboot — apply on connect."/>

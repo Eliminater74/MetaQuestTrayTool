@@ -25,8 +25,8 @@ Also referenced by older binary analysis: **`HKLM\Software\Oculus\RemoteHeadset`
 | Registry value | ODT GUI label | Tray tool |
 | --- | --- | --- |
 | `DistortionCurve` | Distortion Curvature | Quest Link page |
-| `HEVC` | Codec (force HEVC / H.265) | Quest Link page |
-| `NumSlices` | Sliced Encoding (`1` = off) | Quest Link page (case-insensitive name) |
+| `HEVC` | Video codec. `1` = H.265 / HEVC. Delete = ODT Default. No observed H.264 DWORD | Quest Link page |
+| `NumSlices` | Sliced encoding. `1` displayed Off. Delete = ODT Default. No observed On DWORD | Quest Link page (case-insensitive name) |
 | `EncodeWidth` | Encode Resolution Width | Written with `EncodeResolutionWidth` |
 | `EncodeResolutionWidth` | Legacy compatibility name; runtime ownership unverified | Written with `EncodeWidth`; read only when `EncodeWidth` is absent |
 | `DBR` | Encode Dynamic Bitrate | Quest Link page |
@@ -48,9 +48,9 @@ Also referenced by older binary analysis: **`HKLM\Software\Oculus\RemoteHeadset`
 
 **LinkSharpeningEnabled** (DWORD): observed ODT mapping is `1` = Disabled, `2` = Normal, `3` = Quality. Delete for no explicit override; ODT displayed Normal when absent on the tested installation. The previous 0/1/3 mapping was incorrect. The tray's saved enum values are unchanged; only registry conversion changed.
 
-**HEVC** (DWORD): `1` = prefer HEVC (common for Air Link). Delete for default / H.264 behavior.
+**HEVC** (DWORD): `1` = H.265 / HEVC. Delete the value for ODT “Default”. The issue #4 audit saw an external `HEVC=1` display as H.265 and deletion display as Default. It did not observe a DWORD, including `0`, that forces H.264. The tray therefore writes `1` for H.265 / HEVC and **deletes** `HEVC` for an explicit H.264 choice. It does not write `HEVC=0`. Saved Default leaves an existing value in place unless the apply is a global-default delete. A missing `HEVC` value reads back as Default, because the registry cannot tell an explicit H.264 choice from Meta control. Older settings with `PreferHevc: true` load as HEVC. Older `PreferHevc: false` loads as Default, which still deletes `HEVC` on the normal global apply.
 
-**NumSlices** / **numSlices** (DWORD): `1` displayed Off in ODT. Windows registry value names are case-insensitive; these are one value, so the tray writes/deletes it once. Any effect on artifacts or latency was not tested.
+**NumSlices** / **numSlices** (DWORD): `1` displayed Off in ODT. Windows registry value names are case-insensitive; these are one value, so the tray writes/deletes it once. Deletion displayed Default. No value was observed that forces sliced encoding On, so the tray does not offer Enabled and does not write `2`, `4`, or any other slice count. Disabled writes `1`. Default deletes `NumSlices` only when applying global defaults. Older settings with `DisableSlicedEncoding: true` load as Disabled. Any effect on artifacts or latency was not tested.
 
 **DBR** (DWORD): `1` = dynamic bitrate on, `0` = off. Delete for default / automatic.
 

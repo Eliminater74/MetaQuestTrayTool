@@ -754,29 +754,45 @@ public sealed class TrayIconHost : IDisposable
             });
         }
 
-        var hevc = new ToolStripMenuItem("Prefer HEVC")
+        var codecMenu = new ToolStripMenuItem("Video codec")
         {
-            Name = "LinkHevc",
-            CheckOnClick = true,
-            Checked = _app.Settings.Current.LinkSettings.PreferHevc
+            Name = "LinkCodecMenu",
+            ToolTipText = LinkCodecModeLabels.Tooltip
         };
-        hevc.CheckedChanged += (_, _) =>
+        foreach (LinkCodecMode mode in Enum.GetValues<LinkCodecMode>())
         {
-            _app.Settings.Current.LinkSettings.PreferHevc = hevc.Checked;
-            ApplyLinkSettings();
-        };
+            var captured = mode;
+            codecMenu.DropDownItems.Add(new ToolStripMenuItem(LinkCodecModeLabels.Describe(mode), null, (_, _) =>
+            {
+                _app.Settings.Current.LinkSettings.Codec = captured;
+                ApplyLinkSettings();
+            })
+            {
+                Name = $"LinkCodec_{mode}",
+                Tag = mode,
+                ToolTipText = LinkCodecModeLabels.Tooltip
+            });
+        }
 
-        var slices = new ToolStripMenuItem("Disable sliced encoding")
+        var slicesMenu = new ToolStripMenuItem("Sliced encoding")
         {
-            Name = "LinkSlices",
-            CheckOnClick = true,
-            Checked = _app.Settings.Current.LinkSettings.DisableSlicedEncoding
+            Name = "LinkSlicesMenu",
+            ToolTipText = SlicedEncodingModeLabels.Tooltip
         };
-        slices.CheckedChanged += (_, _) =>
+        foreach (SlicedEncodingMode mode in Enum.GetValues<SlicedEncodingMode>())
         {
-            _app.Settings.Current.LinkSettings.DisableSlicedEncoding = slices.Checked;
-            ApplyLinkSettings();
-        };
+            var captured = mode;
+            slicesMenu.DropDownItems.Add(new ToolStripMenuItem(SlicedEncodingModeLabels.Describe(mode), null, (_, _) =>
+            {
+                _app.Settings.Current.LinkSettings.SlicedEncoding = captured;
+                ApplyLinkSettings();
+            })
+            {
+                Name = $"LinkSlices_{mode}",
+                Tag = mode,
+                ToolTipText = SlicedEncodingModeLabels.Tooltip
+            });
+        }
 
         var applyOnStart = new ToolStripMenuItem("Apply on app start")
         {
@@ -792,8 +808,8 @@ public sealed class TrayIconHost : IDisposable
 
         menu.DropDownItems.Add(bitrateMenu);
         menu.DropDownItems.Add(encodeMenu);
-        menu.DropDownItems.Add(hevc);
-        menu.DropDownItems.Add(slices);
+        menu.DropDownItems.Add(codecMenu);
+        menu.DropDownItems.Add(slicesMenu);
         menu.DropDownItems.Add(new ToolStripSeparator());
         menu.DropDownItems.Add(new ToolStripMenuItem("Apply now", null, (_, _) => ApplyLinkSettings()));
         menu.DropDownItems.Add(new ToolStripMenuItem("Apply + restart OVRService", null, (_, _) =>
@@ -862,14 +878,26 @@ public sealed class TrayIconHost : IDisposable
             }
         }
 
-        if (FindItem(root.Items, "LinkHevc") is ToolStripMenuItem hevc)
+        if (FindItem(root.Items, "LinkCodecMenu") is ToolStripMenuItem codecMenu)
         {
-            hevc.Checked = link.PreferHevc;
+            foreach (ToolStripItem item in codecMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is LinkCodecMode mode)
+                {
+                    menuItem.Checked = mode == link.Codec;
+                }
+            }
         }
 
-        if (FindItem(root.Items, "LinkSlices") is ToolStripMenuItem slices)
+        if (FindItem(root.Items, "LinkSlicesMenu") is ToolStripMenuItem slicesMenu)
         {
-            slices.Checked = link.DisableSlicedEncoding;
+            foreach (ToolStripItem item in slicesMenu.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Tag is SlicedEncodingMode mode)
+                {
+                    menuItem.Checked = mode == link.SlicedEncoding;
+                }
+            }
         }
 
         if (FindItem(root.Items, "LinkApplyOnStart") is ToolStripMenuItem applyOnStart)
