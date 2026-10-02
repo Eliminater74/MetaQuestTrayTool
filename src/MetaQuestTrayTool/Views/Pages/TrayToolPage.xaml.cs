@@ -37,6 +37,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         StartAsAdminBox.IsChecked = app.AutomaticElevation;
         StartMinimizedBox.IsChecked = app.Tray.StartMinimized;
         OpenMetaLinkOnStartBox.IsChecked = app.Tray.OpenMetaLinkOnStart;
+        DisableHdrWhileRunningBox.IsChecked = app.Tray.DisableWindowsHdrWhileRunning;
         AudioSwitchBox.IsChecked = app.Audio.AutoSwitchEnabled;
         HideAltTabBox.IsChecked = app.Tray.HideFromAltTab;
         MinimizeOnCloseBox.IsChecked = app.Tray.MinimizeOnClose;
@@ -270,6 +271,7 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
 
         settings.Tray.StartMinimized = StartMinimizedBox.IsChecked == true;
         settings.Tray.OpenMetaLinkOnStart = OpenMetaLinkOnStartBox.IsChecked == true;
+        settings.Tray.DisableWindowsHdrWhileRunning = DisableHdrWhileRunningBox.IsChecked == true;
         settings.Audio.AutoSwitchEnabled = AudioSwitchBox.IsChecked == true;
         settings.Tray.HideFromAltTab = HideAltTabBox.IsChecked == true;
         settings.Tray.MinimizeOnClose = MinimizeOnCloseBox.IsChecked == true;

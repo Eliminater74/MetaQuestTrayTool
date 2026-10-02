@@ -10,6 +10,12 @@ public sealed class TrayToolSettings
     /// False by default so an upgrade does not launch the Meta client.
     /// </summary>
     public bool OpenMetaLinkOnStart { get; set; }
+
+    /// <summary>
+    /// When true, startup turns Windows HDR off on displays where it is currently on,
+    /// and exit restores only those displays. False by default.
+    /// </summary>
+    public bool DisableWindowsHdrWhileRunning { get; set; }
     public bool MinimizeOnClose { get; set; } = true;
     public bool HideFromAltTab { get; set; }
     public bool CheckForUpdatesOnStart { get; set; } = true;

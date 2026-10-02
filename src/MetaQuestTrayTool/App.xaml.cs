@@ -42,6 +42,7 @@ public partial class App : System.Windows.Application
     public ProfileService Profiles { get; }
     public GameLibraryService Library { get; } = new();
     public LinkSettingsService Link { get; } = new();
+    public WindowsHdrService WindowsHdr { get; } = new(new WindowsDisplayConfigHdrApi(), WindowsHdrService.DefaultSnapshotPath);
     public AudioDeviceService Audio { get; } = new();
     public PowerPlanService Power { get; } = new();
     public OpenXrRuntimeService OpenXr { get; } = new();
@@ -115,6 +116,7 @@ public partial class App : System.Windows.Application
 
         if (SessionHelperHost.IsHelperProcess(e.Args))
         {
+            // The helper only launches unelevated processes. It must not change Windows HDR.
             _isSessionHelper = true;
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             SessionHelperHost.Attach(this, e.Args);
@@ -329,7 +331,52 @@ public partial class App : System.Windows.Application
             _ = CheckForUpdatesOnStartAsync();
         }
 
+        TryApplyStartupHdrPolicy();
         ScheduleOpenMetaHorizonLinkOnStart();
+    }
+
+    private void TryApplyStartupHdrPolicy()
+    {
+        try
+        {
+            var result = Settings.Current.Tray.DisableWindowsHdrWhileRunning
+                ? WindowsHdr.DisableForSession()
+                : WindowsHdr.RecoverStaleSnapshot();
+            LogHdr(result);
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("HDR control unsupported/failed: " + ex.Message);
+        }
+    }
+
+    private void TryRestoreWindowsHdr()
+    {
+        try
+        {
+            LogHdr(WindowsHdr.RestoreSession());
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("HDR control unsupported/failed: " + ex.Message);
+        }
+    }
+
+    private void LogHdr(HdrActionResult result)
+    {
+        if (string.IsNullOrWhiteSpace(result.Summary))
+        {
+            return;
+        }
+
+        if (result.Succeeded)
+        {
+            Log.Info(result.Summary);
+        }
+        else
+        {
+            Log.Warn(result.Summary);
+        }
     }
 
     private void ScheduleOpenMetaHorizonLinkOnStart()
@@ -502,6 +549,7 @@ public partial class App : System.Windows.Application
         }
 
         Log.Info($"Meta Quest Tray Tool exiting (code {e.ApplicationExitCode}).");
+        TryRestoreWindowsHdr();
         SessionHelperClient.RequestQuit();
         try
         {

@@ -24,6 +24,9 @@
       <CheckBox x:Name="OpenMetaLinkOnStartBox" Content="Open Meta Horizon Link when tray tool starts"
                 ToolTip="On each tray startup, open Meta Horizon Link or bring an existing client window forward. Uses the same unelevated launch path as the Open Meta Horizon Link command, so an elevated tray does not start the Meta client as Administrator. Failures are written to the log and do not stop startup."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="DisableHdrWhileRunningBox" Content="Temporarily disable Windows HDR while tray tool is running"
+                ToolTip="Temporarily turns Windows HDR off while this tray tool is running and restores the displays it changed when the tool exits. Displays that were already off stay off. Useful if HDR causes problems with Meta Horizon Link."
+                Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <CheckBox x:Name="AudioSwitchBox" Content="Use Audio Switcher" VerticalAlignment="Center"
                   ToolTip="Automatically switch Windows playback/recording to VR audio when Link is active, and restore desktop audio when it drops."
