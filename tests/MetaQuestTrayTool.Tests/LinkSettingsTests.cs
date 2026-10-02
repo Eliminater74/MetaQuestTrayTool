@@ -6,6 +6,43 @@ namespace MetaQuestTrayTool.Tests;
 public class LinkSettingsTests
 {
     [Fact]
+    public void EncodeWidthPresetsInclude4128InAscendingOrder()
+    {
+        Assert.Equal(
+            new[] { 0, 2016, 2352, 2608, 2912, 3136, 3664, 4128 },
+            LinkSettings.EncodeWidthPresets);
+    }
+
+    [Fact]
+    public void EncodeWidth4128WritesAndReadsBack()
+    {
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(new LinkSettings
+        {
+            EncodeResolutionWidth = 4128
+        }, true);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(4128, registry.Values["EncodeWidth"]);
+        Assert.Equal(4128, registry.Values["EncodeResolutionWidth"]);
+        Assert.Equal(4128, result.Current!.EncodeResolutionWidth);
+    }
+
+    [Fact]
+    public void EncodeWidthOutsideThePresetListStillRoundTrips()
+    {
+        var registry = new FakeRegistry();
+        var result = new LinkSettingsService(registry).Apply(new LinkSettings
+        {
+            EncodeResolutionWidth = 4000
+        }, true);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(4000, registry.Values["EncodeWidth"]);
+        Assert.Equal(4000, result.Current!.EncodeResolutionWidth);
+    }
+
+    [Fact]
     public void BitratePresetsExposeOdt960()
     {
         Assert.Contains(960, LinkSettings.BitratePresets);

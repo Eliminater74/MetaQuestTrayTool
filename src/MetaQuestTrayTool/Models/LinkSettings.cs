@@ -16,7 +16,7 @@ public sealed class LinkSettings
 
     public static readonly int[] EncodeWidthPresets =
     [
-        0, 2016, 2352, 2608, 2912, 3136, 3664
+        0, 2016, 2352, 2608, 2912, 3136, 3664, 4128
     ];
 
     public string PresetName { get; set; } = "Custom";
