@@ -8,7 +8,7 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | --- | --- |
 | **Status** | Default home. Live chips: PCVR Ready, SteamVR install/running/Stable\|Beta, OpenXR, OVRService, elevation, session type, ADB, battery/Wi‑Fi, active profile, HotKeys/Voice, Dash→SteamVR, GPU, audio. |
 | **Game Settings** | Global Super Sampling, ASW, FOV, HUD, OpenXR, overlay-close list. Opens Profiles / Global defaults. |
-| **Tray Tool** | Start with Windows, elevation, audio switcher, HotKeys, voice, screenshot controls, headset announcements, verified updates, theme, notifications. |
+| **Tray Tool** | Start with Windows, elevation, open Meta Horizon Link on startup, temporary Windows HDR off while running, audio switcher, HotKeys, voice, screenshot controls, headset announcements, verified updates, theme, notifications. |
 | **Power Options** | VR vs desktop power plan, USB selective suspend, restart OVRService after sleep. |
 | **Service & Startup** | Start/Stop/Restart OVRService, Manual-at-boot, PreventDashLaunch, CoreChannel, SteamVR Home. |
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |

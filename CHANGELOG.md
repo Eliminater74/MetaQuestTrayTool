@@ -8,6 +8,18 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+### Added
+- Tray Tool can open or activate Meta Horizon Link once at startup. The option is off by default and uses the existing unelevated Meta client launch path. See #19.
+- Quest Link encode width presets include 4128. Widths outside the preset list still apply.
+- Quest Link video codec is a Default / H.264 / H.265 choice. H.265 writes the observed `HEVC=1` override. H.264 removes that override. No `HEVC=0` value is written.
+- Quest Link sliced encoding is Default or Disabled (`NumSlices=1`, observed Off in ODT). Enabled is not offered.
+- Tray Tool can temporarily turn Windows HDR off while the app is running and restore only the displays it changed. The option is off by default. A recovery snapshot is saved before the change.
+
+### Verification limits
+- H.264 is implemented by deleting `HEVC`. An explicit DWORD that forces H.264 was not observed, and a missing `HEVC` value still reads back as Default.
+- Sliced encoding On has no observed registry value, so it cannot be forced.
+- HDR uses the documented DisplayConfig advanced-color query/set APIs. Whether a given GPU driver treats advanced color as the Windows HDR toggle still needs a check on that machine.
+
 ## [1.1.35] - 2026-09-16
 
 ### Added

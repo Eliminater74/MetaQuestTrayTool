@@ -80,7 +80,7 @@ The sidebar shell opens on **Status** by default, then: **Game Settings**, **Tra
 ### 3. Set your global defaults
 
 1. Open **Profiles** (or **Advanced → Global defaults**) and configure your everyday Link / OpenXR / audio / power preferences.
-2. On **Quest Link**, set bitrate, encode width, sharpening, HEVC, and related Link options.
+2. On **Quest Link**, set bitrate, encode width, sharpening, video codec, and related Link options.
 3. On **Game Settings** (tray menu or shell), adjust super sampling, ASW, FOV, and other PCVR tweaks.
 4. Changes save automatically to `%AppData%\MetaQuestTrayTool\`.
 
@@ -192,10 +192,11 @@ Release **[v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 ### Quest Link / Dash → SteamVR
 
-- Link registry (`RemoteHeadset`): bitrate presets through 960 Mbps, startup protection for fixed bitrate and DBRMax values above the old 500 Mbps ceiling, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
+- Link registry (`RemoteHeadset`): bitrate presets through 960 Mbps, startup protection for fixed bitrate and DBRMax values above the old 500 Mbps ceiling, encode width through 4128, video codec (Default / H.264 / HEVC), sliced encoding (Default / Disabled), sharpening, distortion, DBR / max / offset, Mobile ASW — presets on Quest Link page — see [docs/ODT-REGISTRY.md](docs/ODT-REGISTRY.md)
 - **PreventDashLaunch → SteamVR over Link**: registry blocks Dash (no Meta process killing); auto-start SteamVR on Meta Link connect; optional restart OVRService when SteamVR exits (tray / Ctrl+Num 0 / voice “dash to steam v r”)
 - **SteamVR Home** (`steamtours.exe`) on demand — Service & Startup / tray / hotkey / voice (Meta’s old Oculus Home is gone)
-- **Open Meta Horizon Link** from tray / hotkey / voice
+- **Open Meta Horizon Link** from tray / hotkey / voice, with an optional Tray Tool setting to open it once at startup
+- Optional Tray Tool setting to turn Windows HDR off while the tray is running and restore only the displays it changed
 
 ### OpenXR / audio / power
 
