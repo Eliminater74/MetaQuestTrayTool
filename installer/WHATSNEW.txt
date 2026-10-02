@@ -1,23 +1,22 @@
-﻿Meta Quest Tray Tool 1.1.35 - What's new
+﻿Meta Quest Tray Tool 1.1.36 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.35] - 2026-09-16
+[1.1.36] - 2026-10-02
 
 Added
-- Bounded session flight recorder logs Link fingerprint / ADB / mutating Link-ODT-OVRService-profile-audio-power edges only (not every poll) to %AppData%\MetaQuestTrayTool\session-trace.log and support ZIP, without writing Link state. Use this to timeline issue #12 freezes on a physical Quest 3.
-
-Fixed
-- Startup Link auto-apply now skips the automatic Link registry write if the preflight read fails, avoiding a possible downgrade of unknown high ODT fixed bitrate or DBRMax values.
-
-Docs
-- Recorded the issue #12 freeze call-path audit: no proven app-side compositor freeze; ADB reconnect can still re-apply globals during a live Meta Link session.
-- Renamed the old issue #4 reproduction TODO to post-fix physical regression validation now that the tracked issue has shipped fixes.
+- Tray Tool can open or activate Meta Horizon Link once at startup. The option is off by default and uses the existing unelevated Meta client launch path.
+- Quest Link encode width presets include 4128. Widths outside the preset list still apply.
+- Quest Link video codec is a Default / H.264 / H.265 choice. H.265 writes the observed HEVC=1 override. H.264 removes that override. No HEVC=0 value is written.
+- Quest Link sliced encoding is Default or Disabled (NumSlices=1, observed Off in ODT). Enabled is not offered.
+- Tray Tool can temporarily turn Windows HDR off while the app is running and restore only the displays it changed. The option is off by default. A recovery snapshot is saved before the change.
 
 Validation
-- Local suite passes 183/183.
+- Local suite passes 212/212.
 
 Verification limits
-- Physical Quest 3 confirmation of the reported Meta Link freeze still needs hardware reproduction. This release ships diagnostics and the startup preflight skip; it does not claim the freeze is fixed.
+- H.264 is implemented by deleting HEVC. An explicit DWORD that forces H.264 was not observed, and a missing HEVC value still reads back as Default.
+- Sliced encoding On has no observed registry value, so it cannot be forced.
+- HDR uses the documented DisplayConfig advanced-color query/set APIs. Whether a given GPU driver treats advanced color as the Windows HDR toggle still needs a check on that machine.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

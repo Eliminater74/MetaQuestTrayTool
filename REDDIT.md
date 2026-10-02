@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```text
-[PC] Meta Quest Tray Tool v1.1.35 — free modern OTT-style tray app for Quest Link / SteamVR (freeze diagnostics)
+[PC] Meta Quest Tray Tool v1.1.36 — free modern OTT-style tray app for Quest Link / SteamVR (codec, 4128, HDR)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.35** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.36** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,11 +54,11 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What changed in v1.1.35
+### What changed in v1.1.36
 
-A bounded **session flight recorder** now logs Link fingerprint changes, ADB reconnects, and mutating Link/ODT/OVRService/profile/audio/power actions (not every poll) to `%AppData%\MetaQuestTrayTool\session-trace.log` and the support ZIP. It does not write Link state. Startup Link auto-apply skips the registry write if the high-bitrate preflight read fails. Issue #12 (Meta Link freeze after minutes) was audited in source: no compositor freeze is proven; ADB reconnect can still re-apply globals during a live Meta Link session. Physical Quest 3 reproduction is still required. v1.1.34 already preserved high DBRMax as well as fixed bitrate; v1.1.33 added 960 Mbps presets.
+Quest Link encode width includes **4128**. Video codec is Default, **H.264**, or **H.265/HEVC**: HEVC writes the observed `HEVC=1` value, and H.264 removes that override instead of writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new options are off by default. Older HEVC and sliced-encoding settings still load. v1.1.35 session tracing and the startup Link preflight skip remain.
 
-### What works now (v1.1.35)
+### What works now (v1.1.36)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -103,7 +103,8 @@ A bounded **session flight recorder** now logs Link fingerprint changes, ADB rec
 - `%AppData%\MetaQuestTrayTool\profiles.json` + Advanced settings backup
 
 **Quest Link / Air Link**
-- Bitrate presets through **960 Mbps**, encode width, HEVC, sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW
+- Bitrate presets through **960 Mbps**, encode width through **4128**, Default / H.264 / HEVC codec, Default / Disabled sliced encoding, sharpening, distortion, DBR / max / offset, Mobile ASW
+- Optional Tray Tool startup: open Meta Horizon Link once, and temporarily disable Windows HDR while restoring only the displays this app changed
 - Startup preserves existing ODT fixed bitrate and DBRMax values above the old 500 Mbps preset ceiling when the saved tray baseline is still old-capped
 - Presets on the Quest Link page stay editable even while Steam Link / SteamVR or Virtual Desktop is active; live Meta Link registry writes are still skipped under those streamers
 - Custom saved Link settings reopen as custom instead of visually falling back to Meta defaults; per-profile Link overrides remain available (inherit = keep global)
@@ -227,5 +228,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.35) — session flight recorder logs Link/ADB/mutation edges for freeze diagnosis without rewriting Link state; startup skips Link apply if the high-bitrate preflight read fails; issue #12 freeze is audited, not claimed fixed; plus DBRMax/fixed high-bitrate startup preservation, 960 Mbps presets, Stop & download waits for headset recordings to stabilize, performance sampling no longer clears logcat history, and Meta runtime compatibility baselines require clean read-probe validation; plus Read Live stays read-only, active Meta Link detection beats resident Virtual Desktop desktop processes when the Meta cache is live, expanded headset controls, recording/download, runtime performance samples, safer updater/release validation, Meta runtime/OpenXR diagnostics, support ZIP redaction, editable Quest Link presets under Steam Link / Virtual Desktop, custom Link settings, bindable Exit app, Quest Link mirror screenshots, smart screenshot fallback, screenshot hotkeys, voice screenshot phrases, explicit headset announcement toggles, helper repair/copy diagnostics, shared/nonblocking status probes, serialized ADB, verified installer checksum sidecars, expanded headset voice coverage, MSFS 2024 VR launch automation, stale helper recovery, settings backup restore, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.36) — Quest Link encode width 4128, Default/H.264/HEVC codec (HEVC=1 or delete; no invented H.264 DWORD), sliced encoding Default or Off (NumSlices=1), optional open Meta Horizon Link on startup, optional temporary Windows HDR off that restores only displays this app changed; plus v1.1.35 session flight recorder for freeze diagnosis without rewriting Link state; startup skips Link apply if the high-bitrate preflight read fails; issue #12 freeze is audited, not claimed fixed; plus DBRMax/fixed high-bitrate startup preservation, 960 Mbps presets, Stop & download waits for headset recordings to stabilize, performance sampling no longer clears logcat history, and Meta runtime compatibility baselines require clean read-probe validation; plus Read Live stays read-only, active Meta Link detection beats resident Virtual Desktop desktop processes when the Meta cache is live, expanded headset controls, recording/download, runtime performance samples, safer updater/release validation, Meta runtime/OpenXR diagnostics, support ZIP redaction, editable Quest Link presets under Steam Link / Virtual Desktop, custom Link settings, bindable Exit app, Quest Link mirror screenshots, smart screenshot fallback, screenshot hotkeys, voice screenshot phrases, explicit headset announcement toggles, helper repair/copy diagnostics, shared/nonblocking status probes, serialized ADB, verified installer checksum sidecars, expanded headset voice coverage, MSFS 2024 VR launch automation, stale helper recovery, settings backup restore, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

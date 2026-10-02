@@ -2,9 +2,9 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Current public release:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
-v1.1.35 adds a bounded session flight recorder for freeze diagnosis (Link fingerprint, ADB reconnect, and mutating apply/restore/OVRService edges, not every poll) and skips startup Link registry apply if the high-bitrate preflight read fails. Issue #12 is audited in source, not claimed fixed. High-bitrate/DBRMax preservation, 960 Mbps presets, recording download, and Meta compatibility checks from v1.1.33/v1.1.34 remain.
+v1.1.36 adds Quest Link encode width 4128, a Default / H.264 / HEVC codec choice, and Default / Disabled sliced encoding, using only the registry values already observed. Tray Tool can open Meta Horizon Link at startup and can temporarily disable Windows HDR, restoring only the displays it changed. Both options are off by default. v1.1.35 session tracing and the startup Link preflight skip remain. An explicit H.264 DWORD and sliced-encoding On were not observed, so they are not written.
 
 [[What-s-New|What's new since the old wiki]] · [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 

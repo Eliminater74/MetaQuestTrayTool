@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -25,6 +25,18 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.36
+
+- [x] Add 4128 to Quest Link encode width presets without clamping custom widths.
+- [x] Replace the HEVC checkbox with Default / H.264 / HEVC using observed `HEVC=1` and deletion only.
+- [x] Replace the sliced-encoding checkbox with Default / Disabled (`NumSlices=1`). Do not invent an Enabled DWORD.
+- [x] Add an off-by-default option to open Meta Horizon Link once at tray startup through the existing unelevated launcher.
+- [x] Add an off-by-default option to disable Windows HDR on displays where it is on, and restore only those displays on exit.
+- [x] Keep old `PreferHevc` and `DisableSlicedEncoding` settings loading correctly.
+- [x] Full local suite 212/212.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.36.
+- [x] Tag and publish **v1.1.36**.
 
 ### v1.1.35
 

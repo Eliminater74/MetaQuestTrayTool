@@ -8,12 +8,17 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.36] - 2026-10-02
+
 ### Added
 - Tray Tool can open or activate Meta Horizon Link once at startup. The option is off by default and uses the existing unelevated Meta client launch path. See #19.
 - Quest Link encode width presets include 4128. Widths outside the preset list still apply.
 - Quest Link video codec is a Default / H.264 / H.265 choice. H.265 writes the observed `HEVC=1` override. H.264 removes that override. No `HEVC=0` value is written.
 - Quest Link sliced encoding is Default or Disabled (`NumSlices=1`, observed Off in ODT). Enabled is not offered.
 - Tray Tool can temporarily turn Windows HDR off while the app is running and restore only the displays it changed. The option is off by default. A recovery snapshot is saved before the change.
+
+### Validation
+- Local suite passes 212/212.
 
 ### Verification limits
 - H.264 is implemented by deleting `HEVC`. An explicit DWORD that forces H.264 was not observed, and a missing `HEVC` value still reads back as Default.
@@ -380,7 +385,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.35...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.36...HEAD
+[1.1.36]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.36
 [1.1.35]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.35
 [1.1.34]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.34
 [1.1.33]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.33

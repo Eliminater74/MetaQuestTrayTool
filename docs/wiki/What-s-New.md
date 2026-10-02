@@ -1,11 +1,22 @@
 # What's new
 
-This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.35**.
+This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.36**.
 
 Download: [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
 Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)
 
-## Current release: v1.1.35
+## Current release: v1.1.36
+
+v1.1.36 addresses issue #19 on the existing Link and tray settings:
+
+- Encode resolution width includes **4128**. Values outside the preset list still apply.
+- Video codec is **Default / Meta controlled**, **H.264**, or **H.265 / HEVC**. HEVC writes `HEVC=1`. H.264 removes that override. No `HEVC=0` value is written, because that DWORD was not observed.
+- Sliced encoding is **Default / Meta controlled** or **Disabled** (`NumSlices=1`, observed Off in ODT). Enabled is not offered.
+- Tray Tool can **open Meta Horizon Link when the tray starts**. Off by default. It uses the existing unelevated launch path.
+- Tray Tool can **temporarily disable Windows HDR** while the app is running and restore only the displays it changed. Off by default. Displays that were already off stay off.
+- Older `PreferHevc` and `DisableSlicedEncoding` settings still load.
+
+## Previous release: v1.1.35
 
 v1.1.35 is a diagnostics and safer-startup release for the open Meta Link freeze report (issue #12):
 
@@ -128,7 +139,9 @@ Use [[Troubleshooting]] when something does not apply, and include the sanitized
 
 Local tests and CI are green for the public release, but some behavior depends on Meta runtime, firmware, headset model, and the active stream. The current open physical checks are:
 
-- issue #12 Meta Link freeze after minutes of play (use `session-trace.log` / support ZIP from v1.1.35)
+- issue #12 Meta Link freeze after minutes of play (use `session-trace.log` / support ZIP from v1.1.35+)
+- whether this PC's GPU driver treats DisplayConfig advanced color as the Windows HDR toggle (v1.1.36)
+- an explicit Meta registry DWORD that forces H.264, if one exists (v1.1.36 deletes `HEVC` instead)
 - DBR enabled with DBRMax 960
 - active-stream bitrate adoption after reconnect or OVRService restart
 - headset recording finalization on current firmware

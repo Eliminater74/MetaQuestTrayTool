@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.35 — MetaQuestTrayTool-Setup-1.1.35.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.35/MetaQuestTrayTool-Setup-1.1.35.exe)
+**Latest:** [v1.1.36 — MetaQuestTrayTool-Setup-1.1.36.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.36/MetaQuestTrayTool-Setup-1.1.36.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,9 +163,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### v1.1.35 current release
+### v1.1.36 current release
 
-Release **[v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. A bounded session flight recorder now logs Link fingerprint, ADB reconnect, and mutating Link/ODT/OVRService/profile/audio/power edges (not every poll) to `%AppData%\MetaQuestTrayTool\session-trace.log` and the support ZIP, without writing Link state. Startup Link auto-apply skips the registry write if the preflight read fails, so an unknown high ODT bitrate/DBRMax is not overwritten. Issue #12 (Meta Link freeze after minutes) was audited in source: no compositor freeze is proven; ADB reconnect can still re-apply globals during a live Meta Link session. Physical Quest 3 freeze reproduction is still required. High-bitrate/DBRMax startup preservation, 960 Mbps presets, recording download, and Meta compatibility checks from v1.1.33/v1.1.34 remain.
+Release **[v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Quest Link encode width now includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified.
 
 ### Shell & tray
 

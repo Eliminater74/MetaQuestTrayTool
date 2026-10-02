@@ -4,20 +4,20 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.35](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current source checkout (public v1.1.35)
+## Current source checkout (public v1.1.36)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
 | Area | Shipped |
 | --- | --- |
-| Shell | Status (default), Game Settings, Tray Tool, Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
+| Shell | Status (default), Game Settings, Tray Tool (optional Meta Horizon Link on start and temporary Windows HDR off), Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
 | Status / Ready | Live chips, SteamVR install/version/Stable\|Beta, PCVR Ready checklist, Recover PCVR, session probe (Air/wired/Steam/VD) |
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
-| Link / Dash | RemoteHeadset Link settings + high bitrate presets through 960 Mbps, startup protection for externally set high fixed ODT bitrate and DBRMax values, presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
+| Link / Dash | RemoteHeadset Link settings, bitrate presets through 960 Mbps, encode width through 4128, Default / H.264 / HEVC codec and Default / Disabled sliced encoding, startup protection for externally set high fixed ODT bitrate and DBRMax values, presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, optional open Meta Horizon Link on tray start, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
 | Headset ADB | Wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop/download, 10-second logcat performance sampler, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
 | Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9 plus bindable Exit), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots + bindable Exit), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
@@ -26,6 +26,13 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
 ---
+
+## v1.1.36 — Link codec, 4128 encode width, startup Link, and temporary HDR
+
+Adds issue #19 options on the existing Link and tray paths. Encode width includes 4128. Video codec is Default, H.264, or HEVC, and sliced encoding is Default or Disabled, using only observed registry values. Tray Tool can open Meta Horizon Link once at startup and can disable Windows HDR only on displays where it is already on, then restore those displays on exit. Both options default off. Older PreferHevc and DisableSlicedEncoding settings still load.
+
+- Local validation: 212 passing tests.
+- No observed DWORD forces H.264 or sliced encoding On. HDR set/restore is covered with a fake display seam; a given GPU driver's HDR toggle still needs a machine check.
 
 ## v1.1.35 — freeze diagnostics and safer startup Link preflight
 
@@ -242,6 +249,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.33 | 960 Mbps Link bitrate presets, high-ODT startup preservation, recording/performance diagnostics, stricter Meta validation baselines |
 | v1.1.34 | DBRMax high-bitrate startup preservation |
 | v1.1.35 | Session freeze diagnostics and safer startup Link preflight |
+| v1.1.36 | Encode width 4128, verified codec and sliced-encoding modes, optional Meta Horizon Link on startup, temporary Windows HDR off |
 
 ---
 
