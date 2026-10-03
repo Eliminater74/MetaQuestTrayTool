@@ -29,6 +29,9 @@ public sealed class SettingsService
     /// <summary>True when the loaded settings came from settings.json.bak or .bak2.</summary>
     public bool RestoredFromBackup { get; private set; }
 
+    /// <summary>True when this load cleared a saved exclusive non-headset ADB disconnect.</summary>
+    public bool RetiredExclusiveWirelessSweep { get; private set; }
+
     public void Load()
     {
         lock (_saveLock)
@@ -445,6 +448,7 @@ public sealed class SettingsService
         Current.Audio ??= new AudioSwitchSettings { AutoSwitchEnabled = true };
         Current.Power ??= new PowerSettings();
         Current.Headset ??= new HeadsetSettings();
+        RetiredExclusiveWirelessSweep = HeadsetSettings.RetireExclusiveWirelessSweep(Current.Headset);
         Current.CustomCommands ??= new CustomCommandSet();
         Current.Profiles ??= [];
         Current.ProfileIgnoreProcesses ??= [];

@@ -327,7 +327,9 @@ public sealed class UpdateService
             throw new InvalidOperationException("Installer was not verified by this update session. Download it again.");
         using var verifiedFile = InstallerIntegrity.VerifyAndLock(installerPath, receipt.Hash, receipt.Size);
 
-        // Stop ADB polling first so a tray tick cannot spawn a new adb.exe after kill-server.
+        // Installer-only. Session end must not call this. It stops our watcher, then
+        // KillServerForUpdate terminates this app's packaged adb.exe so Setup can replace
+        // platform-tools. It does not run `adb kill-server` against a shared server.
         try
         {
             _app.HeadsetWatch?.Stop();

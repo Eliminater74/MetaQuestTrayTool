@@ -1,10 +1,11 @@
 using System.Windows.Threading;
+using MetaQuestTrayTool.Models;
 
 namespace MetaQuestTrayTool.Services;
 
 /// <summary>
-/// ADB headset connect watcher. Meta's debug.oculus.* props do not survive reboot,
-/// so we re-apply when the Quest appears — the set-and-forget path while you are in VR.
+/// Applies Quest ADB settings after a confirmed PCVR session. It is not an always-on ADB detector.
+/// Link detection stays in <see cref="LinkSessionWatchService"/> and does not use ADB.
 /// </summary>
 public sealed class HeadsetWatchService : IDisposable
 {
@@ -13,13 +14,15 @@ public sealed class HeadsetWatchService : IDisposable
     private readonly App _app;
     private readonly DispatcherTimer _timer;
     private readonly DispatcherTimer _resumeTimer;
+    private readonly AdbSessionGate _gate = new();
+    private readonly object _stateLock = new();
     private string? _lastSerial;
     private bool _appliedForSerial;
     private string? _lastIgnoredMessage;
-    private string? _lastSweepMessage;
     private DateTime _lastWirelessAttemptUtc = DateTime.MinValue;
     private static readonly TimeSpan WirelessRetryInterval = TimeSpan.FromSeconds(45);
     private int _pollGate;
+    private int _manualDepth;
 
     public HeadsetWatchService(App app)
     {
@@ -34,15 +37,141 @@ public sealed class HeadsetWatchService : IDisposable
 
     public void Stop()
     {
+        if (!_app.Dispatcher.CheckAccess())
+        {
+            _app.Dispatcher.BeginInvoke(Stop);
+            return;
+        }
+
+        lock (_stateLock)
+        {
+            _gate.NotifyEnded();
+            ClearConnectionState();
+        }
+
         _timer.Stop();
         _resumeTimer.Stop();
     }
 
     public void Dispose() => Stop();
 
+    /// <summary>Called when Link session detection confirms a live PCVR stream. Does not probe Link itself.</summary>
+    public void NotifyPcvrSession(VrConnectionStatus status)
+    {
+        if (!_app.Dispatcher.CheckAccess())
+        {
+            _app.Dispatcher.BeginInvoke(() => NotifyPcvrSession(status));
+            return;
+        }
+
+        bool changed;
+        lock (_stateLock)
+        {
+            changed = _gate.NotifySession(status);
+        }
+
+        if (!_gate.AllowsAutomaticAdb)
+        {
+            if (_timer.IsEnabled)
+            {
+                _timer.Stop();
+                _app.Log.Info($"PCVR session ({status.Kind}) does not use automatic headset ADB.");
+            }
+
+            if (_app.Adb.ActivityMode != AdbActivityMode.ManualCheck)
+            {
+                _app.Adb.NoteSessionIdle();
+            }
+
+            _app.RefreshTrayUi();
+            return;
+        }
+
+        if (_app.Adb.ActivityMode != AdbActivityMode.ManualCheck)
+        {
+            _app.Adb.NoteSessionActive();
+        }
+
+        if (changed)
+        {
+            _app.Log.Info($"PCVR session active ({status.Kind}) — headset ADB is allowed.");
+        }
+
+        SyncWatch();
+    }
+
     /// <summary>
-    /// True while the ADB watcher is paused (indefinite or until a deadline).
-    /// Does not expire the pause — only <see cref="SyncWatch"/> does, so the poll timer restarts.
+    /// Confirmed PCVR session end. Stops our watcher and commands. Does not run adb kill-server
+    /// and does not disconnect the Quest or any other device.
+    /// </summary>
+    public void NotifyPcvrSessionEnded()
+    {
+        if (!_app.Dispatcher.CheckAccess())
+        {
+            _app.Dispatcher.BeginInvoke(NotifyPcvrSessionEnded);
+            return;
+        }
+
+        var wasActive = _gate.SessionActive || _timer.IsEnabled;
+        lock (_stateLock)
+        {
+            _gate.NotifyEnded();
+            ClearConnectionState();
+        }
+
+        var stoppedTimer = _timer.IsEnabled;
+        _timer.Stop();
+        if (wasActive || stoppedTimer)
+        {
+            _app.Adb.NoteSessionIdle();
+            _app.Log.Info(
+                "PCVR session ended — headset ADB polling stopped. The shared ADB server was left running.");
+        }
+
+        _app.RefreshTrayUi();
+    }
+
+    public void BeginManualAdb()
+    {
+        Interlocked.Increment(ref _manualDepth);
+        lock (_stateLock)
+        {
+            _gate.BeginManual();
+        }
+
+        _app.Adb.NoteManualCheck();
+    }
+
+    public void EndManualAdb()
+    {
+        if (!_app.Dispatcher.CheckAccess())
+        {
+            _app.Dispatcher.BeginInvoke(EndManualAdb);
+            return;
+        }
+
+        var depth = Interlocked.Decrement(ref _manualDepth);
+        if (depth > 0)
+        {
+            return;
+        }
+
+        if (depth < 0)
+        {
+            Interlocked.Exchange(ref _manualDepth, 0);
+        }
+
+        lock (_stateLock)
+        {
+            _gate.EndManual();
+        }
+
+        _app.Adb.NoteManualCheckFinished(_gate.AllowsAutomaticAdb);
+        SyncWatch();
+    }
+
+    /// <summary>
+    /// True while automatic ADB is paused. Does not expire the pause — only <see cref="SyncWatch"/> does.
     /// </summary>
     public bool IsPaused
     {
@@ -56,7 +185,6 @@ public sealed class HeadsetWatchService : IDisposable
 
             if (settings.AdbWatcherPausedUntilUtc is { } until && DateTime.UtcNow >= until)
             {
-                // Deadline passed but SyncWatch has not run yet — schedule resume on the UI thread.
                 _app.Dispatcher.BeginInvoke(SyncWatch);
                 return false;
             }
@@ -65,7 +193,6 @@ public sealed class HeadsetWatchService : IDisposable
         }
     }
 
-    /// <summary>Human status for tray / Status page (empty when not paused).</summary>
     public string PauseStatusText
     {
         get
@@ -78,18 +205,20 @@ public sealed class HeadsetWatchService : IDisposable
             var until = _app.Settings.Current.Headset.AdbWatcherPausedUntilUtc;
             if (until is null)
             {
-                return "ADB paused until you resume (other devices safe).";
+                return "Automatic headset ADB is paused. Manual actions still run when you request them.";
             }
 
             var local = until.Value.ToLocalTime();
-            return $"ADB paused until {local:t} ({local:MMM d}) — other devices safe.";
+            return $"Automatic headset ADB paused until {local:t} ({local:MMM d}). Manual actions still run when you request them.";
         }
     }
 
-    /// <summary>
-    /// Stop polling / auto-reconnect / headset-only disconnect so phones, TVs, etc. can use ADB.
-    /// Pass <paramref name="duration"/> for a timed pause (e.g. 2 hours); null = until Resume.
-    /// </summary>
+    public string ActivityStatusText =>
+        !string.IsNullOrWhiteSpace(PauseStatusText)
+            ? PauseStatusText
+            : _app.Adb.DescribeCachedStatus();
+
+    /// <summary>Suppress automatic session ADB. Manual actions still require an explicit request.</summary>
     public void Pause(TimeSpan? duration = null, bool notify = true)
     {
         var settings = _app.Settings.Current.Headset;
@@ -101,8 +230,8 @@ public sealed class HeadsetWatchService : IDisposable
         SyncWatch();
 
         var message = settings.AdbWatcherPausedUntilUtc is { } until
-            ? $"ADB paused until {until.ToLocalTime():t}. Phones / TVs can use ADB without this tray disconnecting them."
-            : "ADB paused until you resume. Phones / TVs can use ADB without this tray disconnecting them.";
+            ? $"Automatic headset ADB paused until {until.ToLocalTime():t}. Manual ADB actions still run when you request them."
+            : "Automatic headset ADB paused until you resume. Manual ADB actions still run when you request them.";
         _app.Log.Info(message);
         if (notify)
         {
@@ -110,7 +239,7 @@ public sealed class HeadsetWatchService : IDisposable
         }
     }
 
-    /// <summary>Resume headset ADB watching (apply / reconnect / headset-only sweep).</summary>
+    /// <summary>Allow automatic ADB for a live PCVR session. Does not poll while no session is active.</summary>
     public void Resume(bool notify = true)
     {
         var settings = _app.Settings.Current.Headset;
@@ -122,42 +251,44 @@ public sealed class HeadsetWatchService : IDisposable
         settings.AdbWatcherPaused = false;
         settings.AdbWatcherPausedUntilUtc = null;
         _app.Settings.Save();
+        var sessionAllows = _gate.AllowsAutomaticAdb;
+        _app.Log.Info(sessionAllows
+            ? "Automatic headset ADB resumed for the active PCVR session."
+            : "ADB resume allows automatic headset ADB when a PCVR session needs it. Not starting ADB while idle.");
         SyncWatch();
-        _app.Log.Info("Headset ADB watcher resumed.");
         if (notify)
         {
-            _app.TrayNotify("ADB resumed", "Headset ADB watching is on again.");
+            _app.TrayNotify(
+                "ADB resumed",
+                sessionAllows
+                    ? "Automatic headset ADB is on for this PCVR session."
+                    : "Automatic headset ADB will wait for the next PCVR session.");
         }
     }
 
-    /// <summary>Stop ADB polling when paused, or when apply-on-connect, wireless auto-reconnect, and headset-only sweep are all off.</summary>
+    /// <summary>Arm the watcher only while a PCVR session allows ADB and a feature needs it.</summary>
     public void SyncWatch()
     {
+        if (!_app.Dispatcher.CheckAccess())
+        {
+            _app.Dispatcher.BeginInvoke(SyncWatch);
+            return;
+        }
+
         var timedPauseEnded = ExpireTimedPauseIfNeeded();
         ArmResumeTimer();
 
         var settings = _app.Settings.Current.Headset;
-        if (settings.AdbWatcherPaused)
+        if (!ShouldArmAutomaticWatcher(_gate.AllowsAutomaticAdb, settings))
         {
             if (_timer.IsEnabled)
             {
                 _timer.Stop();
-                _app.Log.Info("Headset ADB watcher paused — will not poll, reconnect, or disconnect other devices.");
-            }
-
-            _app.RefreshTrayUi();
-            return;
-        }
-
-        var needsWatch = settings.ApplyWhenHeadsetConnects
-                         || settings.WirelessAutoReconnect
-                         || settings.HeadsetOnlyWirelessAdb;
-        if (!needsWatch)
-        {
-            if (_timer.IsEnabled)
-            {
-                _timer.Stop();
-                _app.Log.Info("Headset ADB watcher paused (auto-apply, wireless reconnect, and headset-only sweep off).");
+                _app.Log.Info(settings.AdbWatcherPaused
+                    ? "Automatic headset ADB is paused."
+                    : _gate.AllowsAutomaticAdb
+                        ? "Automatic headset ADB is off (apply-on-connect and wireless reconnect are both off)."
+                        : "Headset ADB watcher idle — no confirmed PCVR session.");
             }
 
             _app.RefreshTrayUi();
@@ -169,13 +300,16 @@ public sealed class HeadsetWatchService : IDisposable
             _timer.Start();
             _app.Log.Info(timedPauseEnded
                 ? "Headset ADB watcher resumed after timed pause."
-                : "Headset ADB watcher started.");
+                : "Headset ADB watcher started for the active PCVR session.");
             BeginPoll();
         }
 
         ApplyCadence(_lastSerial is not null);
         _app.RefreshTrayUi();
     }
+
+    public static bool ShouldArmAutomaticWatcher(bool automaticSessionAllowed, HeadsetSettings settings) =>
+        AdbSessionGate.ShouldArmAutomaticWatcher(automaticSessionAllowed, settings);
 
     /// <summary>
     /// True when ADB lists a different transport serial than the last poll.
@@ -192,7 +326,6 @@ public sealed class HeadsetWatchService : IDisposable
     internal static bool ShouldApplyGlobalBaselineOnAdbApply(bool gameProfileActive, bool applyGlobalWhenHeadsetConnects) =>
         !gameProfileActive && applyGlobalWhenHeadsetConnects;
 
-    /// <summary>Clears an expired timed pause. Returns true when pause flags were cleared.</summary>
     private bool ExpireTimedPauseIfNeeded()
     {
         var settings = _app.Settings.Current.Headset;
@@ -209,9 +342,17 @@ public sealed class HeadsetWatchService : IDisposable
         settings.AdbWatcherPaused = false;
         settings.AdbWatcherPausedUntilUtc = null;
         _app.Settings.Save();
-        _app.Log.Info("Timed ADB pause ended — headset watcher will resume.");
-        _app.TrayNotify("ADB resumed", "Timed pause ended. Headset ADB watching is on again.");
-        return true;
+        var willWatch = ShouldArmAutomaticWatcher(_gate.AllowsAutomaticAdb, settings);
+        var message = willWatch
+            ? "Timed ADB pause ended — headset watcher resumed."
+            : "Timed ADB pause ended — automatic headset ADB stays idle until a PCVR session.";
+        _app.Log.Info(message);
+        _app.TrayNotify(
+            "ADB resumed",
+            willWatch
+                ? "Timed pause ended. Headset ADB watching is on for this PCVR session."
+                : "Timed pause ended. Automatic headset ADB stays idle until a PCVR session.");
+        return willWatch;
     }
 
     private void ArmResumeTimer()
@@ -229,7 +370,6 @@ public sealed class HeadsetWatchService : IDisposable
             return;
         }
 
-        // DispatcherTimer max practical interval is fine for a few hours.
         _resumeTimer.Interval = remaining > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : remaining;
         _resumeTimer.Start();
     }
@@ -247,21 +387,31 @@ public sealed class HeadsetWatchService : IDisposable
 
     private void BeginPoll()
     {
+        if (!ShouldArmAutomaticWatcher(_gate.AllowsAutomaticAdb, _app.Settings.Current.Headset))
+        {
+            return;
+        }
+
+        if (_app.LinkSessionWatch?.DeferAutomaticAdb == true)
+        {
+            return;
+        }
+
         if (Interlocked.Exchange(ref _pollGate, 1) != 0)
         {
             return;
         }
 
+        var generation = _gate.Generation;
         Task.Run(() =>
         {
             try
             {
-                Poll();
+                Poll(generation);
             }
             catch (Exception ex)
             {
-                _app.Dispatcher.BeginInvoke(() =>
-                    _app.Log.Warn($"Headset ADB: {ex.Message}"));
+                InvokeIfCurrent(generation, () => _app.Log.Warn($"Headset ADB: {ex.Message}"));
             }
             finally
             {
@@ -270,83 +420,91 @@ public sealed class HeadsetWatchService : IDisposable
         });
     }
 
-    private void Poll()
+    private void Poll(int generation)
     {
-        var settings = _app.Settings.Current.Headset;
-        if (settings.AdbWatcherPaused
-            || (!settings.ApplyWhenHeadsetConnects
-                && !settings.WirelessAutoReconnect
-                && !settings.HeadsetOnlyWirelessAdb))
+        if (!CanPoll(generation))
         {
-            _app.Dispatcher.BeginInvoke(SyncWatch);
             return;
         }
 
-        // Re-check pause after the gate — Pause may have landed while this poll was queued.
-        if (_app.Settings.Current.Headset.AdbWatcherPaused)
+        MaybeAutoReconnectWireless(generation);
+
+        if (!CanPoll(generation))
         {
-            _app.Dispatcher.BeginInvoke(SyncWatch);
-            return;
-        }
-
-        MaybeAutoReconnectWireless();
-
-        if (_app.Settings.Current.Headset.AdbWatcherPaused)
-        {
-            _app.Dispatcher.BeginInvoke(SyncWatch);
-            return;
-        }
-
-        MaybeSweepNonHeadsetWireless();
-
-        if (_app.Settings.Current.Headset.AdbWatcherPaused)
-        {
-            _app.Dispatcher.BeginInvoke(SyncWatch);
             return;
         }
 
         var quest = _app.Adb.FindQuest();
+        if (!CanPoll(generation))
+        {
+            return;
+        }
+
         var serial = quest?.IsReady == true ? quest.Serial : null;
         if (serial is null)
         {
             SessionFlightRecorder.ObserveAdb(null, wireless: false, caller: nameof(HeadsetWatchService));
-            if (_lastSerial is not null)
+            string? was;
+            lock (_stateLock)
             {
-                var was = _lastSerial;
-                _app.Dispatcher.BeginInvoke(() =>
-                    _app.Log.Info($"ADB headset disconnected — was {was}."));
+                if (!IsCurrent(generation))
+                {
+                    return;
+                }
+
+                was = _lastSerial;
+                _lastSerial = null;
+                _appliedForSerial = false;
             }
 
-            _lastSerial = null;
-            _appliedForSerial = false;
+            if (was is not null)
+            {
+                InvokeIfCurrent(generation, () => _app.Log.Info($"ADB headset disconnected — was {was}."));
+            }
+
             var ignored = _app.Adb.DescribeIgnoredDevices();
+            if (!CanPoll(generation))
+            {
+                return;
+            }
+
             if (ignored is not null && !string.Equals(ignored, _lastIgnoredMessage, StringComparison.Ordinal))
             {
                 _lastIgnoredMessage = ignored;
-                _app.Dispatcher.BeginInvoke(() => _app.Log.Info(ignored));
+                InvokeIfCurrent(generation, () => _app.Log.Info(ignored));
             }
 
-            _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: false));
+            InvokeIfCurrent(generation, () => ApplyCadence(headsetPresent: false));
             return;
         }
 
         _lastIgnoredMessage = null;
 
-        var connected = IsNewAdbConnection(_lastSerial, serial);
+        bool connected;
+        lock (_stateLock)
+        {
+            if (!IsCurrent(generation))
+            {
+                return;
+            }
+
+            connected = IsNewAdbConnection(_lastSerial, serial);
+            _lastSerial = serial;
+        }
+
         var wireless = AdbService.LooksLikeWirelessSerial(serial);
         SessionFlightRecorder.ObserveAdb(serial, wireless, caller: nameof(HeadsetWatchService));
-        _lastSerial = serial;
         if (connected)
         {
             var transport = wireless ? "wireless" : "USB";
             var label = string.IsNullOrWhiteSpace(quest?.Model) ? serial : $"{quest!.Model} ({serial})";
-            _app.Dispatcher.BeginInvoke(() =>
+            InvokeIfCurrent(generation, () =>
                 _app.Log.Info($"ADB headset connected ({transport}) — {label}."));
         }
 
         if (!connected && _appliedForSerial)
         {
-            _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: true));
+            InvokeIfCurrent(generation, () => ApplyCadence(headsetPresent: true));
             return;
         }
 
@@ -354,7 +512,7 @@ public sealed class HeadsetWatchService : IDisposable
         {
             if (connected)
             {
-                _app.Dispatcher.BeginInvoke(() =>
+                InvokeIfCurrent(generation, () =>
                 {
                     const string message = "ADB headset connect — auto-apply is off (enable under Headset settings).";
                     _app.Log.Info(message);
@@ -362,13 +520,23 @@ public sealed class HeadsetWatchService : IDisposable
                 });
             }
 
-            _app.Dispatcher.BeginInvoke(() => ApplyCadence(headsetPresent: true));
+            InvokeIfCurrent(generation, () => ApplyCadence(headsetPresent: true));
+            return;
+        }
+
+        if (!CanPoll(generation))
+        {
             return;
         }
 
         try
         {
             var result = _app.Headset.Apply(_app.Settings.Current.Headset);
+            if (!CanPoll(generation))
+            {
+                return;
+            }
+
             SessionFlightRecorder.Mutation(
                 "headset-adb",
                 "Apply",
@@ -384,8 +552,13 @@ public sealed class HeadsetWatchService : IDisposable
                     reason: connected ? "adb-connect" : "adb-reapply");
             }
 
+            if (!CanPoll(generation))
+            {
+                return;
+            }
+
             _appliedForSerial = true;
-            _app.Dispatcher.BeginInvoke(() =>
+            InvokeIfCurrent(generation, () =>
             {
                 _app.Settings.Save();
                 _app.Log.Info($"Applied headset ADB settings — {result}");
@@ -405,7 +578,7 @@ public sealed class HeadsetWatchService : IDisposable
         }
         catch (Exception ex)
         {
-            _app.Dispatcher.BeginInvoke(() =>
+            InvokeIfCurrent(generation, () =>
             {
                 _app.Log.Warn($"Headset ADB: {ex.Message}");
                 if (connected)
@@ -418,12 +591,11 @@ public sealed class HeadsetWatchService : IDisposable
         }
     }
 
-    private void MaybeAutoReconnectWireless()
+    private void MaybeAutoReconnectWireless(int generation)
     {
         var settings = _app.Settings.Current.Headset;
-        if (settings.AdbWatcherPaused
-            || !settings.WirelessAutoReconnect
-            || settings.WirelessEndpoint is null)
+        if (!CanPoll(generation)
+            || !AdbSessionGate.ShouldAttemptWirelessReconnect(_gate.AllowsAutomaticAdb, settings))
         {
             return;
         }
@@ -433,48 +605,67 @@ public sealed class HeadsetWatchService : IDisposable
             return;
         }
 
-        // Skip if any ready VR headset is already listed (USB or wireless).
         if (_app.Adb.FindQuest()?.IsReady == true)
+        {
+            return;
+        }
+
+        if (!CanPoll(generation))
         {
             return;
         }
 
         _lastWirelessAttemptUtc = DateTime.UtcNow;
         var summary = _app.Adb.TryAutoReconnect(settings);
-        if (string.IsNullOrWhiteSpace(summary))
+        if (!CanPoll(generation) || string.IsNullOrWhiteSpace(summary))
         {
             return;
         }
 
         if (summary.Contains("Connected", StringComparison.OrdinalIgnoreCase)
-            || summary.Contains("Already connected", StringComparison.OrdinalIgnoreCase))
+            || summary.Contains("Already connected", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("auto-reconnect", StringComparison.OrdinalIgnoreCase)
+            || summary.Contains("not a VR headset", StringComparison.OrdinalIgnoreCase))
         {
-            _app.Log.Info(summary);
-        }
-        else if (summary.Contains("auto-reconnect", StringComparison.OrdinalIgnoreCase)
-                 || summary.Contains("not a VR headset", StringComparison.OrdinalIgnoreCase))
-        {
-            // Soft fail — don't spam WARN every 30s while headset is off or a phone is on the LAN.
-            _app.Log.Info(summary);
+            InvokeIfCurrent(generation, () => _app.Log.Info(summary));
         }
     }
 
-    private void MaybeSweepNonHeadsetWireless()
+    private bool CanPoll(int generation)
     {
+        if (_app.LinkSessionWatch?.DeferAutomaticAdb == true)
+        {
+            return false;
+        }
+
         var settings = _app.Settings.Current.Headset;
-        if (!settings.HeadsetOnlyWirelessAdb || settings.AdbWatcherPaused)
+        lock (_stateLock)
         {
-            return;
+            return IsCurrent(generation)
+                   && ShouldArmAutomaticWatcher(_gate.AllowsAutomaticAdb, settings);
         }
+    }
 
-        var summary = _app.Adb.SweepNonHeadsetWireless(settings);
-        if (string.IsNullOrWhiteSpace(summary)
-            || string.Equals(summary, _lastSweepMessage, StringComparison.Ordinal))
+    private bool IsCurrent(int generation) => _gate.IsCurrent(generation);
+
+    private void ClearConnectionState()
+    {
+        _lastSerial = null;
+        _appliedForSerial = false;
+        _lastIgnoredMessage = null;
+        _lastWirelessAttemptUtc = DateTime.MinValue;
+    }
+
+    private void InvokeIfCurrent(int generation, Action action)
+    {
+        _app.Dispatcher.BeginInvoke(() =>
         {
-            return;
-        }
+            if (!IsCurrent(generation) || !_gate.AllowsAutomaticAdb)
+            {
+                return;
+            }
 
-        _lastSweepMessage = summary;
-        _app.Log.Info(summary);
+            action();
+        });
     }
 }

@@ -15,6 +15,16 @@ public sealed class LinkSessionWatchService : IDisposable
     private int _pollGate;
     private int _endConfirmPolls;
     private DateTime _resumeQuietUntilUtc = DateTime.MinValue;
+    private bool _syncAdbAfterResumeQuiet;
+    private int _deferAutomaticAdb;
+
+    public bool IsResumeQuiet => DateTime.UtcNow < _resumeQuietUntilUtc;
+
+    /// <summary>
+    /// True during the post-sleep quiet window and until the settled probe has updated ADB.
+    /// Headset polling must not run in that gap.
+    /// </summary>
+    public bool DeferAutomaticAdb => IsResumeQuiet || Volatile.Read(ref _deferAutomaticAdb) == 1;
 
     /// <summary>Ignore connect/disconnect edges while Windows audio / DeviceCache settle after sleep.</summary>
     private static readonly TimeSpan ResumeQuiet = TimeSpan.FromSeconds(20);
@@ -48,6 +58,8 @@ public sealed class LinkSessionWatchService : IDisposable
     public void NotifySystemResumed()
     {
         _resumeQuietUntilUtc = DateTime.UtcNow + ResumeQuiet;
+        _syncAdbAfterResumeQuiet = true;
+        Volatile.Write(ref _deferAutomaticAdb, 1);
         _endConfirmPolls = 0;
         _app.LinkConnection.InvalidateCache();
         try
@@ -88,6 +100,11 @@ public sealed class LinkSessionWatchService : IDisposable
             }
             catch (Exception ex)
             {
+                if (!IsResumeQuiet)
+                {
+                    Volatile.Write(ref _deferAutomaticAdb, 0);
+                }
+
                 _app.Dispatcher.BeginInvoke(() =>
                     _app.Log.Warn($"Link session watcher failed: {ex.Message}"));
             }
@@ -112,6 +129,24 @@ public sealed class LinkSessionWatchService : IDisposable
             _lastActiveKind = live ? status.Kind : null;
             _endConfirmPolls = 0;
             return;
+        }
+
+        if (_syncAdbAfterResumeQuiet)
+        {
+            _syncAdbAfterResumeQuiet = false;
+            var syncStatus = status;
+            var syncLive = live;
+            _app.Dispatcher.BeginInvoke(() =>
+            {
+                try
+                {
+                    SyncAdbToSettledSession(syncStatus, syncLive);
+                }
+                finally
+                {
+                    Volatile.Write(ref _deferAutomaticAdb, 0);
+                }
+            });
         }
 
         if (string.Equals(fingerprint, _lastFingerprint, StringComparison.Ordinal))
@@ -141,6 +176,7 @@ public sealed class LinkSessionWatchService : IDisposable
             {
                 _app.SessionRecover.NotifySessionStarted();
                 LogConnected(status);
+                _app.HeadsetWatch?.NotifyPcvrSession(status);
                 _app.HeadsetAnnouncer.AnnounceSessionConnected(status);
             });
             return;
@@ -194,6 +230,7 @@ public sealed class LinkSessionWatchService : IDisposable
             _ => "Link session ended"
         };
 
+        _app.HeadsetWatch?.NotifyPcvrSessionEnded();
         if (status.Summary.Contains("auto-connect", StringComparison.OrdinalIgnoreCase))
         {
             _app.Log.Info($"{ended} — Meta DeviceCache still shows auto-connect (headset on Wi‑Fi).");
@@ -208,6 +245,21 @@ public sealed class LinkSessionWatchService : IDisposable
         _app.SessionRecover.NotifySessionEnded(previousActive, ended);
         _app.HeadsetAnnouncer.AnnounceSessionDisconnected(previousActive);
         _app.AudioWatch?.NotifyPcvrSessionEnded($"{ended} — restoring desktop / fallback audio.");
+    }
+
+    /// <summary>
+    /// After the post-sleep quiet window, align ADB with the settled Link probe.
+    /// One reading is enough here because the quiet window already absorbed the blip.
+    /// </summary>
+    private void SyncAdbToSettledSession(VrConnectionStatus status, bool live)
+    {
+        if (live && IsLivePcvrSession(status))
+        {
+            _app.HeadsetWatch?.NotifyPcvrSession(status);
+            return;
+        }
+
+        _app.HeadsetWatch?.NotifyPcvrSessionEnded();
     }
 
     private void LogConnected(VrConnectionStatus status)

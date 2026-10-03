@@ -36,6 +36,32 @@ public sealed class AdbService
     private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan OutputDrainTimeout = TimeSpan.FromSeconds(3);
     private readonly SemaphoreSlim _commandGate = new(1, 1);
+    private AdbActivityMode _activityMode = AdbActivityMode.Idle;
+
+    public AdbActivityMode ActivityMode => _activityMode;
+
+    public void NoteSessionActive()
+    {
+        if (_activityMode != AdbActivityMode.ManualCheck)
+        {
+            _activityMode = AdbActivityMode.SessionActive;
+        }
+    }
+
+    public void NoteSessionIdle()
+    {
+        if (_activityMode != AdbActivityMode.ManualCheck)
+        {
+            _activityMode = AdbActivityMode.Idle;
+        }
+
+        InvalidateDeviceCache();
+    }
+
+    public void NoteManualCheck() => _activityMode = AdbActivityMode.ManualCheck;
+
+    public void NoteManualCheckFinished(bool sessionActive) =>
+        _activityMode = sessionActive ? AdbActivityMode.SessionActive : AdbActivityMode.Idle;
 
     public void Refresh()
     {
@@ -272,32 +298,13 @@ public sealed class AdbService
     }
 
     /// <summary>
-    /// Connect, then (when headset-only is on) drop the session if it is a phone/tablet/emulator
-    /// and disconnect other non-headset wireless devices ADB already listed.
+    /// Connect to one headset endpoint. Does not disconnect other ADB devices.
+    /// Quest commands still run only against a classified headset serial.
     /// </summary>
     public string ConnectWirelessHeadset(string host, int port, HeadsetSettings settings)
     {
-        var summary = ConnectWireless(host, port);
-        if (settings.HeadsetOnlyWirelessAdb)
-        {
-            var rejected = RejectNonHeadsetWireless(FormatEndpoint(host, port));
-            if (rejected is not null)
-            {
-                throw new InvalidOperationException(rejected);
-            }
-
-            // While ADB is paused for other devices, do not disconnect phones/TVs already on the bus.
-            if (!settings.AdbWatcherPaused)
-            {
-                var swept = SweepNonHeadsetWireless(settings);
-                if (!string.IsNullOrWhiteSpace(swept))
-                {
-                    summary = $"{summary} {swept}";
-                }
-            }
-        }
-
-        return summary;
+        _ = settings;
+        return ConnectWireless(host, port);
     }
 
     /// <summary>
@@ -346,18 +353,16 @@ public sealed class AdbService
 
     public string DisconnectWireless(string? host = null, int? port = null)
     {
-        string output;
-        if (!string.IsNullOrWhiteSpace(host) && port is int p)
+        if (string.IsNullOrWhiteSpace(host) || port is not int p)
         {
-            var endpoint = FormatEndpoint(host, p);
-            output = Run("disconnect", endpoint);
-            InvalidateDeviceCache();
-            return $"Disconnected {endpoint}. {TrimAdbNoise(output)}".Trim();
+            throw new InvalidOperationException(
+                "Refusing adb disconnect with no target. Pass the Quest host and port so phones, TVs, and other wireless devices stay connected.");
         }
 
-        output = Run("disconnect");
+        var endpoint = FormatEndpoint(host, p);
+        var output = Run("disconnect", endpoint);
         InvalidateDeviceCache();
-        return $"Disconnected wireless ADB sessions. {TrimAdbNoise(output)}".Trim();
+        return $"Disconnected {endpoint}. {TrimAdbNoise(output)}".Trim();
     }
 
     /// <summary>
@@ -416,96 +421,14 @@ public sealed class AdbService
     }
 
     /// <summary>
-    /// Disconnect wireless (IP:port) sessions that are not a VR headset.
-    /// Does not touch USB devices. Leaves the saved endpoint alone while it is still unauthorized
-    /// (Quest waiting for the debugging prompt).
+    /// Retired. Previously disconnected phones, TVs, emulators, and other wireless devices.
+    /// Kept so older call sites cannot opt back into that behavior. Does not run ADB.
     /// </summary>
     public string? SweepNonHeadsetWireless(HeadsetSettings settings)
     {
-        if (!settings.HeadsetOnlyWirelessAdb)
-        {
-            return null;
-        }
-
-        var kept = settings.WirelessEndpoint;
-        var dropped = new List<string>();
-        foreach (var device in ListDevices(force: true))
-        {
-            if (!LooksLikeWirelessSerial(device.Serial))
-            {
-                continue;
-            }
-
-            var (isVr, probe) = Classify(device);
-            if (isVr)
-            {
-                continue;
-            }
-
-            if (device.NeedsAuthorization && SameWirelessEndpoint(device.Serial, kept))
-            {
-                continue;
-            }
-
-            try
-            {
-                Run("disconnect", device.Serial);
-                dropped.Add(VrHeadsetClassifier.DescribeIgnored(device, probe));
-            }
-            catch
-            {
-                // Best-effort — ADB may already have dropped the session.
-            }
-        }
-
-        if (dropped.Count == 0)
-        {
-            return null;
-        }
-
-        InvalidateDeviceCache();
-        return dropped.Count == 1
-            ? $"Disconnected wireless ADB that is not a VR headset: {dropped[0]}"
-            : $"Disconnected {dropped.Count} wireless ADB devices that are not VR headsets.";
+        _ = settings;
+        return null;
     }
-
-    private string? RejectNonHeadsetWireless(string endpoint)
-    {
-        var device = ListDevices(force: true)
-            .FirstOrDefault(item => SameWirelessEndpoint(item.Serial, endpoint));
-        if (device is null)
-        {
-            return null;
-        }
-
-        if (device.NeedsAuthorization)
-        {
-            return null;
-        }
-
-        var (isVr, probe) = Classify(device);
-        if (isVr)
-        {
-            return null;
-        }
-
-        try
-        {
-            Run("disconnect", device.Serial);
-        }
-        catch
-        {
-            // still report
-        }
-
-        InvalidateDeviceCache();
-        return $"Disconnected {endpoint} — {VrHeadsetClassifier.DescribeIgnored(device, probe)} "
-               + "Wireless ADB stays headset-only; phones, tablets, and emulators are dropped.";
-    }
-
-    private static bool SameWirelessEndpoint(string serial, string? endpoint) =>
-        !string.IsNullOrWhiteSpace(endpoint)
-        && string.Equals(serial.Trim(), endpoint.Trim(), StringComparison.OrdinalIgnoreCase);
 
     public AdbDevice? FindUsbHeadset()
     {
@@ -626,6 +549,7 @@ public sealed class AdbService
 
     public string DescribeCachedStatus()
     {
+        var prefix = AdbSessionGate.PassiveStatusLabel(_activityMode);
         IReadOnlyList<AdbDevice>? devices;
         DateTime cachedAt;
         lock (_cacheLock)
@@ -636,9 +560,7 @@ public sealed class AdbService
 
         if (devices is null)
         {
-            return IsAvailable
-                ? "ADB ready. Status will refresh in the background."
-                : "ADB not checked yet.";
+            return prefix;
         }
 
         var age = DateTime.UtcNow - cachedAt;
@@ -651,21 +573,27 @@ public sealed class AdbService
                         && !LooksLikeWirelessSerial(device.Serial)
                         && !VrHeadsetClassifier.IsObviousEmulator(device));
 
+        string detail;
         if (quest is null)
         {
             var ignored = devices.FirstOrDefault(device => !VrHeadsetClassifier.IsAllowedVrHeadset(device));
-            return ignored is null
-                ? "ADB ready. No VR headset connected." + suffix
+            detail = ignored is null
+                ? "No VR headset connected." + suffix
                 : $"No VR headset. ADB sees {ignored.Serial} ({ignored.Model ?? ignored.State})." + suffix;
         }
-
-        if (quest.NeedsAuthorization)
+        else if (quest.NeedsAuthorization)
         {
-            return $"Headset {quest.Serial} is unauthorized." + suffix;
+            detail = $"Headset {quest.Serial} is unauthorized." + suffix;
+        }
+        else
+        {
+            var transport = LooksLikeWirelessSerial(quest.Serial) ? "wireless" : "USB";
+            detail = $"VR headset connected ({transport}): {quest.Model ?? "Quest"} ({quest.Serial})." + suffix;
         }
 
-        var transport = LooksLikeWirelessSerial(quest.Serial) ? "wireless" : "USB";
-        return $"VR headset connected ({transport}): {quest.Model ?? "Quest"} ({quest.Serial})." + suffix;
+        return _activityMode == AdbActivityMode.Idle
+            ? prefix + " Last check: " + detail
+            : prefix + " " + detail;
     }
 
     public HeadsetIdentity ReadIdentity(string? trustedSerial)
@@ -1111,6 +1039,11 @@ public sealed class AdbService
     private static bool ContainsIgnore(string? value, string token) =>
         value?.Contains(token, StringComparison.OrdinalIgnoreCase) == true;
 
+    /// <summary>
+    /// Bundled platform-tools win over the Android SDK, SideQuest, and PATH.
+    /// No concrete server-version fight was found in this repo, so selection stays deterministic.
+    /// Idle coexistence comes from not executing ADB, not from swapping clients.
+    /// </summary>
     private static string? FindAdb()
     {
         foreach (var candidate in EnumerateCandidates())

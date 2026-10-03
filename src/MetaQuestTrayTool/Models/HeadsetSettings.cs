@@ -128,18 +128,25 @@ public sealed class HeadsetSettings
     /// <summary>Wireless ADB port. Classic tcpip mode is 5555; Wireless debugging uses a dynamic port.</summary>
     public int WirelessPort { get; set; } = 5555;
 
-    /// <summary>When no USB headset is present, periodically try <c>adb connect</c> to the saved host:port.</summary>
+    /// <summary>
+    /// When a PCVR session is active and no ready Quest is listed, try <c>adb connect</c> to the saved host:port.
+    /// This does not poll while the tray is idle.
+    /// </summary>
     public bool WirelessAutoReconnect { get; set; }
 
     /// <summary>
-    /// Drop wireless ADB sessions that are not a VR headset (phones/tablets Adb mDNS-discovers on the LAN).
-    /// USB devices are left listed; commands still never run on them.
+    /// Retired. Older builds disconnected non-headset wireless ADB devices and defaulted this to true.
+    /// It is forced off on load so a saved default cannot keep evicting phones, TVs, or emulators.
+    /// Quest commands stay targeted through headset classification instead.
     /// </summary>
-    public bool HeadsetOnlyWirelessAdb { get; set; } = true;
+    public bool HeadsetOnlyWirelessAdb { get; set; }
+
+    /// <summary>Set once exclusive wireless disconnect has been cleared. Kept so old files cannot opt back in silently.</summary>
+    public bool ExclusiveWirelessSweepRetired { get; set; }
 
     /// <summary>
-    /// When true, the headset ADB watcher does not poll, auto-reconnect, or disconnect other devices.
-    /// Use while debugging a phone/TV/Fire Stick so this tray does not steal the ADB session.
+    /// Suppresses automatic PCVR-session ADB. Manual actions still run when requested.
+    /// Resume allows the next live PCVR session to use ADB; it does not poll while idle.
     /// </summary>
     public bool AdbWatcherPaused { get; set; }
 
@@ -160,6 +167,17 @@ public sealed class HeadsetSettings
 
             return $"{host}:{WirelessPort}";
         }
+    }
+
+    /// <summary>
+    /// Clears exclusive non-headset disconnect. Returns true when a saved true value was turned off.
+    /// </summary>
+    public static bool RetireExclusiveWirelessSweep(HeadsetSettings settings)
+    {
+        var hadExclusive = settings.HeadsetOnlyWirelessAdb;
+        settings.HeadsetOnlyWirelessAdb = false;
+        settings.ExclusiveWirelessSweepRetired = true;
+        return hadExclusive;
     }
 
     private List<string> _customAdbCommands = [];

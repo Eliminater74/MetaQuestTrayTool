@@ -205,9 +205,13 @@ public partial class App : System.Windows.Application
         Settings.Save();
         Log.Info(StartupRegistration.DescribeStatus());
         Adb.Refresh();
-        Headset.ReadIdentity(Settings.Current.Headset);
-        Settings.Save();
-        Log.Info(Adb.DescribeStatus());
+        Log.Info(AdbSessionGate.IdleLogMessage);
+        if (Settings.RetiredExclusiveWirelessSweep)
+        {
+            Log.Info(
+                "Retired automatic disconnect of non-headset wireless ADB devices. Phones, TVs, emulators, and other ADB apps stay connected.");
+        }
+
         Oculus.Refresh();
         Log.Info(Oculus.DescribeStatus());
         var metaCompatibility = RuntimeCompatibility.Check(remember: true, runDebugToolProbe: false);
@@ -1060,6 +1064,7 @@ public partial class App : System.Windows.Application
 
         try
         {
+            // Explicit profile/custom ADB. Saved commands do not keep a background watcher alive.
             var quest = Headset.ReadIdentity(Settings.Current.Headset);
             if (!quest.IsVrHeadset || !quest.IsReady || quest.IsRogue || string.IsNullOrWhiteSpace(quest.AdbSerial))
             {
