@@ -11,7 +11,6 @@ public static class SystemInfoService
         var app = App.Instance;
         app.Oculus.Refresh();
         var openXr = app.OpenXr.ReadActiveKind();
-        var headset = app.Headset.ReadIdentity(app.Settings.Current.Headset);
         var link = app.LinkConnection.Probe(includeEnumHmd: includeEnumHmd);
         var text = new StringBuilder();
         text.AppendLine($"{AppInfo.ProductName} {AppInfo.Version}");
@@ -108,51 +107,14 @@ public static class SystemInfoService
         text.AppendLine($"  Virtual Desktop running: {link.VirtualDesktopRunning}");
 
         text.AppendLine();
-        text.AppendLine("ADB (USB / wireless debugging — optional)");
-        text.AppendLine($"  Status: {headset.DescribeAdbBanner(link)}");
-        text.AppendLine($"  VR headset on ADB: {headset.IsVrHeadset}");
-        text.AppendLine($"  ADB ready: {headset.IsReady}");
-        text.AppendLine($"  ADB state: {headset.State ?? "disconnected"}");
-        if (headset.IsIgnored && !string.IsNullOrWhiteSpace(headset.IgnoreReason))
-        {
-            text.AppendLine($"  Ignored: {headset.IgnoreReason}");
-        }
-        text.AppendLine($"  Model: {headset.Model ?? "—"}");
-        text.AppendLine($"  Device: {headset.Device ?? "—"}");
-        text.AppendLine($"  Manufacturer: {headset.Manufacturer ?? "—"}");
-        text.AppendLine($"  Hardware serial: {headset.Serial ?? "—"}");
-        text.AppendLine($"  ADB serial: {headset.AdbSerial ?? "—"}");
-        text.AppendLine($"  Android: {headset.AndroidVersion ?? "—"}");
-        text.AppendLine($"  Build: {headset.BuildDisplay ?? "—"}");
-        text.AppendLine($"  Fingerprint: {headset.Fingerprint ?? "—"}");
+        text.AppendLine("ADB (on demand — this report does not query the headset)");
+        text.AppendLine($"  Status: {app.Adb.DescribeCachedStatus()}");
+        text.AppendLine($"  Activity: {app.Adb.ActivityMode}");
         text.AppendLine($"  Trusted serial: {app.Settings.Current.Headset.TrustedSerial ?? "(none yet)"}");
-        text.AppendLine($"  Headset-only wireless ADB: {app.Settings.Current.Headset.HeadsetOnlyWirelessAdb}");
+        text.AppendLine($"  Trusted model: {app.Settings.Current.Headset.TrustedModel ?? "—"}");
+        text.AppendLine("  Exclusive wireless disconnect: retired");
         text.AppendLine($"  Trust required: {app.Settings.Current.Headset.RequireTrustedHeadset}");
-        text.AppendLine($"  This device trusted: {headset.IsTrusted}");
-        text.AppendLine($"  Rogue / blocked: {headset.IsRogue}");
-        if (headset.Runtime is { } runtime)
-        {
-            text.AppendLine($"  Battery / Wi‑Fi: {runtime.Summary}");
-            if (runtime.BatteryPercent is int pct)
-            {
-                text.AppendLine($"  Battery percent: {pct}%");
-            }
-
-            if (!string.IsNullOrWhiteSpace(runtime.ChargeStatus))
-            {
-                text.AppendLine($"  Charge status: {runtime.ChargeStatus}");
-            }
-
-            if (!string.IsNullOrWhiteSpace(runtime.WifiSsid))
-            {
-                text.AppendLine($"  Wi‑Fi SSID: {runtime.WifiSsid}");
-            }
-
-            if (runtime.WifiRssi is int rssi)
-            {
-                text.AppendLine($"  Wi‑Fi RSSI: {rssi} dBm");
-            }
-        }
+        text.AppendLine("  Live identity, battery, and Wi‑Fi: use Headset → Check ADB now");
 
         if (app.DebugTool.LastHeadsetSerials.Count > 0)
         {
@@ -165,7 +127,8 @@ public static class SystemInfoService
         text.AppendLine($"  Meta Link registry: {caps.AllowsMetaLinkRegistry}");
         text.AppendLine($"  Oculus Debug Tool (SS/ASW): {caps.AllowsOculusDebugTool}");
         text.AppendLine($"  OpenXR switch: {caps.AllowsOpenXrSwitch}");
-        text.AppendLine($"  Headset ADB tweaks: {caps.AllowsHeadsetAdb}");
+        text.AppendLine(
+            $"  Headset ADB tweaks: {(link.SessionActive && caps.AllowsHeadsetAdb ? "allowed for this live session" : "idle / on demand")}");
         if (!string.IsNullOrWhiteSpace(caps.Banner))
         {
             text.AppendLine($"  Note: {caps.Banner}");

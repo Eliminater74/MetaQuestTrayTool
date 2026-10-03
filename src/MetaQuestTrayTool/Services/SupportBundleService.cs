@@ -121,7 +121,7 @@ public sealed class SupportBundleService
         text.AppendLine($"Headset trust configured: {!string.IsNullOrWhiteSpace(settings.Headset.TrustedSerial)}");
         text.AppendLine($"Wireless ADB configured: {!string.IsNullOrWhiteSpace(settings.Headset.WirelessHost)}");
         text.AppendLine($"Wireless auto reconnect: {settings.Headset.WirelessAutoReconnect}");
-        text.AppendLine($"Headset-only wireless ADB: {settings.Headset.HeadsetOnlyWirelessAdb}");
+        text.AppendLine("Headset-only wireless ADB: retired (other ADB devices stay connected)");
         text.AppendLine($"Link globals: {settings.LinkSettings.Describe()}");
         text.AppendLine($"Game globals: {settings.DefaultGameSettings.Describe()}");
         text.AppendLine($"OpenXR preferred runtime: {settings.OpenXr.PreferredRuntime}");
@@ -156,7 +156,7 @@ public sealed class SupportBundleService
         RuntimeSnapshot? snapshot = null;
         try
         {
-            snapshot = _app.RuntimeSnapshots.Capture(includeHeadset: true, force: true);
+            snapshot = _app.RuntimeSnapshots.Capture(includeHeadset: false, force: true);
         }
         catch
         {

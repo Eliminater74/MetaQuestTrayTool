@@ -20,13 +20,11 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         InitializeComponent();
         ReadyItemsList.ItemsSource = _readyItems;
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(12) };
-        var tick = 0;
         _refreshTimer.Tick += (_, _) =>
         {
             if (IsVisible && IsLoaded)
             {
-                tick++;
-                RefreshBanners(includeAdb: tick % 3 == 0);
+                RefreshBanners(includeAdb: false);
                 RefreshReadyChecklist();
             }
         };
@@ -58,7 +56,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
 
     public void Refresh()
     {
-        var snapshot = App.Instance.RuntimeSnapshots.Capture(includeHeadset: true, force: true);
+        var snapshot = App.Instance.RuntimeSnapshots.Capture(includeHeadset: false, force: true);
         RefreshBanners(snapshot);
         RefreshReadyChecklist(snapshot);
         var generation = BeginReportOperation("Building report…");
@@ -99,7 +97,7 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
         }
     }
 
-    private void RefreshBanners(bool includeAdb = true)
+    private void RefreshBanners(bool includeAdb = false)
     {
         RefreshBanners(App.Instance.RuntimeSnapshots.Capture(includeHeadset: includeAdb));
     }
@@ -139,6 +137,11 @@ public partial class InfoPage : System.Windows.Controls.UserControl, IShellPage
                 : headset.IsReady
                     ? (MediaBrush)FindResource("AppTextBrush")
                     : (MediaBrush)FindResource("AppMutedBrush");
+        }
+        else
+        {
+            HeadsetBanner.Text = App.Instance.Adb.DescribeCachedStatus();
+            HeadsetBanner.Foreground = (MediaBrush)FindResource("AppMutedBrush");
         }
 
         var steamTip = App.Instance.SteamLinkAssist.DescribeOpenXrMismatch(connection);

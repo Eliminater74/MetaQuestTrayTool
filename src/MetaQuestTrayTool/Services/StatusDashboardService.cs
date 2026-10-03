@@ -12,7 +12,7 @@ public sealed class StatusDashboardService
 
     public IReadOnlyList<StatusChipVm> BuildChips(RuntimeSnapshot? snapshot = null)
     {
-        snapshot ??= _app.RuntimeSnapshots.Capture(includeHeadset: true);
+        snapshot ??= _app.RuntimeSnapshots.Capture(includeHeadset: false);
         var link = snapshot.Link;
         var steamVr = snapshot.SteamVr;
         var openXr = snapshot.OpenXr;
@@ -123,21 +123,22 @@ public sealed class StatusDashboardService
                 link.VirtualDesktopRunning ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("Headset ADB",
-                headset?.IsReady == true ? "Connected" : "Not connected",
-                headset?.IsReady == true
-                    ? $"{headset.Model ?? "Quest"} · {headset.Serial ?? headset.AdbSerial}"
-                    : "Optional — USB or wireless debugging for headset props",
-                headset?.IsReady == true
+                _app.Adb.ActivityMode switch
+                {
+                    AdbActivityMode.SessionActive => "Active for PCVR session",
+                    AdbActivityMode.ManualCheck => "Manual check",
+                    _ => "Idle (on demand)"
+                },
+                _app.Adb.DescribeCachedStatus(),
+                _app.Adb.ActivityMode == AdbActivityMode.SessionActive
                     ? StatusChipKind.On
-                    : headset?.IsRogue == true
-                        ? StatusChipKind.Fail
-                        : StatusChipKind.Off),
+                    : StatusChipKind.Off),
 
             Chip("Battery / Wi‑Fi",
                 runtime?.Available == true ? runtime.Summary : "—",
                 runtime?.Available == true
                     ? "From ADB dumpsys"
-                    : "Connect ADB to read battery and Wi‑Fi",
+                    : "On demand — use Check ADB now on the Headset page",
                 runtime?.Available == true ? StatusChipKind.On : StatusChipKind.Off),
 
             Chip("Active profile",

@@ -99,14 +99,11 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
         WirelessPortBox.Text = headset.WirelessPort.ToString(System.Globalization.CultureInfo.InvariantCulture);
         WirelessAutoBox.IsChecked = headset.WirelessAutoReconnect;
-        HeadsetOnlyWirelessBox.IsChecked = headset.HeadsetOnlyWirelessAdb;
         _loading = false;
-
-        // ADB identity is slow — don't block the first paint of this page.
-        StatusText.Text = "Checking ADB…";
-        TrustText.Text = "…";
-        UpdateTrustBanner();
+        ShowPassiveHeadsetStatus();
     }
+
+    private void CheckAdb_Click(object sender, RoutedEventArgs e) => ProbeHeadsetIdentity();
 
     private void ComboPersist_Changed(object sender, SelectionChangedEventArgs e) => Persist_Changed(sender, e);
 
@@ -150,7 +147,6 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         }
 
         headset.WirelessAutoReconnect = WirelessAutoBox.IsChecked == true;
-        headset.HeadsetOnlyWirelessAdb = HeadsetOnlyWirelessBox.IsChecked == true;
         App.Instance.Settings.Save();
         App.Instance.HeadsetWatch?.SyncWatch();
     }
@@ -214,9 +210,13 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Run(() =>
         {
             var headset = App.Instance.Settings.Current.Headset;
-            return string.IsNullOrWhiteSpace(headset.WirelessHost)
-                ? App.Instance.Adb.DisconnectWireless()
-                : App.Instance.Adb.DisconnectWireless(headset.WirelessHost, headset.WirelessPort);
+            if (string.IsNullOrWhiteSpace(headset.WirelessHost))
+            {
+                throw new InvalidOperationException(
+                    "Enter the Quest LAN IP first. Disconnect will not drop every wireless ADB device.");
+            }
+
+            return App.Instance.Adb.DisconnectWireless(headset.WirelessHost, headset.WirelessPort);
         });
     }
 
@@ -241,14 +241,13 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             App.Instance.Log.Info(summary);
             ResultText.Text = summary;
             App.Instance.Settings.Save();
-            UpdateTrustBanner();
+            ProbeHeadsetIdentity();
         }
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
             App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Headset action failed. Check Log.");
             ResultText.Text = ex.Message;
-            UpdateTrustBanner();
         }
     }
 
@@ -335,7 +334,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             App.Instance.Log.Info(result);
             App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction(result);
             ResultText.Text = result;
-            UpdateTrustBanner();
+            ProbeHeadsetIdentity();
         }
         catch (Exception ex)
         {
@@ -351,13 +350,29 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.TrustedSerial = null;
         headset.TrustedModel = null;
         App.Instance.Settings.Save();
-        UpdateTrustBanner();
+        ShowPassiveHeadsetStatus();
         ResultText.Text = "Trusted headset cleared. The next connected Quest will be remembered.";
     }
 
-    private async void UpdateTrustBanner()
+    private void ShowPassiveHeadsetStatus()
+    {
+        var headset = App.Instance.Settings.Current.Headset;
+        var adb = App.Instance.Adb;
+        StatusText.Text = adb.ActivityMode == AdbActivityMode.Idle
+            ? AdbSessionGate.HeadsetPageIdleText
+            : adb.DescribeCachedStatus();
+        RuntimeText.Text = "Battery / Wi‑Fi: not queried. Use Check ADB now, or wait for a PCVR session.";
+        TrustText.Text = string.IsNullOrWhiteSpace(headset.TrustedSerial)
+            ? "No trusted headset saved. Trust is checked when you use Check ADB now."
+            : $"Saved trust: {headset.TrustedModel ?? "headset"} ({headset.TrustedSerial}). Not rechecked until Check ADB now or a PCVR session applies settings.";
+        UpdateRefreshOptions(headset.TrustedModel);
+    }
+
+    private async void ProbeHeadsetIdentity()
     {
         var version = Interlocked.Increment(ref _trustRefreshVersion);
+        App.Instance.HeadsetWatch?.BeginManualAdb();
+        StatusText.Text = "ADB: Manual check";
         try
         {
             var result = await Task.Run(() =>
@@ -391,6 +406,10 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             StatusText.Text = ex.Message;
             RuntimeText.Text = "Battery / Wi‑Fi: connect USB or wireless ADB to read.";
         }
+        finally
+        {
+            App.Instance.HeadsetWatch?.EndManualAdb();
+        }
     }
 
     private void UpdateRefreshOptions(string? model)
@@ -415,6 +434,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
 
     private async void RunPrepared(Func<Func<string>> prepare, Action? completed = null)
     {
+        App.Instance.HeadsetWatch?.BeginManualAdb();
         try
         {
             Persist_Changed(this, new RoutedEventArgs());
@@ -426,14 +446,16 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction(result);
             ResultText.Text = result;
             App.Instance.Settings.Save();
-            UpdateTrustBanner();
         }
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
             App.Instance.HeadsetAnnouncer.AnnounceHeadsetAction("Headset action failed. Check Log.");
             ResultText.Text = ex.Message;
-            UpdateTrustBanner();
+        }
+        finally
+        {
+            App.Instance.HeadsetWatch?.EndManualAdb();
         }
     }
 
@@ -446,14 +468,12 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
             var result = await Task.Run(action).ConfigureAwait(true);
             ResultText.Text = result;
             App.Instance.Settings.Save();
-            UpdateTrustBanner();
         }
         catch (Exception ex)
         {
             App.Instance.Log.Warn(ex.Message);
             App.Instance.HeadsetAnnouncer.AnnounceScreenshotFailed();
             ResultText.Text = ex.Message;
-            UpdateTrustBanner();
         }
     }
 

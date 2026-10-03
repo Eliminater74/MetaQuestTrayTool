@@ -8,9 +8,12 @@
     <StackPanel>
       <TextBlock Text="Headset" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="SideQuest-style ADB for a real VR headset (Quest 2/3/3S/Pro, etc.). Works on Quest Link and Steam Link — on the Steam Link app this is the only way this tray can tweak the headset (SS/ASW/bitrate still will not). Phones/tablets/emulators are ignored. Props reset on reboot — leave apply-on-connect on."/>
+                 Text="SideQuest-style ADB for a real VR headset (Quest 2/3/3S/Pro, etc.). Automatic ADB starts after a confirmed PCVR session (Air Link, wired Link, Steam Link, or Virtual Desktop), not while the tray is idle. Phones, TVs, and emulators stay connected. Props reset on reboot — leave apply-on-connect on."/>
 
       <TextBlock x:Name="StatusText" Margin="0,0,0,4" FontWeight="SemiBold" TextWrapping="Wrap"/>
+      <Button x:Name="CheckAdbButton" Content="Check ADB now" HorizontalAlignment="Left"
+              Style="{StaticResource GhostButtonStyle}" Margin="0,0,0,8" Click="CheckAdb_Click"
+              ToolTip="Query the headset over ADB once. Does not start background watching unless a PCVR session is already active."/>
       <TextBlock x:Name="RuntimeText" Margin="0,0,0,12" Foreground="{DynamicResource AppMutedBrush}" TextWrapping="Wrap"
                  ToolTip="Battery and Wi‑Fi from ADB dumpsys when the headset is connected for debugging."/>
       <CheckBox x:Name="ApplyOnConnectBox" Content="Apply these settings automatically when the headset connects"
@@ -54,18 +57,15 @@
         <Button Content="Connect" Style="{StaticResource AccentButtonStyle}" Click="WirelessConnect_Click"
                 ToolTip="adb connect host:connectPort. Works with tcpip, Wireless debugging, or a port opened by SideQuest on the headset. Remembered for next time."/>
         <Button Content="Disconnect" Style="{StaticResource GhostButtonStyle}" Click="WirelessDisconnect_Click"
-                ToolTip="adb disconnect for this host:port (leaves USB devices alone when possible)."/>
+                ToolTip="adb disconnect for this saved host:port only. Other wireless devices stay connected."/>
         <Button Content="Enable tcpip (USB)" Style="{StaticResource GhostButtonStyle}" Click="WirelessTcpip_Click"
                 ToolTip="Requires USB once: adb tcpip PORT, then unplug and Connect. Fills IP when the headset reports one. Skip if SideQuest on the headset already opened ADB."/>
       </StackPanel>
-      <CheckBox x:Name="WirelessAutoBox" Content="Auto-reconnect wireless ADB when no headset is listed"
+      <CheckBox x:Name="WirelessAutoBox" Content="Auto-reconnect wireless ADB during a PCVR session"
                 Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
-                ToolTip="Every ~45s while enabled, try the saved host:port if no ready VR headset is connected. Quiet while the Quest is off. Use after SideQuest/tcpip/Wireless debugging has opened a port once. Does not scan the LAN for other ADB devices."/>
-      <CheckBox x:Name="HeadsetOnlyWirelessBox" Content="VR headsets only (disconnect phone / TV / tablet wireless ADB)"
-                Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,4"
-                ToolTip="On by default. Drops wireless ADB sessions that are not a VR headset (phones, tablets, Fire TV, etc.). Uncheck to allow any wireless ADB device to stay connected. USB gadgets stay listed either way. Quest tweaks still never run on non-headsets. Also available from the tray → Headset (ADB) menu."/>
-      <TextBlock Style="{StaticResource PageHintStyle}" Margin="24,0,0,8"
-                 Text="On by default so auto-connect cannot latch onto a phone or TV. Uncheck (or use tray → Headset ADB) when you need other wireless ADB devices. Pause ADB in the tray if you want the watcher fully off for a while without quitting."/>
+                ToolTip="While a PCVR session is active, try the saved host:port about every 45s if no ready VR headset is listed. Does not poll while the tray is idle, and does not disconnect other ADB devices."/>
+      <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"
+                 Text="Other phones, TVs, emulators, and ADB apps stay connected. Quest commands run only on the classified headset. Automatic ADB starts after a confirmed PCVR session. Pause ADB in the tray to suppress that automatic path without quitting."/>
 
       <TextBlock Text="Quality &amp; performance" Style="{StaticResource SettingLabelStyle}" Margin="0,8,0,8"/>
       <Grid>
