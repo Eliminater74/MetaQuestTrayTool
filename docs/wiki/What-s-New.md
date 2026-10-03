@@ -1,11 +1,22 @@
 # What's new
 
-This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.36**.
+This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.37**.
 
 Download: [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
 Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)
 
-## Current release: v1.1.36
+## Current release: v1.1.37
+
+v1.1.37 makes headset ADB on demand so the tray can sit in the notification area without touching the shared ADB server:
+
+- No ADB at startup, and no background polling while no PCVR session is active.
+- Air Link, wired Link, Steam Link / SteamVR, and Virtual Desktop are still detected without ADB. Automatic headset ADB starts only after that session is confirmed.
+- When the session ends, this app stops its ADB commands. It does not run `adb kill-server`.
+- Phones, TVs, emulators, and other ADB apps are not disconnected. The old default-on **VR headsets only** sweep is retired, even if a saved settings file still had it enabled.
+- The Headset page shows an idle message until you click **Check ADB now** or use another headset action.
+- **Pause ADB** suppresses automatic session ADB. **Resume** waits for a PCVR session.
+
+## v1.1.36
 
 v1.1.36 addresses issue #19 on the existing Link and tray settings:
 
@@ -80,8 +91,7 @@ Recent Headset page work added:
 - Dynamic FFR versus Fixed FFR controls
 - guarded experimental rendering controls
 - Reset live ADB overrides for documented defaults
-- VR-headsets-only protection for wireless ADB
-- Pause ADB until resume, or for two hours
+- Pause ADB until resume, or for two hours. v1.1.37 retired the separate VR-headsets-only disconnect.
 
 ADB props are runtime headset overrides. Most reset when the Quest reboots; leave apply-on-connect enabled if you want the tray to reapply them.
 

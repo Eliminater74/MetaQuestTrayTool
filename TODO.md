@@ -2,7 +2,7 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
@@ -25,6 +25,17 @@ Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 ---
 
 ## Shipped checklist (history)
+
+### v1.1.37
+
+- [x] Keep startup, tray, Status, Info, and the Headset page off ADB until a confirmed PCVR session or an explicit action.
+- [x] Start automatic headset ADB only after Link detection confirms Air Link, wired Link, Steam Link / SteamVR, or Virtual Desktop.
+- [x] Stop this app's ADB polling and wireless reconnect when the session ends, without `adb kill-server`.
+- [x] Retire automatic disconnect of non-headset wireless devices, including saved `HeadsetOnlyWirelessAdb=true`.
+- [x] Pause suppresses automatic session ADB. Resume while idle does not poll.
+- [x] Full local suite 231/231.
+- [x] Update version, installer notes, current release documentation, release workflow default, and announcement draft to 1.1.37.
+- [x] Tag and publish **v1.1.37**.
 
 ### v1.1.36
 

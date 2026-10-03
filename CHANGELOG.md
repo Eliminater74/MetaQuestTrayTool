@@ -8,6 +8,21 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+## [1.1.37] - 2026-10-03
+
+### Changed
+- Headset ADB is on demand. The tray can sit idle without starting or polling ADB. A confirmed PCVR session (Air Link, wired Link, Steam Link / SteamVR, or Virtual Desktop) is what starts automatic discovery, wireless reconnect, and apply-on-connect. When that session ends, this app stops issuing ADB commands and leaves the shared ADB server running.
+- Opening the tray menu, Status, Info, or Headset page no longer queries the headset. Use **Check ADB now** or an existing headset action when you want a one-time ADB read.
+- Wireless auto-reconnect runs only during a live PCVR session. Pause ADB suppresses that automatic path. Resume allows the next session to use ADB and does not poll while idle.
+- Automatic disconnect of phones, TVs, emulators, and other wireless ADB devices is retired. A saved `HeadsetOnlyWirelessAdb=true` is cleared on load. Quest commands still target only a classified, trusted headset.
+- Installer updates still stop this app's packaged `adb.exe` so Setup can replace platform-tools. That path does not run `adb kill-server` against a shared server.
+
+### Validation
+- Local suite passes 231/231.
+
+### Verification limits
+- Coexistence with Android Studio, SideQuest, and other ADB clients still needs a check on a machine that has those tools and a Quest. The automated tests do not start or kill a developer ADB server.
+
 ## [1.1.36] - 2026-10-02
 
 ### Added
@@ -385,7 +400,8 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.36...HEAD
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.37...HEAD
+[1.1.37]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37
 [1.1.36]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.36
 [1.1.35]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.35
 [1.1.34]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.34

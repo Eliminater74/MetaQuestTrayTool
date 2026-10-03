@@ -2,9 +2,9 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Current public release:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
-v1.1.36 adds Quest Link encode width 4128, a Default / H.264 / HEVC codec choice, and Default / Disabled sliced encoding, using only the registry values already observed. Tray Tool can open Meta Horizon Link at startup and can temporarily disable Windows HDR, restoring only the displays it changed. Both options are off by default. v1.1.35 session tracing and the startup Link preflight skip remain. An explicit H.264 DWORD and sliced-encoding On were not observed, so they are not written.
+v1.1.37 keeps headset ADB off until a confirmed PCVR session or an explicit action such as **Check ADB now**. It does not disconnect other ADB devices and does not kill the shared ADB server when Link ends. v1.1.36 Quest Link encode width 4128, codec, sliced encoding, startup Meta Horizon Link, and temporary Windows HDR remain.
 
 [[What-s-New|What's new since the old wiki]] · [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
@@ -52,7 +52,7 @@ v1.1.36 adds Quest Link encode width 4128, a Default / H.264 / HEVC codec choice
 | OVRService | Start / stop / restart; **Manual-at-boot** so Meta does not pop at Windows sign-in |
 | OpenXR | Switch Meta vs SteamVR (global + per-profile); Steam Link assist |
 | Audio / power | Switch to headset on PCVR start, restore desktop on exit; power plan; USB suspend |
-| Headset ADB | CPU/GPU/refresh/FFR; recording/download; performance samples; Wireless Pair; VR headsets only; Pause ADB; ADB screenshots |
+| Headset ADB | On demand after a PCVR session or Check ADB now; CPU/GPU/refresh/FFR; recording/download; performance samples; Wireless Pair; Pause ADB; ADB screenshots |
 | Voice / HotKeys | Ctrl+Numpad, push-to-talk, bindable Exit, headset spoken status, smart / Link / ADB screenshot commands |
 | Updates / support | Private checked installer download, SHA-256 sidecars, sanitized support ZIP, durable settings backups |
 

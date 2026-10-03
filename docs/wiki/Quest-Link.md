@@ -27,7 +27,7 @@ GPU-tier **Apply recommended presets** fills Link + global game settings from th
 
 ## High bitrate and DBRMax preservation
 
-Current public release **v1.1.36** adds encode width 4128, a Default / H.264 / HEVC codec choice, and Default / Disabled sliced encoding. It still protects old saved baselines during startup. If Oculus Debug Tool already has fixed bitrate or `DBRMax` above 500 Mbps and the tray still has an old 500 Mbps saved value, startup auto-apply keeps the higher ODT value instead of downgrading it. If the preflight read of those existing values fails, startup now **skips** the Link registry write instead of guessing. Each field is evaluated independently:
+**v1.1.36** added encode width 4128, a Default / H.264 / HEVC codec choice, and Default / Disabled sliced encoding. v1.1.37 does not change those Link writes. It still protects old saved baselines during startup. If Oculus Debug Tool already has fixed bitrate or `DBRMax` above 500 Mbps and the tray still has an old 500 Mbps saved value, startup auto-apply keeps the higher ODT value instead of downgrading it. If the preflight read of those existing values fails, startup now **skips** the Link registry write instead of guessing. Each field is evaluated independently:
 
 - high fixed bitrate only: fixed bitrate is preserved
 - high DBRMax only: DBRMax is preserved

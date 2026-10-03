@@ -4,11 +4,11 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Current public release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
-## Current source checkout (public v1.1.36)
+## Current source checkout (public v1.1.37)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -19,13 +19,20 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
 | Link / Dash | RemoteHeadset Link settings, bitrate presets through 960 Mbps, encode width through 4128, Default / H.264 / HEVC codec and Default / Disabled sliced encoding, startup protection for externally set high fixed ODT bitrate and DBRMax values, presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, optional open Meta Horizon Link on tray start, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |
 | OpenXR / audio / power | Meta vs SteamVR switch, Steam Link assist, comms audio pickers, power plan / USB / wake restart |
-| Headset ADB | Wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop/download, 10-second logcat performance sampler, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **VR headsets only** toggle, **Pause ADB** (until resume / 2h) |
+| Headset ADB | On demand after a confirmed PCVR session or an explicit action; wired + Wireless Pair/Connect/tcpip, independent CPU/GPU, model-aware refresh, Dynamic/Fixed FFR, capture + recording start/stop/download, 10-second logcat performance sampler, guarded experimental rendering, reset live documented defaults, ADB Quest screenshots, battery/Wi‑Fi, trusted serial, **Pause ADB** (until resume / 2h). No idle polling, no non-headset disconnect, no `adb kill-server` on session end |
 | Mid-session | HotKeys (Ctrl+Num 0–9, Ctrl+Shift+Num 0/8/9 plus bindable Exit), voice (PTT/mic/confidence/custom phrases + recover/audio/OpenXR/overlays/GPU/smart + Link + ADB screenshots + bindable Exit), expanded headset announcements with separate HotKey/voice/screenshot result toggles, experimental MSFS 2024 VR launch automation |
 | Updates / polish | In-app GitHub updates, private revalidated installer launch, release checksum sidecars, CodeQL, Dependabot, coverage gate, expanded sanitized support ZIP including session-trace.log, persistent read-only Meta compatibility check, 64-bit/32-bit OpenXR diagnostics, shared/nonblocking status probes, helper repair diagnostics, [Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki), themes, tooltips, quiet idle cadence (stop disabled watchers; pause Status/Info when shell hidden), VR Tools links, Donate, durable settings/profiles (`.bak`/`.bak2` after power loss), neon icon/logo |
 
 Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md).
 
 ---
+
+## v1.1.37 — on-demand headset ADB
+
+Headset ADB waits for a confirmed PCVR session or an explicit action. Link detection stays ADB-free. Session end stops this app's commands and leaves the shared ADB server alone. Saved exclusive wireless disconnect is cleared so phones, TVs, and emulators stay connected.
+
+- Local validation: 231 passing tests.
+- Physical coexistence with Android Studio, SideQuest, and a Quest still needs a machine check. Tests do not start or kill a developer ADB server.
 
 ## v1.1.36 — Link codec, 4128 encode width, startup Link, and temporary HDR
 
@@ -250,6 +257,7 @@ Product naming, custom CLI/ADB lines, settings backup, trusted headset, Info + D
 | v1.1.34 | DBRMax high-bitrate startup preservation |
 | v1.1.35 | Session freeze diagnostics and safer startup Link preflight |
 | v1.1.36 | Encode width 4128, verified codec and sliced-encoding modes, optional Meta Horizon Link on startup, temporary Windows HDR off |
+| v1.1.37 | On-demand headset ADB, no idle polling, no non-headset disconnect, shared ADB server left running |
 
 ---
 

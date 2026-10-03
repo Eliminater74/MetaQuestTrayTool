@@ -49,7 +49,7 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.36 — MetaQuestTrayTool-Setup-1.1.36.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.36/MetaQuestTrayTool-Setup-1.1.36.exe)
+**Latest:** [v1.1.37 — MetaQuestTrayTool-Setup-1.1.37.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe)
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,9 +163,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### v1.1.36 current release
+### v1.1.37 current release
 
-Release **[v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Quest Link encode width now includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified.
+Release **[v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Headset ADB stays idle until a confirmed PCVR session or an explicit headset action. The tray does not poll ADB in the background, does not disconnect phones, TVs, or emulators, and does not kill the shared ADB server when a Link session ends. **Check ADB now** on the Headset page is the one-time probe. v1.1.36 Quest Link encode width still includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified.
 
 ### Shell & tray
 
@@ -210,9 +210,9 @@ Release **[v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/l
 
 - Bundled Google platform-tools; independent CPU/GPU levels 0–4, texture size, model-aware refresh, Dynamic/Fixed FFR, chroma, capture settings, recording start/stop/download, 10-second runtime logcat performance samples, guarded experimental rendering, live documented-default reset, paste text / proximity / guardian helpers
 - Auto-apply on connect (props reset on Quest reboot)
-- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip over USB, auto-reconnect (saved IP only — no LAN scan) — SideQuest on the headset can also open an ADB port (often 5555)
-- **VR headsets only** (on by default; Headset page + tray → Headset (ADB)): disconnect phones/tablets/TVs that show up over wireless ADB; uncheck to leave any ADB device connected. Tweaks still never run on non-headsets
-- **Pause ADB** (tray → Headset (ADB)): stop polling / reconnect / disconnect until you resume, or for 2 hours — use while debugging a phone or TV without quitting the tray
+- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect for that saved endpoint only, Enable tcpip over USB, auto-reconnect during a PCVR session (saved IP only — no LAN scan, no idle polling) — SideQuest on the headset can also open an ADB port (often 5555)
+- Other ADB devices stay connected. Quest commands run only on the classified, trusted headset. The old “VR headsets only” disconnect is retired, including for settings files that had it on
+- **Pause ADB** (tray → Headset (ADB)): suppress automatic session ADB until you resume, or for 2 hours. Resume waits for a PCVR session and does not poll while idle. Manual actions such as **Check ADB now** still run when you request them
 - **Take screenshot** (tray **Screenshots**, Headset / Quest Link / Tray Tool pages, **Ctrl+Shift+Num 8**, or voice “take screenshot”): prefers Quest Link mirror capture while Meta Link is actively streaming, then falls back to trusted-headset ADB. **Ctrl+Shift+Num 9** or voice “take headset screenshot” forces ADB. PNGs save to `%AppData%\MetaQuestTrayTool\screenshots\` and the app says **“Screenshot taken.”** in the Quest when headset announcements can reach the audio path
 - **Stop & download latest recording** stops headset capture, finds the newest MP4/MOV in known Quest recording folders, pulls it into `%AppData%\MetaQuestTrayTool\captures\`, and verifies the file is non-empty before reporting success
 - Trusted VR headset serial only — phones / tablets / emulators ignored

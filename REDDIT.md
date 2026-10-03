@@ -3,14 +3,14 @@
 Copy everything under **TITLE** and **BODY** into a new Reddit post (or edit your existing one).
 Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR` (check each sub’s self-promo rules).
 
-**Latest public installer:** [v1.1.36](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public installer:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 
 ---
 
 ## TITLE
 
 ```text
-[PC] Meta Quest Tray Tool v1.1.36 — free modern OTT-style tray app for Quest Link / SteamVR (codec, 4128, HDR)
+[PC] Meta Quest Tray Tool v1.1.37 — free modern OTT-style tray app for Quest Link / SteamVR (on-demand ADB)
 ```
 
 ---
@@ -23,7 +23,7 @@ Suggested subs: `r/OculusQuest`, `r/virtualreality`, `r/SteamVR`, `r/MetaQuestVR
 It’s a **brand-new C# app**, not a decompile and not a continuation of older unfinished ports. Goal: keep the Oculus Tray Tool workflow alive on today’s Meta stack — Steam-first PCVR friendly.
 
 **Author:** Eliminater74  
-**Status:** public releases on GitHub (**v1.1.36** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
+**Status:** public releases on GitHub (**v1.1.37** latest) — Windows 10/11, self-contained Setup.exe (no separate .NET install)
 
 **Download:** https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  
 **Changelog:** https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md  
@@ -54,11 +54,11 @@ You can also push SideQuest-style **ADB headset** tweaks (USB or Wireless Pair),
 
 ---
 
-### What changed in v1.1.36
+### What changed in v1.1.37
 
-Quest Link encode width includes **4128**. Video codec is Default, **H.264**, or **H.265/HEVC**: HEVC writes the observed `HEVC=1` value, and H.264 removes that override instead of writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new options are off by default. Older HEVC and sliced-encoding settings still load. v1.1.35 session tracing and the startup Link preflight skip remain.
+Headset ADB is **on demand**. The tray can sit in the notification area all day without starting ADB or polling `adb devices`. Air Link and the other PCVR detectors still run without ADB. Automatic headset ADB starts only after a confirmed PCVR session, and it stops when that session ends. This app does **not** kill the shared ADB server, and it does **not** disconnect phones, TVs, emulators, or other ADB apps. Use **Check ADB now** when you want a one-time headset read. v1.1.36 Link codec, 4128 encode width, startup Meta Horizon Link, and temporary Windows HDR remain.
 
-### What works now (v1.1.36)
+### What works now (v1.1.37)
 
 **Tray + shell**
 - Notification-area host with themes (Pure Black / Dark / Light)
@@ -133,9 +133,9 @@ Quest Link encode width includes **4128**. Video codec is Default, **H.264**, or
 - Bundled Google platform-tools
 - CPU/GPU, texture size, refresh, FFR, chroma, capture; paste / proximity / guardian helpers
 - Auto-apply on connect (resets on Quest reboot)
-- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect, Enable tcpip, auto-reconnect
-- **VR headsets only** (default on; tray + Headset page): drop phone/TV wireless ADB — uncheck to allow any device
-- **Pause ADB** (tray): until you resume, or for 2 hours — other gadgets can use ADB without quitting
+- **Wireless ADB**: host, connect port, **Pair** (pairing port + code), Connect / Disconnect for that saved Quest endpoint, Enable tcpip, auto-reconnect during a PCVR session only
+- Other ADB devices stay connected. Quest commands still target only the trusted headset
+- **Pause ADB** (tray): suppress automatic session ADB until you resume, or for 2 hours. Resume does not poll while idle
 - **Take screenshot** from tray Screenshots, Headset / Quest Link / Tray Tool pages, **Ctrl+Shift+Num 8**, or voice; prefers Quest Link mirror capture while Meta Link is streaming, then falls back to trusted-headset ADB. **Ctrl+Shift+Num 9** or voice “take headset screenshot” forces ADB. PNGs save under `%AppData%\MetaQuestTrayTool\screenshots\` and the app says **“Screenshot taken.”** in the headset when announcements can reach Quest audio
 - **Stop & download latest recording** waits for the new or changed video file to stabilize before pulling it
 - **Capture 10-second performance sample** starts at the headset's current log timestamp without clearing logcat history
@@ -228,5 +228,5 @@ Thanks for reading — happy to take feature requests and “does this work on Q
 ## Optional short comment (first reply)
 
 ```text
-TL;DR: free modern OTT-inspired tray app (v1.1.36) — Quest Link encode width 4128, Default/H.264/HEVC codec (HEVC=1 or delete; no invented H.264 DWORD), sliced encoding Default or Off (NumSlices=1), optional open Meta Horizon Link on startup, optional temporary Windows HDR off that restores only displays this app changed; plus v1.1.35 session flight recorder for freeze diagnosis without rewriting Link state; startup skips Link apply if the high-bitrate preflight read fails; issue #12 freeze is audited, not claimed fixed; plus DBRMax/fixed high-bitrate startup preservation, 960 Mbps presets, Stop & download waits for headset recordings to stabilize, performance sampling no longer clears logcat history, and Meta runtime compatibility baselines require clean read-probe validation; plus Read Live stays read-only, active Meta Link detection beats resident Virtual Desktop desktop processes when the Meta cache is live, expanded headset controls, recording/download, runtime performance samples, safer updater/release validation, Meta runtime/OpenXR diagnostics, support ZIP redaction, editable Quest Link presets under Steam Link / Virtual Desktop, custom Link settings, bindable Exit app, Quest Link mirror screenshots, smart screenshot fallback, screenshot hotkeys, voice screenshot phrases, explicit headset announcement toggles, helper repair/copy diagnostics, shared/nonblocking status probes, serialized ADB, verified installer checksum sidecars, expanded headset voice coverage, MSFS 2024 VR launch automation, stale helper recovery, settings backup restore, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
+TL;DR: free modern OTT-inspired tray app (v1.1.37) — headset ADB stays idle until a PCVR session or an explicit action, and it no longer disconnects other ADB devices or kills the shared server; plus v1.1.36 Quest Link encode width 4128, Default/H.264/HEVC codec (HEVC=1 or delete; no invented H.264 DWORD), sliced encoding Default or Off (NumSlices=1), optional open Meta Horizon Link on startup, optional temporary Windows HDR off that restores only displays this app changed; plus v1.1.35 session flight recorder for freeze diagnosis without rewriting Link state; startup skips Link apply if the high-bitrate preflight read fails; issue #12 freeze is audited, not claimed fixed; plus DBRMax/fixed high-bitrate startup preservation, 960 Mbps presets, Stop & download waits for headset recordings to stabilize, performance sampling no longer clears logcat history, and Meta runtime compatibility baselines require clean read-probe validation; plus Read Live stays read-only, active Meta Link detection beats resident Virtual Desktop desktop processes when the Meta cache is live, expanded headset controls, recording/download, runtime performance samples, safer updater/release validation, Meta runtime/OpenXR diagnostics, support ZIP redaction, editable Quest Link presets under Steam Link / Virtual Desktop, custom Link settings, bindable Exit app, Quest Link mirror screenshots, smart screenshot fallback, screenshot hotkeys, voice screenshot phrases, explicit headset announcement toggles, helper repair/copy diagnostics, shared/nonblocking status probes, serialized ADB, verified installer checksum sidecars, expanded headset voice coverage, MSFS 2024 VR launch automation, stale helper recovery, settings backup restore, Pause ADB / VR-headsets-only, unelevated SteamVR helper, Quest Home after SteamVR exit, PreventDashLaunch over Link, Status board, profiles. Inspired by ApollyonVR’s Oculus Tray Tool; clean C# rewrite, not a decompile. Installer: https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest  Wiki: https://github.com/Eliminater74/MetaQuestTrayTool/wiki Changelog: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md
 ```

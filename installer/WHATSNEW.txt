@@ -1,22 +1,20 @@
-﻿Meta Quest Tray Tool 1.1.36 - What's new
+﻿Meta Quest Tray Tool 1.1.37 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.36] - 2026-10-02
+[1.1.37] - 2026-10-03
 
-Added
-- Tray Tool can open or activate Meta Horizon Link once at startup. The option is off by default and uses the existing unelevated Meta client launch path.
-- Quest Link encode width presets include 4128. Widths outside the preset list still apply.
-- Quest Link video codec is a Default / H.264 / H.265 choice. H.265 writes the observed HEVC=1 override. H.264 removes that override. No HEVC=0 value is written.
-- Quest Link sliced encoding is Default or Disabled (NumSlices=1, observed Off in ODT). Enabled is not offered.
-- Tray Tool can temporarily turn Windows HDR off while the app is running and restore only the displays it changed. The option is off by default. A recovery snapshot is saved before the change.
+Changed
+- Headset ADB is on demand. The tray can sit idle without starting or polling ADB. A confirmed PCVR session is what starts automatic discovery, wireless reconnect, and apply-on-connect.
+- When that session ends, this app stops issuing ADB commands and leaves the shared ADB server running.
+- Opening the tray menu, Status, Info, or Headset page no longer queries the headset. Use Check ADB now for a one-time read.
+- Automatic disconnect of phones, TVs, emulators, and other wireless ADB devices is retired. A saved HeadsetOnlyWirelessAdb=true is cleared on load.
+- Pause ADB suppresses automatic session ADB. Resume waits for a PCVR session and does not poll while idle.
 
 Validation
-- Local suite passes 212/212.
+- Local suite passes 231/231.
 
 Verification limits
-- H.264 is implemented by deleting HEVC. An explicit DWORD that forces H.264 was not observed, and a missing HEVC value still reads back as Default.
-- Sliced encoding On has no observed registry value, so it cannot be forced.
-- HDR uses the documented DisplayConfig advanced-color query/set APIs. Whether a given GPU driver treats advanced color as the Windows HDR toggle still needs a check on that machine.
+- Coexistence with Android Studio, SideQuest, and other ADB clients still needs a check on a machine that has those tools and a Quest. The automated tests do not start or kill a developer ADB server.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

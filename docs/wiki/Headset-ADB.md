@@ -15,9 +15,10 @@ Current builds include trusted USB/wireless headset selection, independent CPU/G
 3. Or **Wireless debugging**: Pair (pairing port + code), then Connect (IP:connect port).
 4. **Enable tcpip** over USB once if you prefer `adb connect` without pairing every time.
 5. **SideQuest on the headset** can also open an ADB port while it is running — use the headset LAN IP and that port (often **5555**) with **Connect**. No USB pair step required for that session.
-6. Optional **auto-reconnect** to the saved wireless endpoint (that host:port only — the tray does **not** scan the LAN for random ADB devices).
-7. **VR headsets only** is **on by default**: if a phone/tablet/TV shows up on wireless ADB (or you Connect the wrong IP), that session is dropped. **Uncheck** it (Headset page or tray → Headset (ADB)) if you want other gadgets to stay connected. USB phones are never disconnected. Quest tweaks still never run on non-headsets.
-8. **Pause ADB** (tray → Headset (ADB)): stop polling / reconnect / disconnect while you use another device — until you resume, or for 2 hours. The tray stays running; tooltip shows when ADB is paused. Pausing ADB is also the A/B test for issue #12: USB/wireless ADB serial changes can re-apply global Link/ODT settings during a live Meta Link session.
+6. Optional **auto-reconnect** to the saved wireless endpoint while a PCVR session is active (that host:port only — the tray does **not** scan the LAN, and it does **not** retry while the tray is idle).
+7. Other phones, TVs, emulators, and ADB apps stay connected. v1.1.37 retired automatic non-headset disconnect, including the old default-on **VR headsets only** setting. Quest tweaks still never run on non-headsets.
+8. **Pause ADB** (tray → Headset (ADB)): suppress automatic session ADB until you resume, or for 2 hours. Resume allows the next PCVR session to use ADB and does not start polling while idle. The tray stays running. Pausing ADB is also the A/B test for issue #12: USB/wireless ADB serial changes can re-apply global Link/ODT settings during a live Meta Link session.
+9. Opening the Headset page does not query ADB. Use **Check ADB now** for a one-time identity read.
 
 Only **real VR headsets** are trusted. Phones, tablets, and emulators never receive headset commands.
 
@@ -54,7 +55,7 @@ The **Take screenshot (Quest Link preferred)** action on the tray Screenshots me
 
 **Apply when headset connects** re-pushes props (Quest **resets `debug.oculus.*` on reboot**).
 
-Battery, charge, and Wi‑Fi show on Status / Info via `dumpsys` when ADB is up.
+Battery, charge, and Wi‑Fi are read with `dumpsys` only after **Check ADB now** or while a PCVR session has headset ADB active. Status and Info stay idle otherwise.
 
 ## Wireless ADB vs Air Link
 
@@ -70,7 +71,7 @@ You can use Air Link **without** ADB. ADB is only for headset tweaks (CPU/GPU, F
 
 ### SideQuest on the headset
 
-If the **SideQuest app is running on the Quest**, it often exposes a wireless ADB listener. Enter the headset’s Wi‑Fi IP and the port SideQuest opened (commonly `5555`) on the Headset page, click **Connect**, then enable **Auto-reconnect** if you want the tray to keep using that endpoint. This is separate from the SideQuest **PC** app; the tray already bundles its own `adb`.
+If the **SideQuest app is running on the Quest**, it often exposes a wireless ADB listener. Enter the headset’s Wi‑Fi IP and the port SideQuest opened (commonly `5555`) on the Headset page, click **Connect**, then enable **Auto-reconnect** if you want the tray to use that endpoint during a PCVR session. This is separate from the SideQuest **PC** app. The tray shares the normal ADB server and does not kill it when a session ends.
 
 ## Related
 

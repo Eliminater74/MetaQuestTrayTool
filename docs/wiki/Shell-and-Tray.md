@@ -14,7 +14,7 @@ Left-click the tray headset icon to open the sidebar shell. Close the window to 
 | **Log Window** | Startup checks, profile applies, Link writes, audio/power. Refresh / open log folder. |
 | **Advanced** | Reset settings, wipe profiles, library import, backup export/import, check updates, Debug Tool GUI, stuck-helper repair, process diagnostics, sanitized support ZIP. |
 | **Quest Link** | RemoteHeadset bitrate presets through 960 Mbps, startup protection for high fixed bitrate and DBRMax values, encode width through 4128, video codec (Default / H.264 / HEVC), sliced encoding (Default / Disabled), sharpening, DBR, Mobile ASW, GPU presets, Quest Link mirror screenshots. |
-| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, ADB screenshots, **VR headsets only**, **Pause ADB**. |
+| **Headset** | ADB props, Wireless Pair/Connect, trusted serial, apply-on-connect, **Check ADB now**, ADB screenshots, **Pause ADB**. Opening the page does not start ADB. |
 | **VR Tools** | Curated third-party links (overlays, wireless PCVR, tracking, essentials). |
 | **Info** | PCVR Ready checklist, persistent Meta runtime compatibility status, Recover PCVR, session probe, system dump. |
 | **Donate / About** | PayPal + version / credits. |
@@ -31,7 +31,7 @@ Typical actions:
 
 - Open Settings, Meta Horizon Link, Oculus Debug Tool
 - Start SteamVR over Link, Open SteamVR Home, Recover PCVR, Cycle Perf HUD, Save last-good
-- Game Settings, Profiles, Quest Link, Screenshots, OpenXR, Audio, Power, Headset (ADB: screenshots / VR headsets only / Pause / Resume), HotKeys / Voice
+- Game Settings, Profiles, Quest Link, Screenshots, OpenXR, Audio, Power, Headset (ADB: screenshots / Pause / Resume), HotKeys / Voice
 - Start / stop / restart **OVRService**
 - Check for updates, VR Tools, Donate, Exit
 
