@@ -8,6 +8,24 @@ The in-app updater and GitHub Releases show the notes for each version so you ca
 
 ## [Unreleased]
 
+Not a release. The public version remains 1.1.37 until you choose otherwise.
+
+### Added
+- Runtime headset capability reports, with Quest 3S kept distinct from Quest 3.
+- Transactional ADB property snapshots in `%AppData%\MetaQuestTrayTool\headset-property-recovery.json`.
+- Opt-in Quest 3 GPU level 7. Levels 0–4 are unchanged. Quest 3S is refused. Battery temperature at or above 45 °C refuses the write. Property readback is not a clock measurement.
+- Opt-in Quest 3 refresh property requests for 144 Hz and 207 Hz. 240 Hz and `debug.oculus.forceDisplayScaling` are not written. A panel request is not a streaming frame rate.
+- Performance page with pasted-log analysis, an explicit 10-second headset sample, optional nvidia-smi PC samples, and advisory bottleneck text.
+- Benchmark scoring that withholds 1% lows unless frame times were supplied, and refuses an interrupting comparison that was not authorized.
+- A local overlay pipe that does not load an OpenVR dashboard overlay.
+- Provider classification for Meta Link, SteamVR, Steam Link, Virtual Desktop, ALVR, and Quest3-Pyrowave. ALVR numeric edits preserve unknown JSON and refuse a running server unless overridden. SteamVR driver registration only adds a path, and only when authorized.
+- Optional profile provider preferences. They do not launch or switch streaming apps.
+- A redacted `performance-diagnostics.txt` entry in the support ZIP.
+
+### Verification limits
+- Host tests passed. No physical Quest, ALVR, or Pyrowave session was measured by the implementation agent.
+- GPU level 7, 144 Hz, and 207 Hz still need hardware acceptance. See `docs/research/HARDWARE-ACCEPTANCE.md`.
+
 ## [1.1.37] - 2026-10-03
 
 ### Changed

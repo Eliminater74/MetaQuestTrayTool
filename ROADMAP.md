@@ -29,7 +29,7 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ## In progress — advanced headset performance and PCVR providers
 
-Research baseline, capability matrix, stage tracker, and hardware acceptance checklist: [docs/research](docs/research/ADVANCED-PCVR-BASELINE.md). Quest3-Pyrowave commit `1b529ef54b4f7b34a44c28ad9a54c6c4ac6887a7` is a research reference only. This section is not a release and does not change the public version.
+Research baseline, capability matrix, stage tracker, and hardware acceptance checklist: [docs/research](docs/research/ADVANCED-PCVR-BASELINE.md). Quest3-Pyrowave commit `1b529ef54b4f7b34a44c28ad9a54c6c4ac6887a7` is a research reference only. The code is in the working source and is listed under Unreleased in the changelog. It is not a release and does not change the public version. Experimental GPU level 7, 144/207 Hz, and the OpenVR in-headset overlay still need hardware acceptance. The OpenVR overlay is intentionally not loaded.
 
 ## v1.1.37 — on-demand headset ADB
 

@@ -32,8 +32,24 @@ installation-path, and network details.
 
 The Info page can export a support ZIP. That ZIP uses an allowlisted settings summary instead
 of raw `settings.json`, includes counts for profiles/custom commands instead of their text,
-and applies extra redaction for user-profile paths, IP endpoints, serial/fingerprint/SSID
-labels, and long device-like tokens. Review the ZIP before sending it to anyone.
+includes a short performance-diagnostics note, and applies extra redaction for user-profile
+paths, IP endpoints, serial/fingerprint/SSID labels, and long device-like tokens. A trusted
+headset serial passed into that diagnostics note is replaced before export. Review the ZIP
+before sending it to anyone.
+
+## Experimental headset properties
+
+Quest 3 GPU level 7 and 144/207 Hz refresh requests are off by default. They write only
+`debug.oculus.gpuLevel` or `debug.oculus.refreshRate` through a snapshot bound to one headset
+serial. They do not write `debug.oculus.forceDisplayScaling`, and they do not delete an
+originally unset property. A readback is not a GPU clock or a delivered frame rate.
+
+## Performance overlay pipe
+
+The Performance page can open named pipe `MetaQuestTrayTool.PerformanceOverlay` for the current
+user and Administrators. It is not a network listener. The command list is fixed. Text that
+asks for ADB, a shell, command chaining, or a profile change is rejected. The pipe does not
+load `openvr_api.dll`. Leave it off unless you are using the desktop companion.
 
 ## Device and process actions
 
