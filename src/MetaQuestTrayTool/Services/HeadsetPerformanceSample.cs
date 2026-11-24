@@ -34,6 +34,14 @@ public sealed record HeadsetPerformanceSample(
         AppendLast(text, "GPU utilization", Samples.Select(sample => sample.GpuUtilizationPercent), "%");
         AppendLast(text, "FFR/Foveation", Samples.Select(sample => sample.Foveation));
         AppendLast(text, "SpaceWarp", Samples.Select(sample => sample.SpaceWarp));
+        AppendLast(text, "CPU clock MHz", Samples.Select(sample => sample.CpuClockMHz));
+        AppendLast(text, "GPU clock MHz", Samples.Select(sample => sample.GpuClockMHz));
+        AppendLast(text, "Memory clock MHz", Samples.Select(sample => sample.MemoryClockMHz));
+        AppendLast(text, "Battery temperature C", Samples.Select(sample => sample.BatteryTemperatureC));
+        AppendLast(text, "Refresh Hz", Samples.Select(sample => sample.RefreshHz));
+        AppendLast(text, "Dropped frames", Samples.Select(sample => sample.DroppedFrames));
+        AppendLast(text, "Reprojected frames", Samples.Select(sample => sample.ReprojectedFrames));
+        AppendLast(text, "Thermal", Samples.Select(sample => sample.ThermalStatus));
 
         var evidence = Samples.Select(sample => sample.RawLine).TakeLast(3).ToList();
         if (evidence.Count > 0)
@@ -84,6 +92,15 @@ public sealed record HeadsetPerformanceSample(
         }
     }
 
+    private static void AppendLast(StringBuilder text, string label, IEnumerable<double?> values)
+    {
+        var value = values.LastOrDefault(item => item.HasValue);
+        if (value.HasValue)
+        {
+            text.AppendLine($"{label}: {value.Value.ToString("0.##", CultureInfo.InvariantCulture)}");
+        }
+    }
+
     private static void AppendLast(StringBuilder text, string label, IEnumerable<string?> values)
     {
         var value = values.LastOrDefault(item => !string.IsNullOrWhiteSpace(item));
@@ -104,7 +121,15 @@ public sealed record HeadsetPerformanceLogSample(
     double? CpuUtilizationPercent,
     double? GpuUtilizationPercent,
     string? Foveation,
-    string? SpaceWarp)
+    string? SpaceWarp,
+    double? CpuClockMHz = null,
+    double? GpuClockMHz = null,
+    double? MemoryClockMHz = null,
+    double? BatteryTemperatureC = null,
+    string? ThermalStatus = null,
+    int? DroppedFrames = null,
+    int? ReprojectedFrames = null,
+    double? RefreshHz = null)
 {
     private static readonly Regex FpsRegex = new(@"\bFPS\s*[=:]\s*(?<value>\d+(?:\.\d+)?)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex CpuLevelRegex = new(@"\b(?:CPU\s*Level|CpuLevel|cpuLevel|CPU)\s*[=:]\s*(?<value>\d+)\b(?!\s*%)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -113,6 +138,14 @@ public sealed record HeadsetPerformanceLogSample(
     private static readonly Regex GpuUtilRegex = new(@"\b(?:GPU\s*(?:Util|Utilization)|GPUUtilization|GPUUtil|GPU%)\s*[=:]\s*(?<value>\d+(?:\.\d+)?)\s*%?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex FoveationRegex = new(@"\b(?:Fov|Foveation|FFR)\s*[=:]\s*(?<value>[0-9]+D?)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex SpaceWarpRegex = new(@"\b(?:ASW|AppSW|SpaceWarp|SW)\s*[=:]\s*(?<value>[A-Za-z0-9_.\-]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex CpuClockRegex = new(@"\bCPU\s*Clock\s*[=:]\s*(?<value>\d+(?:\.\d+)?)\s*MHz\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex GpuClockRegex = new(@"\bGPU\s*Clock\s*[=:]\s*(?<value>\d+(?:\.\d+)?)\s*MHz\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex MemoryClockRegex = new(@"\b(?:Memory|Mem)\s*Clock\s*[=:]\s*(?<value>\d+(?:\.\d+)?)\s*MHz\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex BatteryTempRegex = new(@"\bBattery\s*Temp(?:erature)?\s*[=:]\s*(?<value>\d+(?:\.\d+)?)\s*C\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex ThermalRegex = new(@"\bThermal(?:\s*Status)?\s*[=:]\s*(?<value>[A-Za-z0-9_.\-]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex DroppedRegex = new(@"\bDropped(?:\s*Frames)?\s*[=:]\s*(?<value>\d+)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex ReprojectedRegex = new(@"\bReprojected(?:\s*Frames)?\s*[=:]\s*(?<value>\d+)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex RefreshRegex = new(@"\bRefresh(?:\s*Rate)?\s*[=:]\s*(?<value>\d+(?:\.\d+)?)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     internal static HeadsetPerformanceLogSample? TryParse(string line)
     {
@@ -128,13 +161,29 @@ public sealed record HeadsetPerformanceLogSample(
         var gpuUtilization = MatchDouble(GpuUtilRegex, line);
         var foveation = MatchString(FoveationRegex, line);
         var spaceWarp = MatchString(SpaceWarpRegex, line);
+        var cpuClock = MatchDouble(CpuClockRegex, line);
+        var gpuClock = MatchDouble(GpuClockRegex, line);
+        var memoryClock = MatchDouble(MemoryClockRegex, line);
+        var battery = MatchDouble(BatteryTempRegex, line);
+        var thermal = MatchString(ThermalRegex, line);
+        var dropped = MatchInt(DroppedRegex, line);
+        var reprojected = MatchInt(ReprojectedRegex, line);
+        var refresh = MatchDouble(RefreshRegex, line);
         if (fps is null
             && cpuLevel is null
             && gpuLevel is null
             && cpuUtilization is null
             && gpuUtilization is null
             && string.IsNullOrWhiteSpace(foveation)
-            && string.IsNullOrWhiteSpace(spaceWarp))
+            && string.IsNullOrWhiteSpace(spaceWarp)
+            && cpuClock is null
+            && gpuClock is null
+            && memoryClock is null
+            && battery is null
+            && string.IsNullOrWhiteSpace(thermal)
+            && dropped is null
+            && reprojected is null
+            && refresh is null)
         {
             return null;
         }
@@ -147,7 +196,15 @@ public sealed record HeadsetPerformanceLogSample(
             cpuUtilization,
             gpuUtilization,
             foveation,
-            spaceWarp);
+            spaceWarp,
+            cpuClock,
+            gpuClock,
+            memoryClock,
+            battery,
+            thermal,
+            dropped,
+            reprojected,
+            refresh);
     }
 
     private static double? MatchDouble(Regex regex, string text)
