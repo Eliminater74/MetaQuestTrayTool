@@ -83,3 +83,29 @@ Final host verification on 2026-11-24:
 - No physical headset, ALVR server, Pyrowave dashboard, or SteamVR session was used.
 
 The named pipe is not the overlay. Stored preferences are not profile application except the opted-in GPU path above. Provider detection is not complete provider management.
+
+## Integration and reliability audit
+
+Start: `399cddb48cb614a879f02303a687f5797d299465`. The public version stayed 1.1.37. Nothing was pushed or published.
+
+| Stage | Commit | What changed |
+| --- | --- | --- |
+| A Thermal lifecycle | `8d824d5` | An owned GPU level 7 watch restores on cancellation, shutdown, sample budget, and unreadable samples. A replaced watch does not restore. A failed restore stays pending and blocks automatic reapply. |
+| B Recovery | `e40701f` | A snapshot cancelled before any write is discarded. GPU level 7 refuses a missing fingerprint. |
+| C Overlay | `166228d` | Elevated tray starts the companion unelevated. Pipe ACL is the current user, with a medium integrity label. SteamVR quit is acknowledged. Mouse input is requested and was not executed. |
+| D Telemetry | `55dcb50` | The Performance page stops sampling and the companion when it unloads. |
+| E Benchmarks | `5b69536` | Identical PC samples are refused. ABBA order is A-B-B-A. |
+| F Pyrowave | `83f563e` | A post requires a parsed `video.pyrowave` object and rejects RestartSteamvr and UpdateClientList. No page posts it. |
+| F ALVR | none | Library-only. No production caller and no unsafe in-library running-server bypass. No new editor was added. |
+| G Profiles | `1687cb7` | A profile does not take restore ownership of a GPU level 7 value it did not apply. |
+| H Installer | `39ceccf` | Setup closes the overlay companion before replacing files. The second runtime was left in place. |
+
+Host verification after those commits, on 2026-11-24:
+
+- `dotnet restore MetaQuestTrayTool.sln -r win-x64 --locked-mode` succeeded.
+- Debug build of the app project: succeeded, 0 warnings.
+- Release build of the app project: succeeded, 0 warnings. `dotnet build MetaQuestTrayTool.sln -c Release -r win-x64` fails with NETSDK1134, so the solution was not built with a RID.
+- `dotnet test tests/MetaQuestTrayTool.Tests/MetaQuestTrayTool.Tests.csproj -c Release -r win-x64 --no-restore --collect:"XPlat Code Coverage"`: 376 passed, 0 failed, 0 skipped. That project is the only test project.
+- `scripts/Test-Coverage.ps1`: line coverage 17.80%, floor 8%.
+- `scripts/build-installer.ps1` wrote `dist/MetaQuestTrayTool-Setup-1.1.37.exe` (75.6 MB), its SHA-256 file, and `publish/win-x64/overlay/MetaQuestTrayTool.Overlay.exe`. The installer was not published.
+- No physical headset, ALVR server, Pyrowave dashboard, or SteamVR session was used. The installer was not run against a machine that already had the companion open, and it was not installed into a path containing spaces.
