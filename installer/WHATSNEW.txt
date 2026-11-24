@@ -1,20 +1,45 @@
-﻿Meta Quest Tray Tool 1.1.37 - What's new
+﻿Meta Quest Tray Tool 1.2.0-beta.1 - What's new
 
 Read these notes before installing. You can cancel Setup if you prefer to stay on your current version.
 
-[1.1.37] - 2026-10-03
+[1.2.0-beta.1] - 2026-11-24
 
-Changed
-- Headset ADB is on demand. The tray can sit idle without starting or polling ADB. A confirmed PCVR session (Air Link, wired Link, Steam Link / SteamVR, or Virtual Desktop) is what starts automatic discovery, wireless reconnect, and apply-on-connect. When that session ends, this app stops issuing ADB commands and leaves the shared ADB server running.
-- Opening the tray menu, Status, Info, or Headset page no longer queries the headset. Use Check ADB now or an existing headset action when you want a one-time ADB read.
-- Wireless auto-reconnect runs only during a live PCVR session. Pause ADB suppresses that automatic path. Resume allows the next session to use ADB and does not poll while idle.
-- Automatic disconnect of phones, TVs, emulators, and other wireless ADB devices is retired. A saved HeadsetOnlyWirelessAdb=true is cleared on load. Quest commands still target only a classified, trusted headset.
-- Installer updates still stop this app's packaged adb.exe so Setup can replace platform-tools. That path does not run adb kill-server against a shared server.
+Pre-release for community testing. v1.1.37 remains the latest stable release. The in-app updater reads GitHub's latest stable release and does not offer this beta to a stable install. A beta install is not downgraded to 1.1.37. GitHub issue #27 is addressed in this build and stays open until the reporter confirms it.
 
-Validation
-- Local suite passes 231/231.
+Added
+- Runtime headset capability reports, with Quest 3S kept distinct from Quest 3.
+- Transactional ADB property snapshots in %AppData%\MetaQuestTrayTool\headset-property-recovery.json.
+- Opt-in Quest 3 GPU level 7. Levels 0–4 are unchanged. Quest 3S is refused. A missing battery temperature refuses the write, as does a battery reading at or above 45 °C. While an override owned by this app is active, battery and thermal status are sampled on a bounded timer. The original GPU property is restored if the reading is missing, stale, unreachable, at the gate, or severe, and also when that watch is cancelled or the application exits. A watch replaced by a newer explicit apply does not restore the newer value. That 45 °C value is an application gate on battery temperature, not GPU junction temperature, and not an established universal hardware limit. Property readback is not a clock measurement. A completed restoration, a failed restoration, and an external change that this app did not write all block automatic reapplication until the Headset page applies it again. A failed restoration stays visible and is retried only while the failure is still an incomplete or unreadable restore.
+- Opt-in Quest 3 refresh property requests for 144 Hz and 207 Hz. After readback, a display dump is parsed separately from the property. A dump that shows a different rate is restored. 240 Hz and debug.oculus.forceDisplayScaling are not written. Neither result is reported as OpenXR, streaming, or fresh-frame FPS.
+- Performance page with a session monitor, pasted-log analysis labeled as pasted, an explicit headset sample labeled as runtime evidence, optional nvidia-smi PC samples, CSV and JSON export, and advisory bottleneck text. Unavailable measurements stay unavailable. Headset ADB for the monitor runs only while the page is open, monitoring is started, and a PCVR session is already active.
+- Timed 30-second, 60-second, and five-minute PC benchmarks with a warm-up, cancel, history, and CSV/JSON export. A PC comparison runs only when the two sides name different values of a supported setting. Repeated samples of an unchanged workload are refused before anything is applied. ABBA order is baseline, candidate, candidate, baseline. Periodic samples still do not produce 1% lows. Refresh, bitrate, and GPU-level comparisons are not offered from the page. The page's PC GPU button does not record identical samples as a comparison. A comparison that needs a reconnect or SteamVR restart does not run unless it is authorized, and a SteamVR restart is still refused.
+- A separate overlay process. It uses the unmodified OpenVR C# binding from ValveSoftware/openvr tag v2.5.1 and is not loaded into the tray. The pipe token is written to the companion's standard input. The pipe allows the current user only and is labeled medium integrity. An elevated tray starts that companion with the interactive Explorer token and does not fall back to an elevated process. A missing SteamVR library exits the companion and leaves the tray running. The companion asks OpenVR for mouse input and acknowledges a SteamVR quit event. Neither request has been accepted inside a headset. Controller interaction is not claimed.
+- Provider classification for Meta Link, SteamVR, Steam Link, Virtual Desktop, ALVR, and Quest3-Pyrowave. ALVR library code can update an existing preferred FPS, an existing ConstantMbps number, and an existing resolution leaf while the caller says the server is stopped, and can restore the adjacent backup. It does not switch variants, invent an HTTP API, or edit a running server. No page calls that editor yet. Pyrowave session files are not edited. A dashboard SetValues body can be built for bitrate, chroma, wavelet, and resolution from tools/quest3/control.py at 1b529ef. A post is refused unless the supplied session JSON contains session_settings.video.pyrowave as an object, and a body that asks for RestartSteamvr or UpdateClientList is refused. No page posts that body. Wired mode, automatic bitrate, and refresh writes remain unavailable.
+- Game profiles can apply opted-in GPU level 7 when the named provider is already active, the trusted headset matches, and the current GPU level is not already 7. That profile restores the value it applied when the game exits. A level 7 that was already present is left in place and is not restored on exit. Experimental refresh, named ALVR or Pyrowave presets, and auto-switch are not applied. No streaming provider is launched. ALVR, Pyrowave, and Steam Link sessions do not authorize the write.
+- A redacted performance-diagnostics.txt entry in the support ZIP.
+- Custom notification windows for startup and the existing tray notices. Modern windows are on by default for a missing preference. The window has the application icon, a severity label, a dismiss button, and action buttons. Pure Black, Dark, and Light use different surfaces. Transparency stays readable and turns opaque in high contrast or when the preference is off.
+- A quick-control flyout on the tray menu. Its Exit action uses the same shutdown path as the other Exit commands.
+
+Fixed
+- Startup still showed the standard Windows balloon, “Running in the notification area. Right-click the headset icon to open settings or Exit.” TrayIconHost.Show called NotifyIcon.ShowBalloonTip and never opened the custom window. That call is now only the logged fallback, used when modern windows are turned off or the window cannot be created. The same event does not show both.
+- GitHub issue #27: Exit now closes the installed Meta Horizon Link client before stopping OVRService when “stop on exit” is enabled. The hotkey, voice command, tray menu, settings window, updater, and Windows session end all use that same exit. Stopping the service alone left Client.exe open. The option still leaves Link and OVRService running when it is off, and it does not stop SteamVR or the shared ADB server.
+- An owned GPU level 7 override is restored when its thermal watch is cancelled, the application exits, or the process restarts with a pending lease. A cancelled watch no longer leaves the override applied with sampling stopped.
+- A property snapshot saved and then cancelled before any write is removed, so a later apply is not blocked by a transaction that never wrote.
+- GPU level 7 is refused when the firmware fingerprint was not read.
+- The overlay companion is not started elevated from an elevated tray. The performance pipe no longer grants Administrators.
+- Live performance sampling stops when the Performance page closes.
+- A Pyrowave dashboard post is refused when the session is not identified as Pyrowave.
+- Identical PC samples are not recorded as an A/B comparison. ABBA runs four legs in A-B-B-A order.
+- A game profile does not restore a GPU level 7 override it did not apply.
+- Setup closes MetaQuestTrayTool.Overlay.exe as well as the tray before replacing files.
 
 Verification limits
-- Coexistence with Android Studio, SideQuest, and other ADB clients still needs a check on a machine that has those tools and a Quest. The automated tests do not start or kill a developer ADB server.
+- Desktop notification check on 2026-11-24. The debug build was launched with --no-elevate because automatic elevation had opened a secure-desktop consent prompt. The visible startup window read “Ready for Virtual Reality” with Open Settings and Open Performance. Success, warning, and error windows, the quick-control flyout, and the Tray Tool notification preferences were also on screen. Pure Black, Dark, and Light surfaces were captured from that process. No Quest headset was used. An opaque system backdrop behind the rounded card was removed after the first capture showed a gray rectangle.
+- Integration audit on 2026-11-24, starting at 399cddb. Debug app build: 0 warnings. Release app build: 0 warnings. dotnet build of the solution with -r win-x64 fails with NETSDK1134; the test project was built and tested instead. Release tests: 376 passed, 0 failed, 0 skipped. Line coverage 17.80% against an 8% floor. Local installer dist/MetaQuestTrayTool-Setup-1.1.37.exe is 75.6 MB and was not published. The public version was not changed. No physical Quest, ALVR, Pyrowave, or SteamVR session was measured.
+- GPU level 7, 144 Hz, and 207 Hz still need hardware acceptance. See docs/research/HARDWARE-ACCEPTANCE.md.
+- Experimental GPU level 7 and experimental 144/207 Hz stay off unless you opt in. The 45 °C value is an application battery-temperature gate, not GPU junction temperature and not a firmware limit.
+- No page edits a running ALVR server or posts a Pyrowave dashboard request. Those provider paths are not a supported setup flow.
+- The SteamVR overlay companion has not been accepted inside a headset. Controller interaction is not claimed.
+- This beta does not replace v1.1.37 as the latest stable download.
 
 Full history: https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md

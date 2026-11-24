@@ -73,7 +73,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-A pre-release tag such as `v1.2.0-beta.1` uses the same workflow. Windows file version stays numeric (`1.2.0.0`). The displayed version keeps the suffix.
+A pre-release tag such as `v1.2.0-beta.1` uses the same workflow. Windows file version and the installer version resource stay numeric (`1.2.0.0`). The displayed setup name keeps the suffix.
 
 ## Files
 

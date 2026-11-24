@@ -56,7 +56,7 @@ VersionInfoVersion={#MyAppFileVersion}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} Setup
 VersionInfoProductName={#MyAppName}
-VersionInfoProductVersion={#MyAppVersion}
+VersionInfoProductVersion={#MyAppFileVersion}
 VersionInfoCopyright=Copyright (C) Eliminater74
 
 [Languages]
