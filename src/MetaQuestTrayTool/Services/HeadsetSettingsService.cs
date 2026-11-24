@@ -253,11 +253,14 @@ public sealed class HeadsetSettingsService
         return new HeadsetRecordingDownloadResult(outputPath, recording.RemotePath, file.Length);
     }
 
-    public string CapturePerformanceSample(HeadsetSettings settings, TimeSpan duration)
+    public string CapturePerformanceSample(HeadsetSettings settings, TimeSpan duration) =>
+        CapturePerformanceSampleModel(settings, duration).ToDisplayText();
+
+    public HeadsetPerformanceSample CapturePerformanceSampleModel(HeadsetSettings settings, TimeSpan duration)
     {
         var quest = RequireReadyHeadset(settings);
         var output = _adb.LogcatForDuration(quest.Serial, duration);
-        return HeadsetPerformanceSample.Parse(output, duration).ToDisplayText();
+        return HeadsetPerformanceSample.Parse(output, duration);
     }
 
     public string Apply(HeadsetSettings settings, IReadOnlyList<string>? extraAdb = null)

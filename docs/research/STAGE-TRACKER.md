@@ -10,8 +10,8 @@ Starting HEAD: `52d961bb5a456f8cd44313a5fbec266cfe789704`.
 | 3 Experimental GPU level 7 | Complete | `eea8d175b095c96316f705f5b1384f85202d5a8f` | Filtered GPU and override tests: 20 passed. |
 | 4a Headset telemetry | Complete | `b98317f2f93e432bb0afffefe3449cb5cb18d073` | Headset telemetry tests: 8 passed. |
 | 4b PC telemetry | Complete in this commit | this commit | Covered by `PcAndStreamingTelemetryTests`. |
-| 4c Streaming telemetry | Complete in this commit | this commit | Same filtered run: 9 passed. |
-| 5 Dashboard and analyzer | Pending | | |
+| 4c Streaming telemetry | Complete | `8b78ebf3610af9738f8c0ab213fca609c222466b` | `PcAndStreamingTelemetryTests`: 9 passed. |
+| 5 Dashboard and analyzer | Complete in this commit | this commit | `BottleneckAnalyzerTests` and override regression: 15 passed. UI build succeeded. |
 | 6 Benchmarks | Pending | | |
 | 7 Experimental refresh | Pending | | |
 | 8 Overlay IPC | Pending | | |

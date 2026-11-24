@@ -14,7 +14,7 @@ Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
 | Area | Shipped |
 | --- | --- |
-| Shell | Status (default), Game Settings, Tray Tool (optional Meta Horizon Link on start and temporary Windows HDR off), Power, Service & Startup, Log, Advanced, Quest Link, Headset, VR Tools, Info |
+| Shell | Status (default), Game Settings, Tray Tool (optional Meta Horizon Link on start and temporary Windows HDR off), Power, Service & Startup, Log, Advanced, Quest Link, Headset, Performance, VR Tools, Info |
 | Status / Ready | Live chips, SteamVR install/version/Stable\|Beta, PCVR Ready checklist, Recover PCVR, session probe (Air/wired/Steam/VD) |
 | Game / profiles | ODT SS/ASW/FOV/HUD, Debug Tool GUI, auto profiles, library Launch, ignore list, last-good, overlays close |
 | Link / Dash | RemoteHeadset Link settings, bitrate presets through 960 Mbps, encode width through 4128, Default / H.264 / HEVC codec and Default / Disabled sliced encoding, startup protection for externally set high fixed ODT bitrate and DBRMax values, presets that remain editable while non-Meta streamers are active, Quest Link mirror screenshots, optional open Meta Horizon Link on tray start, PreventDashLaunch → SteamVR over Link (registry only; no Meta process killing), CoreChannel, SteamVR Home (on demand), OVRService restart on SteamVR exit, OVRService Manual-at-boot toggle |

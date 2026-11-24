@@ -16,6 +16,7 @@ public partial class MainShellWindow : Window
     private readonly AdvancedPage _advancedPage = new();
     private readonly QuestLinkPage _linkPage = new();
     private readonly HeadsetPage _headsetPage = new();
+    private readonly PerformancePage _performancePage = new();
     private readonly InfoPage _infoPage = new();
     private readonly VrToolsPage _vrToolsPage = new();
     private bool _forceClose;
@@ -54,6 +55,7 @@ public partial class MainShellWindow : Window
             "Advanced" => NavAdvanced,
             "Link" => NavLink,
             "Headset" => NavHeadset,
+            "Performance" => NavPerformance,
             "Info" => NavInfo,
             "VrTools" => NavVrTools,
             "Game" => NavGame,
@@ -97,6 +99,7 @@ public partial class MainShellWindow : Window
             "Advanced" => _advancedPage,
             "Link" => _linkPage,
             "Headset" => _headsetPage,
+            "Performance" => _performancePage,
             "Info" => _infoPage,
             "VrTools" => _vrToolsPage,
             "Game" => _gamePage,
@@ -113,6 +116,7 @@ public partial class MainShellWindow : Window
             "Advanced" => "Advanced",
             "Link" => "Quest Link",
             "Headset" => "Headset",
+            "Performance" => "Performance",
             "Info" => "Info",
             "VrTools" => "VR Tools",
             "Game" => "Game Settings",

@@ -104,6 +104,9 @@
             <RadioButton x:Name="NavHeadset" Content="Headset" Style="{StaticResource NavButtonStyle}"
                          GroupName="ShellNav" Checked="Nav_Checked" Tag="Headset"
                          ToolTip="ADB tweaks for your trusted Quest. Props do not survive reboot — apply on connect."/>
+            <RadioButton x:Name="NavPerformance" Content="Performance" Style="{StaticResource NavButtonStyle}"
+                         GroupName="ShellNav" Checked="Nav_Checked" Tag="Performance"
+                         ToolTip="Advisory performance samples, PC GPU history, and bottleneck notes. Does not change settings."/>
             <RadioButton x:Name="NavVrTools" Content="VR Tools" Style="{StaticResource NavButtonStyle}"
                          GroupName="ShellNav" Checked="Nav_Checked" Tag="VrTools"
                          ToolTip="Curated links to Revive, Advanced Settings, overlays, wireless PCVR, and more."/>
