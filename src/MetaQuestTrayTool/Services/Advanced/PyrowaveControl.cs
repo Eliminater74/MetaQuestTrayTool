@@ -58,24 +58,58 @@ public static class PyrowaveControl
         return body;
     }
 
-    public static string Send(IPyrowaveTransport transport, string body)
+    public static bool SessionContainsPyrowave(string? sessionJson)
     {
-        if (body.Contains("RestartSteamvr", StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(sessionJson))
         {
-            throw new InvalidOperationException("RestartSteamvr is not sent.");
+            return false;
         }
 
+        try
+        {
+            return JsonNode.Parse(sessionJson) is JsonObject root
+                && root["session_settings"]?["video"]?["pyrowave"] is JsonObject;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return false;
+        }
+    }
+
+    public static string Send(IPyrowaveTransport transport, string body, string? sessionJson)
+    {
+        ArgumentNullException.ThrowIfNull(transport);
+        RejectUnsafeBody(body, sessionJson);
         return transport.Post(DashboardUrl, body);
     }
 
-    public static string PostLocalhost(string body, TimeSpan timeout)
+    public static string PostLocalhost(string body, string? sessionJson, TimeSpan timeout)
     {
+        RejectUnsafeBody(body, sessionJson);
         using var client = new HttpClient { Timeout = timeout };
         using var request = new HttpRequestMessage(HttpMethod.Post, DashboardUrl);
         request.Headers.TryAddWithoutValidation("X-ALVR", "true");
         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
         using var response = client.Send(request);
         return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+    }
+
+    private static void RejectUnsafeBody(string body, string? sessionJson)
+    {
+        if (!SessionContainsPyrowave(sessionJson))
+        {
+            throw new InvalidOperationException("The dashboard session does not contain video.pyrowave. The request was not sent, so stock ALVR was not changed.");
+        }
+
+        if (body.Contains("RestartSteamvr", StringComparison.Ordinal) || body.Contains("UpdateClientList", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("RestartSteamvr and UpdateClientList are not sent.");
+        }
+
+        if (!string.Equals(DashboardUrl, "http://127.0.0.1:8082/api/dashboard-request", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("The Pyrowave dashboard URL is not the pinned localhost endpoint. Nothing was sent.");
+        }
     }
 
     private static JsonObject[]? Bitrate(string value, out string detail)

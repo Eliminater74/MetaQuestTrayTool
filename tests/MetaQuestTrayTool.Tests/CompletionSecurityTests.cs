@@ -18,7 +18,8 @@ public class CompletionSecurityTests
         Assert.Contains("unavailable", wired, StringComparison.OrdinalIgnoreCase);
         Assert.Throws<InvalidOperationException>(() => PyrowaveControl.Send(
             new QuietTransport(),
-            "{\"RestartSteamvr\":true}"));
+            "{\"RestartSteamvr\":true}",
+            Session));
 
         Assert.Null(AlvrSessionManagement.TrySetConstantBitrate(Session, 150, true, out var running));
         Assert.Contains("running", running, StringComparison.OrdinalIgnoreCase);

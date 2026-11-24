@@ -67,11 +67,17 @@ public class PyrowaveControlTests
         string? seen = null;
         var transport = new RecordingTransport(body => seen = body);
         var body = PyrowaveControl.TryBuild("chroma", "420", true, out _)!;
-        PyrowaveControl.Send(transport, body);
+        PyrowaveControl.Send(transport, body, Session);
         Assert.Equal(PyrowaveControl.DashboardUrl, transport.Url);
         Assert.Contains("chroma_444", seen, StringComparison.Ordinal);
         Assert.Contains("false", seen, StringComparison.Ordinal);
-        Assert.Throws<InvalidOperationException>(() => PyrowaveControl.Send(transport, "{\"RestartSteamvr\":true}"));
+        Assert.Throws<InvalidOperationException>(() => PyrowaveControl.Send(transport, "{\"RestartSteamvr\":true}", Session));
+
+        var posts = 0;
+        var stock = new RecordingTransport(_ => posts++);
+        Assert.Throws<InvalidOperationException>(() => PyrowaveControl.Send(stock, body, """{"session_settings":{"video":{"preferred_fps":90}}}"""));
+        Assert.Equal(0, posts);
+        Assert.False(PyrowaveControl.SessionContainsPyrowave(null));
     }
 
     private sealed class RecordingTransport : IPyrowaveTransport
