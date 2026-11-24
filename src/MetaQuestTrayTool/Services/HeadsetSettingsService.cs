@@ -302,7 +302,7 @@ public sealed class HeadsetSettingsService
             var transaction = transactions.Apply(quest.Serial, quest.Model, fingerprint, new Dictionary<string, string>
             {
                 [ExperimentalGpuPolicy.PropertyName] = ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture)
-            });
+            }, bootId: TryBootId(quest.Serial));
             if (transaction.Status != PropertyTransactionStatus.Verified)
             {
                 throw new InvalidOperationException(transaction.ToDisplayText());
@@ -363,7 +363,7 @@ public sealed class HeadsetSettingsService
             var transaction = transactions.Apply(quest.Serial, quest.Model, fingerprint, new Dictionary<string, string>
             {
                 [ExperimentalRefreshPolicy.RefreshProperty] = experimentalHz.ToString(CultureInfo.InvariantCulture)
-            });
+            }, bootId: TryBootId(quest.Serial));
             if (transaction.Status != PropertyTransactionStatus.Verified)
             {
                 throw new InvalidOperationException(transaction.ToDisplayText());
@@ -529,6 +529,27 @@ public sealed class HeadsetSettingsService
     }
 
     internal static IHeadsetPropertyStore CreatePropertyStore(AdbService adb) => new AdbHeadsetPropertyStore(adb);
+
+    private static string? TryBootId(string serial, AdbService adb)
+    {
+        try
+        {
+            var text = adb.Shell(serial, "cat /proc/sys/kernel/random/boot_id");
+            var line = text.Trim().Split('\r', '\n')[0].Trim();
+            if (line.Length is < 1 or > 64 || line.Any(ch => !(char.IsAsciiLetterOrDigit(ch) || ch == '-')))
+            {
+                return null;
+            }
+
+            return line;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+        {
+            return null;
+        }
+    }
+
+    private string? TryBootId(string serial) => TryBootId(serial, _adb);
 
     private sealed class AdbHeadsetPropertyStore : IHeadsetPropertyStore
     {

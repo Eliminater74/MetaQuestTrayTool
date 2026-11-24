@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -39,6 +40,7 @@ public sealed class AdbPropertySnapshot
     public string Serial { get; init; } = string.Empty;
     public string? Model { get; init; }
     public string? Fingerprint { get; init; }
+    public string? BootId { get; init; }
     public string Owner { get; init; } = AdbPropertyTransactionService.OwnerId;
     public DateTimeOffset CapturedUtc { get; init; }
     public List<TrackedHeadsetProperty> Properties { get; init; } = [];
@@ -64,13 +66,20 @@ public sealed class AdbPropertyTransactionService
     private readonly IHeadsetPropertyStore _store;
     private readonly string? _recoveryPath;
     private readonly object _gate = new();
+    private readonly string _operationKey;
     private AdbPropertySnapshot? _memory;
+    private string? _corruptDetail;
 
     public AdbPropertyTransactionService(IHeadsetPropertyStore store, string? recoveryPath = null)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _recoveryPath = string.IsNullOrWhiteSpace(recoveryPath) ? null : recoveryPath;
+        _operationKey = _recoveryPath ?? "memory:" + RuntimeHelpers.GetHashCode(this).ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
+
+    public bool TryBeginOperation(out int generation) => PropertyOperationCoordinator.TryEnter(_operationKey, out generation);
+
+    public void EndOperation(int generation) => PropertyOperationCoordinator.Exit(_operationKey, generation);
 
     public PropertyTransactionResult Apply(
         string serial,
@@ -78,7 +87,50 @@ public sealed class AdbPropertyTransactionService
         string? fingerprint,
         IReadOnlyDictionary<string, string> changes,
         DateTimeOffset? capturedUtc = null,
-        CancellationToken cancellation = default)
+        CancellationToken cancellation = default,
+        string? bootId = null)
+    {
+        if (!TryBeginOperation(out var operation))
+        {
+            return Fail("Another headset property operation is in progress. Nothing was written.");
+        }
+
+        try
+        {
+            return ApplyCore(serial, model, fingerprint, changes, capturedUtc, cancellation, bootId);
+        }
+        finally
+        {
+            EndOperation(operation);
+        }
+    }
+
+    public PropertyTransactionResult ApplyIfCurrent(
+        int generation,
+        string serial,
+        string? model,
+        string? fingerprint,
+        IReadOnlyDictionary<string, string> changes,
+        DateTimeOffset? capturedUtc = null,
+        CancellationToken cancellation = default,
+        string? bootId = null)
+    {
+        if (!PropertyOperationCoordinator.IsCurrent(_operationKey, generation))
+        {
+            return Fail("The property operation is stale. Nothing was written.");
+        }
+
+        return ApplyCore(serial, model, fingerprint, changes, capturedUtc, cancellation, bootId);
+    }
+
+    private PropertyTransactionResult ApplyCore(
+        string serial,
+        string? model,
+        string? fingerprint,
+        IReadOnlyDictionary<string, string> changes,
+        DateTimeOffset? capturedUtc = null,
+        CancellationToken cancellation = default,
+        string? bootId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serial);
         if (changes is null || changes.Count == 0)
@@ -95,6 +147,16 @@ public sealed class AdbPropertyTransactionService
         lock (_gate)
         {
             var existing = LoadRecovery();
+            if (_corruptDetail is not null)
+            {
+                return Fail("The property recovery file is corrupt (" + _corruptDetail + "). Nothing was written. The file was left in place.");
+            }
+
+            if (existing is not null && !string.Equals(existing.Owner, OwnerId, StringComparison.Ordinal))
+            {
+                return Fail("The stored snapshot has a different owner. Nothing was written.");
+            }
+
             if (existing is not null && !string.Equals(existing.Serial, serial, StringComparison.Ordinal))
             {
                 return Fail("A property snapshot for a different headset is still stored. Restore or discard that snapshot before applying overrides to this headset.");
@@ -106,6 +168,14 @@ public sealed class AdbPropertyTransactionService
                 && !string.Equals(existing.Fingerprint, fingerprint, StringComparison.Ordinal))
             {
                 return Fail("The stored snapshot belongs to a different firmware fingerprint. Restore or discard it before applying new overrides. Nothing was written.");
+            }
+
+            if (existing is not null
+                && !string.IsNullOrWhiteSpace(existing.BootId)
+                && !string.IsNullOrWhiteSpace(bootId)
+                && !string.Equals(existing.BootId, bootId, StringComparison.Ordinal))
+            {
+                return Fail("The headset boot id changed since the snapshot. Restore or discard that snapshot before applying. Nothing was written.");
             }
 
             if (cancellation.IsCancellationRequested)
@@ -157,6 +227,7 @@ public sealed class AdbPropertyTransactionService
                 Model = string.IsNullOrWhiteSpace(model) ? existing?.Model : model,
                 Fingerprint = string.IsNullOrWhiteSpace(fingerprint) ? existing?.Fingerprint : fingerprint,
                 Owner = OwnerId,
+                BootId = string.IsNullOrWhiteSpace(bootId) ? existing?.BootId : bootId,
                 CapturedUtc = existing?.CapturedUtc ?? capturedUtc ?? DateTimeOffset.UtcNow,
                 Properties = tracked.Values.ToList()
             };
@@ -221,12 +292,24 @@ public sealed class AdbPropertyTransactionService
     /// Restores a subset of the snapshot and leaves every other tracked property untouched.
     /// A thermal trip uses this so an unrelated refresh override is not rolled back with the GPU property.
     /// </summary>
-    public PropertyTransactionResult Restore(string serial, string? fingerprint, IReadOnlyCollection<string>? onlyNames)
+    public PropertyTransactionResult Restore(string serial, string? fingerprint, IReadOnlyCollection<string>? onlyNames, string? bootId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serial);
+        if (!TryBeginOperation(out var operation))
+        {
+            return Fail("Another headset property operation is in progress. Nothing was written.");
+        }
+
+        try
+        {
         lock (_gate)
         {
             var snapshot = LoadRecovery();
+            if (_corruptDetail is not null)
+            {
+                return Fail("The property recovery file is corrupt (" + _corruptDetail + "). Nothing was written. The file was left in place.");
+            }
+
             if (snapshot is null)
             {
                 return Fail("No property snapshot is stored.");
@@ -244,6 +327,10 @@ public sealed class AdbPropertyTransactionService
             {
                 return Fail("The headset firmware fingerprint changed since the snapshot. Restore was refused.");
             }
+
+            var rebooted = !string.IsNullOrWhiteSpace(snapshot.BootId)
+                && !string.IsNullOrWhiteSpace(bootId)
+                && !string.Equals(snapshot.BootId, bootId, StringComparison.Ordinal);
 
             var selected = onlyNames is null
                 ? snapshot.Properties
@@ -273,6 +360,22 @@ public sealed class AdbPropertyTransactionService
                 }
 
                 var currentPresence = string.IsNullOrWhiteSpace(current) ? PropertyPresence.AbsentOrEmpty : PropertyPresence.Present;
+                if (rebooted && currentPresence == PropertyPresence.AbsentOrEmpty)
+                {
+                    details.Add($"{property.Name}: absent after a headset reboot. The override did not survive, so nothing was written.");
+                    restoredNames.Add(property.Name);
+                    continue;
+                }
+
+                if (rebooted
+                    && !string.Equals(current, property.OriginalValue, StringComparison.Ordinal)
+                    && !string.Equals(current, property.AppliedValue, StringComparison.Ordinal))
+                {
+                    conflict = true;
+                    details.Add($"{property.Name}: current '{current}' changed across a reboot and matches neither the original nor the applied value. Left unchanged.");
+                    continue;
+                }
+
                 if (property.OriginalPresence == PropertyPresence.AbsentOrEmpty)
                 {
                     if (currentPresence == PropertyPresence.AbsentOrEmpty)
@@ -352,6 +455,7 @@ public sealed class AdbPropertyTransactionService
                         Model = snapshot.Model,
                         Fingerprint = snapshot.Fingerprint,
                         Owner = snapshot.Owner,
+                        BootId = snapshot.BootId,
                         CapturedUtc = snapshot.CapturedUtc,
                         Properties = remaining
                     };
@@ -385,14 +489,31 @@ public sealed class AdbPropertyTransactionService
                 Snapshot = fullyCleared ? null : snapshot
             };
         }
+        }
+        finally
+        {
+            EndOperation(operation);
+        }
     }
 
     public PropertyTransactionResult DiscardRecovery(string serial)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serial);
+        if (!TryBeginOperation(out var operation))
+        {
+            return Fail("Another headset property operation is in progress. Nothing was written.");
+        }
+
+        try
+        {
         lock (_gate)
         {
             var snapshot = LoadRecovery();
+            if (_corruptDetail is not null)
+            {
+                return Fail("The property recovery file is corrupt (" + _corruptDetail + "). It was not discarded.");
+            }
+
             if (snapshot is null)
             {
                 return Fail("No property snapshot is stored.");
@@ -409,6 +530,55 @@ public sealed class AdbPropertyTransactionService
                 Status = PropertyTransactionStatus.Restored,
                 Summary = "The snapshot for this headset was discarded without writing properties."
             };
+        }
+        }
+        finally
+        {
+            EndOperation(operation);
+        }
+    }
+
+    public PropertyTransactionResult QuarantineCorruptRecovery()
+    {
+        if (_recoveryPath is null || !File.Exists(_recoveryPath))
+        {
+            return Fail("No recovery file is present.");
+        }
+
+        if (!TryBeginOperation(out var operation))
+        {
+            return Fail("Another headset property operation is in progress. Nothing was written.");
+        }
+
+        try
+        {
+            lock (_gate)
+            {
+                LoadRecovery();
+                if (_corruptDetail is null)
+                {
+                    return Fail("The recovery file is readable. It was not moved.");
+                }
+
+                var destination = _recoveryPath + ".corrupt";
+                if (File.Exists(destination))
+                {
+                    return Fail("A quarantined copy already exists. The corrupt file was left in place. Nothing was written.");
+                }
+
+                File.Move(_recoveryPath, destination);
+                _corruptDetail = null;
+                _memory = null;
+                return new PropertyTransactionResult
+                {
+                    Status = PropertyTransactionStatus.Restored,
+                    Summary = "The unreadable recovery file was moved aside. No headset properties were written."
+                };
+            }
+        }
+        finally
+        {
+            EndOperation(operation);
         }
     }
 
@@ -531,15 +701,35 @@ public sealed class AdbPropertyTransactionService
 
     private AdbPropertySnapshot? LoadRecovery()
     {
+        _corruptDetail = null;
         if (_recoveryPath is not null && File.Exists(_recoveryPath))
         {
+            string text;
             try
             {
-                _memory = JsonSerializer.Deserialize<AdbPropertySnapshot>(File.ReadAllText(_recoveryPath));
+                text = File.ReadAllText(_recoveryPath);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _corruptDetail = ex.GetType().Name;
+                return null;
+            }
+
+            try
+            {
+                var parsed = JsonSerializer.Deserialize<AdbPropertySnapshot>(text);
+                if (parsed is null || string.IsNullOrWhiteSpace(parsed.Serial) || parsed.Properties is null)
+                {
+                    _corruptDetail = "missing snapshot";
+                    return null;
+                }
+
+                _memory = parsed;
                 return _memory;
             }
             catch (JsonException)
             {
+                _corruptDetail = "invalid JSON";
                 return null;
             }
         }
@@ -561,4 +751,57 @@ public sealed class AdbPropertyTransactionService
         Status = PropertyTransactionStatus.Failed,
         Summary = summary
     };
+}
+
+internal static class PropertyOperationCoordinator
+{
+    private static readonly object Sync = new();
+    private static readonly Dictionary<string, Slot> Slots = new(StringComparer.OrdinalIgnoreCase);
+
+    public static bool TryEnter(string key, out int generation)
+    {
+        lock (Sync)
+        {
+            if (!Slots.TryGetValue(key, out var slot))
+            {
+                slot = new Slot();
+                Slots[key] = slot;
+            }
+
+            if (slot.Held != 0)
+            {
+                generation = 0;
+                return false;
+            }
+
+            slot.Held = 1;
+            generation = ++slot.Generation;
+            return true;
+        }
+    }
+
+    public static void Exit(string key, int generation)
+    {
+        lock (Sync)
+        {
+            if (Slots.TryGetValue(key, out var slot) && slot.Held == 1 && slot.Generation == generation)
+            {
+                slot.Held = 0;
+            }
+        }
+    }
+
+    public static bool IsCurrent(string key, int generation)
+    {
+        lock (Sync)
+        {
+            return Slots.TryGetValue(key, out var slot) && slot.Held == 1 && slot.Generation == generation;
+        }
+    }
+
+    private sealed class Slot
+    {
+        public int Held;
+        public int Generation;
+    }
 }
