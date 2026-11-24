@@ -22,9 +22,18 @@
         <Button Content="Score PC history" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="ScoreHistory_Click"
                 ToolTip="Scores the PC GPU samples already collected. This is not a frame-time 1% low and it does not restart SteamVR."/>
         <Button Content="Save report" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Save_Click"/>
+        <Button Content="Export CSV" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="ExportCsv_Click"/>
+        <Button Content="Export JSON" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="ExportJson_Click"/>
+        <Button Content="Start PC benchmark" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Benchmark_Click"
+                ToolTip="Timed PC sample. Warm-up is discarded. This does not restart SteamVR or change headset settings. 1% lows are not calculated from these samples."/>
+        <Button Content="Cancel benchmark" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="CancelBenchmark_Click"/>
         <Button Content="Toggle overlay pipe" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Overlay_Click"
-                ToolTip="Starts a local pipe for the current user. It accepts only a fixed command list. The in-headset OpenVR overlay is not loaded."/>
+                ToolTip="Starts a local pipe for the current user. Commands require the in-process token. The in-headset OpenVR overlay is not loaded."/>
       </WrapPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <TextBlock Text="PC benchmark" VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <ComboBox x:Name="BenchmarkBox" Width="140"/>
+      </StackPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <TextBlock Text="PC sample interval" VerticalAlignment="Center" Margin="0,0,8,0"/>
         <ComboBox x:Name="IntervalBox" Width="120" SelectionChanged="Interval_Changed"/>

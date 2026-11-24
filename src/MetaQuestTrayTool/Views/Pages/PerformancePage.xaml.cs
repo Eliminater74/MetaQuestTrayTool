@@ -13,10 +13,12 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     private readonly DispatcherTimer _timer;
     private readonly List<double> _gpuHistory = [];
     private readonly List<TelemetryMetric> _latest = [];
+    private readonly List<TelemetryMetric> _shown = [];
     private bool _monitoring;
     private bool _sampleInFlight;
     private bool _loading = true;
     private OverlayIpcServer? _overlay;
+    private CancellationTokenSource? _benchmark;
 
     public PerformancePage()
     {
@@ -25,6 +27,10 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         IntervalBox.Items.Add(new ComboBoxItem { Content = "5 seconds", Tag = 5 });
         IntervalBox.Items.Add(new ComboBoxItem { Content = "10 seconds", Tag = 10 });
         IntervalBox.SelectedIndex = 1;
+        BenchmarkBox.Items.Add(new ComboBoxItem { Content = "30 seconds", Tag = 30 });
+        BenchmarkBox.Items.Add(new ComboBoxItem { Content = "60 seconds", Tag = 60 });
+        BenchmarkBox.Items.Add(new ComboBoxItem { Content = "5 minutes", Tag = 300 });
+        BenchmarkBox.SelectedIndex = 0;
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _timer.Tick += (_, _) => _ = SamplePcAsync();
         _loading = false;
@@ -110,7 +116,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         }
 
         _overlay.Start(() => string.IsNullOrWhiteSpace(ReportBox.Text) ? "no-sample" : ReportBox.Text);
-        SummaryText.Text = OverlayCommands.Handle("overlay-status") + ". Pipe: " + OverlayIpcServer.PipeName;
+        SummaryText.Text = "Local pipe started for the current user. " + OpenVrOverlayStatus.Describe();
     }
 
     private void ScoreHistory_Click(object sender, RoutedEventArgs e)
@@ -135,6 +141,81 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
 
         File.WriteAllText(dialog.FileName, ReportBox.Text ?? string.Empty);
         SummaryText.Text = "Saved " + dialog.FileName;
+    }
+
+    private void ExportCsv_Click(object sender, RoutedEventArgs e) => Export("CSV export|*.csv", "pcvr-performance.csv", TelemetryExport.ToCsv(_shown));
+
+    private void ExportJson_Click(object sender, RoutedEventArgs e) => Export("JSON export|*.json", "pcvr-performance.json", TelemetryExport.ToJson(_shown));
+
+    private void Export(string filter, string fileName, string contents)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog { Filter = filter, FileName = fileName };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        File.WriteAllText(dialog.FileName, contents);
+        SummaryText.Text = "Saved " + dialog.FileName;
+    }
+
+    private async void Benchmark_Click(object sender, RoutedEventArgs e)
+    {
+        if (_benchmark is not null)
+        {
+            SummaryText.Text = "A PC benchmark is already running.";
+            return;
+        }
+
+        var duration = BenchmarkBox.SelectedItem is ComboBoxItem { Tag: int seconds } ? seconds : 30;
+        _benchmark = new CancellationTokenSource();
+        var token = _benchmark.Token;
+        SummaryText.Text = duration.ToString() + " second PC benchmark started. Warm-up samples are discarded. SteamVR is not restarted.";
+        try
+        {
+            var result = await Task.Run(() => BenchmarkSession.Run(
+                duration,
+                5,
+                () => DateTimeOffset.UtcNow,
+                SampleGpuOnce,
+                delay => Thread.Sleep(delay),
+                token,
+                "PC GPU %"));
+            BenchmarkHistoryStore.Append(AppPaths.BenchmarkHistoryFile, result);
+            ReportBox.Text = result.ToDisplayText();
+            SummaryText.Text = result.Cancelled
+                ? "PC benchmark cancelled. No headset setting was changed."
+                : "PC benchmark finished. 1% lows were not calculated. History was saved.";
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
+        {
+            ReportBox.Text = ex.Message;
+        }
+        finally
+        {
+            _benchmark?.Dispose();
+            _benchmark = null;
+        }
+    }
+
+    private void CancelBenchmark_Click(object sender, RoutedEventArgs e)
+    {
+        _benchmark?.Cancel();
+        SummaryText.Text = "Benchmark cancel requested. No process was killed.";
+    }
+
+    private static double? SampleGpuOnce()
+    {
+        try
+        {
+            var csv = PcTelemetry.TryQueryNvidiaSmi();
+            var metrics = PcTelemetry.FromProbe(csv, csv is null ? "nvidia-smi unavailable" : null, null, DateTimeOffset.UtcNow);
+            return metrics.FirstOrDefault(metric => metric.Name == "PcGpuUtilization")?.Value;
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
     }
 
     private void Interval_Changed(object sender, SelectionChangedEventArgs e)
@@ -202,7 +283,15 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         var lines = metrics.Select(metric => metric.Availability == MetricAvailability.Available
             ? $"{metric.Name}: {metric.Value?.ToString("0.##") ?? metric.Text} {metric.Unit} [{metric.Quality}, {metric.Source}]"
             : $"{metric.Name}: unavailable ({metric.Note})");
-        ReportBox.Text = evidence + Environment.NewLine + Environment.NewLine
+        _shown.Clear();
+        _shown.AddRange(metrics.Take(240));
+        var source = metrics.FirstOrDefault()?.Source ?? "report";
+        var banner = source == "pasted-log"
+            ? "Source: pasted log. This is not live monitoring."
+            : source == "headset"
+                ? "Source: explicit headset sample. This is not a background poll."
+                : "Source: " + source + ".";
+        ReportBox.Text = banner + Environment.NewLine + evidence + Environment.NewLine + Environment.NewLine
             + string.Join(Environment.NewLine, lines) + Environment.NewLine + Environment.NewLine
             + BottleneckAnalyzer.ToDisplayText(findings);
         SummaryText.Text = findings[0].Title;
