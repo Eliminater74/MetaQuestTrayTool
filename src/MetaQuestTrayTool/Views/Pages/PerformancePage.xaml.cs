@@ -16,6 +16,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     private bool _monitoring;
     private bool _sampleInFlight;
     private bool _loading = true;
+    private OverlayIpcServer? _overlay;
 
     public PerformancePage()
     {
@@ -28,6 +29,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         _timer.Tick += (_, _) => _ = SamplePcAsync();
         _loading = false;
         IsVisibleChanged += (_, _) => SyncTimer();
+        Unloaded += (_, _) => _overlay?.Dispose();
         SummaryText.Text = "Monitoring is stopped. No headset polling is running.";
     }
 
@@ -95,6 +97,20 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         DrawChart();
         SyncTimer();
         SummaryText.Text = "PC history stopped and cleared.";
+    }
+
+    private void Overlay_Click(object sender, RoutedEventArgs e)
+    {
+        _overlay ??= new OverlayIpcServer();
+        if (_overlay.IsRunning)
+        {
+            _overlay.Stop();
+            SummaryText.Text = "Overlay pipe stopped. The OpenVR dashboard overlay was not loaded.";
+            return;
+        }
+
+        _overlay.Start(() => string.IsNullOrWhiteSpace(ReportBox.Text) ? "no-sample" : ReportBox.Text);
+        SummaryText.Text = OverlayCommands.Handle("overlay-status") + ". Pipe: " + OverlayIpcServer.PipeName;
     }
 
     private void ScoreHistory_Click(object sender, RoutedEventArgs e)
