@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 namespace MetaQuestTrayTool.Services;
 
 public sealed class PyrowaveSettingsReport
@@ -34,11 +36,84 @@ public static class PyrowaveSession
     public static PyrowaveSettingsReport Read(string? sessionText)
     {
         var profiles = PyrowaveDiscovery.DiscoverProfiles(sessionText);
+        var profile = profiles.Count == 0 ? "unavailable" : string.Join(", ", profiles);
+        var refresh = "unavailable";
+        var stream = "unavailable";
+        var render = "unavailable";
+        var bitrate = "unavailable";
+        var automatic = "unavailable";
+        var wavelet = "unavailable";
+        var chroma = "unavailable";
+        var wired = "unavailable";
+        var telemetry = "unavailable";
+        if (!string.IsNullOrWhiteSpace(sessionText))
+        {
+            try
+            {
+                if (JsonNode.Parse(sessionText) is JsonObject root
+                    && root["session_settings"]?["video"] is JsonObject video)
+                {
+                    refresh = video["preferred_fps"]?.ToString() ?? refresh;
+                    stream = DescribeFrame(video["transcoding_view_resolution"] as JsonObject);
+                    render = DescribeFrame(video["emulated_headset_view_resolution"] as JsonObject);
+                    if (video["bitrate"]?["mode"] is JsonObject mode)
+                    {
+                        var variant = mode["variant"]?.ToString() ?? "unknown";
+                        automatic = variant == "Adaptive" ? "Adaptive is present. control.py at 1b529ef does not write it." : "not adaptive";
+                        bitrate = variant + " " + (mode["ConstantMbps"]?.ToString() ?? "unavailable");
+                    }
+
+                    if (video["pyrowave"] is JsonObject pyro)
+                    {
+                        wavelet = pyro["wavelet"]?["variant"]?.ToString() ?? wavelet;
+                        chroma = pyro["chroma_444"]?.ToString() switch
+                        {
+                            "true" => "444",
+                            "false" => "420",
+                            _ => chroma
+                        };
+                        wired = pyro["transport"]?["variant"]?.ToString() ?? wired;
+                        telemetry = pyro["latency_stamp"] is null
+                            ? "No latency_stamp field in this session. Log telemetry is not inferred."
+                            : "latency_stamp=" + pyro["latency_stamp"];
+                    }
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+            }
+        }
+
         return new PyrowaveSettingsReport
         {
-            ActiveProfile = profiles.Count == 0 ? "unavailable" : string.Join(", ", profiles),
-            WriteStatus = "Configuration writes are unavailable. Bitrate, resolution, wavelet, chroma, and wired-connection fields were not changed."
+            ActiveProfile = profile,
+            Refresh = refresh,
+            StreamResolution = stream,
+            RenderResolution = render,
+            Bitrate = bitrate,
+            AutomaticBitrate = automatic,
+            Wavelet = wavelet,
+            Chroma = chroma,
+            WiredConnections = wired,
+            Telemetry = telemetry,
+            WriteStatus = "Session files are not edited. Dashboard SetValues from tools/quest3/control.py at 1b529ef can be built separately and is not sent unless a caller authorizes the disruption. RestartSteamvr is never sent."
         };
+    }
+
+    private static string DescribeFrame(JsonObject? frame)
+    {
+        if (frame is null)
+        {
+            return "unavailable";
+        }
+
+        var variant = frame["variant"]?.ToString() ?? "unknown";
+        if (variant == "Absolute")
+        {
+            return "Absolute " + frame["Absolute"]?["width"] + "x" + frame["Absolute"]?["height"]?["content"];
+        }
+
+        return variant + " " + frame["Scale"];
     }
 
     public static string? TryApply(string? json, string setting, string value, bool serverRunning, out string detail)
