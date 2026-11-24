@@ -28,7 +28,7 @@ Discovery does not call ADB by itself. Property changes made through `AdbPropert
 
 ## What you can set
 
-Independent CPU and GPU levels, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop/download, 10-second runtime logcat performance samples, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers.
+Independent CPU and GPU levels 0–4, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop/download, 10-second runtime logcat performance samples, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers. An opt-in **Quest 3 experimental GPU level 7** checkbox writes `debug.oculus.gpuLevel=7` through a snapshot. It is refused on Quest 3S and other models, and at or above 45 °C battery temperature. Readback is not a clock measurement. Hardware verification is pending.
 
 High Top FFR is labelled legacy/VrApi because OpenXR treats it as High. Capture FPS is labelled legacy/firmware-dependent until physical headset validation proves current firmware honors `debug.oculus.capture.fps`.
 

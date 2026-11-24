@@ -94,6 +94,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Select(CaptureBitrateBox, headset.CaptureBitrate);
         StereoBox.IsChecked = headset.StereoCapture;
         FullRateBox.IsChecked = headset.FullRateCapture;
+        ExperimentalGpuBox.IsChecked = headset.ExperimentalGpuMaximumEnabled;
         RequireTrustBox.IsChecked = headset.RequireTrustedHeadset;
         CustomAdbBox.Text = string.Join(Environment.NewLine, headset.CustomAdbCommands);
         WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
@@ -132,6 +133,7 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.CaptureBitrate = Read<HeadsetCaptureBitrate>(CaptureBitrateBox, headset.CaptureBitrate);
         headset.StereoCapture = StereoBox.IsChecked == true;
         headset.FullRateCapture = FullRateBox.IsChecked == true;
+        headset.ExperimentalGpuMaximumEnabled = ExperimentalGpuBox.IsChecked == true;
         headset.RequireTrustedHeadset = RequireTrustBox.IsChecked == true;
         headset.CustomAdbCommands = CustomCommandSet.ParseLines(CustomAdbBox.Text);
         headset.WirelessHost = string.IsNullOrWhiteSpace(WirelessHostBox.Text) ? null : WirelessHostBox.Text.Trim();

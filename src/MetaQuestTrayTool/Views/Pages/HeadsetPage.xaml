@@ -119,6 +119,7 @@
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
 
           <TextBlock Grid.Row="0" Text="Quest Pro local dimming" VerticalAlignment="Center" Margin="0,0,0,8"/>
@@ -128,6 +129,11 @@
           <TextBlock Grid.Row="1" Text="Subsampled foveation" VerticalAlignment="Center" Margin="0,0,0,8"/>
           <ComboBox x:Name="SubsampledFoveationBox" Grid.Row="1" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"
                     ToolTip="Experimental Meta runtime property for subsampled fixed foveation layout. Leave on App default unless you are testing rendering behavior."/>
+
+          <CheckBox x:Name="ExperimentalGpuBox" Grid.Row="2" Grid.ColumnSpan="2"
+                    Content="Quest 3 experimental GPU level 7 (off by default)"
+                    Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
+                    ToolTip="Opt-in. Writes debug.oculus.gpuLevel=7 only for a Quest 3, after snapshotting the previous value. Quest 3S and other models are refused. Refuses at or above 45 C battery temperature. A property readback is not a GPU clock measurement. Hardware verification is pending. If the previous value was unset, clearing it needs a reboot."/>
         </Grid>
       </Expander>
 

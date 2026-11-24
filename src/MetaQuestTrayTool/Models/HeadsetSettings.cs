@@ -155,6 +155,12 @@ public sealed class HeadsetSettings
     /// </summary>
     public DateTime? AdbWatcherPausedUntilUtc { get; set; }
 
+    /// <summary>
+    /// Opt-in Quest 3 debug.oculus.gpuLevel=7. Default off. Quest 3S and other models are refused.
+    /// A successful property readback is not a GPU clock measurement. Hardware verification is pending.
+    /// </summary>
+    public bool ExperimentalGpuMaximumEnabled { get; set; }
+
     public string? WirelessEndpoint
     {
         get

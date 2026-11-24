@@ -128,6 +128,19 @@ public sealed class HeadsetSettingsService
         return result;
     }
 
+    internal static IReadOnlyDictionary<string, string> PerformanceOverridesForApply(
+        HeadsetSettings settings,
+        ExperimentalGpuDecision decision)
+    {
+        var result = new Dictionary<string, string>(PerformanceOverrides(settings));
+        if (decision.ApplyLevel7)
+        {
+            result[ExperimentalGpuPolicy.PropertyName] = ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture);
+        }
+
+        return result;
+    }
+
     internal static IReadOnlyDictionary<string, string> ExperimentalOverrides(HeadsetSettings settings, string? model)
     {
         var result = new Dictionary<string, string>();
@@ -250,13 +263,40 @@ public sealed class HeadsetSettingsService
     public string Apply(HeadsetSettings settings, IReadOnlyList<string>? extraAdb = null)
     {
         var quest = RequireReadyHeadset(settings);
-        var applied = new List<string>();
-
         if (!HeadsetCapabilities.RefreshRates(quest.Model).Contains(settings.RefreshRate))
             throw new InvalidOperationException("The saved refresh rate is not supported by this headset model. Choose a supported rate or Device default.");
-        var performance = PerformanceOverrides(settings);
+        var gpuDecision = ResolveExperimentalGpu(settings, quest);
+        var performance = new Dictionary<string, string>(PerformanceOverridesForApply(settings, gpuDecision));
         var foveation = FoveationOverrides(settings);
         var experimental = ExperimentalOverrides(settings, quest.Model);
+
+        var applied = new List<string>();
+        if (gpuDecision.ApplyLevel7)
+        {
+            var transactions = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile);
+            string? fingerprint = null;
+            try
+            {
+                fingerprint = _adb.GetProp(quest.Serial, "ro.build.fingerprint");
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+            {
+                fingerprint = null;
+            }
+
+            var transaction = transactions.Apply(quest.Serial, quest.Model, fingerprint, new Dictionary<string, string>
+            {
+                [ExperimentalGpuPolicy.PropertyName] = ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture)
+            });
+            if (transaction.Status != PropertyTransactionStatus.Verified)
+            {
+                throw new InvalidOperationException(transaction.ToDisplayText());
+            }
+
+            applied.Add(ExperimentalGpuPolicy.PropertyName + "=" + ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture)
+                + " (readback verified; clock not measured)");
+            performance.Remove(ExperimentalGpuPolicy.PropertyName);
+        }
 
         foreach (var (name, value) in performance)
             applied.Add(_adb.SetProp(quest.Serial, name, value));
@@ -359,9 +399,49 @@ public sealed class HeadsetSettingsService
         }
 
         var label = quest.Model ?? quest.Serial;
-        return applied.Count == 0
+        var summary = applied.Count == 0
             ? $"Headset {label} connected — all headset overrides are Device/App default (nothing to push)."
             : $"Applied {applied.Count} headset ADB command(s) on {label}.";
+        if (!string.IsNullOrWhiteSpace(gpuDecision.Warning))
+        {
+            summary += Environment.NewLine + gpuDecision.Warning;
+        }
+
+        return summary;
+    }
+
+    private ExperimentalGpuDecision ResolveExperimentalGpu(HeadsetSettings settings, AdbDevice quest)
+    {
+        if (!settings.ExperimentalGpuMaximumEnabled)
+        {
+            return ExperimentalGpuPolicy.Evaluate(false, quest.Model, null);
+        }
+
+        double? temperature = null;
+        try
+        {
+            temperature = HeadsetCapabilityDiscovery.ParseTemperature(_adb.Shell(quest.Serial, "dumpsys battery"));
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+        {
+            temperature = null;
+        }
+
+        var decision = ExperimentalGpuPolicy.Evaluate(true, quest.Model, temperature);
+        if (decision.Refusal is not null)
+        {
+            throw new InvalidOperationException(decision.Refusal);
+        }
+
+        return decision;
+    }
+
+    private sealed class AdbHeadsetPropertyStore : IHeadsetPropertyStore
+    {
+        private readonly AdbService _adb;
+        public AdbHeadsetPropertyStore(AdbService adb) => _adb = adb;
+        public string? Read(string serial, string name) => _adb.GetProp(serial, name);
+        public void Write(string serial, string name, string value) => _adb.SetProp(serial, name, value);
     }
 
     public string ResetDocumentedOverrides(HeadsetSettings settings)
