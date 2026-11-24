@@ -19,6 +19,8 @@
         <Button Content="Start PC history" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Start_Click"/>
         <Button Content="Pause" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Pause_Click"/>
         <Button Content="Stop" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Stop_Click"/>
+        <Button Content="Score PC history" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="ScoreHistory_Click"
+                ToolTip="Scores the PC GPU samples already collected. This is not a frame-time 1% low and it does not restart SteamVR."/>
         <Button Content="Save report" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Save_Click"/>
       </WrapPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">

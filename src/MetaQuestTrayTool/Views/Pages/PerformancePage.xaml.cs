@@ -97,6 +97,14 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         SummaryText.Text = "PC history stopped and cleared.";
     }
 
+    private void ScoreHistory_Click(object sender, RoutedEventArgs e)
+    {
+        var report = BenchmarkMath.FromPeriodicSamples("PC GPU %", _gpuHistory);
+        ReportBox.Text = report.ToDisplayText() + Environment.NewLine
+            + "This score does not restart SteamVR or change headset settings.";
+        SummaryText.Text = "PC history scored. 1% lows are unavailable for these periodic samples.";
+    }
+
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new Microsoft.Win32.SaveFileDialog
