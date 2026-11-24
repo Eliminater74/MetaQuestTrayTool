@@ -41,15 +41,20 @@ before sending it to anyone.
 
 Quest 3 GPU level 7 and 144/207 Hz refresh requests are off by default. They write only
 `debug.oculus.gpuLevel` or `debug.oculus.refreshRate` through a snapshot bound to one headset
-serial. They do not write `debug.oculus.forceDisplayScaling`, and they do not delete an
-originally unset property. A readback is not a GPU clock or a delivered frame rate.
+serial. A missing battery temperature refuses GPU level 7. The 45 °C battery gate is not a
+GPU junction limit. They do not write `debug.oculus.forceDisplayScaling`, and they do not delete an
+originally unset property. A later apply keeps the first original value. A readback is not a GPU
+clock, an effective panel rate, or a delivered frame rate. The review is recorded in
+`docs/research/SECURITY-REVIEW.md`.
 
 ## Performance overlay pipe
 
 The Performance page can open named pipe `MetaQuestTrayTool.PerformanceOverlay` for the current
-user and Administrators. It is not a network listener. The command list is fixed. Text that
-asks for ADB, a shell, command chaining, or a profile change is rejected. The pipe does not
-load `openvr_api.dll`. Leave it off unless you are using the desktop companion.
+user and Administrators. It is not a network listener. Each command must present the token
+created when the pipe starts, and a message longer than 1024 bytes is rejected. The command
+list is fixed. Text that asks for ADB, a shell, command chaining, or a profile change is
+rejected. The pipe does not load `openvr_api.dll`. Leave it off unless you are using the
+desktop companion.
 
 ## Device and process actions
 

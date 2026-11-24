@@ -24,7 +24,34 @@ Final verification on 2026-11-24, before the documentation commit:
 | 7 Experimental refresh | `2977d8ae0ad86d1a8b992eadc6486dc1eab7b882` | 19 refresh and override tests. Scaling property is not written. |
 | 8 Overlay pipe | `01a1c8c31eff090a00c95dbfd225df6aca220f20` | Release build. OpenVR overlay not loaded. |
 | 9–13 Providers, ALVR, Pyrowave, profiles, diagnostics | `40e373e90db3d3658206755388f73ff2ca5e5b6f` | 13 integration tests. |
-| 14 Full regression | this documentation commit records it | 312 passed, 0 failed. No separate repair was required. |
-| 15 Documentation | this commit | Version number was not changed. Installer was not rebuilt. |
+| 14 Full regression | `866b54ba80cf22a661139b7938b934dbf9a11d07` | 312 passed. That result was not a security review. |
+| 15 Documentation | `866b54ba80cf22a661139b7938b934dbf9a11d07` | Version number was not changed. |
+
+## Independent review
+
+Review start: `866b54ba80cf22a661139b7938b934dbf9a11d07`.
+
+| Review stage | Commit | What changed |
+| --- | --- | --- |
+| B Recovery | `2d560a3966f34cf8a40e67ad3fa49661c2599e6d` | A later apply keeps the first original. A fingerprint change writes nothing. |
+| C GPU and refresh | `c130dd498b5478fbbb4bf90dc84e79da433af5c2` | Missing battery temperature refuses GPU level 7. Panel rate is parsed separately from property readback. |
+| E Benchmarks | `2e180485f4c3077534685dec5bbfb7ab4608d595` | Timed 30/60/300 second sessions, warm-up, cancel, history, and comparison guards. |
+| F Overlay pipe | `cb44381fa7851eeed124516d1ecb9d78099a1a45` | Per-process token and 1024-byte read limit. OpenVR stays unloaded. |
+| G ALVR | `75970268cbb5fede1d809eaffe405ede0ee24052` | Generic numeric editor removed. One allowlisted plain number. No running-server override. |
+| H Pyrowave | `8ab22c882b2152bbbbb197aee0152c79ecd8a4b7` | Settings are reported. Unverified schema paths are not written. |
+| I Profiles | `66c1a5449a58c8ebb152442535cce8072e136b40` | Preferences are evaluated on apply and do not launch a provider. |
+| D Dashboard | `c901c2223565c4c391da1324927d5f7cf2da165e` | Source labels, CSV/JSON export, and PC benchmark controls. |
+| J Security review | `a5426af7283cf6d18470972155f789e7738b13e1` | Review notes and regression tests. See `SECURITY-REVIEW.md`. |
+
+Final host verification after those commits:
+
+- `dotnet restore MetaQuestTrayTool.sln -r win-x64 --locked-mode`
+- Debug build: succeeded, 0 warnings.
+- Release build: succeeded, 0 warnings.
+- `dotnet test MetaQuestTrayTool.sln -c Release -r win-x64 --no-restore --collect:"XPlat Code Coverage"`: 332 passed, 0 failed, 0 skipped.
+- `scripts/Test-Coverage.ps1`: line coverage 15.96%, floor 8%.
+- Publish smoke wrote `publish/local-smoke/MetaQuestTrayTool.exe`.
+- `scripts/build-installer.ps1` wrote `dist/MetaQuestTrayTool-Setup-1.1.37.exe` (53.3 MB). It was not published and the public version was not changed.
+- No physical headset, ALVR server, or Pyrowave install was used.
 
 Hardware acceptance remains outstanding. See `HARDWARE-ACCEPTANCE.md`.
