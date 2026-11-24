@@ -53,4 +53,13 @@
     <Copy SourceFiles="@(_OverlayFile)" DestinationFolder="$(OutputPath)overlay\" SkipUnchangedFiles="true" Condition="'@(_OverlayFile)' != ''" />
   </Target>
 
+  <!-- The installer is self-contained. The companion must be too, or a machine without the shared runtime cannot start it. -->
+  <Target Name="PublishOverlayCompanion" AfterTargets="Publish">
+    <PropertyGroup>
+      <_OverlayProject>$(MSBuildThisFileDirectory)..\MetaQuestTrayTool.Overlay\MetaQuestTrayTool.Overlay.csproj</_OverlayProject>
+      <_OverlayPublish>$(PublishDir)overlay\</_OverlayPublish>
+    </PropertyGroup>
+    <MSBuild Projects="$(_OverlayProject)" Targets="Restore;Publish" Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=true;PublishDir=$(_OverlayPublish);RestoreLockedMode=true" />
+  </Target>
+
 </Project>
