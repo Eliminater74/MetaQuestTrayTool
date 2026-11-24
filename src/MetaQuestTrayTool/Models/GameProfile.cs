@@ -39,6 +39,8 @@ public sealed class GameProfile
         set => _customCommands = value ?? new();
     }
 
+    public PcvrProfilePreferences? Pcvr { get; set; }
+
     public GameProfile Clone() => new()
     {
         Name = Name,
@@ -58,7 +60,8 @@ public sealed class GameProfile
         OpenXrRuntime = OpenXrRuntime,
         CpuPriority = CpuPriority,
         Comments = Comments,
-        CustomCommands = CustomCommands?.Clone() ?? new()
+        CustomCommands = CustomCommands?.Clone() ?? new(),
+        Pcvr = Pcvr?.Clone()
     };
 
     public void CopyFrom(GameProfile other)
@@ -82,5 +85,6 @@ public sealed class GameProfile
         CpuPriority = copy.CpuPriority;
         Comments = copy.Comments;
         CustomCommands = copy.CustomCommands;
+        Pcvr = copy.Pcvr;
     }
 }

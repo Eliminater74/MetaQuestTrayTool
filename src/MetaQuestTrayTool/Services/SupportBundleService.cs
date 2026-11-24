@@ -81,6 +81,12 @@ public sealed class SupportBundleService
             ["recent-log.txt"] = BuildRecentLog(),
             ["session-trace.txt"] = BuildSessionTrace()
         };
+        var headset = _app.Settings.Current.Headset;
+        entries["performance-diagnostics.txt"] = SupportBundleService.SanitizeForSupport(DiagnosticReportBuilder.Build(
+            "Performance diagnostics" + Environment.NewLine
+            + "Experimental GPU opt-in: " + headset.ExperimentalGpuMaximumEnabled + Environment.NewLine
+            + "Experimental refresh opt-in: " + headset.ExperimentalRefreshEnabled,
+            headset.TrustedSerial));
 
         try
         {
