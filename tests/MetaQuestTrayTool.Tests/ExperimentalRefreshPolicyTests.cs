@@ -37,4 +37,26 @@ public class ExperimentalRefreshPolicyTests
         Assert.Contains("streaming", decision.Warning, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain(ExperimentalRefreshPolicy.ScalingProperty, decision.Warning, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void PropertyReadbackIsNotTreatedAsTheEffectivePanelRate()
+    {
+        var missing = ExperimentalRefreshPolicy.Interpret(207, "207", null);
+        Assert.True(missing.PropertyMatched);
+        Assert.Equal(PanelEvidence.NotRead, missing.Panel);
+        Assert.Contains("not measured", missing.Summary, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Fresh delivered FPS", missing.Summary, StringComparison.Ordinal);
+
+        var different = ExperimentalRefreshPolicy.Interpret(207, "207", "mCurrentRefreshRate=120.0");
+        Assert.Equal(PanelEvidence.Differs, different.Panel);
+        Assert.Equal(120, different.EffectivePanelHz);
+
+        var matched = ExperimentalRefreshPolicy.Interpret(144, "144", "refreshRate=144.0");
+        Assert.Equal(PanelEvidence.Matches, matched.Panel);
+        Assert.Contains("not a streaming frame rate", matched.Summary, StringComparison.OrdinalIgnoreCase);
+
+        var mixed = ExperimentalRefreshPolicy.Interpret(144, "144", "mCurrentRefreshRate=144\nrefreshRate=72");
+        Assert.Equal(PanelEvidence.Unparsed, mixed.Panel);
+        Assert.Null(mixed.EffectivePanelHz);
+    }
 }

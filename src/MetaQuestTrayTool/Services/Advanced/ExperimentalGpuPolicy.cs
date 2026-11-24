@@ -19,6 +19,12 @@ public static class ExperimentalGpuPolicy
 {
     public const int MaximumLevel = 7;
     public const string PropertyName = "debug.oculus.gpuLevel";
+
+    /// <summary>
+    /// Application gate on the battery temperature reported by dumpsys battery.
+    /// This is not GPU junction temperature, not a Meta firmware limit, and not a claim that 45 C is safe or unsafe for the panel.
+    /// Quest3-Pyrowave's short captures were about 35-41 C and its authors did not publish a sustained thermal limit.
+    /// </summary>
     public const double RefuseAtOrAboveCelsius = 45;
 
     public static ExperimentalGpuDecision Evaluate(bool optedIn, string? model, double? batteryTemperatureC)
@@ -38,21 +44,26 @@ public static class ExperimentalGpuPolicy
             };
         }
 
-        if (batteryTemperatureC is double temperature && temperature >= RefuseAtOrAboveCelsius)
+        if (batteryTemperatureC is not double temperature)
         {
             return new ExperimentalGpuDecision
             {
-                Refusal = $"Battery temperature is {temperature.ToString("0.0", CultureInfo.InvariantCulture)} C, which is at or above the {RefuseAtOrAboveCelsius.ToString("0", CultureInfo.InvariantCulture)} C application gate. GPU level 7 was not written. Firmware thermal limits are unchanged."
+                Refusal = "Battery temperature was not available. Experimental GPU level 7 was not written. A missing battery reading is not treated as safe. The 45 C value is only an application gate on battery temperature, not GPU junction temperature."
             };
         }
 
-        var warning = batteryTemperatureC is null
-            ? "Battery temperature was not available, so the 45 C gate was not evaluated. Firmware thermal limits still apply."
-            : $"Battery temperature was {batteryTemperatureC.Value.ToString("0.0", CultureInfo.InvariantCulture)} C.";
+        if (temperature >= RefuseAtOrAboveCelsius)
+        {
+            return new ExperimentalGpuDecision
+            {
+                Refusal = $"Battery temperature is {temperature.ToString("0.0", CultureInfo.InvariantCulture)} C, which is at or above the {RefuseAtOrAboveCelsius.ToString("0", CultureInfo.InvariantCulture)} C application gate. GPU level 7 was not written. This gate is not a GPU junction limit and firmware thermal limits are unchanged."
+            };
+        }
+
         return new ExperimentalGpuDecision
         {
             ApplyLevel7 = true,
-            Warning = warning + " Property readback does not prove the GPU clock. Hardware verification is pending. Sustained thermals are not established."
+            Warning = $"Battery temperature was {temperature.ToString("0.0", CultureInfo.InvariantCulture)} C. That reading is not GPU junction temperature. Property readback does not prove the GPU clock. Hardware verification is pending. Sustained thermals are not established."
         };
     }
 

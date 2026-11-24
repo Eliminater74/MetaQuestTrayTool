@@ -46,8 +46,9 @@ public class ExperimentalGpuPolicyTests
         Assert.Contains("clock", warm.Warning, StringComparison.OrdinalIgnoreCase);
 
         var unknown = ExperimentalGpuPolicy.Evaluate(true, "Quest 3", null);
-        Assert.True(unknown.ApplyLevel7);
-        Assert.Contains("not available", unknown.Warning, StringComparison.OrdinalIgnoreCase);
+        Assert.False(unknown.ApplyLevel7);
+        Assert.Contains("not available", unknown.Refusal, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("junction", unknown.Refusal, StringComparison.OrdinalIgnoreCase);
 
         var settings = new HeadsetSettings
         {

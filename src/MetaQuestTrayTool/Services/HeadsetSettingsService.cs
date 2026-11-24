@@ -342,8 +342,27 @@ public sealed class HeadsetSettingsService
                 throw new InvalidOperationException(transaction.ToDisplayText());
             }
 
-            applied.Add(ExperimentalRefreshPolicy.RefreshProperty + "=" + experimentalHz.ToString(CultureInfo.InvariantCulture)
-                + " (readback verified; streaming frame rate not measured)");
+            string? displayDump = null;
+            try
+            {
+                displayDump = _adb.Shell(quest.Serial, "dumpsys display");
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+            {
+                displayDump = null;
+            }
+
+            var verification = ExperimentalRefreshPolicy.Interpret(
+                experimentalHz,
+                experimentalHz.ToString(CultureInfo.InvariantCulture),
+                displayDump);
+            if (verification.Panel == PanelEvidence.Differs)
+            {
+                var restored = transactions.Restore(quest.Serial, fingerprint);
+                throw new InvalidOperationException(verification.Summary + Environment.NewLine + restored.ToDisplayText());
+            }
+
+            applied.Add(verification.Summary.Replace(Environment.NewLine, " ", StringComparison.Ordinal));
         }
         else
         {
