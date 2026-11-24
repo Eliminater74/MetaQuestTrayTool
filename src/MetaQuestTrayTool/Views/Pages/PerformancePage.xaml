@@ -27,12 +27,16 @@
         <Button Content="Start PC benchmark" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Benchmark_Click"
                 ToolTip="Timed PC sample. Warm-up is discarded. This does not restart SteamVR or change headset settings. 1% lows are not calculated from these samples."/>
         <Button Content="Cancel benchmark" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="CancelBenchmark_Click"/>
+        <Button Content="Run PC comparison" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Compare_Click"
+                ToolTip="Non-disruptive A/B or ABBA of the PC GPU probe. Refresh, bitrate, and GPU level comparisons are not offered here because they can interrupt a session. 1% lows are not calculated."/>
         <Button Content="Toggle overlay pipe" Style="{StaticResource GhostButtonStyle}" Margin="0,0,8,8" Click="Overlay_Click"
                 ToolTip="Starts a local pipe for the current user. Commands require the in-process token. The in-headset OpenVR overlay is not loaded."/>
       </WrapPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <TextBlock Text="PC benchmark" VerticalAlignment="Center" Margin="0,0,8,0"/>
         <ComboBox x:Name="BenchmarkBox" Width="140"/>
+        <TextBlock Text="Comparison" VerticalAlignment="Center" Margin="16,0,8,0"/>
+        <ComboBox x:Name="ComparisonBox" Width="160"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <TextBlock Text="PC sample interval" VerticalAlignment="Center" Margin="0,0,8,0"/>

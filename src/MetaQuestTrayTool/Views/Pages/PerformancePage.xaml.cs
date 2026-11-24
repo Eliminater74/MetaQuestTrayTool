@@ -33,6 +33,9 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         BenchmarkBox.Items.Add(new ComboBoxItem { Content = "60 seconds", Tag = 60 });
         BenchmarkBox.Items.Add(new ComboBoxItem { Content = "5 minutes", Tag = 300 });
         BenchmarkBox.SelectedIndex = 0;
+        ComparisonBox.Items.Add(new ComboBoxItem { Content = "PC GPU A/B", Tag = ComparisonOrder.Ab });
+        ComparisonBox.Items.Add(new ComboBoxItem { Content = "PC GPU ABBA", Tag = ComparisonOrder.Abba });
+        ComparisonBox.SelectedIndex = 0;
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _timer.Tick += (_, _) => _ = SamplePcAsync();
         _loading = false;
@@ -193,6 +196,57 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             SummaryText.Text = result.Cancelled
                 ? "PC benchmark cancelled. No headset setting was changed."
                 : "PC benchmark finished. 1% lows were not calculated. History was saved.";
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
+        {
+            ReportBox.Text = ex.Message;
+        }
+        finally
+        {
+            _benchmark?.Dispose();
+            _benchmark = null;
+        }
+    }
+
+    private async void Compare_Click(object sender, RoutedEventArgs e)
+    {
+        if (_benchmark is not null)
+        {
+            SummaryText.Text = "A timed run is already active.";
+            return;
+        }
+
+        var order = ComparisonBox.SelectedItem is ComboBoxItem { Tag: ComparisonOrder selected } ? selected : ComparisonOrder.Ab;
+        var duration = BenchmarkBox.SelectedItem is ComboBoxItem { Tag: int seconds } ? seconds : 30;
+        _benchmark = new CancellationTokenSource();
+        var token = _benchmark.Token;
+        SummaryText.Text = "Non-disruptive " + order + " PC comparison started. No headset or SteamVR setting is changed.";
+        try
+        {
+            var result = await Task.Run(() => SettingsComparison.Run(
+                new ComparisonRequest
+                {
+                    Setting = "PC GPU %",
+                    Baseline = "window-a",
+                    Candidate = "window-b",
+                    Disruption = BenchmarkDisruption.NonDisruptive,
+                    Order = order,
+                    DurationSeconds = duration,
+                    WarmupSeconds = 1
+                },
+                _ => { },
+                SampleGpuOnce,
+                () => null,
+                () => DateTimeOffset.UtcNow,
+                delay => Thread.Sleep(delay),
+                () => { },
+                token));
+            ComparisonHistory.Append(AppPaths.ComparisonHistoryFile, result);
+            ReportBox.Text = result.ToDisplayText() + Environment.NewLine
+                + "Refresh, bitrate, and GPU-level comparisons are not offered from this page because they can interrupt the session.";
+            SummaryText.Text = result.Cancelled
+                ? "PC comparison cancelled. No setting was changed."
+                : "PC comparison finished. 1% lows were not calculated.";
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
         {
