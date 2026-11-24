@@ -214,7 +214,14 @@ public sealed class AdbPropertyTransactionService
         }
     }
 
-    public PropertyTransactionResult Restore(string serial, string? fingerprint)
+    public PropertyTransactionResult Restore(string serial, string? fingerprint) =>
+        Restore(serial, fingerprint, onlyNames: null);
+
+    /// <summary>
+    /// Restores a subset of the snapshot and leaves every other tracked property untouched.
+    /// A thermal trip uses this so an unrelated refresh override is not rolled back with the GPU property.
+    /// </summary>
+    public PropertyTransactionResult Restore(string serial, string? fingerprint, IReadOnlyCollection<string>? onlyNames)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serial);
         lock (_gate)
@@ -238,10 +245,19 @@ public sealed class AdbPropertyTransactionService
                 return Fail("The headset firmware fingerprint changed since the snapshot. Restore was refused.");
             }
 
+            var selected = onlyNames is null
+                ? snapshot.Properties
+                : snapshot.Properties.Where(property => onlyNames.Contains(property.Name, StringComparer.Ordinal)).ToList();
+            if (onlyNames is not null && selected.Count == 0)
+            {
+                return Fail("None of the requested properties are in the stored snapshot. Nothing was written.");
+            }
+
             var details = new List<string>();
             var incomplete = false;
             var conflict = false;
-            foreach (var property in snapshot.Properties)
+            var restoredNames = new List<string>();
+            foreach (var property in selected)
             {
                 var current = ReadQuiet(serial, property.Name, out var readError);
                 if (readError is not null)
@@ -262,6 +278,7 @@ public sealed class AdbPropertyTransactionService
                     if (currentPresence == PropertyPresence.AbsentOrEmpty)
                     {
                         details.Add($"{property.Name}: already absent or empty.");
+                        restoredNames.Add(property.Name);
                         continue;
                     }
 
@@ -273,6 +290,7 @@ public sealed class AdbPropertyTransactionService
                 if (string.Equals(current, property.OriginalValue, StringComparison.Ordinal))
                 {
                     details.Add($"{property.Name}: already at the original value.");
+                    restoredNames.Add(property.Name);
                     continue;
                 }
 
@@ -305,27 +323,66 @@ public sealed class AdbPropertyTransactionService
                 }
 
                 details.Add($"{property.Name}: restored {property.OriginalValue}.");
+                restoredNames.Add(property.Name);
             }
 
             var status = conflict
                 ? PropertyTransactionStatus.Conflict
                 : incomplete ? PropertyTransactionStatus.Incomplete : PropertyTransactionStatus.Restored;
-            if (status == PropertyTransactionStatus.Restored)
+            if (onlyNames is null)
             {
-                DeleteRecovery();
+                if (status == PropertyTransactionStatus.Restored)
+                {
+                    DeleteRecovery();
+                }
+            }
+            else
+            {
+                var remaining = snapshot.Properties.Where(property => !restoredNames.Contains(property.Name, StringComparer.Ordinal)).ToList();
+                if (remaining.Count == 0)
+                {
+                    DeleteRecovery();
+                    snapshot = null;
+                }
+                else
+                {
+                    var updated = new AdbPropertySnapshot
+                    {
+                        Serial = snapshot.Serial,
+                        Model = snapshot.Model,
+                        Fingerprint = snapshot.Fingerprint,
+                        Owner = snapshot.Owner,
+                        CapturedUtc = snapshot.CapturedUtc,
+                        Properties = remaining
+                    };
+                    var saveError = SaveRecovery(updated);
+                    if (saveError is not null)
+                    {
+                        details.Add(saveError);
+                        status = PropertyTransactionStatus.Incomplete;
+                        snapshot = LoadRecovery();
+                    }
+                    else
+                    {
+                        snapshot = updated;
+                    }
+                }
             }
 
+            var fullyCleared = status == PropertyTransactionStatus.Restored && (onlyNames is null || snapshot is null);
             return new PropertyTransactionResult
             {
                 Status = status,
-                Summary = status switch
-                {
-                    PropertyTransactionStatus.Restored => "Original headset properties were restored and the snapshot was cleared.",
-                    PropertyTransactionStatus.Conflict => "Restore left conflicting properties unchanged.",
-                    _ => "Restore is incomplete. A reboot may still be required."
-                },
+                Summary = fullyCleared
+                    ? "Original headset properties were restored and the snapshot was cleared."
+                    : status switch
+                    {
+                        PropertyTransactionStatus.Restored => "Requested properties were restored. The snapshot still tracks other properties.",
+                        PropertyTransactionStatus.Conflict => "Restore left conflicting properties unchanged.",
+                        _ => "Restore is incomplete. A reboot may still be required."
+                    },
                 Details = details,
-                Snapshot = status == PropertyTransactionStatus.Restored ? null : snapshot
+                Snapshot = fullyCleared ? null : snapshot
             };
         }
     }

@@ -73,6 +73,8 @@ public sealed class HeadsetSettingsService
         _adb = adb;
     }
 
+    public IExperimentalGpuSession? ExperimentalSession { get; set; }
+
     public HeadsetIdentity ReadIdentity(HeadsetSettings settings)
     {
         ForgetInvalidTrust(settings);
@@ -309,6 +311,31 @@ public sealed class HeadsetSettingsService
             applied.Add(ExperimentalGpuPolicy.PropertyName + "=" + ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture)
                 + " (readback verified; clock not measured)");
             performance.Remove(ExperimentalGpuPolicy.PropertyName);
+            ExperimentalSession?.BeginExplicit(quest.Serial, quest.Model, fingerprint);
+            applied.Add("Battery temperature will be sampled only while this experimental override stays active. " + ExperimentalGpuThermalPolicy.GateDisclaimer);
+        }
+        else if (!settings.ExperimentalGpuMaximumEnabled)
+        {
+            ExperimentalSession?.StopWithoutRestore("Experimental GPU level 7 was not requested.");
+            if (File.Exists(AppPaths.PropertyRecoveryFile))
+            {
+                string? offFingerprint = null;
+                try
+                {
+                    offFingerprint = _adb.GetProp(quest.Serial, "ro.build.fingerprint");
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+                {
+                    offFingerprint = null;
+                }
+
+                var restored = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile)
+                    .Restore(quest.Serial, offFingerprint, [ExperimentalGpuPolicy.PropertyName]);
+                if (restored.Status != PropertyTransactionStatus.Failed)
+                {
+                    applied.Add(restored.Summary);
+                }
+            }
         }
 
         foreach (var (name, value) in performance)
@@ -500,6 +527,8 @@ public sealed class HeadsetSettingsService
 
         return decision;
     }
+
+    internal static IHeadsetPropertyStore CreatePropertyStore(AdbService adb) => new AdbHeadsetPropertyStore(adb);
 
     private sealed class AdbHeadsetPropertyStore : IHeadsetPropertyStore
     {

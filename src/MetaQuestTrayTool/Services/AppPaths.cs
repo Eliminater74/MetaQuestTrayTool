@@ -14,6 +14,7 @@ public static class AppPaths
     public static string ScreenshotsDirectory { get; } = IOPath.Combine(AppDataDirectory, "screenshots");
     public static string CapturesDirectory { get; } = IOPath.Combine(AppDataDirectory, "captures");
     public static string PropertyRecoveryFile { get; } = IOPath.Combine(AppDataDirectory, "headset-property-recovery.json");
+    public static string GpuThermalLatchFile { get; } = IOPath.Combine(AppDataDirectory, "gpu-thermal-latch.json");
     public static string BenchmarkHistoryFile { get; } = IOPath.Combine(AppDataDirectory, "benchmark-history.json");
 
     public static void EnsureAppDataDirectory()

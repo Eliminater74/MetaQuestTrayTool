@@ -87,6 +87,12 @@ public partial class App : System.Windows.Application
         DebugTool = new OculusDebugToolService(Oculus);
         Profiles = new ProfileService(Settings);
         Headset = new HeadsetSettingsService(Adb);
+        Headset.ExperimentalSession = new ExperimentalGpuThermalGuard(
+            ReadExperimentalThermal,
+            (serial, fingerprint) => new AdbPropertyTransactionService(HeadsetSettingsService.CreatePropertyStore(Adb), AppPaths.PropertyRecoveryFile)
+                .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName]),
+            message => Log.Info(message),
+            AppPaths.GpuThermalLatchFile);
         CustomCommands = new CustomCommandService(DebugTool, Adb);
         HotKeyCommands = new HotKeyCommandService(this);
         HotKeys = new HotKeyService(this, HotKeyCommands);
@@ -1053,6 +1059,35 @@ public partial class App : System.Windows.Application
         var summary = string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         Log.Info("Applied GPU recommended presets — " + summary);
         return summary;
+    }
+
+    private ThermalReading ReadExperimentalThermal(string serial)
+    {
+        try
+        {
+            var battery = Adb.Shell(serial, "dumpsys battery");
+            string? thermal = null;
+            try
+            {
+                thermal = Adb.Shell(serial, "dumpsys thermalservice");
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+            {
+                thermal = null;
+            }
+
+            return new ThermalReading
+            {
+                HeadsetReachable = true,
+                BatteryCelsius = HeadsetCapabilityDiscovery.ParseTemperature(battery),
+                ThermalStatusText = thermal,
+                SampledUtc = DateTimeOffset.UtcNow
+            };
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+        {
+            return ThermalReading.Unreachable(DateTimeOffset.UtcNow, ex.GetType().Name);
+        }
     }
 
     private string TryApplyCustomAdb(IReadOnlyList<string> commands) => ApplyCustomAdbResult(commands).Summary;
