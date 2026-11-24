@@ -373,7 +373,7 @@ public sealed class UpdateService
         // Exit after the installer has started so Program Files can be overwritten.
         try
         {
-            _app.Shutdown();
+            _app.RequestUserExit(UserExitSource.Updater);
         }
         catch
         {

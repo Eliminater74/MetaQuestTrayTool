@@ -53,6 +53,17 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         SummaryText.Text = "Monitoring is stopped. No headset polling is running.";
     }
 
+    public void CancelOwnedSessions()
+    {
+        _monitoring = false;
+        _timer.Stop();
+        _monitor.Stop();
+        _benchmark?.Cancel();
+        OverlayProcessHost.Stop();
+        _overlay?.Dispose();
+        _overlay = null;
+    }
+
     public void Refresh()
     {
         if (!_monitoring)

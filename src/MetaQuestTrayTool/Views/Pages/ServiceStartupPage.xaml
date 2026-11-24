@@ -61,8 +61,8 @@
       <CheckBox x:Name="StartOnToolBox" Content="Start Oculus service when tool starts"
                 ToolTip="When the tray app starts, start OVRService if it is not already running."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
-      <CheckBox x:Name="StopOnExitBox" Content="Stop Oculus service when tool exits"
-                ToolTip="When you Exit the tray app, stop OVRService. Leave off if you want Link to keep running after closing the tray."
+      <CheckBox x:Name="StopOnExitBox" Content="Stop OVRService and close Meta Horizon Link when this app exits"
+                ToolTip="On Exit from the hotkey, voice command, tray menu, or settings window, close the installed Meta Horizon Link client and then stop the OVRService Windows service. Leave this off to keep Link and the service running. This does not stop SteamVR, Virtual Desktop, ALVR, or the shared ADB server."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
       <CheckBox x:Name="RestartOnWakeBox" Content="Restart Oculus service when computer wakes up"
                 ToolTip="After sleep/hibernate, restart OVRService so Link recovers more reliably."

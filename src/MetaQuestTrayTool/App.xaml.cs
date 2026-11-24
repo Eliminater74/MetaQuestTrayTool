@@ -24,6 +24,9 @@ public partial class App : System.Windows.Application
     private CancellationTokenSource? _showShellCts;
     private bool _pendingShowShell;
     private bool _isSessionHelper;
+    private bool _allowExitCleanup;
+    private readonly UserExitRouter _userExit = new();
+    private readonly MetaLinkExitCoordinator _metaExit = new();
     private TrayIconHost? _tray;
     private ProcessWatcherService? _processWatcher;
     private AudioSwitchWatcher? _audioWatcher;
@@ -142,6 +145,8 @@ public partial class App : System.Windows.Application
         // A previous elevated process can leave only its unelevated session helper behind
         // after a crash. It is not a second tray instance and should not block startup.
         SessionHelperClient.RequestQuit();
+        _allowExitCleanup = true;
+        SessionEnding += (_, _) => RequestUserExit(UserExitSource.WindowsSession);
         ArmShowShellListener();
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
@@ -430,6 +435,20 @@ public partial class App : System.Windows.Application
         }
     }
 
+    public void RequestUserExit(string source)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => RequestUserExit(source));
+            return;
+        }
+
+        var first = _userExit.TryBegin(source, Shutdown);
+        Log.Info(first
+            ? "Exit requested from " + source + "."
+            : "Duplicate exit ignored from " + source + ".");
+    }
+
     public void TrayNotify(string title, string message) => _tray?.Notify(title, message);
 
     public void NotifyStillRunningInTray() => _tray?.NotifyStillRunning();
@@ -560,9 +579,9 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        if (_isSessionHelper)
+        if (_isSessionHelper || !_allowExitCleanup)
         {
-            Log.Info($"Meta Quest Tray Tool session helper exiting (code {e.ApplicationExitCode}).");
+            Log.Info($"Meta Quest Tray Tool exiting without owned-session cleanup (code {e.ApplicationExitCode}).");
             base.OnExit(e);
             return;
         }
@@ -616,11 +635,33 @@ public partial class App : System.Windows.Application
         Voice.Dispose();
         ExperimentalMsfsVr.Dispose();
         HeadsetAnnouncer.Dispose();
-
-        if (Settings.Current.Service.StopServiceWhenToolExits)
+        try
         {
-            Log.Info(Oculus.Stop());
+            _tray?.CancelOwnedSessions();
+            OverlayProcessHost.Stop();
         }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException)
+        {
+            Log.Warn("Owned session cleanup during shutdown failed: " + ex.Message);
+        }
+
+        var client = Oculus.ResolveClientExePath();
+        var server = Oculus.RuntimeServerPath;
+        if (string.IsNullOrWhiteSpace(server) || !File.Exists(server))
+        {
+            server = null;
+        }
+
+        var meta = _metaExit.Run(
+            new MetaLinkExitRequest
+            {
+                StopMetaOnExit = Settings.Current.Service.StopServiceWhenToolExits,
+                ClientExecutable = client,
+                RuntimeServerExecutable = server
+            },
+            new WindowsMetaProcessProbe(),
+            () => Oculus.Stop(TimeSpan.FromSeconds(12)));
+        Log.Info(meta.Summary);
 
         if (Settings.Current.Power is { AutoSwitchEnabled: true, ApplyOn: PowerPlanTrigger.ToolStartExit })
         {

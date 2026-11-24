@@ -23,6 +23,7 @@ Not a release. The public version remains 1.1.37 until you choose otherwise.
 - A redacted `performance-diagnostics.txt` entry in the support ZIP.
 
 ### Fixed
+- GitHub issue #27: Exit now closes the installed Meta Horizon Link client before stopping OVRService when “stop on exit” is enabled. The hotkey, voice command, tray menu, settings window, updater, and Windows session end all use that same exit. Stopping the service alone left `Client.exe` open. The option still leaves Link and OVRService running when it is off, and it does not stop SteamVR or the shared ADB server.
 - An owned GPU level 7 override is restored when its thermal watch is cancelled, the application exits, or the process restarts with a pending lease. A cancelled watch no longer leaves the override applied with sampling stopped.
 - A property snapshot saved and then cancelled before any write is removed, so a later apply is not blocked by a transaction that never wrote.
 - GPU level 7 is refused when the firmware fingerprint was not read.

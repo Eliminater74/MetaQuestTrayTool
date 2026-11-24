@@ -43,7 +43,7 @@ public sealed class HotKeyCommandService
             HotKeyAction.TakeScreenshot => ExecuteTakeScreenshot(sourceLabel),
             HotKeyAction.TakeQuestLinkMirrorScreenshot => ExecuteTakeQuestLinkMirrorScreenshot(sourceLabel),
             HotKeyAction.TakeHeadsetScreenshot => ExecuteTakeHeadsetScreenshot(sourceLabel),
-            HotKeyAction.ExitApp => ExecuteExitApp(),
+            HotKeyAction.ExitApp => ExecuteExitApp(source),
             _ => $"Unknown hotkey action: {action}"
         };
 
@@ -62,9 +62,9 @@ public sealed class HotKeyCommandService
         return summary;
     }
 
-    private string ExecuteExitApp()
+    private string ExecuteExitApp(HotKeyCommandSource source)
     {
-        _app.Dispatcher.BeginInvoke(new Action(() => _app.Shutdown()));
+        _app.RequestUserExit(source == HotKeyCommandSource.VoiceCommand ? UserExitSource.Voice : UserExitSource.Hotkey);
         return "Exiting Meta Quest Tray Tool.";
     }
 

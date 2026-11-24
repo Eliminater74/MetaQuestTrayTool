@@ -208,8 +208,11 @@ public sealed class OculusRuntimeService
         return "Meta reset OVRService to Automatic — re-applied Manual-at-boot preference. " + result;
     }
 
-    public string Start() => ChangeState(start: true);
-    public string Stop() => ChangeState(start: false);
+    public string Start() => ChangeState(start: true, TimeSpan.FromSeconds(30));
+    public string Stop() => Stop(TimeSpan.FromSeconds(30));
+
+    /// <summary>Exit uses a shorter wait so a stuck service cannot hold the tray open for the full control timeout.</summary>
+    public string Stop(TimeSpan wait) => ChangeState(start: false, wait);
 
     public string Restart()
     {
@@ -489,7 +492,7 @@ public sealed class OculusRuntimeService
         return false;
     }
 
-    private string ChangeState(bool start)
+    private string ChangeState(bool start, TimeSpan wait)
     {
         Refresh();
         if (!ServiceExists)
@@ -510,7 +513,7 @@ public sealed class OculusRuntimeService
                 }
 
                 controller.Start();
-                controller.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(30));
+                controller.WaitForStatus(ServiceControllerStatus.Running, wait);
             }
             else
             {
@@ -520,7 +523,7 @@ public sealed class OculusRuntimeService
                 }
 
                 controller.Stop();
-                controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
+                controller.WaitForStatus(ServiceControllerStatus.Stopped, wait);
             }
 
             Refresh(force: true);
@@ -537,6 +540,10 @@ public sealed class OculusRuntimeService
         {
             return $"Access denied while changing {ServiceName}. The tray must already be running as Administrator "
                    + "(automatic at logon) — you cannot approve UAC with the headset on.";
+        }
+        catch (System.ServiceProcess.TimeoutException)
+        {
+            return $"Could not change {ServiceName}: the wait timed out.";
         }
         catch (Exception ex)
         {

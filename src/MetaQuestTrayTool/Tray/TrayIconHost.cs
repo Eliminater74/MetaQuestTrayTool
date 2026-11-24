@@ -287,7 +287,7 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(new ToolStripMenuItem("Exit", null, (_, _) =>
         {
             _shell?.ForceClose();
-            _app.Shutdown();
+            _app.RequestUserExit(UserExitSource.TrayMenu);
         }));
 
         return menu;
@@ -1618,6 +1618,8 @@ public sealed class TrayIconHost : IDisposable
             _syncingStartup = false;
         }
     }
+
+    public void CancelOwnedSessions() => _shell?.CancelOwnedSessions();
 
     public void ShowShell()
     {

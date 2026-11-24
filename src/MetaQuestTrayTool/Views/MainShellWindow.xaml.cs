@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using MetaQuestTrayTool.Services;
 using MetaQuestTrayTool.Views.Pages;
 
 namespace MetaQuestTrayTool.Views;
@@ -65,6 +66,8 @@ public partial class MainShellWindow : Window
         Activate();
         WindowState = WindowState.Normal;
     }
+
+    public void CancelOwnedSessions() => _performancePage.CancelOwnedSessions();
 
     public void RefreshActivePage()
     {
@@ -180,7 +183,7 @@ public partial class MainShellWindow : Window
         }
         else
         {
-            App.Instance.Shutdown();
+            App.Instance.RequestUserExit(UserExitSource.MainWindow);
         }
     }
 

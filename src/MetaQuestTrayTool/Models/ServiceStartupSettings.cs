@@ -4,6 +4,10 @@ namespace MetaQuestTrayTool.Models;
 public sealed class ServiceStartupSettings
 {
     public bool StartServiceWhenToolStarts { get; set; } = true;
+    /// <summary>
+    /// On a user exit, close the installed Meta Horizon Link client and then stop OVRService.
+    /// Off leaves both running. The saved name is unchanged so existing settings keep working.
+    /// </summary>
     public bool StopServiceWhenToolExits { get; set; }
     public bool RestartServiceWhenComputerWakes { get; set; } = true;
 

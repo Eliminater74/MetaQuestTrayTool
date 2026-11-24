@@ -40,7 +40,7 @@ If Meta will not open after Manual: the service is probably stopped. Start OVRSe
 | Option | Meaning |
 | --- | --- |
 | Start Oculus service when tool starts | Tray starts OVRService at logon (good pair with Manual-at-boot) |
-| Stop Oculus service when tool exits | Leave off if you want Link after closing the tray |
+| Stop OVRService and close Meta Horizon Link when this app exits | Closes the installed Link client, then stops OVRService. Leave off to keep both running. Does not stop SteamVR or ADB. |
 | Restart Oculus service when computer wakes | Recovers Link after sleep; can drop an active session on wake |
 
 ## Elevation
