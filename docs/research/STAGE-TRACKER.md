@@ -8,9 +8,9 @@ Starting HEAD: `52d961bb5a456f8cd44313a5fbec266cfe789704`.
 | 1 Capability discovery | Complete | `379f9654c433299d3e7b0b9158d200558872be53` | `HeadsetCapabilityDiscoveryTests`: 21 passed. |
 | 2 ADB property transactions | Complete | `474a5c5abdb87e146cc48afbfded710acdebff84` | `AdbPropertyTransactionTests`: 7 passed. |
 | 3 Experimental GPU level 7 | Complete | `eea8d175b095c96316f705f5b1384f85202d5a8f` | Filtered GPU and override tests: 20 passed. |
-| 4a Headset telemetry | Complete in this commit | this commit | Headset telemetry and existing performance parser tests: 8 passed. |
-| 4b PC telemetry | Pending | | |
-| 4c Streaming telemetry | Pending | | |
+| 4a Headset telemetry | Complete | `b98317f2f93e432bb0afffefe3449cb5cb18d073` | Headset telemetry tests: 8 passed. |
+| 4b PC telemetry | Complete in this commit | this commit | Covered by `PcAndStreamingTelemetryTests`. |
+| 4c Streaming telemetry | Complete in this commit | this commit | Same filtered run: 9 passed. |
 | 5 Dashboard and analyzer | Pending | | |
 | 6 Benchmarks | Pending | | |
 | 7 Experimental refresh | Pending | | |
