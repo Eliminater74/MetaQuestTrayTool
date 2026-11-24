@@ -18,7 +18,8 @@ public class SettingsComparisonTests
                 DurationSeconds = 30,
                 WarmupSeconds = 0,
                 Baseline = "72",
-                Candidate = "90"
+                Candidate = "90",
+                ChangesSetting = true
             },
             applied.Add,
             () => applied.Count,
@@ -31,8 +32,8 @@ public class SettingsComparisonTests
         Assert.True(outcome.Completed);
         Assert.True(outcome.Restored);
         Assert.Equal(1, restored);
-        Assert.Equal(new[] { "72", "90", "72" }, applied);
-        Assert.Equal(3, outcome.Legs.Count);
+        Assert.Equal(new[] { "72", "90", "90", "72" }, applied);
+        Assert.Equal(4, outcome.Legs.Count);
         Assert.Contains("not calculated", outcome.StatisticsNote, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("within 5 C", outcome.ThermalNote, StringComparison.Ordinal);
         Assert.DoesNotContain("SteamVR was restarted", outcome.Summary, StringComparison.Ordinal);
@@ -92,7 +93,7 @@ public class SettingsComparisonTests
         var clock = new DateTimeOffset(2026, 11, 24, 12, 0, 0, TimeSpan.Zero);
         var temperatures = new Queue<double?>(new double?[] { 30, 40 });
         var outcome = SettingsComparison.Run(
-            new ComparisonRequest { Order = ComparisonOrder.Ab, DurationSeconds = 30, Setting = "telemetry" },
+            new ComparisonRequest { Order = ComparisonOrder.Ab, DurationSeconds = 30, Setting = "telemetry", ChangesSetting = true, Baseline = "a", Candidate = "b" },
             _ => { },
             () => 10,
             () => temperatures.Dequeue(),
@@ -120,10 +121,41 @@ public class SettingsComparisonTests
         }
     }
 
+    [Fact]
+    public void IdenticalSamplingIsRefusedBeforeAnyApply()
+    {
+        var applied = 0;
+        var restored = 0;
+        var outcome = SettingsComparison.Run(
+            new ComparisonRequest
+            {
+                Setting = "PC GPU %",
+                Baseline = "unchanged",
+                Candidate = "unchanged",
+                ChangesSetting = false,
+                Order = ComparisonOrder.Abba
+            },
+            _ => applied++,
+            () => applied,
+            () => 40,
+            () => DateTimeOffset.UtcNow,
+            _ => { },
+            () => restored++,
+            CancellationToken.None);
+        Assert.True(outcome.Refused);
+        Assert.False(outcome.Completed);
+        Assert.Equal(0, applied);
+        Assert.Equal(0, restored);
+        Assert.Contains("not a comparison", outcome.Summary, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static ComparisonRequest Request(BenchmarkDisruption disruption, bool authorized) => new()
     {
         Disruption = disruption,
         Authorized = authorized,
+        ChangesSetting = true,
+        Baseline = "baseline",
+        Candidate = "candidate",
         DurationSeconds = 30,
         Order = ComparisonOrder.Ab
     };

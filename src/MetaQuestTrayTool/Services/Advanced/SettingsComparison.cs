@@ -17,6 +17,7 @@ public sealed class ComparisonRequest
     public string Candidate { get; init; } = "candidate";
     public BenchmarkDisruption Disruption { get; init; } = BenchmarkDisruption.NonDisruptive;
     public bool Authorized { get; init; }
+    public bool ChangesSetting { get; init; }
     public ComparisonOrder Order { get; init; } = ComparisonOrder.Ab;
     public int DurationSeconds { get; init; } = 30;
     public int WarmupSeconds { get; init; }
@@ -80,6 +81,11 @@ public static class SettingsComparison
             return Refuse("Refused. The comparison can interrupt the session and was not authorized. Nothing was changed.");
         }
 
+        if (!request.ChangesSetting || string.Equals(request.Baseline, request.Candidate, StringComparison.Ordinal))
+        {
+            return Refuse("Refused. The two sides do not change a setting. Repeated samples of the same workload are not a comparison. Nothing was changed.");
+        }
+
         var legs = new List<ComparisonLeg>();
         string? failure = null;
         var cancelled = false;
@@ -93,7 +99,11 @@ public static class SettingsComparison
 
             if (!cancelled && request.Order == ComparisonOrder.Abba)
             {
-                cancelled = SampleLeg(request, request.Baseline, apply, sample, temperature, clock, wait, cancellation, legs);
+                cancelled = SampleLeg(request, request.Candidate, apply, sample, temperature, clock, wait, cancellation, legs);
+                if (!cancelled)
+                {
+                    cancelled = SampleLeg(request, request.Baseline, apply, sample, temperature, clock, wait, cancellation, legs);
+                }
             }
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or TimeoutException)

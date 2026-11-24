@@ -245,34 +245,32 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         var duration = BenchmarkBox.SelectedItem is ComboBoxItem { Tag: int seconds } ? seconds : 30;
         _benchmark = new CancellationTokenSource();
         var token = _benchmark.Token;
-        SummaryText.Text = "Non-disruptive " + order + " PC comparison started. No headset or SteamVR setting is changed.";
+        SummaryText.Text = "Checking whether this PC run changes a setting.";
         try
         {
             var result = await Task.Run(() => SettingsComparison.Run(
                 new ComparisonRequest
                 {
                     Setting = "PC GPU %",
-                    Baseline = "window-a",
-                    Candidate = "window-b",
+                    Baseline = "unchanged",
+                    Candidate = "unchanged",
+                    ChangesSetting = false,
                     Disruption = BenchmarkDisruption.NonDisruptive,
                     Order = order,
                     DurationSeconds = duration,
                     WarmupSeconds = 1
                 },
-                _ => { },
-                SampleGpuOnce,
+                _ => throw new InvalidOperationException("A comparison that does not change a setting must not sample."),
+                () => throw new InvalidOperationException("A comparison that does not change a setting must not sample."),
                 () => null,
                 () => DateTimeOffset.UtcNow,
-                delay => Thread.Sleep(delay),
-                () => { },
+                _ => throw new InvalidOperationException("A comparison that does not change a setting must not wait."),
+                () => throw new InvalidOperationException("A comparison that does not change a setting must not restore."),
                 token));
-            ComparisonHistory.Append(AppPaths.ComparisonHistoryFile, result);
             ReportBox.Text = result.ToDisplayText() + Environment.NewLine
                 + "Refresh, bitrate, and GPU-level comparisons are not offered from this page because they can interrupt the session.";
             _overlaySnapshot = ReportBox.Text;
-            SummaryText.Text = result.Cancelled
-                ? "PC comparison cancelled. No setting was changed."
-                : "PC comparison finished. 1% lows were not calculated.";
+            SummaryText.Text = result.Summary;
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
         {
