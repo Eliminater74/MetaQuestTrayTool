@@ -12,6 +12,7 @@ public sealed class AppSettings
     /// </summary>
     public bool AutomaticElevation { get; set; } = true;
     public bool ShowNotifications { get; set; } = true;
+    public NoticeSettings Notices { get; set; } = new();
 
     /// <summary>Push global Debug Tool + Link + OpenXR when the tool starts (if no game profile is active).</summary>
     public bool ApplyGameSettingsOnStart { get; set; } = true;

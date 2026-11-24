@@ -95,7 +95,16 @@ public partial class App : System.Windows.Application
             ReadExperimentalThermal,
             (serial, fingerprint) => new AdbPropertyTransactionService(HeadsetSettingsService.CreatePropertyStore(Adb), AppPaths.PropertyRecoveryFile)
                 .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName], Headset.ReadBootId(serial)),
-            message => Log.Info(message),
+            message =>
+            {
+                Log.Info(message);
+                if (message.Contains("failed", StringComparison.OrdinalIgnoreCase)
+                    || message.Contains("severe", StringComparison.OrdinalIgnoreCase)
+                    || message.Contains("blocked", StringComparison.OrdinalIgnoreCase))
+                {
+                    TrayNotify("Thermal protection", message.Length > 160 ? message[..157] + "…" : message);
+                }
+            },
             AppPaths.GpuThermalLatchFile);
         CustomCommands = new CustomCommandService(DebugTool, Adb);
         HotKeyCommands = new HotKeyCommandService(this);

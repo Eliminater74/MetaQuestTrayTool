@@ -69,8 +69,18 @@
                   SelectionChanged="UpdateInterval_Changed"/>
       </StackPanel>
       <CheckBox x:Name="NotificationsBox" Content="Show tray notifications"
-                ToolTip="Balloon tips for profile apply/restore, audio switch, updates, and Dash→SteamVR."
+                ToolTip="Desktop notices for profile apply/restore, audio switch, updates, and Dash→SteamVR. Spoken headset announcements stay separate."
                 Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="ModernNoticesBox" Content="Use modern notification windows"
+                ToolTip="On by default. Turn off to use the standard Windows balloon instead. The reason is written to the log."
+                Margin="28,0,0,0" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="NoticeTransparencyBox" Content="Translucent notification background"
+                Margin="28,0,0,0" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="NoticeAnimationBox" Content="Animate notification entrance"
+                Margin="28,0,0,0" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
+      <CheckBox x:Name="QuickClickBox" Content="Left-click the tray icon for quick controls"
+                ToolTip="Off keeps the familiar left-click, which opens Settings. Quick controls stay on the right-click menu either way."
+                Margin="28,0,0,8" Checked="Persist_Changed" Unchecked="Persist_Changed"/>
 
       <TextBlock Text="HotKeys and voice commands" Style="{StaticResource SettingLabelStyle}" Margin="0,12,0,4"/>
       <TextBlock Style="{StaticResource PageHintStyle}" Margin="0,0,0,8"

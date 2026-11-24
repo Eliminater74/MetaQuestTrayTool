@@ -26,6 +26,8 @@ public sealed class TrayIconHost : IDisposable
     private HotKeysWindow? _hotKeys;
     private VoiceCommandsWindow? _voiceCommands;
     private int _dynamicRefreshInFlight;
+    private NotificationPresenter? _notices;
+    private QuickControlWindow? _quick;
 
     public TrayIconHost(App app)
     {
@@ -48,23 +50,42 @@ public sealed class TrayIconHost : IDisposable
         _notifyIcon.Visible = true;
         _notifyIcon.MouseClick += OnMouseClick;
         _notifyIcon.DoubleClick += (_, _) => ShowShell();
+        _notices = new NotificationPresenter(_app, ActivateNotice, ShowBalloon);
 
         if (!_app.Settings.Current.Tray.StartMinimized)
         {
             ShowShell();
         }
 
-        if (_app.Settings.Current.ShowNotifications)
-        {
-            _notifyIcon.ShowBalloonTip(
-                4000,
-                App.AppName,
-                "Running in the notification area. Right-click the headset icon to open settings or Exit.",
-                ToolTipIcon.Info);
-        }
+        _notices.PresentStartup();
     }
 
     public void Notify(string title, string message)
+    {
+        if (_notices is null)
+        {
+            _app.Log.Warn("Notification presenter was not ready. Windows balloon used for " + title + ".");
+            ShowBalloon(title, message);
+            return;
+        }
+
+        _notices.Present(title, message);
+    }
+
+    public void NotifyStillRunning() =>
+        _notices?.Present("Still running", "Meta Quest Tray Tool is still in the notification area.", force: true);
+
+    public void Dispose()
+    {
+        ThemeService.Changed -= OnThemeChanged;
+        _notices?.Dispose();
+        _quick?.Close();
+        _notifyIcon.Visible = false;
+        _notifyIcon.Dispose();
+        _icon?.Dispose();
+    }
+
+    private void ShowBalloon(string title, string message)
     {
         if (!_app.Settings.Current.ShowNotifications)
         {
@@ -74,21 +95,27 @@ public sealed class TrayIconHost : IDisposable
         _notifyIcon.ShowBalloonTip(2500, title, message, ToolTipIcon.Info);
     }
 
-    public void NotifyStillRunning()
+    private void ActivateNotice(NoticeAction action)
     {
-        _notifyIcon.ShowBalloonTip(
-            4000,
-            App.AppName,
-            "Still running in the notification area. Right-click the headset icon to open settings or Exit.",
-            ToolTipIcon.Info);
-    }
-
-    public void Dispose()
-    {
-        ThemeService.Changed -= OnThemeChanged;
-        _notifyIcon.Visible = false;
-        _notifyIcon.Dispose();
-        _icon?.Dispose();
+        switch (action)
+        {
+            case NoticeAction.OpenPerformance:
+                ShowShell("Performance");
+                break;
+            case NoticeAction.OpenHeadset:
+            case NoticeAction.OpenRecovery:
+                ShowShell("Headset");
+                break;
+            case NoticeAction.ViewLogs:
+                ShowShell("Log");
+                break;
+            case NoticeAction.OpenProfiles:
+                ShowProfiles();
+                break;
+            case NoticeAction.OpenSettings:
+                ShowShell("Tray");
+                break;
+        }
     }
 
     private void OnThemeChanged(object? sender, AppTheme theme) => ApplyMenuTheme();
@@ -140,7 +167,14 @@ public sealed class TrayIconHost : IDisposable
     {
         if (e.Button == MouseButtons.Left)
         {
-            ShowShell();
+            if (_app.Settings.Current.Notices.LeftClickOpensQuickControls)
+            {
+                ShowQuickControls();
+            }
+            else
+            {
+                ShowShell();
+            }
         }
     }
 
@@ -159,6 +193,8 @@ public sealed class TrayIconHost : IDisposable
             PaintMenu(menu, ThemeService.MenuPalette(), menu.Renderer);
         };
 
+        menu.Items.Add(new ToolStripMenuItem("Quick controls", null, (_, _) => ShowQuickControls()));
+        menu.Items.Add(new ToolStripMenuItem("Notification history", null, (_, _) => _notices?.ShowHistory()));
         menu.Items.Add(new ToolStripMenuItem("Open Settings", null, (_, _) => ShowShell()));
         menu.Items.Add(new ToolStripMenuItem("Open Meta Horizon Link", null, (_, _) =>
         {
@@ -1620,6 +1656,98 @@ public sealed class TrayIconHost : IDisposable
     }
 
     public void CancelOwnedSessions() => _shell?.CancelOwnedSessions();
+
+    public void ShowShell(string page)
+    {
+        ShowShell();
+        _shell?.ShowPage(page);
+    }
+
+    private void ShowQuickControls()
+    {
+        if (_quick is not null)
+        {
+            _quick.Activate();
+            return;
+        }
+
+        var snapshot = _app.RuntimeSnapshots.TryGetCached();
+        var battery = snapshot?.Headset?.Runtime is { Available: true, BatteryPercent: int percent }
+            ? percent + "%"
+            : "Unavailable";
+        var thermal = _app.Headset.ExperimentalSession?.PendingSummary;
+        var rows = new List<(string Label, string Value)>
+        {
+            ("Headset", snapshot?.Link.SessionActive == true ? "Session active" : "No cached session"),
+            ("Provider", snapshot is null ? "Unavailable" : snapshot.Link.SessionActive ? snapshot.SetupMode.ToString() : "Idle"),
+            ("SteamVR", snapshot?.SteamVr.IsRunning == true ? "Running" : "Not running"),
+            ("OpenXR", snapshot?.OpenXr?.ToString() ?? "Unavailable"),
+            ("Profile", snapshot?.ActiveProfileName ?? "None"),
+            ("ADB", _app.Adb.ActivityMode.ToString()),
+            ("Battery", battery),
+            ("Experimental GPU", string.IsNullOrWhiteSpace(thermal) ? "No pending recovery" : "Recovery pending")
+        };
+        var notices = _app.Settings.Current.Notices;
+        _quick = new QuickControlWindow(
+            rows,
+            QuickCommand,
+            ThemeService.Current,
+            notices.Transparency && !SystemParameters.HighContrast);
+        _quick.Closed += (_, _) => _quick = null;
+        _quick.Show();
+    }
+
+    private void QuickCommand(string command)
+    {
+        switch (command)
+        {
+            case "settings":
+                ShowShell("Tray");
+                break;
+            case "performance":
+                ShowShell("Performance");
+                break;
+            case "headset":
+                ShowShell("Headset");
+                break;
+            case "profiles":
+                ShowProfiles();
+                break;
+            case "steamvr":
+                Task.Run(() =>
+                {
+                    var summary = _app.DashToSteamVr.StartSteamVrNow("quick control");
+                    _app.Dispatcher.BeginInvoke(() => Notify("SteamVR", summary));
+                });
+                break;
+            case "recover":
+                Task.Run(() =>
+                {
+                    var summary = _app.SessionRecover.Recover("quick control");
+                    _app.Dispatcher.BeginInvoke(() => Notify("PCVR recover", summary));
+                });
+                break;
+            case "adb":
+                if (_app.HeadsetWatch?.IsPaused == true)
+                {
+                    _app.HeadsetWatch.Resume();
+                }
+                else
+                {
+                    _app.HeadsetWatch?.Pause();
+                }
+                break;
+            case "history":
+                _notices?.ShowHistory();
+                break;
+            case "exit":
+                _shell?.ForceClose();
+                _app.RequestUserExit(UserExitSource.QuickControl);
+                break;
+        }
+
+        _quick?.Close();
+    }
 
     public void ShowShell()
     {

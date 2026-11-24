@@ -46,6 +46,10 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         UpdatesBox.IsChecked = app.Tray.CheckForUpdatesOnStart;
         SelectUpdateInterval(app.Tray.AutoUpdateCheckInterval);
         NotificationsBox.IsChecked = app.ShowNotifications;
+        ModernNoticesBox.IsChecked = app.Notices.ModernFlyouts;
+        NoticeTransparencyBox.IsChecked = app.Notices.Transparency;
+        NoticeAnimationBox.IsChecked = app.Notices.Animations;
+        QuickClickBox.IsChecked = app.Notices.LeftClickOpensQuickControls;
         LoadHeadsetAnnouncer(app.HeadsetAnnouncer);
         SelectTheme(app.Tray.Theme);
         StatusText.Text = App.Instance.StartupRegistration.DescribeStatus()
@@ -277,6 +281,10 @@ public partial class TrayToolPage : System.Windows.Controls.UserControl, IShellP
         settings.Tray.MinimizeOnClose = MinimizeOnCloseBox.IsChecked == true;
         settings.Tray.CheckForUpdatesOnStart = UpdatesBox.IsChecked == true;
         settings.ShowNotifications = NotificationsBox.IsChecked == true;
+        settings.Notices.ModernFlyouts = ModernNoticesBox.IsChecked == true;
+        settings.Notices.Transparency = NoticeTransparencyBox.IsChecked == true;
+        settings.Notices.Animations = NoticeAnimationBox.IsChecked == true;
+        settings.Notices.LeftClickOpensQuickControls = QuickClickBox.IsChecked == true;
         App.Instance.Settings.Save();
         App.Instance.AudioWatch?.SyncTimer();
 

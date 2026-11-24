@@ -22,6 +22,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     private OverlayIpcServer? _overlay;
     private string _overlaySnapshot = "no-sample";
     private CancellationTokenSource? _benchmark;
+    private string? _lastPerformanceNotice;
 
     public PerformancePage()
     {
@@ -231,11 +232,13 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             SummaryText.Text = result.Cancelled
                 ? "PC benchmark cancelled. No headset setting was changed."
                 : "PC benchmark finished. 1% lows were not calculated. History was saved.";
+            App.Instance.TrayNotify("Benchmark", SummaryText.Text);
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
         {
             ReportBox.Text = ex.Message;
             _overlaySnapshot = ReportBox.Text;
+            App.Instance.TrayNotify("Benchmark", ex.Message);
         }
         finally
         {
@@ -282,11 +285,13 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
                 + "Refresh, bitrate, and GPU-level comparisons are not offered from this page because they can interrupt the session.";
             _overlaySnapshot = ReportBox.Text;
             SummaryText.Text = result.Summary;
+            App.Instance.TrayNotify("Benchmark", result.Summary);
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
         {
             ReportBox.Text = ex.Message;
             _overlaySnapshot = ReportBox.Text;
+            App.Instance.TrayNotify("Benchmark", ex.Message);
         }
         finally
         {
@@ -455,6 +460,13 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             + BottleneckAnalyzer.ToDisplayText(findings);
         _overlaySnapshot = ReportBox.Text;
         SummaryText.Text = findings[0].Title;
+        if ((findings[0].Title.Contains("bottleneck", StringComparison.OrdinalIgnoreCase)
+                || findings[0].Title.Contains("thermal", StringComparison.OrdinalIgnoreCase))
+            && !string.Equals(_lastPerformanceNotice, findings[0].Title, StringComparison.Ordinal))
+        {
+            _lastPerformanceNotice = findings[0].Title;
+            App.Instance.TrayNotify("Performance", findings[0].Title);
+        }
     }
 
     private void DrawChart()
