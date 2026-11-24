@@ -1,7 +1,9 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Security.AccessControl;
+using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Text;
 
 namespace MetaQuestTrayTool.Services;
 
@@ -9,14 +11,31 @@ public static class OverlayCommands
 {
     public const int MaxLineLength = 1024;
 
-    public static string Handle(string? line, Func<string>? snapshot = null)
+    public static string Handle(string? line, Func<string>? snapshot = null, string? expectedToken = null)
     {
         if (string.IsNullOrWhiteSpace(line) || line.Length > MaxLineLength || line.Contains('\n') || line.Contains('\r') || line.Contains('\0'))
         {
             return "ERR malformed command";
         }
 
-        var command = line.Trim();
+        if (string.IsNullOrWhiteSpace(expectedToken))
+        {
+            return "ERR auth required";
+        }
+
+        if (!line.StartsWith("auth ", StringComparison.OrdinalIgnoreCase))
+        {
+            return "ERR auth required";
+        }
+
+        var supplied = line["auth ".Length..];
+        var split = supplied.IndexOf(' ');
+        var token = split < 0 ? supplied.Trim() : supplied[..split];
+        var command = split < 0 ? string.Empty : supplied[(split + 1)..].Trim();
+        if (!TokenEquals(token, expectedToken))
+        {
+            return "ERR auth rejected";
+        }
         if (command.Contains("..", StringComparison.Ordinal)
             || command.Contains(';', StringComparison.Ordinal)
             || command.Contains('|', StringComparison.Ordinal)
@@ -36,7 +55,7 @@ public static class OverlayCommands
 
         if (command.Equals("overlay-status", StringComparison.OrdinalIgnoreCase))
         {
-            return "OK desktop-companion openvr-overlay=not-loaded reason=untested-native-binding";
+            return "OK desktop-companion " + OpenVrOverlayStatus.Describe();
         }
 
         if (command.Equals("snapshot", StringComparison.OrdinalIgnoreCase))
@@ -76,6 +95,23 @@ public static class OverlayCommands
 
         return "ERR unsupported command";
     }
+
+    public static string CreateToken() => Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant();
+
+    private static bool TokenEquals(string supplied, string expected)
+    {
+        var left = Encoding.UTF8.GetBytes(supplied);
+        var right = Encoding.UTF8.GetBytes(expected);
+        return left.Length == right.Length && CryptographicOperations.FixedTimeEquals(left, right);
+    }
+}
+
+public static class OpenVrOverlayStatus
+{
+    public const string State = "not-loaded";
+
+    public static string Describe() =>
+        "openvr-overlay=" + State + " reason=native-binding-stays-out-of-the-tray-process";
 }
 
 public sealed class OverlayIpcServer : IDisposable
@@ -83,14 +119,18 @@ public sealed class OverlayIpcServer : IDisposable
     public const string PipeName = "MetaQuestTrayTool.PerformanceOverlay";
     private CancellationTokenSource? _cancel;
     private Func<string>? _snapshot;
+    private string _token = string.Empty;
 
     public bool IsRunning { get; private set; }
+
+    public string Token => _token;
 
     public void Start(Func<string> snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         Stop();
         _snapshot = snapshot;
+        _token = OverlayCommands.CreateToken();
         _cancel = new CancellationTokenSource();
         IsRunning = true;
         var token = _cancel.Token;
@@ -122,10 +162,9 @@ public sealed class OverlayIpcServer : IDisposable
             {
                 using var server = CreateServer();
                 server.WaitForConnectionAsync(token).GetAwaiter().GetResult();
-                using var reader = new StreamReader(server, leaveOpen: true);
                 using var writer = new StreamWriter(server, leaveOpen: true) { AutoFlush = true };
-                var line = reader.ReadLine();
-                writer.WriteLine(OverlayCommands.Handle(line, _snapshot));
+                var line = ReadBounded(server, OverlayCommands.MaxLineLength);
+                writer.WriteLine(OverlayCommands.Handle(line, _snapshot, _token));
             }
             catch (OperationCanceledException)
             {
@@ -141,6 +180,33 @@ public sealed class OverlayIpcServer : IDisposable
                 Thread.Sleep(200);
             }
         }
+    }
+
+    private static string? ReadBounded(Stream stream, int maxLength)
+    {
+        var buffer = new byte[maxLength + 1];
+        var count = 0;
+        while (count <= maxLength)
+        {
+            var next = stream.ReadByte();
+            if (next < 0 || next == '\n')
+            {
+                break;
+            }
+
+            if (next == '\r')
+            {
+                continue;
+            }
+
+            buffer[count++] = (byte)next;
+            if (count > maxLength)
+            {
+                return null;
+            }
+        }
+
+        return Encoding.UTF8.GetString(buffer, 0, count);
     }
 
     private static NamedPipeServerStream CreateServer()

@@ -14,8 +14,19 @@ public class PcvrIntegrationTests
     [InlineData("profile Beat Saber", "ERR profile")]
     [InlineData("ping; adb shell", "ERR command rejected")]
     [InlineData("cmd /c whoami", "ERR command rejected")]
-    public void OverlayCommandsStayOnTheAllowList(string command, string expectedFragment) =>
-        Assert.Contains(expectedFragment, OverlayCommands.Handle(command, () => "secret"), StringComparison.OrdinalIgnoreCase);
+    public void OverlayCommandsStayOnTheAllowList(string command, string expectedFragment)
+    {
+        const string token = "0123456789abcdef0123456789abcdef";
+        var response = OverlayCommands.Handle("auth " + token + " " + command, () => "secret", token);
+        Assert.Contains(expectedFragment, response, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void OverlayRequiresTheProcessToken()
+    {
+        Assert.Contains("auth required", OverlayCommands.Handle("ping"), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not-loaded", OpenVrOverlayStatus.Describe(), StringComparison.OrdinalIgnoreCase);
+    }
 
     [Fact]
     public void SteamVrOverMetaLinkIsNotTheSteamLinkApp()
