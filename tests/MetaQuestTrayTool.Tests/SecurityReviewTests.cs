@@ -39,6 +39,47 @@ public class SecurityReviewTests
         Assert.Contains("No streaming provider was launched", decision.Summary, StringComparison.Ordinal);
         Assert.Contains("did not write", decision.Summary, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("were not applied", decision.Summary, StringComparison.OrdinalIgnoreCase);
+
+        var actions = new RecordingProfileActions();
+        var applied = new PcvrProfileLifecycle().Apply(decisionPreferences(), ReadyProfile(), actions);
+        Assert.Empty(actions.Writes);
+        Assert.Contains("was not written", applied.Summary, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("were not applied", applied.Summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static PcvrProfilePreferences decisionPreferences() => new()
+    {
+        PreferredProvider = "Pyrowave",
+        AutoSwitchProvider = false,
+        ExperimentalGpuMaximum = true,
+        ExperimentalRefreshHz = 207,
+        PyrowaveProfile = "Quality 120 Hz"
+    };
+
+    private static PcvrProfileContext ReadyProfile() => new()
+    {
+        SessionActive = true,
+        ActiveProvider = "Meta Quest Link",
+        TrustedSerial = "trusted",
+        HeadsetSerial = "trusted",
+        AdbSerial = "serial-1",
+        Model = "Quest 3",
+        Fingerprint = "fingerprint",
+        HeadsetReady = true,
+        ExperimentalGpuOptIn = true,
+        BatteryCelsius = 40
+    };
+
+    private sealed class RecordingProfileActions : IPcvrProfileActions
+    {
+        public List<string> Writes { get; } = [];
+        public string ApplyExperimentalGpu(PcvrProfileContext context)
+        {
+            Writes.Add(context.AdbSerial ?? string.Empty);
+            return "written";
+        }
+
+        public string RestoreExperimentalGpu(string serial) => "restored";
     }
 
     [Fact]

@@ -1,7 +1,8 @@
 namespace MetaQuestTrayTool.Models;
 
 /// <summary>
-/// Optional provider notes stored on a game profile. They never launch or switch a streaming stack.
+/// Provider preferences stored on a game profile. A matching, already-running provider can apply an opted-in GPU level 7.
+/// The profile does not launch or switch a streaming stack, and it does not write refresh or session files.
 /// </summary>
 public sealed class PcvrProfilePreferences
 {

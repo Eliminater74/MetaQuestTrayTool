@@ -71,6 +71,7 @@ public partial class App : System.Windows.Application
     public MetaRuntimeCompatibilityService RuntimeCompatibility { get; }
     public SupportBundleService SupportBundles { get; }
     public SessionFlightRecorder SessionTrace { get; }
+    public PcvrProfileLifecycle PcvrProfiles { get; } = new();
 
     public ProcessWatcherService? ProcessWatcher => _processWatcher;
     public PowerWatchService? PowerWatch => _powerWatcher;
@@ -785,7 +786,7 @@ public partial class App : System.Windows.Application
                 return OpenXr.SetResult(profile.OpenXrRuntime);
             });
         if (profile.Pcvr is not null)
-            coordinator.Run("PCVR", () => PcvrProfilePolicy.Decide(profile.Pcvr));
+            coordinator.Run("PCVR", () => ApplyPcvrProfile(profile.Pcvr));
         return coordinator.Result;
     }
 
@@ -866,6 +867,7 @@ public partial class App : System.Windows.Application
         }
 
         parts.Add(OpenXr.RestoreAfterProfile(Settings.Current.OpenXr.PreferredRuntime));
+        parts.Add(PcvrProfiles.Restore(new HeadsetPcvrProfileActions(this)).Summary);
 
         var summary = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part))).Trim();
         if (summary.Length == 0)
@@ -1087,6 +1089,116 @@ public partial class App : System.Windows.Application
         catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
         {
             return ThermalReading.Unreachable(DateTimeOffset.UtcNow, ex.GetType().Name);
+        }
+    }
+
+    private ProfileStepResult ApplyPcvrProfile(PcvrProfilePreferences preferences) =>
+        PcvrProfiles.Apply(preferences, BuildPcvrProfileContext(preferences), new HeadsetPcvrProfileActions(this));
+
+    private PcvrProfileContext BuildPcvrProfileContext(PcvrProfilePreferences preferences)
+    {
+        VrSessionCapabilities caps;
+        try
+        {
+            caps = LinkConnection.GetCapabilities();
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException)
+        {
+            caps = new VrSessionCapabilities { Kind = VrConnectionKind.Unknown, SessionActive = false, Banner = ex.Message };
+        }
+
+        var context = new PcvrProfileContext
+        {
+            SessionActive = caps.SessionActive,
+            ActiveProvider = DescribeActiveProvider(caps),
+            TrustedSerial = Settings.Current.Headset.TrustedSerial,
+            ExperimentalGpuOptIn = Settings.Current.Headset.ExperimentalGpuMaximumEnabled,
+            ThermalReapplyBlocked = Headset.ExperimentalSession?.AutomaticReapplyBlocked == true
+        };
+        if (preferences.ExperimentalGpuMaximum != true || !context.ExperimentalGpuOptIn || !context.SessionActive)
+        {
+            return context;
+        }
+
+        try
+        {
+            var identity = Headset.ReadIdentity(Settings.Current.Headset);
+            context = context with
+            {
+                HeadsetSerial = identity.Serial,
+                AdbSerial = identity.AdbSerial,
+                Model = identity.Model,
+                HeadsetReady = identity.IsReady && identity.IsVrHeadset && !identity.IsRogue && identity.IsTrusted
+            };
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException)
+        {
+            return context;
+        }
+
+        if (!context.HeadsetReady || string.IsNullOrWhiteSpace(context.AdbSerial))
+        {
+            return context;
+        }
+
+        var thermal = ReadExperimentalThermal(context.AdbSerial);
+        string? fingerprint = null;
+        try
+        {
+            fingerprint = Adb.GetProp(context.AdbSerial, "ro.build.fingerprint");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException)
+        {
+            fingerprint = null;
+        }
+
+        return context with
+        {
+            BatteryCelsius = thermal.HeadsetReachable ? thermal.BatteryCelsius : null,
+            Fingerprint = fingerprint
+        };
+    }
+
+    private static string? DescribeActiveProvider(VrSessionCapabilities caps)
+    {
+        if (!caps.SessionActive)
+        {
+            return null;
+        }
+
+        return caps.Kind switch
+        {
+            VrConnectionKind.MetaWiredLink or VrConnectionKind.MetaAirLink or VrConnectionKind.MetaLinkUnknownTransport => "Meta Quest Link",
+            VrConnectionKind.VirtualDesktop => "Virtual Desktop",
+            _ => null
+        };
+    }
+
+    private sealed class HeadsetPcvrProfileActions : IPcvrProfileActions
+    {
+        private readonly App _app;
+        public HeadsetPcvrProfileActions(App app) => _app = app;
+
+        public string ApplyExperimentalGpu(PcvrProfileContext context)
+        {
+            var result = _app.Headset.ApplyTrustedExperimentalGpu(context.AdbSerial ?? string.Empty, context.Model, context.Fingerprint);
+            if (result.Status != PropertyTransactionStatus.Verified)
+            {
+                throw new InvalidOperationException(result.ToDisplayText());
+            }
+
+            return result.Summary + " No streaming provider was launched.";
+        }
+
+        public string RestoreExperimentalGpu(string serial)
+        {
+            var result = _app.Headset.RestoreTrustedExperimentalGpu(serial);
+            if (result.Status == PropertyTransactionStatus.Failed)
+            {
+                throw new InvalidOperationException(result.ToDisplayText());
+            }
+
+            return result.Summary;
         }
     }
 

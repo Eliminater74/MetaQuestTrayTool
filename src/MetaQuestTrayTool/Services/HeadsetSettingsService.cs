@@ -859,6 +859,53 @@ public sealed class HeadsetSettingsService
         result[property] = value == HeadsetExperimentalOverride.ForceOn ? "1" : "0";
     }
 
+    public PropertyTransactionResult ApplyTrustedExperimentalGpu(string serial, string? model, string? fingerprint)
+    {
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            throw new InvalidOperationException("Headset serial was not confirmed. GPU level 7 was not written.");
+        }
+
+        var transaction = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile)
+            .Apply(serial, model, fingerprint, new Dictionary<string, string>
+            {
+                [ExperimentalGpuPolicy.PropertyName] = ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture)
+            }, bootId: TryBootId(serial));
+        if (transaction.Status == PropertyTransactionStatus.Verified)
+        {
+            ExperimentalSession?.BeginExplicit(serial, model, fingerprint);
+        }
+
+        return transaction;
+    }
+
+    public PropertyTransactionResult RestoreTrustedExperimentalGpu(string serial)
+    {
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            throw new InvalidOperationException("Headset serial was not confirmed. The profile GPU override was not restored.");
+        }
+
+        string? fingerprint = null;
+        try
+        {
+            fingerprint = _adb.GetProp(serial, "ro.build.fingerprint");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+        {
+            fingerprint = null;
+        }
+
+        var restored = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile)
+            .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName]);
+        if (restored.Status != PropertyTransactionStatus.Failed)
+        {
+            ExperimentalSession?.StopWithoutRestore("The game profile restored the experimental GPU property.");
+        }
+
+        return restored;
+    }
+
     private static bool TryCaptureSize(HeadsetCaptureSize size, out int width, out int height)
     {
         (width, height) = size switch
