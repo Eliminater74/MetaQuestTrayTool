@@ -778,6 +778,8 @@ public partial class App : System.Windows.Application
                 OpenXr.CaptureBeforeProfile();
                 return OpenXr.SetResult(profile.OpenXrRuntime);
             });
+        if (profile.Pcvr is not null)
+            coordinator.Run("PCVR", () => PcvrProfilePolicy.Decide(profile.Pcvr));
         return coordinator.Result;
     }
 
