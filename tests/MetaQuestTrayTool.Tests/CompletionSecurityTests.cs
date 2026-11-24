@@ -64,6 +64,7 @@ public class CompletionSecurityTests
     private sealed class QuietActions : IPcvrProfileActions
     {
         public int Writes { get; private set; }
+        public bool OwnsRestore => false;
         public string ApplyExperimentalGpu(PcvrProfileContext context)
         {
             Writes++;

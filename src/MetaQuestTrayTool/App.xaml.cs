@@ -1237,15 +1237,35 @@ public partial class App : System.Windows.Application
         private readonly App _app;
         public HeadsetPcvrProfileActions(App app) => _app = app;
 
+        public bool OwnsRestore { get; private set; }
+
         public string ApplyExperimentalGpu(PcvrProfileContext context)
         {
-            var result = _app.Headset.ApplyTrustedExperimentalGpu(context.AdbSerial ?? string.Empty, context.Model, context.Fingerprint);
+            OwnsRestore = false;
+            var serial = context.AdbSerial ?? string.Empty;
+            string? current;
+            try
+            {
+                current = _app.Adb.GetProp(serial, ExperimentalGpuPolicy.PropertyName);
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException)
+            {
+                throw new InvalidOperationException("The current GPU level was not read. The profile did not write it and did not launch a provider. " + ex.GetType().Name);
+            }
+
+            if (!PcvrProfileLifecycle.OwnsNewGpuOverride(current))
+            {
+                return "GPU level 7 was already applied. This profile did not take ownership and will not restore it when the game exits. No streaming provider was launched.";
+            }
+
+            var result = _app.Headset.ApplyTrustedExperimentalGpu(serial, context.Model, context.Fingerprint);
             if (result.Status != PropertyTransactionStatus.Verified)
             {
                 throw new InvalidOperationException(result.ToDisplayText());
             }
 
-            return result.Summary + " No streaming provider was launched.";
+            OwnsRestore = true;
+            return result.Summary + " This profile will restore it when the game exits. No streaming provider was launched.";
         }
 
         public string RestoreExperimentalGpu(string serial)

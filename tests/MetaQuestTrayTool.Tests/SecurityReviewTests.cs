@@ -73,6 +73,7 @@ public class SecurityReviewTests
     private sealed class RecordingProfileActions : IPcvrProfileActions
     {
         public List<string> Writes { get; } = [];
+        public bool OwnsRestore => false;
         public string ApplyExperimentalGpu(PcvrProfileContext context)
         {
             Writes.Add(context.AdbSerial ?? string.Empty);

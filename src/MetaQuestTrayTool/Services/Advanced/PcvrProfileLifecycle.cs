@@ -20,6 +20,7 @@ public sealed record PcvrProfileContext
 
 public interface IPcvrProfileActions
 {
+    bool OwnsRestore { get; }
     string ApplyExperimentalGpu(PcvrProfileContext context);
     string RestoreExperimentalGpu(string serial);
 }
@@ -61,7 +62,11 @@ public sealed class PcvrProfileLifecycle
             try
             {
                 var written = actions.ApplyExperimentalGpu(context);
-                _applied = new AppliedGpu(generation, context.AdbSerial ?? string.Empty);
+                if (actions.OwnsRestore)
+                {
+                    _applied = new AppliedGpu(generation, context.AdbSerial ?? string.Empty);
+                }
+
                 return new ProfileStepResult("PCVR", ProfileStepStatus.Succeeded, written + " " + plan.Summary);
             }
             catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException)
@@ -186,6 +191,9 @@ public sealed class PcvrProfileLifecycle
             yield return "Named ALVR or Pyrowave presets were not applied. No session file was edited and no dashboard request was sent.";
         }
     }
+
+    public static bool OwnsNewGpuOverride(string? currentValue) =>
+        !string.Equals(currentValue?.Trim(), ExperimentalGpuPolicy.MaximumLevel.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal);
 
     internal static bool ProvidersMatch(string? preferred, string? active, out string reason)
     {

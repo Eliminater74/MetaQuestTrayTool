@@ -85,6 +85,25 @@ public class PcvrProfileLifecycleTests
     }
 
     [Fact]
+    public void AnExistingGpuLevel7IsNotRestoredWhenTheGameExits()
+    {
+        var actions = new RecordingActions { AlreadyApplied = true };
+        var lifecycle = new PcvrProfileLifecycle();
+        var applied = lifecycle.Apply(GpuPreference("ALVR"), Ready("ALVR"), actions);
+        Assert.Equal(ProfileStepStatus.Succeeded, applied.Status);
+        Assert.Empty(actions.GpuWrites);
+        Assert.False(actions.OwnsRestore);
+        Assert.Contains("already applied", applied.Summary, StringComparison.OrdinalIgnoreCase);
+        var restored = lifecycle.Restore(actions);
+        Assert.Empty(actions.Restores);
+        Assert.Contains("nothing was restored", restored.Summary, StringComparison.OrdinalIgnoreCase);
+        Assert.False(PcvrProfileLifecycle.OwnsNewGpuOverride("7"));
+        Assert.False(PcvrProfileLifecycle.OwnsNewGpuOverride(" 7 "));
+        Assert.True(PcvrProfileLifecycle.OwnsNewGpuOverride("4"));
+        Assert.True(PcvrProfileLifecycle.OwnsNewGpuOverride(null));
+    }
+
+    [Fact]
     public void RestoreFailureStaysFailedAndCanBeRetried()
     {
         var actions = new RecordingActions { FailRestore = true };
@@ -123,8 +142,18 @@ public class PcvrProfileLifecycleTests
         public List<string> Restores { get; } = [];
         public bool FailRestore { get; set; }
 
+        public bool AlreadyApplied { get; init; }
+        public bool OwnsRestore { get; private set; }
+
         public string ApplyExperimentalGpu(PcvrProfileContext context)
         {
+            if (AlreadyApplied)
+            {
+                OwnsRestore = false;
+                return "GPU level 7 was already applied.";
+            }
+
+            OwnsRestore = true;
             GpuWrites.Add("7");
             return "Verified GPU level 7. No streaming provider was launched.";
         }
