@@ -71,6 +71,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         Add(CaptureBitrateBox, "20 Mbps", HeadsetCaptureBitrate.Mbps20);
         Add(CaptureBitrateBox, "30 Mbps", HeadsetCaptureBitrate.Mbps30);
         Add(CaptureBitrateBox, "40 Mbps", HeadsetCaptureBitrate.Mbps40);
+        Add(ExperimentalRefreshRateBox, "Not selected", 0);
+        Add(ExperimentalRefreshRateBox, "144 Hz experimental (Quest 3 property only)", 144);
+        Add(ExperimentalRefreshRateBox, "207 Hz experimental (Quest 3 property only)", 207);
     }
 
     public void Refresh()
@@ -95,6 +98,8 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         StereoBox.IsChecked = headset.StereoCapture;
         FullRateBox.IsChecked = headset.FullRateCapture;
         ExperimentalGpuBox.IsChecked = headset.ExperimentalGpuMaximumEnabled;
+        ExperimentalRefreshBox.IsChecked = headset.ExperimentalRefreshEnabled;
+        Select(ExperimentalRefreshRateBox, headset.ExperimentalRefreshHz ?? 0);
         RequireTrustBox.IsChecked = headset.RequireTrustedHeadset;
         CustomAdbBox.Text = string.Join(Environment.NewLine, headset.CustomAdbCommands);
         WirelessHostBox.Text = headset.WirelessHost ?? string.Empty;
@@ -134,6 +139,9 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         headset.StereoCapture = StereoBox.IsChecked == true;
         headset.FullRateCapture = FullRateBox.IsChecked == true;
         headset.ExperimentalGpuMaximumEnabled = ExperimentalGpuBox.IsChecked == true;
+        headset.ExperimentalRefreshEnabled = ExperimentalRefreshBox.IsChecked == true;
+        var experimentalHz = Read(ExperimentalRefreshRateBox, headset.ExperimentalRefreshHz ?? 0);
+        headset.ExperimentalRefreshHz = experimentalHz is 144 or 207 ? experimentalHz : null;
         headset.RequireTrustedHeadset = RequireTrustBox.IsChecked == true;
         headset.CustomAdbCommands = CustomCommandSet.ParseLines(CustomAdbBox.Text);
         headset.WirelessHost = string.IsNullOrWhiteSpace(WirelessHostBox.Text) ? null : WirelessHostBox.Text.Trim();

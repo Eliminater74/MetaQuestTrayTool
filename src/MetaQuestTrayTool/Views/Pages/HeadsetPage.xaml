@@ -120,6 +120,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
 
           <TextBlock Grid.Row="0" Text="Quest Pro local dimming" VerticalAlignment="Center" Margin="0,0,0,8"/>
@@ -134,6 +135,12 @@
                     Content="Quest 3 experimental GPU level 7 (off by default)"
                     Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
                     ToolTip="Opt-in. Writes debug.oculus.gpuLevel=7 only for a Quest 3, after snapshotting the previous value. Quest 3S and other models are refused. Refuses at or above 45 C battery temperature. A property readback is not a GPU clock measurement. Hardware verification is pending. If the previous value was unset, clearing it needs a reboot."/>
+
+          <CheckBox x:Name="ExperimentalRefreshBox" Grid.Row="3" Grid.Column="0"
+                    Content="Experimental refresh"
+                    Checked="Persist_Changed" Unchecked="Persist_Changed" Margin="0,0,0,8"
+                    ToolTip="Opt-in Quest 3 only. Writes debug.oculus.refreshRate for 144 or 207 after a snapshot. Quest Link is not guaranteed to deliver that frame rate. 240 Hz and display scaling are not offered. Set the standard refresh box to device default first. Hardware verification is pending."/>
+          <ComboBox x:Name="ExperimentalRefreshRateBox" Grid.Row="3" Grid.Column="1" MaxWidth="320" HorizontalAlignment="Left" Padding="6" Margin="0,0,0,8" SelectionChanged="ComboPersist_Changed"/>
         </Grid>
       </Expander>
 

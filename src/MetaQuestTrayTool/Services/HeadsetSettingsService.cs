@@ -269,6 +269,16 @@ public sealed class HeadsetSettingsService
         if (!HeadsetCapabilities.RefreshRates(quest.Model).Contains(settings.RefreshRate))
             throw new InvalidOperationException("The saved refresh rate is not supported by this headset model. Choose a supported rate or Device default.");
         var gpuDecision = ResolveExperimentalGpu(settings, quest);
+        var refreshDecision = ExperimentalRefreshPolicy.Evaluate(
+            settings.ExperimentalRefreshEnabled,
+            quest.Model,
+            settings.ExperimentalRefreshHz,
+            settings.RefreshRate != HeadsetRefreshRate.DeviceDefault);
+        if (refreshDecision.Refusal is not null)
+        {
+            throw new InvalidOperationException(refreshDecision.Refusal);
+        }
+
         var performance = new Dictionary<string, string>(PerformanceOverridesForApply(settings, gpuDecision));
         var foveation = FoveationOverrides(settings);
         var experimental = ExperimentalOverrides(settings, quest.Model);
@@ -310,18 +320,46 @@ public sealed class HeadsetSettingsService
             applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.textureHeight", height.ToString()));
         }
 
-        var refresh = settings.RefreshRate switch
+        if (refreshDecision.Apply && refreshDecision.Hz is int experimentalHz)
         {
-            HeadsetRefreshRate.Hz60 => 60,
-            HeadsetRefreshRate.Hz72 => 72,
-            HeadsetRefreshRate.Hz80 => 80,
-            HeadsetRefreshRate.Hz90 => 90,
-            HeadsetRefreshRate.Hz120 => 120,
-            _ => (int?)null
-        };
-        if (refresh is not null)
+            var transactions = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile);
+            string? fingerprint = null;
+            try
+            {
+                fingerprint = _adb.GetProp(quest.Serial, "ro.build.fingerprint");
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+            {
+                fingerprint = null;
+            }
+
+            var transaction = transactions.Apply(quest.Serial, quest.Model, fingerprint, new Dictionary<string, string>
+            {
+                [ExperimentalRefreshPolicy.RefreshProperty] = experimentalHz.ToString(CultureInfo.InvariantCulture)
+            });
+            if (transaction.Status != PropertyTransactionStatus.Verified)
+            {
+                throw new InvalidOperationException(transaction.ToDisplayText());
+            }
+
+            applied.Add(ExperimentalRefreshPolicy.RefreshProperty + "=" + experimentalHz.ToString(CultureInfo.InvariantCulture)
+                + " (readback verified; streaming frame rate not measured)");
+        }
+        else
         {
-            applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.refreshRate", refresh.Value.ToString()));
+            var refresh = settings.RefreshRate switch
+            {
+                HeadsetRefreshRate.Hz60 => 60,
+                HeadsetRefreshRate.Hz72 => 72,
+                HeadsetRefreshRate.Hz80 => 80,
+                HeadsetRefreshRate.Hz90 => 90,
+                HeadsetRefreshRate.Hz120 => 120,
+                _ => (int?)null
+            };
+            if (refresh is not null)
+            {
+                applied.Add(_adb.SetProp(quest.Serial, "debug.oculus.refreshRate", refresh.Value.ToString()));
+            }
         }
 
         foreach (var (name, value) in foveation)
@@ -408,6 +446,11 @@ public sealed class HeadsetSettingsService
         if (!string.IsNullOrWhiteSpace(gpuDecision.Warning))
         {
             summary += Environment.NewLine + gpuDecision.Warning;
+        }
+
+        if (!string.IsNullOrWhiteSpace(refreshDecision.Warning))
+        {
+            summary += Environment.NewLine + refreshDecision.Warning;
         }
 
         return summary;

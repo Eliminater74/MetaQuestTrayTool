@@ -161,6 +161,15 @@ public sealed class HeadsetSettings
     /// </summary>
     public bool ExperimentalGpuMaximumEnabled { get; set; }
 
+    /// <summary>
+    /// Opt-in Quest 3 debug.oculus.refreshRate of 144 or 207. Default off.
+    /// 240 Hz and display scaling are not written. A panel request is not a streaming frame rate.
+    /// Hardware verification is pending.
+    /// </summary>
+    public bool ExperimentalRefreshEnabled { get; set; }
+
+    public int? ExperimentalRefreshHz { get; set; }
+
     public string? WirelessEndpoint
     {
         get
