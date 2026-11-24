@@ -40,7 +40,11 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         _timer.Tick += (_, _) => _ = SamplePcAsync();
         _loading = false;
         IsVisibleChanged += (_, _) => SyncTimer();
-        Unloaded += (_, _) => _overlay?.Dispose();
+        Unloaded += (_, _) =>
+        {
+            OverlayProcessHost.Stop();
+            _overlay?.Dispose();
+        };
         SummaryText.Text = "Monitoring is stopped. No headset polling is running.";
     }
 
@@ -120,13 +124,15 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         _overlay ??= new OverlayIpcServer();
         if (_overlay.IsRunning)
         {
+            OverlayProcessHost.Stop();
             _overlay.Stop();
-            SummaryText.Text = "Overlay pipe stopped. The OpenVR dashboard overlay was not loaded.";
+            SummaryText.Text = "Overlay pipe stopped and the companion process was asked to quit. The tray did not load OpenVR.";
             return;
         }
 
         _overlay.Start(() => string.IsNullOrWhiteSpace(ReportBox.Text) ? "no-sample" : ReportBox.Text);
-        SummaryText.Text = "Local pipe started for the current user. " + OpenVrOverlayStatus.Describe();
+        var companion = OverlayProcessHost.TryStart(_overlay.Token);
+        SummaryText.Text = "Local pipe started for the current user. " + companion + " " + OpenVrOverlayStatus.Describe();
     }
 
     private void ScoreHistory_Click(object sender, RoutedEventArgs e)

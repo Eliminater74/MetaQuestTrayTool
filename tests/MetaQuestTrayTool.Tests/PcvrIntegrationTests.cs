@@ -8,7 +8,7 @@ public class PcvrIntegrationTests
 {
     [Theory]
     [InlineData("ping", "OK pong")]
-    [InlineData("overlay-status", "openvr-overlay=not-loaded")]
+    [InlineData("overlay-status", "tray-loads-openvr=false")]
     [InlineData("benchmark-start 30", "SteamVR was not restarted")]
     [InlineData("benchmark-start 15", "ERR unsupported")]
     [InlineData("profile Beat Saber", "ERR profile")]
@@ -25,7 +25,7 @@ public class PcvrIntegrationTests
     public void OverlayRequiresTheProcessToken()
     {
         Assert.Contains("auth required", OverlayCommands.Handle("ping"), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("not-loaded", OpenVrOverlayStatus.Describe(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("tray-loads-openvr=false", OpenVrOverlayStatus.Describe(), StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

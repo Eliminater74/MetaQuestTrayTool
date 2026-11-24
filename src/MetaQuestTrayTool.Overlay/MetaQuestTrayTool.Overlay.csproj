@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>MetaQuestTrayTool.Overlay</AssemblyName>
+    <RootNamespace>MetaQuestTrayTool.Overlay</RootNamespace>
+    <Description>Isolated SteamVR dashboard overlay. The tray process does not load this assembly.</Description>
+  </PropertyGroup>
+
+</Project>

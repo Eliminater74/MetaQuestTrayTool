@@ -8,6 +8,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F308F965
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaQuestTrayTool.Tests", "tests\MetaQuestTrayTool.Tests\MetaQuestTrayTool.Tests.csproj", "{CF6936CC-0A06-40F8-8889-F2C9C7C040F9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{62E8F2CA-29E3-4360-AEBA-75EE03165C2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaQuestTrayTool.Overlay", "src\MetaQuestTrayTool.Overlay\MetaQuestTrayTool.Overlay.csproj", "{752D67BA-D30C-4629-863F-D46EECA7F615}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +26,16 @@ Global
 		{CF6936CC-0A06-40F8-8889-F2C9C7C040F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF6936CC-0A06-40F8-8889-F2C9C7C040F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF6936CC-0A06-40F8-8889-F2C9C7C040F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{752D67BA-D30C-4629-863F-D46EECA7F615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{752D67BA-D30C-4629-863F-D46EECA7F615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{752D67BA-D30C-4629-863F-D46EECA7F615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{752D67BA-D30C-4629-863F-D46EECA7F615}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CF6936CC-0A06-40F8-8889-F2C9C7C040F9} = {F308F965-B54A-4F92-9AF9-508ECD3015BC}
+		{752D67BA-D30C-4629-863F-D46EECA7F615} = {62E8F2CA-29E3-4360-AEBA-75EE03165C2B}
 	EndGlobalSection
 EndGlobal

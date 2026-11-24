@@ -108,10 +108,13 @@ public static class OverlayCommands
 
 public static class OpenVrOverlayStatus
 {
-    public const string State = "not-loaded";
+    public const string State = "separate-process";
 
     public static string Describe() =>
-        "openvr-overlay=" + State + " reason=native-binding-stays-out-of-the-tray-process";
+        "openvr-overlay=" + State
+        + " binding=Valve openvr v2.5.1 IVROverlay_027"
+        + " tray-loads-openvr=false"
+        + " physical-acceptance=not-performed";
 }
 
 public sealed class OverlayIpcServer : IDisposable

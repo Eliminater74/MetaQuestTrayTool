@@ -1,0 +1,8 @@
+openvr_api.cs is an unmodified copy of
+https://github.com/ValveSoftware/openvr/blob/v2.5.1/headers/openvr_api.cs
+(tag v2.5.1). Valve's repository license is BSD-3-Clause.
+The file header is the upstream copyright notice.
+It is compiled only into MetaQuestTrayTool.Overlay.
+MetaQuestTrayTool.exe does not reference this assembly and does not load openvr_api.dll.
+Interface version used by this host: IVROverlay_027, application type VRApplication_Overlay.
+No native signature in this repository was written by hand.

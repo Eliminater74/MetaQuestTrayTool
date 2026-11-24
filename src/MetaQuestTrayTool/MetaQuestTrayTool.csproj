@@ -37,4 +37,20 @@
           Link="platform-tools\%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <Target Name="CopyOverlayCompanion" AfterTargets="Build">
+    <PropertyGroup>
+      <_OverlayProject>$(MSBuildThisFileDirectory)..\MetaQuestTrayTool.Overlay\MetaQuestTrayTool.Overlay.csproj</_OverlayProject>
+      <_OverlayRid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)\</_OverlayRid>
+      <_OverlayBin>$(MSBuildThisFileDirectory)..\MetaQuestTrayTool.Overlay\bin\$(Configuration)\net8.0-windows\$(_OverlayRid)</_OverlayBin>
+    </PropertyGroup>
+    <MSBuild Projects="$(_OverlayProject)" Targets="Build" Properties="Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier)" />
+    <ItemGroup>
+      <_OverlayFile Include="$(_OverlayBin)MetaQuestTrayTool.Overlay.exe" />
+      <_OverlayFile Include="$(_OverlayBin)MetaQuestTrayTool.Overlay.dll" />
+      <_OverlayFile Include="$(_OverlayBin)MetaQuestTrayTool.Overlay.deps.json" />
+      <_OverlayFile Include="$(_OverlayBin)MetaQuestTrayTool.Overlay.runtimeconfig.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_OverlayFile)" DestinationFolder="$(OutputPath)overlay\" SkipUnchangedFiles="true" Condition="'@(_OverlayFile)' != ''" />
+  </Target>
+
 </Project>

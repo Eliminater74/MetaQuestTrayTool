@@ -12,7 +12,7 @@ public class SecurityReviewTests
         Assert.Contains("auth required", OverlayCommands.Handle("ping", null, null), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("auth rejected", OverlayCommands.Handle("auth 00000000000000000000000000000000 ping", null, token), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("malformed", OverlayCommands.Handle(new string('a', 1025), null, token), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("not-loaded", OpenVrOverlayStatus.Describe(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("tray-loads-openvr=false", OpenVrOverlayStatus.Describe(), StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

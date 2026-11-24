@@ -206,6 +206,9 @@
           "System.ServiceProcess.ServiceController": "[8.0.1, )",
           "System.Speech": "[8.0.0, )"
         }
+      },
+      "metaquesttraytool.overlay": {
+        "type": "Project"
       }
     },
     "net8.0-windows7.0/win-x64": {
