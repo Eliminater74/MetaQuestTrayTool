@@ -43,6 +43,10 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         IsVisibleChanged += (_, _) => SyncTimer();
         Unloaded += (_, _) =>
         {
+            _monitoring = false;
+            _monitor.Stop();
+            _timer.Stop();
+            _benchmark?.Cancel();
             OverlayProcessHost.Stop();
             _overlay?.Dispose();
         };
@@ -61,11 +65,15 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     {
         var when = DateTimeOffset.Now;
         var headset = HeadsetPerformanceSample.Parse(LogBox.Text ?? string.Empty, TimeSpan.FromSeconds(10));
-        var metrics = new List<TelemetryMetric>();
-        metrics.AddRange(HeadsetTelemetry.FromSample(headset, when, "pasted-log"));
-        metrics.AddRange(StreamingTelemetry.Parse(LogBox.Text, "pasted-log", when));
-        metrics.AddRange(_latest.Where(metric => metric.Source == "nvidia-smi" || metric.Name == "PcCpuUtilization"));
-        Show(LivePerformanceMonitor.Label(metrics, EvidenceKind.PastedLog, when), headset.ToDisplayText(), EvidenceKind.PastedLog);
+        var pasted = new List<TelemetryMetric>();
+        pasted.AddRange(HeadsetTelemetry.FromSample(headset, when, "pasted-log"));
+        pasted.AddRange(StreamingTelemetry.Parse(LogBox.Text, "pasted-log", when));
+        var metrics = LivePerformanceMonitor.Label(pasted, EvidenceKind.PastedLog, when).ToList();
+        metrics.AddRange(LivePerformanceMonitor.Label(
+            _latest.Where(metric => metric.Source == "nvidia-smi" || metric.Name == "PcCpuUtilization").ToList(),
+            EvidenceKind.LiveSample,
+            when));
+        Show(metrics, headset.ToDisplayText(), EvidenceKind.PastedLog);
     }
 
     private async void HeadsetSample_Click(object sender, RoutedEventArgs e)
@@ -353,10 +361,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
                 MaybeSampleHeadset(now);
             }
 
-            if (!_monitoring)
-            {
-                Show(LivePerformanceMonitor.Label(_latest, EvidenceKind.LiveSample, now), csv ?? error ?? "No PC sample.", EvidenceKind.LiveSample);
-            }
+            Show(LivePerformanceMonitor.Label(_latest, EvidenceKind.LiveSample, now), csv ?? error ?? "No PC sample.", EvidenceKind.LiveSample);
         }
         finally
         {
@@ -376,13 +381,14 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             sessionActive = false;
         }
 
-        if (!_monitor.TryReserveHeadsetSample(sessionActive, userRequestedHeadset: false, now))
+        if (Interlocked.CompareExchange(ref _headsetFlight, 1, 0) != 0)
         {
             return;
         }
 
-        if (Interlocked.CompareExchange(ref _headsetFlight, 1, 0) != 0)
+        if (!_monitor.TryReserveHeadsetSample(sessionActive, userRequestedHeadset: false, now))
         {
+            Interlocked.Exchange(ref _headsetFlight, 0);
             return;
         }
 
@@ -404,7 +410,13 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             }
             catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
             {
-                Dispatcher.Invoke(() => SummaryText.Text = "Headset session sample failed: " + ex.Message);
+                try
+                {
+                    Dispatcher.Invoke(() => SummaryText.Text = "Headset session sample failed: " + ex.Message);
+                }
+                catch (InvalidOperationException)
+                {
+                }
             }
             finally
             {
