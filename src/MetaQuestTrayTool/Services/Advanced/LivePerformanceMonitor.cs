@@ -81,6 +81,18 @@ public sealed class LivePerformanceMonitor
         return true;
     }
 
+    public bool TryReserveHeadsetSample(bool sessionActive, bool userRequestedHeadset, DateTimeOffset utc)
+    {
+        if (!HeadsetSampleDue(sessionActive, userRequestedHeadset, utc))
+        {
+            return false;
+        }
+
+        _lastHeadsetUtc = utc;
+        HeadsetSamplesRequested++;
+        return true;
+    }
+
     public bool HeadsetSampleDue(bool sessionActive, bool userRequestedHeadset, DateTimeOffset utc)
     {
         if (State != MonitorState.Running)

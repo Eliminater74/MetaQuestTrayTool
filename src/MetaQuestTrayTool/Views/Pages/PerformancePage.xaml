@@ -5,7 +5,7 @@
     <StackPanel>
       <TextBlock Text="Performance" Style="{StaticResource PageTitleStyle}"/>
       <TextBlock Style="{StaticResource PageHintStyle}"
-                 Text="Advisory diagnostics only. Nothing here changes Link, SteamVR, or headset settings. Headset ADB runs only when you press the headset sample button. PC history does not use ADB. Missing metrics stay blank. Hardware verification of clocks and experimental modes is pending."/>
+                 Text="Advisory diagnostics only. Nothing here changes Link, SteamVR, or headset settings. PC history does not use ADB. A short headset sample runs only while monitoring is started, this page is visible, and a PCVR session is already active. Pasted logs, property readback, and runtime samples stay labeled. Missing metrics stay blank. SteamVR frame timing is not read here. Hardware verification is pending."/>
       <TextBlock x:Name="SummaryText" Margin="0,0,0,8" TextWrapping="Wrap"/>
       <TextBlock Text="Optional log" Style="{StaticResource SettingLabelStyle}"/>
       <TextBox x:Name="LogBox" Height="72" AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,8"

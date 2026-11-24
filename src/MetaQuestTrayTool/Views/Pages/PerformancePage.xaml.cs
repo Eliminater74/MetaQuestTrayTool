@@ -14,8 +14,10 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     private readonly List<double> _gpuHistory = [];
     private readonly List<TelemetryMetric> _latest = [];
     private readonly List<TelemetryMetric> _shown = [];
+    private readonly LivePerformanceMonitor _monitor = new();
     private bool _monitoring;
     private bool _sampleInFlight;
+    private int _headsetFlight;
     private bool _loading = true;
     private OverlayIpcServer? _overlay;
     private CancellationTokenSource? _benchmark;
@@ -55,7 +57,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         metrics.AddRange(HeadsetTelemetry.FromSample(headset, when, "pasted-log"));
         metrics.AddRange(StreamingTelemetry.Parse(LogBox.Text, "pasted-log", when));
         metrics.AddRange(_latest.Where(metric => metric.Source == "nvidia-smi" || metric.Name == "PcCpuUtilization"));
-        Show(metrics, headset.ToDisplayText());
+        Show(LivePerformanceMonitor.Label(metrics, EvidenceKind.PastedLog, when), headset.ToDisplayText(), EvidenceKind.PastedLog);
     }
 
     private async void HeadsetSample_Click(object sender, RoutedEventArgs e)
@@ -70,9 +72,11 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         {
             var sample = await Task.Run(() => App.Instance.Headset.CapturePerformanceSampleModel(
                 App.Instance.Settings.Current.Headset, TimeSpan.FromSeconds(10)));
-            var metrics = HeadsetTelemetry.FromSample(sample, DateTimeOffset.Now, "headset").ToList();
-            metrics.AddRange(StreamingTelemetry.Parse(string.Join('\n', sample.Samples.Select(item => item.RawLine)), "headset", DateTimeOffset.Now));
-            Show(metrics, sample.ToDisplayText());
+            var when = DateTimeOffset.Now;
+            var metrics = HeadsetTelemetry.FromSample(sample, when, "headset").ToList();
+            metrics.AddRange(StreamingTelemetry.Parse(string.Join('\n', sample.Samples.Select(item => item.RawLine)), "headset", when));
+            _monitor.TryRecord(metrics, EvidenceKind.RuntimeEvidence, when);
+            Show(LivePerformanceMonitor.Label(metrics, EvidenceKind.RuntimeEvidence, when), sample.ToDisplayText(), EvidenceKind.RuntimeEvidence);
         }
         catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
         {
@@ -85,24 +89,27 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     private void Start_Click(object sender, RoutedEventArgs e)
     {
         _monitoring = true;
+        _monitor.Start();
         SyncTimer();
-        SummaryText.Text = "PC history is running while this page is visible. Headset ADB is not polled.";
+        SummaryText.Text = "Monitoring is running while this page is visible. Headset ADB stays off unless a PCVR session is already active.";
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
     {
         _monitoring = false;
+        _monitor.Pause();
         SyncTimer();
-        SummaryText.Text = "PC history paused.";
+        SummaryText.Text = "Monitoring paused. No headset sample is in progress from this page.";
     }
 
     private void Stop_Click(object sender, RoutedEventArgs e)
     {
         _monitoring = false;
+        _monitor.Stop();
         _gpuHistory.Clear();
         DrawChart();
         SyncTimer();
-        SummaryText.Text = "PC history stopped and cleared.";
+        SummaryText.Text = "Monitoring stopped and the retained history was cleared.";
     }
 
     private void Overlay_Click(object sender, RoutedEventArgs e)
@@ -266,9 +273,16 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
                 DrawChart();
             }
 
+            var now = DateTimeOffset.Now;
+            if (_monitor.State == MonitorState.Running)
+            {
+                _monitor.TryRecord(_latest, EvidenceKind.LiveSample, now);
+                MaybeSampleHeadset(now);
+            }
+
             if (!_monitoring)
             {
-                Show(_latest, csv ?? error ?? "No PC sample.");
+                Show(LivePerformanceMonitor.Label(_latest, EvidenceKind.LiveSample, now), csv ?? error ?? "No PC sample.", EvidenceKind.LiveSample);
             }
         }
         finally
@@ -277,7 +291,56 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         }
     }
 
-    private void Show(IReadOnlyList<TelemetryMetric> metrics, string evidence)
+    private void MaybeSampleHeadset(DateTimeOffset now)
+    {
+        var sessionActive = false;
+        try
+        {
+            sessionActive = App.Instance.LinkConnection.GetCapabilities().SessionActive;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException)
+        {
+            sessionActive = false;
+        }
+
+        if (!_monitor.TryReserveHeadsetSample(sessionActive, userRequestedHeadset: false, now))
+        {
+            return;
+        }
+
+        if (Interlocked.CompareExchange(ref _headsetFlight, 1, 0) != 0)
+        {
+            return;
+        }
+
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                var sample = App.Instance.Headset.CapturePerformanceSampleModel(
+                    App.Instance.Settings.Current.Headset,
+                    TimeSpan.FromSeconds(2));
+                var stamped = DateTimeOffset.Now;
+                var metrics = HeadsetTelemetry.FromSample(sample, stamped, "headset").ToList();
+                metrics.AddRange(StreamingTelemetry.Parse(string.Join('\n', sample.Samples.Select(item => item.RawLine)), "headset", stamped));
+                Dispatcher.Invoke(() =>
+                {
+                    _monitor.TryRecord(metrics, EvidenceKind.RuntimeEvidence, stamped);
+                    Show(LivePerformanceMonitor.Label(metrics, EvidenceKind.RuntimeEvidence, stamped), sample.ToDisplayText(), EvidenceKind.RuntimeEvidence);
+                });
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
+            {
+                Dispatcher.Invoke(() => SummaryText.Text = "Headset session sample failed: " + ex.Message);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _headsetFlight, 0);
+            }
+        });
+    }
+
+    private void Show(IReadOnlyList<TelemetryMetric> metrics, string evidence, EvidenceKind kind)
     {
         var findings = BottleneckAnalyzer.Analyze(metrics);
         var lines = metrics.Select(metric => metric.Availability == MetricAvailability.Available
@@ -285,12 +348,14 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             : $"{metric.Name}: unavailable ({metric.Note})");
         _shown.Clear();
         _shown.AddRange(metrics.Take(240));
-        var source = metrics.FirstOrDefault()?.Source ?? "report";
-        var banner = source == "pasted-log"
-            ? "Source: pasted log. This is not live monitoring."
-            : source == "headset"
-                ? "Source: explicit headset sample. This is not a background poll."
-                : "Source: " + source + ".";
+        var banner = kind switch
+        {
+            EvidenceKind.PastedLog => "Source: pasted log. This is not live monitoring and it is not a property readback.",
+            EvidenceKind.RuntimeEvidence => "Source: runtime headset sample. This is not a requested setting or a property readback.",
+            EvidenceKind.PropertyReadback => "Source: property readback. This does not prove the panel rate or a GPU clock.",
+            EvidenceKind.RequestedSetting => "Source: requested setting. This was not measured at runtime.",
+            _ => "Source: live PC sample. Headset fields that were not sampled stay unavailable."
+        };
         ReportBox.Text = banner + Environment.NewLine + evidence + Environment.NewLine + Environment.NewLine
             + string.Join(Environment.NewLine, lines) + Environment.NewLine + Environment.NewLine
             + BottleneckAnalyzer.ToDisplayText(findings);
