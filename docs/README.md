@@ -11,6 +11,7 @@
 | [../CHANGELOG.md](../CHANGELOG.md) | What's new per release (also shown in Setup and the in-app updater) |
 | [media/README.md](media/README.md) | Screenshots and demo video |
 | [SECURITY.md](SECURITY.md) | Update verification, local-data privacy, and device/process safety |
+| [research/ADVANCED-PCVR-BASELINE.md](research/ADVANCED-PCVR-BASELINE.md) | Advanced headset performance research baseline, Pyrowave reference commit, and what is not imported |
 | [../README.md](../README.md) | User guide, download, and feature inventory |
 | [wiki/](wiki/) | GitHub Wiki source (user guide, troubleshooting, videos) |
 | [GitHub Wiki](https://github.com/Eliminater74/MetaQuestTrayTool/wiki) | Published wiki |

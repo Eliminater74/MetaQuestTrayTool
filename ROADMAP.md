@@ -27,6 +27,10 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ---
 
+## In progress — advanced headset performance and PCVR providers
+
+Research baseline, capability matrix, stage tracker, and hardware acceptance checklist: [docs/research](docs/research/ADVANCED-PCVR-BASELINE.md). Quest3-Pyrowave commit `1b529ef54b4f7b34a44c28ad9a54c6c4ac6887a7` is a research reference only. This section is not a release and does not change the public version.
+
 ## v1.1.37 — on-demand headset ADB
 
 Headset ADB waits for a confirmed PCVR session or an explicit action. Link detection stays ADB-free. Session end stops this app's commands and leaves the shared ADB server alone. Saved exclusive wireless disconnect is cleared so phones, TVs, and emulators stay connected.
