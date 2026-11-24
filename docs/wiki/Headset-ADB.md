@@ -22,6 +22,8 @@ Current builds include trusted USB/wireless headset selection, independent CPU/G
 
 Only **real VR headsets** are trusted. Phones, tablets, and emulators never receive headset commands.
 
+Standard refresh still comes from the model table when ADB is absent. Live getprop, display, and battery dumps can override the model and report the current refresh and battery temperature when those dumps are supplied. Quest 3S is classified separately from Quest 3. See `HeadsetCapabilityDiscovery`.
+
 ## What you can set
 
 Independent CPU and GPU levels, texture size, model-aware refresh rate, Dynamic or Fixed FFR, chroma, capture size/FPS/bitrate, headset recording start/stop/download, 10-second runtime logcat performance samples, Quest Pro local dimming, subsampled foveation, live documented-default reset, paste-text / proximity / guardian helpers.

@@ -4,8 +4,8 @@ Starting HEAD: `52d961bb5a456f8cd44313a5fbec266cfe789704`.
 
 | Stage | Status | Commit | Host verification |
 | --- | --- | --- | --- |
-| 0 Baseline audit | Complete in this commit | this commit | `dotnet restore -r win-x64 --locked-mode`, Release build, 231 passed, 0 failed, 0 skipped. No headset attached. |
-| 1 Capability discovery | Pending | | |
+| 0 Baseline audit | Complete | `6f08835712b32eb5c77c55a798eb768dff5fbc6d` | Release build, 231 passed. No headset. |
+| 1 Capability discovery | Complete in this commit | this commit | `HeadsetCapabilityDiscoveryTests` added. Filtered run passed 21. Full suite run recorded in the commit message. |
 | 2 ADB property transactions | Pending | | |
 | 3 Experimental GPU level 7 | Pending | | |
 | 4 Telemetry | Pending | | |
