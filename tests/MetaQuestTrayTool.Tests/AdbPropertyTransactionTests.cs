@@ -151,6 +151,60 @@ public class AdbPropertyTransactionTests
     }
 
     [Fact]
+    public void SecondApplyKeepsTheFirstOriginalAndAFingerprintChangeWritesNothing()
+    {
+        var client = new FakePropertyStore();
+        client.Set("quest", "debug.oculus.gpuLevel", "4");
+        var path = Path.Combine(Path.GetTempPath(), "mqt-prop-" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var service = new AdbPropertyTransactionService(client, path);
+            Assert.Equal(PropertyTransactionStatus.Verified, service.Apply("quest", "Quest 3", "fp1", new Dictionary<string, string>
+            {
+                ["debug.oculus.gpuLevel"] = "7"
+            }).Status);
+
+            Assert.Equal(PropertyTransactionStatus.Verified, service.Apply("quest", "Quest 3", "fp1", new Dictionary<string, string>
+            {
+                ["debug.oculus.gpuLevel"] = "6"
+            }).Status);
+            Assert.Equal("6", client.Read("quest", "debug.oculus.gpuLevel"));
+
+            var blocked = service.Apply("quest", "Quest 3", "fp2", new Dictionary<string, string>
+            {
+                ["debug.oculus.gpuLevel"] = "5"
+            });
+            Assert.Equal(PropertyTransactionStatus.Failed, blocked.Status);
+            Assert.Equal("6", client.Read("quest", "debug.oculus.gpuLevel"));
+            Assert.Contains("fingerprint", blocked.Summary, StringComparison.OrdinalIgnoreCase);
+
+            Assert.Equal(PropertyTransactionStatus.Restored, service.Restore("quest", "fp1").Status);
+            Assert.Equal("4", client.Read("quest", "debug.oculus.gpuLevel"));
+        }
+        finally
+        {
+            TryDelete(path);
+        }
+    }
+
+    [Fact]
+    public void CancellationBeforeAWriteDoesNotReplaceTheSnapshot()
+    {
+        var client = new FakePropertyStore();
+        client.Set("quest", "debug.oculus.gpuLevel", "4");
+        var service = new AdbPropertyTransactionService(client);
+        using var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+        var result = service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string>
+        {
+            ["debug.oculus.gpuLevel"] = "7"
+        }, cancellation: cancelled.Token);
+        Assert.Equal(PropertyTransactionStatus.Failed, result.Status);
+        Assert.Equal(0, client.Writes);
+        Assert.Equal("4", client.Read("quest", "debug.oculus.gpuLevel"));
+    }
+
+    [Fact]
     public void DisconnectDuringWriteDoesNotTouchADifferentSerialSnapshot()
     {
         var client = new FakePropertyStore();
@@ -184,6 +238,7 @@ public class AdbPropertyTransactionTests
         {
             if (File.Exists(path)) File.Delete(path);
             if (File.Exists(path + ".tmp")) File.Delete(path + ".tmp");
+            if (File.Exists(path + ".bak")) File.Delete(path + ".bak");
         }
         catch (IOException)
         {

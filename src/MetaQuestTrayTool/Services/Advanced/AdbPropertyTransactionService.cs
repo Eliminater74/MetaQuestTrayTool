@@ -77,7 +77,8 @@ public sealed class AdbPropertyTransactionService
         string? model,
         string? fingerprint,
         IReadOnlyDictionary<string, string> changes,
-        DateTimeOffset? capturedUtc = null)
+        DateTimeOffset? capturedUtc = null,
+        CancellationToken cancellation = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serial);
         if (changes is null || changes.Count == 0)
@@ -99,32 +100,65 @@ public sealed class AdbPropertyTransactionService
                 return Fail("A property snapshot for a different headset is still stored. Restore or discard that snapshot before applying overrides to this headset.");
             }
 
-            var tracked = new List<TrackedHeadsetProperty>();
+            if (existing is not null
+                && !string.IsNullOrWhiteSpace(existing.Fingerprint)
+                && !string.IsNullOrWhiteSpace(fingerprint)
+                && !string.Equals(existing.Fingerprint, fingerprint, StringComparison.Ordinal))
+            {
+                return Fail("The stored snapshot belongs to a different firmware fingerprint. Restore or discard it before applying new overrides. Nothing was written.");
+            }
+
+            if (cancellation.IsCancellationRequested)
+            {
+                return Fail("Cancelled before any property was written.");
+            }
+
+            var tracked = new Dictionary<string, TrackedHeadsetProperty>(StringComparer.Ordinal);
+            if (existing is not null)
+            {
+                foreach (var property in existing.Properties)
+                {
+                    tracked[property.Name] = property;
+                }
+            }
+
             foreach (var (name, value) in changes)
             {
+                if (tracked.TryGetValue(name, out var previous))
+                {
+                    tracked[name] = new TrackedHeadsetProperty
+                    {
+                        Name = previous.Name,
+                        OriginalPresence = previous.OriginalPresence,
+                        OriginalValue = previous.OriginalValue,
+                        AppliedValue = value
+                    };
+                    continue;
+                }
+
                 var original = ReadQuiet(serial, name, out var readError);
                 if (readError is not null)
                 {
                     return Fail(readError);
                 }
 
-                tracked.Add(new TrackedHeadsetProperty
+                tracked[name] = new TrackedHeadsetProperty
                 {
                     Name = name,
                     OriginalPresence = string.IsNullOrWhiteSpace(original) ? PropertyPresence.AbsentOrEmpty : PropertyPresence.Present,
                     OriginalValue = string.IsNullOrWhiteSpace(original) ? null : original,
                     AppliedValue = value
-                });
+                };
             }
 
             var snapshot = new AdbPropertySnapshot
             {
                 Serial = serial,
-                Model = model,
-                Fingerprint = fingerprint,
+                Model = string.IsNullOrWhiteSpace(model) ? existing?.Model : model,
+                Fingerprint = string.IsNullOrWhiteSpace(fingerprint) ? existing?.Fingerprint : fingerprint,
                 Owner = OwnerId,
-                CapturedUtc = capturedUtc ?? DateTimeOffset.UtcNow,
-                Properties = tracked
+                CapturedUtc = existing?.CapturedUtc ?? capturedUtc ?? DateTimeOffset.UtcNow,
+                Properties = tracked.Values.ToList()
             };
             var saveError = SaveRecovery(snapshot);
             if (saveError is not null)
@@ -134,8 +168,20 @@ public sealed class AdbPropertyTransactionService
 
             var details = new List<string>();
             var written = new List<TrackedHeadsetProperty>();
-            foreach (var property in tracked)
+            foreach (var (name, _) in changes)
             {
+                if (cancellation.IsCancellationRequested)
+                {
+                    if (written.Count == 0)
+                    {
+                        return Fail("Cancelled before any property was written.");
+                    }
+
+                    details.Add("Cancelled.");
+                    return Rollback(serial, written, details, "Apply was cancelled. Completed writes were rolled back.");
+                }
+
+                var property = tracked[name];
                 try
                 {
                     _store.Write(serial, property.Name, property.AppliedValue!);
@@ -391,6 +437,7 @@ public sealed class AdbPropertyTransactionService
 
     private string? SaveRecovery(AdbPropertySnapshot snapshot)
     {
+        var previous = _memory;
         _memory = snapshot;
         if (_recoveryPath is null)
         {
@@ -407,12 +454,20 @@ public sealed class AdbPropertyTransactionService
 
             var temp = _recoveryPath + ".tmp";
             File.WriteAllText(temp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(temp, _recoveryPath, overwrite: true);
+            if (File.Exists(_recoveryPath))
+            {
+                File.Replace(temp, _recoveryPath, _recoveryPath + ".bak", ignoreMetadataErrors: true);
+            }
+            else
+            {
+                File.Move(temp, _recoveryPath);
+            }
+
             return null;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            _memory = null;
+            _memory = previous;
             return "Could not persist the property snapshot. No properties were written.";
         }
     }
