@@ -1,6 +1,6 @@
 # What's new
 
-This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.37**.
+This page catches the wiki up from the older v1.1.18-era guide to the current public release, **v1.1.37**. Later local work is under Unreleased in CHANGELOG.md and is not this download.
 
 Download: [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
 Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)

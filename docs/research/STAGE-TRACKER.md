@@ -55,3 +55,31 @@ Final host verification after those commits:
 - No physical headset, ALVR server, or Pyrowave install was used.
 
 Hardware acceptance remains outstanding. See `HARDWARE-ACCEPTANCE.md`.
+
+## Host-side completion
+
+Start: `53536cc907e1bf420dac5a1aa2b630edea180a73`.
+
+| Stage | Commit | What changed |
+| --- | --- | --- |
+| 1 Thermal watch | `b293168` | Samples battery temperature only while GPU level 7 is applied and restores that property. |
+| 2 Recovery | `ad2420d` | Corrupt files, reboot, overlap, and stale ownership fail closed. The first snapshot stays. |
+| 3 Live monitor | `7fbb928`, `f4408ff` | Session monitor and Performance page. Unavailable metrics stay unavailable. |
+| 4 Comparisons | `5ca936b` | PC GPU A/B and ABBA with restoration. Refresh and bitrate comparisons are not offered. |
+| 5 Overlay process | `17b520d` | Separate process, Valve openvr v2.5.1. The tray does not load it. |
+| 6 ALVR | `cf6afd6` | Existing bitrate and resolution leaves while the server is stopped. |
+| 7 Pyrowave | `535714a` | SetValues body from control.py at 1b529ef. RestartSteamvr is not sent. |
+| 8 Profiles | `49c708d` | Opted-in GPU level 7 when the provider and headset match. Other preferences stay unapplied. |
+| 9 Security | `56c6796` | Command-shaped provider and session input writes nothing. |
+| Overlay publish | `d871a0d` | The self-contained companion is included in the publish directory. |
+
+Final host verification on 2026-11-24:
+
+- `dotnet restore MetaQuestTrayTool.sln -r win-x64 --locked-mode` succeeded.
+- Debug build of the app project: succeeded, 0 warnings.
+- `dotnet test MetaQuestTrayTool.sln -c Release -r win-x64 --no-restore --collect:"XPlat Code Coverage"`: 368 passed, 0 failed, 0 skipped.
+- `scripts/Test-Coverage.ps1`: line coverage 17.33%, floor 8%.
+- `scripts/build-installer.ps1` wrote `dist/MetaQuestTrayTool-Setup-1.1.37.exe` (75.6 MB) and `publish/win-x64/overlay/MetaQuestTrayTool.Overlay.exe`. The installer was not published. The public version was not changed.
+- No physical headset, ALVR server, Pyrowave dashboard, or SteamVR session was used.
+
+The named pipe is not the overlay. Stored preferences are not profile application except the opted-in GPU path above. Provider detection is not complete provider management.

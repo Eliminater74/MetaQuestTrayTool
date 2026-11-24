@@ -9,15 +9,17 @@ Nothing in this file has been run on a headset by the implementation agent. Host
 - Confirm the shared ADB server is not killed when a session ends.
 - Quest Link, Air Link, Steam Link, Virtual Desktop, stock ALVR, and Quest3-Pyrowave coexistence. Confirm SteamVR-over-Link is not labeled as the Steam Link app.
 - Standard GPU levels 0–4 still apply and read back.
-- Experimental GPU level 7 on a Quest 3 only: property readback, VrApi GPU level, actual GPU clock, battery temperature, and restore of the previous property. Confirm Quest 3S refuses it.
-- Confirm firmware thermal limits still throttle. The 45 °C battery gate is a tray refusal on the battery reading, not GPU junction temperature and not a claim about Meta's thermal policy. A missing battery reading must refuse GPU level 7.
+- Experimental GPU level 7 on a Quest 3 only: property readback, VrApi GPU level, actual GPU clock, battery temperature, and restore of the previous property. Confirm Quest 3S refuses it. Confirm the session watch restores the GPU property when battery temperature rises to the application gate during play, and that it does not poll while no override is active.
+- Confirm firmware thermal limits still throttle. The 45 °C battery gate is a tray refusal on the battery reading, not GPU junction temperature, not a firmware limit, and not an established universal hardware safety limit. A missing battery reading must refuse GPU level 7.
 - Standard refresh rates.
 - Experimental 144 Hz and 207 Hz: requested property, property readback, effective panel rate, and restore. The host parser does not replace a headset check. Confirm the streaming app's delivered FPS separately.
 - Confirm 240 Hz and `debug.oculus.forceDisplayScaling` are not written.
 - Benchmark numbers against a known session. 1% lows must come from frame times, not one-second FPS samples.
-- Desktop performance companion. In-headset OpenVR overlay is not shipped.
-- ALVR and Pyrowave discovery, backup, and rollback. A running ALVR server must not be edited. There is no override. Pyrowave session writes stay refused until a schema path is verified.
+- Desktop performance companion and the separate SteamVR dashboard process. CreateDashboardOverlay was not executed here. Confirm compact, detail, and hidden modes, the dashboard laser click, and that a missing SteamVR install does not exit the tray.
+- ALVR preferred FPS, an existing ConstantMbps value, and an existing resolution leaf while the server is stopped, plus backup restore. A running ALVR server must not be edited. There is no override. Confirm the edit does not apply until the next ALVR start, because this tray does not restart SteamVR.
+- Pyrowave SetValues for bitrate, chroma, wavelet, and resolution against a live dashboard at 127.0.0.1:8082. Confirm RestartSteamvr is not sent. Wired mode, automatic bitrate, and refresh writes are still unavailable.
 - Disconnect, reconnect, and reboot recovery. Properties that cannot be cleared without reboot must say so.
+- A game profile that names the already-active provider applies opted-in GPU level 7 and restores it when the game exits. A profile must not launch ALVR, Pyrowave, or SteamVR, and must not change the panel rate.
 
 ## Unsupported or not claimed
 

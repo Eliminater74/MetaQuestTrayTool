@@ -20,17 +20,19 @@ GPU level 7 is refused when battery temperature is missing or at or above 45 °C
 
 ## IPC
 
-`MetaQuestTrayTool.PerformanceOverlay` is created only from the Performance page. The ACL is the current user and Administrators. Each command must present the token created when that pipe starts. Reads longer than 1024 bytes are rejected. The command allow list does not include ADB, shell, profile changes, or process termination. The tray does not load an OpenVR native library.
+`MetaQuestTrayTool.PerformanceOverlay` is created only from the Performance page. The ACL is the current user and Administrators. Each command must present the token created when that pipe starts. Reads longer than 1024 bytes are rejected. The command allow list does not include ADB, shell, profile changes, or process termination. The tray does not load an OpenVR native library. The dashboard companion is a separate executable. Its start info has an empty argument list, and the token is written to its standard input. A missing library or a failed `OpenVR.Init` exits that process with code 0.
 
-Remaining limit: a process that can read this tray's memory can recover the token. The pipe is local isolation, not a remote authentication protocol.
+Remaining limit: a process that can read this tray's memory can recover the token. The pipe is local isolation, not a remote authentication protocol. Physical SteamVR acceptance was not performed.
 
 ## Provider files
 
-The generic numeric editor and its running-server override are gone. ALVR edits one allowlisted plain number, `session_settings.video.preferred_fps`, from 60 through 120, and only while the caller says the server is not running. Enum objects and unknown paths are refused. Unknown JSON is preserved. `WriteWithBackup` refuses a path containing `..` and keeps a `.bak`. A session that looks like Pyrowave is not edited by the ALVR editor. The Pyrowave writer refuses every setting because the schema path was not verified. Dashboard launch requires an explicit authorization flag and adds no arguments. SteamVR driver registration still only appends, and only when authorized.
+The generic numeric editor and its running-server override are gone. ALVR can change preferred FPS, an existing ConstantMbps number from 5 to 1000, and an existing resolution leaf, only while the caller says the server is not running. It does not switch a variant or create a missing object. Enum objects and unknown paths are refused. Unknown JSON is preserved. `WriteWithBackup` refuses a path containing `..` and keeps a `.bak`. A backup restore also refuses a running server. A session that looks like Pyrowave is not edited by the ALVR editor. No ALVR HTTP endpoint is called.
+
+Pyrowave session files are not edited. `PyrowaveControl` builds the SetValues body from tools/quest3/control.py at 1b529ef and posts it only through an injected transport to `http://127.0.0.1:8082/api/dashboard-request`. A body containing RestartSteamvr is rejected. Wired mode, automatic bitrate, and refresh are not sent. A game profile does not post this body. Dashboard launch requires an explicit authorization flag and adds no arguments. SteamVR driver registration still only appends, and only when authorized.
 
 ## Profiles and processes
 
-Profile apply evaluates provider preferences and does not launch or stop a streaming stack, write ADB, or edit a session file. Benchmark cancellation does not kill a process. The PC benchmark does not restart SteamVR.
+A game profile can write GPU level 7 only when the named provider is already the active session, the Headset page opt-in is on, the trusted serial matches, a fingerprint was read, and the battery gate allows it. Experimental refresh and named ALVR or Pyrowave presets are not written. Auto-switch does not launch or stop a provider. Command-shaped provider names write nothing. Benchmark cancellation does not kill a process. The PC benchmark does not restart SteamVR. The thermal watch samples only after an explicit level 7 apply. It does not poll while idle.
 
 ## What this review did not prove
 

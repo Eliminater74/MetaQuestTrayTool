@@ -6,7 +6,7 @@ MetaQuestTrayTool starting HEAD: `52d961bb5a456f8cd44313a5fbec266cfe789704` (`re
 
 Quest3-Pyrowave research commit: `1b529ef54b4f7b34a44c28ad9a54c6c4ac6887a7` (main, 2026-10-09, "Merge PR #25: first run (.136)"). Docs and `tools/quest3/gpu_level.py` were read from that commit. Pyrowave source was not vendored into this repository.
 
-This is a host-side architecture and feature audit. It is not a physical headset test and it does not treat Pyrowave's short-screen measurements as Quest Link results.
+This is a host-side architecture and feature audit. It is not a physical headset test and it does not treat Pyrowave's short-screen measurements as Quest Link results. Later implementation status is in `STAGE-TRACKER.md`. This file stays the starting audit.
 
 ## What each project is
 

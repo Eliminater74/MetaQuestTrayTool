@@ -48,6 +48,8 @@ Want Steam games with SS / ASW / Link bitrate? Use Link + [[Dash-to-SteamVR]] â€
 
 The launcher will not replace an already-active game profile. Close the active game first so its settings are restored before starting another profiled game.
 
+A profile can also apply Quest 3 GPU level 7 when that Headset page option is already enabled, the profile names the provider that is already streaming, and the trusted headset matches. It restores that GPU property when the game exits. It does not launch or switch ALVR, Pyrowave, Steam Link, or Virtual Desktop. Experimental refresh and named streaming presets on the profile are stored only and are not applied.
+
 **Ignore list** (Tray / Game Settings) stops Discord, browsers, `vrserver`, etc. from stealing the profile.
 
 **Save last-good** (tray) writes the current SS/ASW/HUD into the *active* personal profile mid-session.
