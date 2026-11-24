@@ -13,6 +13,7 @@ public static class AppPaths
     public static string ArtworkDirectory { get; } = IOPath.Combine(AppDataDirectory, "artwork");
     public static string ScreenshotsDirectory { get; } = IOPath.Combine(AppDataDirectory, "screenshots");
     public static string CapturesDirectory { get; } = IOPath.Combine(AppDataDirectory, "captures");
+    public static string PropertyRecoveryFile { get; } = IOPath.Combine(AppDataDirectory, "headset-property-recovery.json");
 
     public static void EnsureAppDataDirectory()
     {

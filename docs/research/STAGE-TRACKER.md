@@ -5,8 +5,8 @@ Starting HEAD: `52d961bb5a456f8cd44313a5fbec266cfe789704`.
 | Stage | Status | Commit | Host verification |
 | --- | --- | --- | --- |
 | 0 Baseline audit | Complete | `6f08835712b32eb5c77c55a798eb768dff5fbc6d` | Release build, 231 passed. No headset. |
-| 1 Capability discovery | Complete in this commit | this commit | `HeadsetCapabilityDiscoveryTests` added. Filtered run passed 21. Full suite run recorded in the commit message. |
-| 2 ADB property transactions | Pending | | |
+| 1 Capability discovery | Complete | `379f9654c433299d3e7b0b9158d200558872be53` | `HeadsetCapabilityDiscoveryTests`: 21 passed. |
+| 2 ADB property transactions | Complete in this commit | this commit | `AdbPropertyTransactionTests`: 7 passed. |
 | 3 Experimental GPU level 7 | Pending | | |
 | 4 Telemetry | Pending | | |
 | 5 Dashboard and analyzer | Pending | | |
