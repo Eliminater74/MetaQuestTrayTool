@@ -299,12 +299,14 @@ public sealed class HeadsetSettingsService
                 fingerprint = null;
             }
 
+            ExperimentalSession?.PrepareExplicitApply();
             var transaction = transactions.Apply(quest.Serial, quest.Model, fingerprint, new Dictionary<string, string>
             {
                 [ExperimentalGpuPolicy.PropertyName] = ExperimentalGpuPolicy.MaximumLevel.ToString(CultureInfo.InvariantCulture)
             }, bootId: TryBootId(quest.Serial));
             if (transaction.Status != PropertyTransactionStatus.Verified)
             {
+                ExperimentalSession?.ExplicitApplyFailed();
                 throw new InvalidOperationException(transaction.ToDisplayText());
             }
 
@@ -330,11 +332,9 @@ public sealed class HeadsetSettingsService
                 }
 
                 var restored = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile)
-                    .Restore(quest.Serial, offFingerprint, [ExperimentalGpuPolicy.PropertyName]);
-                if (restored.Status != PropertyTransactionStatus.Failed)
-                {
-                    applied.Add(restored.Summary);
-                }
+                    .Restore(quest.Serial, offFingerprint, [ExperimentalGpuPolicy.PropertyName], TryBootId(quest.Serial));
+                ExperimentalSession?.NoteRestoreResult(quest.Serial, restored);
+                applied.Add(restored.Summary);
             }
         }
 
@@ -550,6 +550,8 @@ public sealed class HeadsetSettingsService
     }
 
     private string? TryBootId(string serial) => TryBootId(serial, _adb);
+
+    public string? ReadBootId(string serial) => TryBootId(serial);
 
     private sealed class AdbHeadsetPropertyStore : IHeadsetPropertyStore
     {
@@ -866,6 +868,7 @@ public sealed class HeadsetSettingsService
             throw new InvalidOperationException("Headset serial was not confirmed. GPU level 7 was not written.");
         }
 
+        ExperimentalSession?.PrepareExplicitApply();
         var transaction = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile)
             .Apply(serial, model, fingerprint, new Dictionary<string, string>
             {
@@ -874,6 +877,10 @@ public sealed class HeadsetSettingsService
         if (transaction.Status == PropertyTransactionStatus.Verified)
         {
             ExperimentalSession?.BeginExplicit(serial, model, fingerprint);
+        }
+        else
+        {
+            ExperimentalSession?.ExplicitApplyFailed();
         }
 
         return transaction;
@@ -896,13 +903,10 @@ public sealed class HeadsetSettingsService
             fingerprint = null;
         }
 
+        ExperimentalSession?.StopWithoutRestore("The game profile is restoring the experimental GPU property.");
         var restored = new AdbPropertyTransactionService(new AdbHeadsetPropertyStore(_adb), AppPaths.PropertyRecoveryFile)
-            .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName]);
-        if (restored.Status != PropertyTransactionStatus.Failed)
-        {
-            ExperimentalSession?.StopWithoutRestore("The game profile restored the experimental GPU property.");
-        }
-
+            .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName], TryBootId(serial));
+        ExperimentalSession?.NoteRestoreResult(serial, restored);
         return restored;
     }
 

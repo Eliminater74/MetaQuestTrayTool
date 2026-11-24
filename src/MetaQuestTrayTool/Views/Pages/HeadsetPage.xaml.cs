@@ -375,6 +375,11 @@ public partial class HeadsetPage : System.Windows.Controls.UserControl, IShellPa
         TrustText.Text = string.IsNullOrWhiteSpace(headset.TrustedSerial)
             ? "No trusted headset saved. Trust is checked when you use Check ADB now."
             : $"Saved trust: {headset.TrustedModel ?? "headset"} ({headset.TrustedSerial}). Not rechecked until Check ADB now or a PCVR session applies settings.";
+        var pendingGpu = App.Instance.Headset.ExperimentalSession?.PendingSummary;
+        if (!string.IsNullOrWhiteSpace(pendingGpu))
+        {
+            TrustText.Text = pendingGpu + Environment.NewLine + TrustText.Text;
+        }
         UpdateRefreshOptions(headset.TrustedModel);
     }
 

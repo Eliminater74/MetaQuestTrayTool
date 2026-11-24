@@ -91,7 +91,7 @@ public partial class App : System.Windows.Application
         Headset.ExperimentalSession = new ExperimentalGpuThermalGuard(
             ReadExperimentalThermal,
             (serial, fingerprint) => new AdbPropertyTransactionService(HeadsetSettingsService.CreatePropertyStore(Adb), AppPaths.PropertyRecoveryFile)
-                .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName]),
+                .Restore(serial, fingerprint, [ExperimentalGpuPolicy.PropertyName], Headset.ReadBootId(serial)),
             message => Log.Info(message),
             AppPaths.GpuThermalLatchFile);
         CustomCommands = new CustomCommandService(DebugTool, Adb);
@@ -213,6 +213,14 @@ public partial class App : System.Windows.Application
         Log.Info(StartupRegistration.DescribeStatus());
         Adb.Refresh();
         Log.Info(AdbSessionGate.IdleLogMessage);
+        if (Headset.ExperimentalSession is ExperimentalGpuThermalGuard thermalGuard)
+        {
+            var pendingGpu = thermalGuard.RecoverPendingLease() ?? RecoverGpuSnapshotWithoutWatch(thermalGuard);
+            if (pendingGpu is not null)
+            {
+                Log.Warn(pendingGpu.Summary);
+            }
+        }
         if (Settings.RetiredExclusiveWirelessSweep)
         {
             Log.Info(
@@ -560,6 +568,25 @@ public partial class App : System.Windows.Application
         }
 
         Log.Info($"Meta Quest Tray Tool exiting (code {e.ApplicationExitCode}).");
+        try
+        {
+            var profileRestore = PcvrProfiles.Restore(new HeadsetPcvrProfileActions(this));
+            if (!string.IsNullOrWhiteSpace(profileRestore.Summary))
+            {
+                Log.Info(profileRestore.Summary);
+            }
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException)
+        {
+            Log.Warn("Profile GPU restore during shutdown failed: " + ex.Message);
+        }
+
+        if (Headset.ExperimentalSession is ExperimentalGpuThermalGuard shuttingDown)
+        {
+            var thermal = shuttingDown.RestoreOwnedAndStop("Application shutting down.", TimeSpan.FromSeconds(8));
+            Log.Info(thermal.Summary);
+        }
+
         TryRestoreWindowsHdr();
         SessionHelperClient.RequestQuit();
         try
@@ -1061,6 +1088,37 @@ public partial class App : System.Windows.Application
         var summary = string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         Log.Info("Applied GPU recommended presets — " + summary);
         return summary;
+    }
+
+    private static ThermalSessionOutcome? RecoverGpuSnapshotWithoutWatch(ExperimentalGpuThermalGuard guard)
+    {
+        if (!File.Exists(AppPaths.PropertyRecoveryFile))
+        {
+            return null;
+        }
+
+        try
+        {
+            var snapshot = System.Text.Json.JsonSerializer.Deserialize<AdbPropertySnapshot>(File.ReadAllText(AppPaths.PropertyRecoveryFile));
+            if (snapshot is null
+                || !string.Equals(snapshot.Owner, AdbPropertyTransactionService.OwnerId, StringComparison.Ordinal)
+                || snapshot.Properties is null
+                || snapshot.Properties.All(property => property.Name != ExperimentalGpuPolicy.PropertyName))
+            {
+                return null;
+            }
+
+            return guard.RecoverSnapshot(snapshot.Serial, snapshot.Fingerprint);
+        }
+        catch (Exception ex) when (ex is IOException or System.Text.Json.JsonException or UnauthorizedAccessException)
+        {
+            return new ThermalSessionOutcome
+            {
+                RestorationPending = true,
+                BlockedAutomaticReapply = true,
+                Summary = "The property recovery file could not be read during startup. Experimental GPU level 7 was not written and was not restored."
+            };
+        }
     }
 
     private ThermalReading ReadExperimentalThermal(string serial)

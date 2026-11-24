@@ -84,7 +84,25 @@ public class ExperimentalGpuThermalGuardTests
     }
 
     [Fact]
-    public void CancellationDoesNotRestore()
+    public void CancellationRestoresTheOwnedOverrideAndBlocksReapply()
+    {
+        var store = new MemoryPropertyStore();
+        store.Set("quest", "debug.oculus.gpuLevel", "4");
+        var service = new AdbPropertyTransactionService(store);
+        service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" });
+        using var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+        var guard = new ExperimentalGpuThermalGuard(_ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]));
+        var outcome = guard.Run("quest", "fp", _ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]), () => Now, (_, _) => { }, cancelled.Token);
+        Assert.True(outcome.Cancelled);
+        Assert.True(outcome.Restored);
+        Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+        Assert.True(guard.AutomaticReapplyBlocked);
+        Assert.Contains("cannot remain active", outcome.Summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void SupersededWatchDoesNotRestore()
     {
         var writes = 0;
         using var cancelled = new CancellationTokenSource();
@@ -94,15 +112,116 @@ public class ExperimentalGpuThermalGuardTests
             writes++;
             throw new InvalidOperationException("restore");
         });
-        var outcome = guard.Run("quest", "fp", _ => Sample(36), (_, _) =>
-        {
-            writes++;
-            throw new InvalidOperationException("restore");
-        }, () => Now, (_, _) => { }, cancelled.Token);
+        var outcome = guard.Run(
+            "quest",
+            "fp",
+            _ => Sample(36),
+            (_, _) =>
+            {
+                writes++;
+                throw new InvalidOperationException("restore");
+            },
+            () => Now,
+            (_, _) => { },
+            cancelled.Token,
+            stillOwner: () => false);
         Assert.True(outcome.Cancelled);
         Assert.False(outcome.Restored);
         Assert.Equal(0, writes);
-        Assert.False(guard.AutomaticReapplyBlocked);
+        Assert.Contains("superseded", outcome.Summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void UnexpectedReadFailureRestores()
+    {
+        var store = new MemoryPropertyStore();
+        store.Set("quest", "debug.oculus.gpuLevel", "4");
+        var service = new AdbPropertyTransactionService(store);
+        service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" });
+        var guard = new ExperimentalGpuThermalGuard(_ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]));
+        var outcome = guard.Run("quest", "fp", _ => throw new InvalidCastException("probe"), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]), () => Now, (_, _) => { }, CancellationToken.None);
+        Assert.True(outcome.Restored);
+        Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+        Assert.True(guard.AutomaticReapplyBlocked);
+    }
+
+    [Fact]
+    public void ExternalGpuChangeIsLeftInPlace()
+    {
+        var store = new MemoryPropertyStore();
+        store.Set("quest", "debug.oculus.gpuLevel", "4");
+        var service = new AdbPropertyTransactionService(store);
+        service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" });
+        store.Set("quest", "debug.oculus.gpuLevel", "5");
+        var guard = new ExperimentalGpuThermalGuard(_ => Sample(50), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]));
+        var outcome = guard.Run("quest", "fp", _ => Sample(50), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]), () => Now, (_, _) => { }, CancellationToken.None);
+        Assert.Equal(PropertyTransactionStatus.Conflict, outcome.RestorationStatus);
+        Assert.Equal("5", store.Read("quest", "debug.oculus.gpuLevel"));
+        Assert.True(guard.AutomaticReapplyBlocked);
+        Assert.False(outcome.Restored);
+    }
+
+    [Fact]
+    public void SampleBudgetRestores()
+    {
+        var store = new MemoryPropertyStore();
+        store.Set("quest", "debug.oculus.gpuLevel", "4");
+        var service = new AdbPropertyTransactionService(store);
+        service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" });
+        var guard = new ExperimentalGpuThermalGuard(_ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]));
+        var outcome = guard.Run("quest", "fp", _ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]), () => Now, (_, _) => { }, CancellationToken.None);
+        Assert.True(outcome.Restored);
+        Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+        Assert.Contains("sample budget", outcome.Summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ShutdownAndCrashLeaseRestoreTheOwnedOverride()
+    {
+        var store = new MemoryPropertyStore();
+        store.Set("quest", "debug.oculus.gpuLevel", "4");
+        var service = new AdbPropertyTransactionService(store);
+        service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" });
+        var path = Path.Combine(Path.GetTempPath(), "mqt-thermal-" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var guard = new ExperimentalGpuThermalGuard(
+                _ => Sample(36),
+                (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]),
+                latchPath: path);
+            guard.BeginExplicit("quest", "Quest 3", "fp");
+            var stopped = guard.RestoreOwnedAndStop("Application shutting down.", TimeSpan.FromSeconds(5));
+            Assert.True(stopped.Restored);
+            Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+            Assert.True(guard.AutomaticReapplyBlocked);
+
+            store.Set("quest", "debug.oculus.gpuLevel", "4");
+            Assert.Equal(PropertyTransactionStatus.Verified, service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" }).Status);
+            var crashed = new ExperimentalGpuThermalGuard(_ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]), latchPath: path);
+            crashed.BeginExplicit("quest", "Quest 3", "fp");
+            crashed.StopWithoutRestore("process disappeared");
+            var restarted = new ExperimentalGpuThermalGuard(_ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]), latchPath: path);
+            var recovered = restarted.RecoverPendingLease();
+            Assert.NotNull(recovered);
+            Assert.True(recovered!.Restored);
+            Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+            Assert.True(restarted.AutomaticReapplyBlocked);
+            var blocked = restarted.Run("quest", "fp", _ => Sample(30), (_, _) => throw new InvalidOperationException("reapply"), () => Now, (_, _) => { }, CancellationToken.None);
+            Assert.True(blocked.BlockedAutomaticReapply);
+
+            store.Set("quest", "debug.oculus.gpuLevel", "4");
+            Assert.Equal(PropertyTransactionStatus.Verified, service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string> { ["debug.oculus.gpuLevel"] = "7" }).Status);
+            var unwitnessed = new ExperimentalGpuThermalGuard(_ => Sample(36), (serial, fingerprint) => service.Restore(serial, fingerprint, ["debug.oculus.gpuLevel"]));
+            var fromSnapshot = unwitnessed.RecoverSnapshot("quest", "fp");
+            Assert.NotNull(fromSnapshot);
+            Assert.True(fromSnapshot!.Restored);
+            Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+            Assert.True(unwitnessed.AutomaticReapplyBlocked);
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
     }
 
     [Fact]
