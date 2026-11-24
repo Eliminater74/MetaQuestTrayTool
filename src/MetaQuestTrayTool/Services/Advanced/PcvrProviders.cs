@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json.Nodes;
 
@@ -112,6 +113,19 @@ public static class ProviderClassifier
     }
 }
 
+public sealed record AlvrNumericSetting(string Path, double Minimum, double Maximum, string Note);
+
+public static class AlvrSettingCatalog
+{
+    public static readonly AlvrNumericSetting PreferredFps = new(
+        "session_settings.video.preferred_fps",
+        60,
+        120,
+        "Plain JSON number only. ALVR enum objects are refused. This does not prove a panel mode.");
+
+    public static IReadOnlyList<AlvrNumericSetting> All { get; } = [PreferredFps];
+}
+
 public static class AlvrSessionEditor
 {
     public static bool IsSafeDirectory(string? path)
@@ -132,17 +146,34 @@ public static class AlvrSessionEditor
         }
     }
 
-    public static string? TrySetExistingNumber(string json, string dottedPath, double value, bool serverRunning, bool allowWhileRunning, out string detail)
+    public static bool LooksLikePyrowaveSession(string json) =>
+        json.Contains("quest3.pyro", StringComparison.OrdinalIgnoreCase)
+        || json.Contains("pyrowave", StringComparison.OrdinalIgnoreCase);
+
+    public static string? TryApplyAllowlisted(string json, string settingPath, double value, bool serverRunning, out string detail)
     {
-        if (serverRunning && !allowWhileRunning)
+        if (serverRunning)
         {
-            detail = "The server appears to be running. The session file was not edited.";
+            detail = "The server appears to be running. The session file was not edited. There is no override that bypasses this.";
             return null;
         }
 
-        if (string.IsNullOrWhiteSpace(dottedPath) || dottedPath.Contains("..", StringComparison.Ordinal))
+        if (LooksLikePyrowaveSession(json))
         {
-            detail = "The setting path was rejected.";
+            detail = "This session looks like Pyrowave. The ALVR editor did not change it.";
+            return null;
+        }
+
+        var spec = AlvrSettingCatalog.All.FirstOrDefault(item => item.Path == settingPath);
+        if (spec is null || string.IsNullOrWhiteSpace(settingPath) || settingPath.Contains("..", StringComparison.Ordinal))
+        {
+            detail = "That setting is not in the ALVR allowlist. Unknown fields were left untouched.";
+            return null;
+        }
+
+        if (double.IsNaN(value) || double.IsInfinity(value) || value < spec.Minimum || value > spec.Maximum)
+        {
+            detail = "The value is outside the allowed range. The file was not edited.";
             return null;
         }
 
@@ -163,7 +194,7 @@ public static class AlvrSessionEditor
             return null;
         }
 
-        var parts = dottedPath.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        var parts = spec.Path.Split('.', StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < parts.Length - 1; i++)
         {
             if (current[parts[i]] is not JsonObject child)
@@ -178,13 +209,84 @@ public static class AlvrSessionEditor
         var leaf = parts[^1];
         if (current[leaf] is not JsonValue existing || !existing.TryGetValue<double>(out _) && !existing.TryGetValue<int>(out _))
         {
-            detail = "The existing value is missing or is not a number. It was not created or replaced.";
+            detail = "The existing value is missing or is not a plain number. It was not created or replaced.";
             return null;
         }
 
         current[leaf] = value;
-        detail = "Updated an existing numeric value. Other fields were preserved.";
+        detail = "Updated an allowlisted numeric value. Other fields were preserved.";
         return root.ToJsonString();
+    }
+
+    public static string? FindDashboard(string? installDirectory)
+    {
+        if (!IsSafeDirectory(installDirectory))
+        {
+            return null;
+        }
+
+        var candidate = Path.Combine(installDirectory!, "ALVR Dashboard.exe");
+        return File.Exists(candidate) ? candidate : null;
+    }
+
+    public static string? ReadDashboardVersion(string? dashboardExe)
+    {
+        if (string.IsNullOrWhiteSpace(dashboardExe) || !File.Exists(dashboardExe))
+        {
+            return null;
+        }
+
+        if (!string.Equals(Path.GetFileName(dashboardExe), "ALVR Dashboard.exe", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var version = FileVersionInfo.GetVersionInfo(dashboardExe).FileVersion;
+        return string.IsNullOrWhiteSpace(version) ? null : version;
+    }
+
+    public static bool DashboardLooksActive(IEnumerable<string> processNames) =>
+        processNames.Any(name => name.Equals("ALVR Dashboard", StringComparison.OrdinalIgnoreCase));
+
+    public static bool TryLaunchDashboard(string? installDirectory, bool authorized, out string detail)
+    {
+        if (!authorized)
+        {
+            detail = "Dashboard launch was not authorized. No process was started.";
+            return false;
+        }
+
+        var exe = FindDashboard(installDirectory);
+        if (exe is null)
+        {
+            detail = "ALVR Dashboard.exe was not found in that directory.";
+            return false;
+        }
+
+        Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true });
+        detail = "Started ALVR Dashboard.exe. No arguments were added.";
+        return true;
+    }
+
+    public static void WriteWithBackup(string path, string contents)
+    {
+        var directory = Path.GetDirectoryName(path);
+        if (!IsSafeDirectory(directory) || !IsSafeDirectory(path) || Path.GetFileName(path).Contains("..", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Refused to write the session file.");
+        }
+
+        var full = Path.GetFullPath(path);
+        var temp = full + ".tmp";
+        File.WriteAllText(temp, contents);
+        if (File.Exists(full))
+        {
+            File.Replace(temp, full, full + ".bak", ignoreMetadataErrors: true);
+        }
+        else
+        {
+            File.Move(temp, full);
+        }
     }
 }
 

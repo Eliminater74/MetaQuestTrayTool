@@ -45,17 +45,26 @@ public class PcvrIntegrationTests
     [Fact]
     public void AlvrEditPreservesUnknownFieldsAndRefusesARunningServer()
     {
-        const string json = """{"video":{"bitrate_mbps":150},"extra":"keep me"}""";
-        var blocked = AlvrSessionEditor.TrySetExistingNumber(json, "video.bitrate_mbps", 200, serverRunning: true, allowWhileRunning: false, out var blockedDetail);
+        const string json = """{"session_settings":{"video":{"preferred_fps":72}},"extra":"keep me"}""";
+        var blocked = AlvrSessionEditor.TryApplyAllowlisted(json, AlvrSettingCatalog.PreferredFps.Path, 90, serverRunning: true, out var blockedDetail);
         Assert.Null(blocked);
         Assert.Contains("running", blockedDetail, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no override", blockedDetail, StringComparison.OrdinalIgnoreCase);
 
-        var edited = AlvrSessionEditor.TrySetExistingNumber(json, "video.bitrate_mbps", 200, false, false, out var detail);
+        var edited = AlvrSessionEditor.TryApplyAllowlisted(json, AlvrSettingCatalog.PreferredFps.Path, 90, false, out var detail);
         Assert.Contains("preserved", detail, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("keep me", edited, StringComparison.Ordinal);
-        Assert.Contains("200", edited, StringComparison.Ordinal);
-        Assert.Null(AlvrSessionEditor.TrySetExistingNumber(json, "video.does_not_exist", 1, false, false, out _));
+        Assert.Contains("90", edited, StringComparison.Ordinal);
+        Assert.Null(AlvrSessionEditor.TryApplyAllowlisted(json, "video.bitrate_mbps", 200, false, out var rejected));
+        Assert.Contains("allowlist", rejected, StringComparison.OrdinalIgnoreCase);
+        Assert.Null(AlvrSessionEditor.TryApplyAllowlisted(json, AlvrSettingCatalog.PreferredFps.Path, 400, false, out var range));
+        Assert.Contains("range", range, StringComparison.OrdinalIgnoreCase);
+        const string pyro = """{"session_settings":{"video":{"preferred_fps":72}},"note":"pyrowave"}""";
+        Assert.Null(AlvrSessionEditor.TryApplyAllowlisted(pyro, AlvrSettingCatalog.PreferredFps.Path, 90, false, out var pyroDetail));
+        Assert.Contains("Pyrowave", pyroDetail, StringComparison.Ordinal);
         Assert.False(AlvrSessionEditor.IsSafeDirectory(@"C:\ALVR\..\Windows"));
+        Assert.False(AlvrSessionEditor.TryLaunchDashboard(@"C:\ALVR", authorized: false, out var launch));
+        Assert.Contains("not authorized", launch, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
