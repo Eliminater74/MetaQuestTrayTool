@@ -44,7 +44,8 @@ PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
 MinVersion=10.0
 CloseApplications=yes
-CloseApplicationsFilter=MetaQuestTrayTool.exe
+; The companion keeps MetaQuestTrayTool.Overlay.exe locked while SteamVR is open.
+CloseApplicationsFilter=MetaQuestTrayTool.exe,MetaQuestTrayTool.Overlay.exe
 RestartApplications=no
 AllowNoIcons=yes
 VersionInfoVersion={#MyAppVersion}.0
