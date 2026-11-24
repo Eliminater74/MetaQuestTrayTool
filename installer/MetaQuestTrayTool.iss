@@ -5,6 +5,10 @@
   #define MyAppVersion "1.0.0"
 #endif
 
+#ifndef MyAppFileVersion
+  #define MyAppFileVersion "1.0.0.0"
+#endif
+
 #ifndef PublishDir
   #define PublishDir "..\publish\win-x64"
 #endif
@@ -48,7 +52,7 @@ CloseApplications=yes
 CloseApplicationsFilter=MetaQuestTrayTool.exe,MetaQuestTrayTool.Overlay.exe
 RestartApplications=no
 AllowNoIcons=yes
-VersionInfoVersion={#MyAppVersion}.0
+VersionInfoVersion={#MyAppFileVersion}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} Setup
 VersionInfoProductName={#MyAppName}

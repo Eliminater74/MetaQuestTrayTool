@@ -6,9 +6,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use [Se
 
 The in-app updater and GitHub Releases show the notes for each version so you can decide whether to install.
 
-## [Unreleased]
+## [1.2.0-beta.1] - 2026-11-24
 
-Not a release. The public version remains 1.1.37 until you choose otherwise.
+Pre-release for community testing. **v1.1.37 remains the latest stable release.** The in-app updater reads GitHub's latest stable release and does not offer this beta to a stable install. A beta install is not downgraded to 1.1.37. GitHub issue #27 is addressed in this build and stays open until the reporter confirms it.
 
 ### Added
 - Runtime headset capability reports, with Quest 3S kept distinct from Quest 3.
@@ -41,6 +41,10 @@ Not a release. The public version remains 1.1.37 until you choose otherwise.
 - Desktop notification check on 2026-11-24. The debug build was launched with `--no-elevate` because automatic elevation had opened a secure-desktop consent prompt. The visible startup window read “Ready for Virtual Reality” with Open Settings and Open Performance. Success, warning, and error windows, the quick-control flyout, and the Tray Tool notification preferences were also on screen. Pure Black, Dark, and Light surfaces were captured from that process. No Quest headset was used. An opaque system backdrop behind the rounded card was removed after the first capture showed a gray rectangle.
 - Integration audit on 2026-11-24, starting at `399cddb`. Debug app build: 0 warnings. Release app build: 0 warnings. `dotnet build` of the solution with `-r win-x64` fails with NETSDK1134; the test project was built and tested instead. Release tests: 376 passed, 0 failed, 0 skipped. Line coverage 17.80% against an 8% floor. Local installer `dist/MetaQuestTrayTool-Setup-1.1.37.exe` is 75.6 MB and was not published. The public version was not changed. No physical Quest, ALVR, Pyrowave, or SteamVR session was measured.
 - GPU level 7, 144 Hz, and 207 Hz still need hardware acceptance. See `docs/research/HARDWARE-ACCEPTANCE.md`.
+- Experimental GPU level 7 and experimental 144/207 Hz stay off unless you opt in. The 45 °C value is an application battery-temperature gate, not GPU junction temperature and not a firmware limit.
+- No page edits a running ALVR server or posts a Pyrowave dashboard request. Those provider paths are not a supported setup flow.
+- The SteamVR overlay companion has not been accepted inside a headset. Controller interaction is not claimed.
+- This beta does not replace v1.1.37 as the latest stable download.
 
 ## [1.1.37] - 2026-10-03
 
@@ -434,7 +438,7 @@ Not a release. The public version remains 1.1.37 until you choose otherwise.
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
-[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.1.37...HEAD
+[1.2.0-beta.1]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1
 [1.1.37]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37
 [1.1.36]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.36
 [1.1.35]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.35

@@ -15,8 +15,25 @@ public static class AppInfo
         typeof(AppInfo).Assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product
         ?? "Meta Quest Tray Tool";
 
-    public static string Version =>
-        typeof(AppInfo).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+    public static string Version
+    {
+        get
+        {
+            var informational = typeof(AppInfo).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            if (!string.IsNullOrWhiteSpace(informational))
+            {
+                var plus = informational.IndexOf('+', StringComparison.Ordinal);
+                var display = plus >= 0 ? informational[..plus] : informational;
+                if (!string.IsNullOrWhiteSpace(display))
+                {
+                    return display;
+                }
+            }
+
+            return typeof(AppInfo).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+        }
+    }
 
     /// <summary>Live PayPal donate page.</summary>
     public const string DonateUrl =

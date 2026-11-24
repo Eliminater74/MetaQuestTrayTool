@@ -2,7 +2,9 @@
 
 Check items off as they land. Keep this in sync with [ROADMAP.md](ROADMAP.md).
 
-**Current public release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest stable release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+
+**Pre-release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1)
 
 ---
 

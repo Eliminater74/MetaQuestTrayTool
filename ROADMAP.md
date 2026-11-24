@@ -4,11 +4,13 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Current public release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest stable release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+
+**Pre-release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1). It is not offered by the in-app updater.
 
 ---
 
-## Current source checkout (public v1.1.37)
+## Current source checkout (stable v1.1.37, pre-release v1.2.0-beta.1)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 
@@ -29,7 +31,7 @@ Checkbox history: [TODO.md](TODO.md). User-facing detail: [README.md](README.md)
 
 ## In progress — advanced headset performance and PCVR providers
 
-Research baseline, capability matrix, stage tracker, and hardware acceptance checklist: [docs/research](docs/research/ADVANCED-PCVR-BASELINE.md). Quest3-Pyrowave commit `1b529ef54b4f7b34a44c28ad9a54c6c4ac6887a7` is a research reference only. The code is in the working source and is listed under Unreleased in the changelog. It is not a release and does not change the public version. Experimental GPU level 7, 144/207 Hz, and the OpenVR in-headset overlay still need hardware acceptance. The OpenVR overlay is intentionally not loaded.
+Research baseline, capability matrix, stage tracker, and hardware acceptance checklist: [docs/research](docs/research/ADVANCED-PCVR-BASELINE.md). Quest3-Pyrowave commit `1b529ef54b4f7b34a44c28ad9a54c6c4ac6887a7` is a research reference only. The code is in v1.2.0-beta.1. Experimental GPU level 7, 144/207 Hz, and the OpenVR in-headset overlay still need hardware acceptance. The OpenVR overlay is intentionally not loaded into the tray. No page edits ALVR or posts Pyrowave.
 
 ## v1.1.37 — on-demand headset ADB
 

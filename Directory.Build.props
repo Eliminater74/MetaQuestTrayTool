@@ -1,7 +1,11 @@
 <Project>
   <PropertyGroup>
-    <!-- Single version + product name for the whole app (exe, About, Info, tray). -->
-    <Version>1.1.37</Version>
+    <!-- User-facing version. A pre-release suffix stays in the display version. -->
+    <Version>1.2.0-beta.1</Version>
+    <!-- Windows file and assembly versions stay numeric. -->
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Product>Meta Quest Tray Tool</Product>
     <AssemblyTitle>Meta Quest Tray Tool</AssemblyTitle>
     <Company>Eliminater74</Company>

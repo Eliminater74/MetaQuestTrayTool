@@ -45,9 +45,13 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 }
 
 $projectVersion = Get-ProjectVersion
-if ($Version -notmatch '^\d+\.\d+\.\d+$') {
-    throw "Version must use strict major.minor.patch format."
+if ($Version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') {
+    throw "Version must be major.minor.patch or a pre-release such as 1.2.0-beta.1."
 }
+if ($Version -notmatch '^(\d+\.\d+\.\d+)') {
+    throw "Version $Version has no numeric file version."
+}
+$fileVersion = "$($Matches[1]).0"
 if ($Version -ne $projectVersion) {
     throw "Version $Version does not match Directory.Build.props version $projectVersion."
 }
@@ -138,6 +142,7 @@ $whatsNew = Join-Path $root "installer\WHATSNEW.txt"
 $publishForIss = "..\publish\win-x64"
 & $iscc `
     "/DMyAppVersion=$Version" `
+    "/DMyAppFileVersion=$fileVersion" `
     "/DPublishDir=$publishForIss" `
     $iss
 

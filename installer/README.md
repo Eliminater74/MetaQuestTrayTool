@@ -52,7 +52,8 @@ dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
   -o .\publish\win-x64
 
 & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" `
-  /DMyAppVersion=1.0.0 `
+  /DMyAppVersion=1.2.0-beta.1 `
+  /DMyAppFileVersion=1.2.0.0 `
   /DPublishDir=..\publish\win-x64 `
   .\installer\MetaQuestTrayTool.iss
 ```
@@ -63,14 +64,16 @@ dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
 | --- | --- | --- |
 | **CI** (`.github/workflows/ci.yml`) | Push/PR to `main`, manual | Locked restore + build + tests + coverage gate + publish smoke test |
 | **CodeQL** (`.github/workflows/codeql.yml`) | Push/PR to `main`, weekly, manual | C# security analysis |
-| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (e.g. `v1.0.0`), manual | Pinned Inno Setup + Setup.exe + SHA-256 sidecar + GitHub Release |
+| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (for example `v1.1.37` or `v1.2.0-beta.1`), manual | Pinned Inno Setup + Setup.exe + SHA-256 sidecar + GitHub Release. A tag with a pre-release suffix is published as a GitHub pre-release and is not marked latest. |
 
-Tag a release:
+Tag a stable release:
 
 ```powershell
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+A pre-release tag such as `v1.2.0-beta.1` uses the same workflow. Windows file version stays numeric (`1.2.0.0`). The displayed version keeps the suffix.
 
 ## Files
 

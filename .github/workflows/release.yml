@@ -9,7 +9,7 @@ on:
       version:
         description: "Release version without v prefix (e.g. 1.0.0)"
         required: true
-        default: "1.1.37"
+        default: "1.2.0-beta.1"
       prerelease:
         description: "Mark as pre-release"
         type: boolean
@@ -39,17 +39,25 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($version)) {
             throw "Version is empty."
           }
-          if ($version -notmatch '^\d+\.\d+\.\d+$') {
-            throw "Version must use strict major.minor.patch format."
+          if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') {
+            throw "Version must be major.minor.patch or a pre-release such as 1.2.0-beta.1."
           }
           [xml]$props = Get-Content Directory.Build.props
           $sourceVersion = $props.Project.PropertyGroup.Version
           if ($version -ne $sourceVersion) {
             throw "Release version $version does not match Directory.Build.props version $sourceVersion."
           }
+          $dispatchPrerelease = $env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and '${{ inputs.prerelease }}' -eq 'true'
+          $prerelease = $version.Contains('-') -or $dispatchPrerelease
           "Resolved version: $version"
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=v$version" >> $env:GITHUB_OUTPUT
+          "prerelease=$($prerelease.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          if ($prerelease) {
+            "make_latest=false" >> $env:GITHUB_OUTPUT
+          } else {
+            "make_latest=true" >> $env:GITHUB_OUTPUT
+          }
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
@@ -178,6 +186,6 @@ jobs:
             dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe
             dist/MetaQuestTrayTool-Setup-${{ steps.version.outputs.version }}.exe.sha256.txt
           draft: false
-          prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease }}
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
           generate_release_notes: false
-          make_latest: true
+          make_latest: ${{ steps.version.outputs.make_latest }}

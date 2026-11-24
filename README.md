@@ -49,7 +49,9 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Latest:** [v1.1.37 — MetaQuestTrayTool-Setup-1.1.37.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe)
+**Stable:** [v1.1.37 — MetaQuestTrayTool-Setup-1.1.37.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe)
+
+**Beta:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1) is a pre-release for community testing. The in-app updater does not offer it. v1.1.37 stays the latest stable release. Experimental GPU level 7 and 144/207 Hz stay off unless you opt in, and they are not hardware-accepted. No page edits ALVR or posts Pyrowave. GitHub issue #27 is fixed in this beta and remains open.
 
 Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
 
@@ -163,9 +165,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### v1.1.37 current release
+### v1.1.37 stable release
 
-Release **[v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is current — see **[CHANGELOG.md](CHANGELOG.md)** for every release. Headset ADB stays idle until a confirmed PCVR session or an explicit headset action. The tray does not poll ADB in the background, does not disconnect phones, TVs, or emulators, and does not kill the shared ADB server when a Link session ends. **Check ADB now** on the Headset page is the one-time probe. v1.1.36 Quest Link encode width still includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified. Work after this release is listed under Unreleased in CHANGELOG.md. It is not in the published v1.1.37 download. A locally rebuilt installer keeps the same version number and must not be treated as a new release.
+Release **[v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is the latest stable release — see **[CHANGELOG.md](CHANGELOG.md)** for every release. **[v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1)** is a separate pre-release and is not offered by the in-app updater. Headset ADB stays idle until a confirmed PCVR session or an explicit headset action. The tray does not poll ADB in the background, does not disconnect phones, TVs, or emulators, and does not kill the shared ADB server when a Link session ends. **Check ADB now** on the Headset page is the one-time probe. v1.1.36 Quest Link encode width still includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified. The v1.2.0-beta.1 notes are in CHANGELOG.md. That pre-release is not the v1.1.37 download.
 
 ### Shell & tray
 

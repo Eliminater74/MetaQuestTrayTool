@@ -2,7 +2,9 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Current public release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest stable release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+
+**Pre-release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1). The in-app updater does not offer it. Experimental GPU level 7 and 144/207 Hz stay off unless opted in and are not hardware-accepted. ALVR and Pyrowave have no production editor. GitHub issue #27 stays open.
 
 v1.1.37 keeps headset ADB off until a confirmed PCVR session or an explicit action such as **Check ADB now**. It does not disconnect other ADB devices and does not kill the shared ADB server when Link ends. v1.1.36 Quest Link encode width 4128, codec, sliced encoding, startup Meta Horizon Link, and temporary Windows HDR remain.
 

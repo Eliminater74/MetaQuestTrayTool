@@ -573,6 +573,8 @@ public class RuntimeSafetyTests
     [Theory]
     [InlineData("v1.2.3", 1, 2, 3)]
     [InlineData("1.2.3-beta", 1, 2, 3)]
+    [InlineData("1.2.0-beta.1", 1, 2, 0)]
+    [InlineData("v1.2.0-beta.2", 1, 2, 0)]
     public void UpdateVersionParser_ParsesReleaseVersions(string input, int major, int minor, int build)
     {
         var version = UpdateService.ParseVersion(input);
@@ -589,5 +591,27 @@ public class RuntimeSafetyTests
     public void UpdateVersionParser_RejectsInvalidVersions(string? input)
     {
         Assert.Null(UpdateService.ParseVersion(input));
+    }
+
+    [Theory]
+    [InlineData("v1.1.37", true)]
+    [InlineData("v1.2.0", true)]
+    [InlineData("v1.2.0-beta.1", false)]
+    [InlineData("v1.2.0-beta.2", false)]
+    [InlineData("1.2.0-beta.1", false)]
+    [InlineData(null, false)]
+    public void StableReleaseTag_AcceptsOnlyStableTags(string? tag, bool stable)
+    {
+        Assert.Equal(stable, UpdateService.IsStableReleaseTag(tag));
+    }
+
+    [Fact]
+    public void AppVersion_KeepsThePrereleaseSuffix()
+    {
+        Assert.Equal("1.2.0-beta.1", MetaQuestTrayTool.AppInfo.Version);
+        var header = new System.Net.Http.Headers.ProductInfoHeaderValue(
+            "MetaQuestTrayTool",
+            MetaQuestTrayTool.AppInfo.Version);
+        Assert.Equal("MetaQuestTrayTool/1.2.0-beta.1", header.ToString());
     }
 }

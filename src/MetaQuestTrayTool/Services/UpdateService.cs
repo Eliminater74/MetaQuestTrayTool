@@ -33,7 +33,8 @@ public sealed class UpdateCheckResult
 }
 
 /// <summary>
-/// Checks GitHub Releases (latest tag v*) and downloads the Setup.exe for an in-place upgrade.
+/// Checks the latest stable GitHub Release and downloads that Setup.exe.
+/// A pre-release tag, including one accidentally marked latest, is not offered.
 /// </summary>
 public sealed class UpdateService
 {
@@ -83,7 +84,19 @@ public sealed class UpdateService
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
             var root = doc.RootElement;
             var tag = root.TryGetProperty("tag_name", out var tagEl) ? tagEl.GetString() : null;
-            if (tag is null || !System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v\d+\.\d+\.\d+$"))
+            var markedPrerelease = root.TryGetProperty("prerelease", out var preEl)
+                && preEl.ValueKind == JsonValueKind.True;
+            if (markedPrerelease || IsPrereleaseTag(tag))
+            {
+                return new UpdateCheckResult
+                {
+                    CurrentVersion = current,
+                    LatestVersion = current,
+                    TagName = tag
+                };
+            }
+
+            if (tag is null || !IsStableReleaseTag(tag))
             {
                 return new UpdateCheckResult
                 {
@@ -610,6 +623,12 @@ public sealed class UpdateService
 
         return text[..(maxChars - 1)].TrimEnd() + "…";
     }
+
+    public static bool IsStableReleaseTag(string? tag) =>
+        tag is not null && System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v\d+\.\d+\.\d+$");
+
+    public static bool IsPrereleaseTag(string? tag) =>
+        tag is not null && System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v?\d+\.\d+\.\d+-[0-9A-Za-z.-]+$");
 
     public static Version? ParseVersion(string? text)
     {
