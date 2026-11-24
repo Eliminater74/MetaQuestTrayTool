@@ -22,6 +22,13 @@ public class OverlayCompanionTests
         var line = OverlayInteraction.AuthLine("abc123", "snapshot");
         Assert.Equal("auth abc123 snapshot", line);
         Assert.DoesNotContain(line, info.Arguments ?? string.Empty, StringComparison.Ordinal);
+        Assert.Equal("unelevated-stdin", OverlayProcessHost.LaunchPlan(trayElevated: true));
+        Assert.Equal("inherited-stdin", OverlayProcessHost.LaunchPlan(trayElevated: false));
+        var sddl = OverlayIpcServer.CreatePipeSecurity().GetSecurityDescriptorSddlForm(System.Security.AccessControl.AccessControlSections.All);
+        Assert.Contains(System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value, sddl, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("S:(ML;;NW;;;ME)", OverlayIpcServer.MediumIntegrityLabel);
+        Assert.DoesNotContain("WD", sddl, StringComparison.Ordinal);
+        Assert.DoesNotContain("BA", sddl, StringComparison.Ordinal);
     }
 
     [Fact]

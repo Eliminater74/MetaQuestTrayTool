@@ -1,5 +1,6 @@
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -128,11 +129,14 @@ public sealed class OverlayIpcServer : IDisposable
 
     public string Token => _token;
 
-    public void Start(Func<string> snapshot)
+    private Action<string>? _command;
+
+    public void Start(Func<string> snapshot, Action<string>? command = null)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         Stop();
         _snapshot = snapshot;
+        _command = command;
         _token = OverlayCommands.CreateToken();
         _cancel = new CancellationTokenSource();
         IsRunning = true;
@@ -165,9 +169,17 @@ public sealed class OverlayIpcServer : IDisposable
             {
                 using var server = CreateServer();
                 server.WaitForConnectionAsync(token).GetAwaiter().GetResult();
+                server.ReadTimeout = IoTimeoutMilliseconds;
+                server.WriteTimeout = IoTimeoutMilliseconds;
                 using var writer = new StreamWriter(server, leaveOpen: true) { AutoFlush = true };
                 var line = ReadBounded(server, OverlayCommands.MaxLineLength);
-                writer.WriteLine(OverlayCommands.Handle(line, _snapshot, _token));
+                var response = OverlayCommands.Handle(line, _snapshot, _token);
+                if (response.StartsWith("OK benchmark-stop", StringComparison.OrdinalIgnoreCase))
+                {
+                    _command?.Invoke("benchmark-stop");
+                }
+
+                writer.WriteLine(response);
             }
             catch (OperationCanceledException)
             {
@@ -212,20 +224,22 @@ public sealed class OverlayIpcServer : IDisposable
         return Encoding.UTF8.GetString(buffer, 0, count);
     }
 
+    public const int IoTimeoutMilliseconds = 2000;
+
+    public const string MediumIntegrityLabel = "S:(ML;;NW;;;ME)";
+
+    public static PipeSecurity CreatePipeSecurity()
+    {
+        var user = WindowsIdentity.GetCurrent().User ?? throw new InvalidOperationException("The current user has no SID. The overlay pipe was not created.");
+        var security = new PipeSecurity();
+        security.SetSecurityDescriptorSddlForm($"D:(A;;GA;;;{user.Value})");
+        return security;
+    }
+
     private static NamedPipeServerStream CreateServer()
     {
-        var security = new PipeSecurity();
-        using var identity = WindowsIdentity.GetCurrent();
-        if (identity.User is not null)
-        {
-            security.AddAccessRule(new PipeAccessRule(identity.User, PipeAccessRights.FullControl, AccessControlType.Allow));
-        }
-
-        security.AddAccessRule(new PipeAccessRule(
-            new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-            PipeAccessRights.FullControl,
-            AccessControlType.Allow));
-        return NamedPipeServerStreamAcl.Create(
+        var security = CreatePipeSecurity();
+        var server = NamedPipeServerStreamAcl.Create(
             PipeName,
             PipeDirection.InOut,
             1,
@@ -234,5 +248,23 @@ public sealed class OverlayIpcServer : IDisposable
             0,
             0,
             security);
+        AllowMediumIntegrity(server);
+        return server;
     }
+
+    private static void AllowMediumIntegrity(NamedPipeServerStream server)
+    {
+        var descriptor = new RawSecurityDescriptor(MediumIntegrityLabel);
+        var bytes = new byte[descriptor.BinaryLength];
+        descriptor.GetBinaryForm(bytes, 0);
+        if (!SetKernelObjectSecurity(server.SafePipeHandle.DangerousGetHandle(), LabelSecurityInformation, bytes))
+        {
+            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "The overlay pipe could not be labeled for a medium-integrity companion.");
+        }
+    }
+
+    private const int LabelSecurityInformation = 0x00000010;
+
+    [DllImport("advapi32.dll", SetLastError = true)]
+    private static extern bool SetKernelObjectSecurity(IntPtr handle, int securityInformation, byte[] securityDescriptor);
 }

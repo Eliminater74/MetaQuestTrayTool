@@ -9,10 +9,20 @@ internal static class Program
     [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern bool SetDllDirectory(string lpPathName);
 
+    [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr LoadLibrary(string lpFileName);
+
     private static int Main()
     {
         try
         {
+            using var single = new Mutex(true, @"Local\MetaQuestTrayTool.Overlay", out var ownsCompanion);
+            if (!ownsCompanion)
+            {
+                Console.Error.WriteLine("overlay: another companion is already running. OpenVR was not initialized.");
+                return 0;
+            }
+
             var token = Console.In.ReadLine();
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -28,6 +38,12 @@ internal static class Program
             }
 
             SetDllDirectory(Path.GetDirectoryName(api)!);
+            if (LoadLibrary(api) == IntPtr.Zero)
+            {
+                Console.Error.WriteLine("overlay: LoadLibrary failed for " + api + ". OpenVR was not initialized. Win32 " + Marshal.GetLastWin32Error());
+                return 0;
+            }
+
             var error = EVRInitError.None;
             OpenVR.Init(ref error, EVRApplicationType.VRApplication_Overlay);
             if (error != EVRInitError.None)
@@ -56,6 +72,11 @@ internal static class Program
 
             overlay.SetOverlayWidthInMeters(main, 1.4f);
             overlay.SetOverlayFlag(main, VROverlayFlags.VisibleInDashboard, true);
+            var input = overlay.SetOverlayInputMethod(main, VROverlayInputMethod.Mouse);
+            if (input != EVROverlayError.None)
+            {
+                Console.Error.WriteLine("overlay: SetOverlayInputMethod failed: " + input + ". Dashboard laser clicks were not enabled. Physical acceptance was not performed.");
+            }
             var mode = OverlayDisplayMode.Compact;
             var quit = false;
             var reader = Task.Run(() =>
@@ -98,8 +119,23 @@ internal static class Program
 
                 for (var i = 0; i < 10 && !quit; i++)
                 {
+                    var system = OpenVR.System;
+                    if (system is not null)
+                    {
+                        var systemEvent = default(VREvent_t);
+                        while (system.PollNextEvent(ref systemEvent, (uint)Marshal.SizeOf<VREvent_t>()))
+                        {
+                            if (systemEvent.eventType == (uint)EVREventType.VREvent_Quit)
+                            {
+                                system.AcknowledgeQuit_Exiting();
+                                quit = true;
+                                break;
+                            }
+                        }
+                    }
+
                     var ev = default(VREvent_t);
-                    while (overlay.PollNextOverlayEvent(main, ref ev, (uint)Marshal.SizeOf<VREvent_t>()))
+                    while (!quit && overlay.PollNextOverlayEvent(main, ref ev, (uint)Marshal.SizeOf<VREvent_t>()))
                     {
                         if (ev.eventType != (uint)EVREventType.VREvent_MouseButtonDown)
                         {

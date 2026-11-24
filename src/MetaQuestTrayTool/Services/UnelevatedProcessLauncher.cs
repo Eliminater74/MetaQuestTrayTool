@@ -59,6 +59,134 @@ public static class UnelevatedProcessLauncher
         out string detail) =>
         TryStart(fileName, arguments, workingDirectory, dropElevation: true, hideWindow: true, allowExplorerFallback: false, out detail);
 
+    /// <summary>
+    /// Starts a hidden process on the Explorer shell token with an inheritable standard-input handle.
+    /// Used so an elevated tray can hand a pipe token to a medium-integrity companion without putting it on the command line.
+    /// </summary>
+    public static bool TryStartHiddenWithStandardInput(
+        string fileName,
+        string? workingDirectory,
+        SafeHandle standardInput,
+        out int processId,
+        out string detail)
+    {
+        processId = 0;
+        ArgumentNullException.ThrowIfNull(standardInput);
+        if (standardInput.IsInvalid)
+        {
+            detail = "standard input handle is invalid";
+            return false;
+        }
+
+        var shell = GetShellWindow();
+        if (shell == IntPtr.Zero)
+        {
+            detail = "no Explorer shell window";
+            return false;
+        }
+
+        _ = GetWindowThreadProcessId(shell, out var pid);
+        if (pid == 0)
+        {
+            detail = "could not resolve Explorer pid";
+            return false;
+        }
+
+        var process = OpenProcess(ProcessQueryLimitedInformation, false, pid);
+        if (process == IntPtr.Zero)
+        {
+            detail = Win32("OpenProcess(Explorer)");
+            return false;
+        }
+
+        try
+        {
+            if (!OpenProcessToken(process, TokenDuplicate, out var token))
+            {
+                detail = Win32("OpenProcessToken(Explorer)");
+                return false;
+            }
+
+            try
+            {
+                if (!DuplicateTokenEx(
+                        token,
+                        TokenAssignPrimary | TokenDuplicate | TokenQuery | TokenAdjustDefault | TokenAdjustSessionId,
+                        IntPtr.Zero,
+                        SecurityImpersonation,
+                        TokenPrimary,
+                        out var primary))
+                {
+                    detail = Win32("DuplicateTokenEx");
+                    return false;
+                }
+
+                try
+                {
+                    var inherit = new SecurityAttributes
+                    {
+                        nLength = Marshal.SizeOf<SecurityAttributes>(),
+                        bInheritHandle = 1
+                    };
+                    var nullWrite = CreateFileW("NUL", GenericWrite, FileShareWrite, ref inherit, OpenExisting, 0, IntPtr.Zero);
+                    if (nullWrite == InvalidHandle)
+                    {
+                        detail = Win32("CreateFile(NUL)");
+                        return false;
+                    }
+
+                    try
+                    {
+                        var command = new StringBuilder();
+                        command.Append(Quote(fileName));
+                        var startup = new StartupInfo { cb = Marshal.SizeOf<StartupInfo>() };
+                        startup.dwFlags = StartfUseShowWindow | StartfUseStdHandles;
+                        startup.wShowWindow = SwHide;
+                        startup.hStdInput = standardInput.DangerousGetHandle();
+                        startup.hStdOutput = nullWrite;
+                        startup.hStdError = nullWrite;
+                        if (!CreateProcessWithTokenW(
+                                primary,
+                                LogonWithProfile,
+                                fileName.EndsWith("cmd.exe", StringComparison.OrdinalIgnoreCase) ? null : fileName,
+                                command,
+                                CreateUnicodeEnvironment | CreateNoWindow,
+                                IntPtr.Zero,
+                                string.IsNullOrWhiteSpace(workingDirectory) ? null : workingDirectory,
+                                ref startup,
+                                out var info))
+                        {
+                            detail = Win32("CreateProcessWithTokenW");
+                            return false;
+                        }
+
+                        processId = info.dwProcessId;
+                        CloseHandle(info.hThread);
+                        CloseHandle(info.hProcess);
+                        detail = "started via Explorer token (unelevated, inherited stdin)";
+                        return true;
+                    }
+                    finally
+                    {
+                        CloseHandle(nullWrite);
+                    }
+                }
+                finally
+                {
+                    CloseHandle(primary);
+                }
+            }
+            finally
+            {
+                CloseHandle(token);
+            }
+        }
+        finally
+        {
+            CloseHandle(process);
+        }
+    }
+
     private static bool TryStart(
         string fileName,
         string? arguments,
@@ -404,7 +532,30 @@ public static class UnelevatedProcessLauncher
     private const uint CreateUnicodeEnvironment = 0x00000400;
     private const uint CreateNoWindow = 0x08000000;
     private const int StartfUseShowWindow = 0x00000001;
+    private const int StartfUseStdHandles = 0x00000100;
     private const short SwHide = 0;
+    private const uint GenericWrite = 0x40000000;
+    private const uint FileShareWrite = 0x00000002;
+    private const uint OpenExisting = 3;
+    private static readonly IntPtr InvalidHandle = new(-1);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern IntPtr CreateFileW(
+        string fileName,
+        uint desiredAccess,
+        uint shareMode,
+        ref SecurityAttributes securityAttributes,
+        uint creationDisposition,
+        uint flagsAndAttributes,
+        IntPtr templateFile);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct SecurityAttributes
+    {
+        public int nLength;
+        public IntPtr lpSecurityDescriptor;
+        public int bInheritHandle;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct TokenElevation

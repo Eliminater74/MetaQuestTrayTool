@@ -20,6 +20,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
     private int _headsetFlight;
     private bool _loading = true;
     private OverlayIpcServer? _overlay;
+    private string _overlaySnapshot = "no-sample";
     private CancellationTokenSource? _benchmark;
 
     public PerformancePage()
@@ -88,6 +89,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or IOException)
         {
             ReportBox.Text = ex.Message;
+            _overlaySnapshot = ReportBox.Text;
         }
     }
 
@@ -130,7 +132,13 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             return;
         }
 
-        _overlay.Start(() => string.IsNullOrWhiteSpace(ReportBox.Text) ? "no-sample" : ReportBox.Text);
+        _overlay.Start(() => _overlaySnapshot, command =>
+        {
+            if (string.Equals(command, "benchmark-stop", StringComparison.OrdinalIgnoreCase))
+            {
+                _benchmark?.Cancel();
+            }
+        });
         var companion = OverlayProcessHost.TryStart(_overlay.Token);
         SummaryText.Text = "Local pipe started for the current user. " + companion + " " + OpenVrOverlayStatus.Describe();
     }
@@ -140,6 +148,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         var report = BenchmarkMath.FromPeriodicSamples("PC GPU %", _gpuHistory);
         ReportBox.Text = report.ToDisplayText() + Environment.NewLine
             + "This score does not restart SteamVR or change headset settings.";
+        _overlaySnapshot = ReportBox.Text;
         SummaryText.Text = "PC history scored. 1% lows are unavailable for these periodic samples.";
     }
 
@@ -199,6 +208,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
                 "PC GPU %"));
             BenchmarkHistoryStore.Append(AppPaths.BenchmarkHistoryFile, result);
             ReportBox.Text = result.ToDisplayText();
+            _overlaySnapshot = ReportBox.Text;
             SummaryText.Text = result.Cancelled
                 ? "PC benchmark cancelled. No headset setting was changed."
                 : "PC benchmark finished. 1% lows were not calculated. History was saved.";
@@ -206,6 +216,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
         {
             ReportBox.Text = ex.Message;
+            _overlaySnapshot = ReportBox.Text;
         }
         finally
         {
@@ -250,6 +261,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
             ComparisonHistory.Append(AppPaths.ComparisonHistoryFile, result);
             ReportBox.Text = result.ToDisplayText() + Environment.NewLine
                 + "Refresh, bitrate, and GPU-level comparisons are not offered from this page because they can interrupt the session.";
+            _overlaySnapshot = ReportBox.Text;
             SummaryText.Text = result.Cancelled
                 ? "PC comparison cancelled. No setting was changed."
                 : "PC comparison finished. 1% lows were not calculated.";
@@ -257,6 +269,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentOutOfRangeException)
         {
             ReportBox.Text = ex.Message;
+            _overlaySnapshot = ReportBox.Text;
         }
         finally
         {
@@ -419,6 +432,7 @@ public partial class PerformancePage : System.Windows.Controls.UserControl, IShe
         ReportBox.Text = banner + Environment.NewLine + evidence + Environment.NewLine + Environment.NewLine
             + string.Join(Environment.NewLine, lines) + Environment.NewLine + Environment.NewLine
             + BottleneckAnalyzer.ToDisplayText(findings);
+        _overlaySnapshot = ReportBox.Text;
         SummaryText.Text = findings[0].Title;
     }
 
