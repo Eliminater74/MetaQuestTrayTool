@@ -210,6 +210,41 @@ public class RecoveryHardeningTests
     }
 
     [Fact]
+    public void CancelBeforeWriteRemovesTheUnwrittenSnapshot()
+    {
+        var store = new RecordingStore();
+        store.Set("quest", "debug.oculus.gpuLevel", "4");
+        store.Set("other", "debug.oculus.gpuLevel", "2");
+        var path = TempFile();
+        try
+        {
+            var service = new AdbPropertyTransactionService(store, path);
+            using var cancelled = new CancellationTokenSource();
+            store.CancelOnRead = cancelled;
+            var result = service.Apply("quest", "Quest 3", "fp", new Dictionary<string, string>
+            {
+                ["debug.oculus.gpuLevel"] = "7"
+            }, cancellation: cancelled.Token, bootId: "boot-1");
+            Assert.Equal(PropertyTransactionStatus.Failed, result.Status);
+            Assert.Contains("Cancelled before any property", result.Summary, StringComparison.Ordinal);
+            Assert.Equal("4", store.Read("quest", "debug.oculus.gpuLevel"));
+            Assert.False(File.Exists(path));
+            Assert.Empty(store.WriteNames);
+
+            var other = service.Apply("other", "Quest 3", "fp-2", new Dictionary<string, string>
+            {
+                ["debug.oculus.gpuLevel"] = "3"
+            }, bootId: "boot-9");
+            Assert.Equal(PropertyTransactionStatus.Verified, other.Status);
+            Assert.Equal("3", store.Read("other", "debug.oculus.gpuLevel"));
+        }
+        finally
+        {
+            Delete(path);
+        }
+    }
+
+    [Fact]
     public void SurvivedRebootRestoresTheOriginalValue()
     {
         var store = new RecordingStore();
@@ -242,6 +277,7 @@ public class RecoveryHardeningTests
         public Dictionary<string, string> Values { get; } = new(StringComparer.Ordinal);
         public List<string> WriteNames { get; } = [];
         public bool ThrowOnRead { get; set; }
+        public CancellationTokenSource? CancelOnRead { get; set; }
 
         public void Set(string serial, string name, string value) => Values[serial + "|" + name] = value;
 
@@ -252,6 +288,7 @@ public class RecoveryHardeningTests
                 throw new IOException("disconnected");
             }
 
+            CancelOnRead?.Cancel();
             return Values.TryGetValue(serial + "|" + name, out var value) && !string.IsNullOrWhiteSpace(value) ? value : null;
         }
 

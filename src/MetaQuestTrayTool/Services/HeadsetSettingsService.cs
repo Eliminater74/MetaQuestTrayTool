@@ -299,6 +299,11 @@ public sealed class HeadsetSettingsService
                 fingerprint = null;
             }
 
+            if (string.IsNullOrWhiteSpace(fingerprint))
+            {
+                throw new InvalidOperationException("Firmware fingerprint was not read. GPU level 7 was not written.");
+            }
+
             ExperimentalSession?.PrepareExplicitApply();
             var transaction = transactions.Apply(quest.Serial, quest.Model, fingerprint, new Dictionary<string, string>
             {
@@ -385,7 +390,7 @@ public sealed class HeadsetSettingsService
                 displayDump);
             if (verification.Panel == PanelEvidence.Differs)
             {
-                var restored = transactions.Restore(quest.Serial, fingerprint);
+                var restored = transactions.Restore(quest.Serial, fingerprint, onlyNames: null, bootId: TryBootId(quest.Serial));
                 throw new InvalidOperationException(verification.Summary + Environment.NewLine + restored.ToDisplayText());
             }
 
@@ -866,6 +871,11 @@ public sealed class HeadsetSettingsService
         if (string.IsNullOrWhiteSpace(serial))
         {
             throw new InvalidOperationException("Headset serial was not confirmed. GPU level 7 was not written.");
+        }
+
+        if (string.IsNullOrWhiteSpace(fingerprint))
+        {
+            throw new InvalidOperationException("Firmware fingerprint was not read. GPU level 7 was not written.");
         }
 
         ExperimentalSession?.PrepareExplicitApply();

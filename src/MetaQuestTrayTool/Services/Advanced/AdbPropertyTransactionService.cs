@@ -245,6 +245,19 @@ public sealed class AdbPropertyTransactionService
                 {
                     if (written.Count == 0)
                     {
+                        if (existing is null)
+                        {
+                            DeleteRecovery();
+                        }
+                        else
+                        {
+                            var revertError = SaveRecovery(existing);
+                            if (revertError is not null)
+                            {
+                                return Fail("Cancelled before any property was written, and the previous snapshot could not be restored. The headset was not written.");
+                            }
+                        }
+
                         return Fail("Cancelled before any property was written.");
                     }
 
