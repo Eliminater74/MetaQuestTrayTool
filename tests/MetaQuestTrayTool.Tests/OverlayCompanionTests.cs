@@ -24,8 +24,16 @@ public class OverlayCompanionTests
         Assert.DoesNotContain(line, info.Arguments ?? string.Empty, StringComparison.Ordinal);
         Assert.Equal("unelevated-stdin", OverlayProcessHost.LaunchPlan(trayElevated: true));
         Assert.Equal("inherited-stdin", OverlayProcessHost.LaunchPlan(trayElevated: false));
-        var sddl = OverlayIpcServer.CreatePipeSecurity().GetSecurityDescriptorSddlForm(System.Security.AccessControl.AccessControlSections.All);
-        Assert.Contains(System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value, sddl, StringComparison.OrdinalIgnoreCase);
+        var security = OverlayIpcServer.CreatePipeSecurity();
+        var sddl = security.GetSecurityDescriptorSddlForm(System.Security.AccessControl.AccessControlSections.Access);
+        var current = System.Security.Principal.WindowsIdentity.GetCurrent().User!;
+        var rules = security.GetAccessRules(true, false, typeof(System.Security.Principal.SecurityIdentifier));
+        var identities = rules.Cast<System.IO.Pipes.PipeAccessRule>()
+            .Select(rule => rule.IdentityReference)
+            .Cast<System.Security.Principal.SecurityIdentifier>()
+            .ToList();
+        Assert.Contains(current, identities);
+        Assert.All(identities, identity => Assert.Equal(current, identity));
         Assert.Equal("S:(ML;;NW;;;ME)", OverlayIpcServer.MediumIntegrityLabel);
         Assert.DoesNotContain("WD", sddl, StringComparison.Ordinal);
         Assert.DoesNotContain("BA", sddl, StringComparison.Ordinal);
