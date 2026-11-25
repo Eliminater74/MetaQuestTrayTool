@@ -1,20 +1,20 @@
 # What's new
 
-This page catches the wiki up from the older v1.1.18-era guide to the latest stable release, **v1.1.37**. [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1) is a separate pre-release. The in-app updater does not offer it, and it does not replace v1.1.37.
+This page catches the wiki up from the older v1.1.18-era guide to the latest public release, **v1.2.0-beta.1**. The version stays a beta. [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37) is the previous stable installer. The updater shipped in v1.1.37 cannot install a beta-suffixed tag, so that install needs the download below.
 
-Download: [latest stable release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)  
+Download: [v1.2.0-beta.1 installer](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe)  
 Full history: [CHANGELOG.md](https://github.com/Eliminater74/MetaQuestTrayTool/blob/main/CHANGELOG.md)
 
-## Pre-release: v1.2.0-beta.1
+## Latest public release: v1.2.0-beta.1
 
-Community test build. Stable installs stay on v1.1.37.
+Community-test build, and the release GitHub labels Latest.
 
 - Custom notification windows replace the startup Windows balloon. Modern windows are on by default. The Windows balloon remains the logged fallback.
 - Quick controls are on the tray menu. Exit uses the same shutdown path as the other Exit commands.
 - When stop-on-exit is enabled, Exit closes the installed Meta Horizon Link client before stopping OVRService. GitHub issue #27 stays open until that is confirmed on a machine.
 - Experimental GPU level 7 and 144/207 Hz stay off unless opted in. Hardware acceptance is still open. No page edits ALVR or posts Pyrowave.
 
-## Stable release: v1.1.37
+## Previous stable installer: v1.1.37
 
 v1.1.37 makes headset ADB on demand so the tray can sit in the notification area without touching the shared ADB server:
 

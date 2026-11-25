@@ -6,9 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use [Se
 
 The in-app updater and GitHub Releases show the notes for each version so you can decide whether to install.
 
+## [Unreleased]
+
+### Fixed
+- The update checker follows GitHub's latest release when the tag keeps a beta suffix, such as `v1.2.0-beta.1`. It selects `MetaQuestTrayTool-Setup-1.2.0-beta.1.exe`, says the update is a beta before asking, and does not offer an older version. The checker already published in v1.1.37 and in the v1.2.0-beta.1 installer does not include this fix. v1.1.37 accepts only a tag shaped exactly like `v1.1.37` and looks for `MetaQuestTrayTool-Setup-1.2.0.exe`, so that install cannot download `v1.2.0-beta.1` by itself.
+
 ## [1.2.0-beta.1] - 2026-11-24
 
-Pre-release for community testing. **v1.1.37 remains the latest stable release.** The in-app updater reads GitHub's latest stable release and does not offer this beta to a stable install. A beta install is not downgraded to 1.1.37. GitHub issue #27 is addressed in this build and stays open until the reporter confirms it.
+Latest public release for community testing. The version number stays a beta. **v1.1.37 remains available as the previous stable installer.** GitHub issue #27 is addressed in this build and stays open until the reporter confirms it. The updater shipped in v1.1.37 cannot install this beta-suffixed tag.
 
 ### Added
 - Runtime headset capability reports, with Quest 3S kept distinct from Quest 3.
@@ -44,7 +49,7 @@ Pre-release for community testing. **v1.1.37 remains the latest stable release.*
 - Experimental GPU level 7 and experimental 144/207 Hz stay off unless you opt in. The 45 °C value is an application battery-temperature gate, not GPU junction temperature and not a firmware limit.
 - No page edits a running ALVR server or posts a Pyrowave dashboard request. Those provider paths are not a supported setup flow.
 - The SteamVR overlay companion has not been accepted inside a headset. Controller interaction is not claimed.
-- This beta does not replace v1.1.37 as the latest stable download.
+- v1.2.0-beta.1 is the latest public download. v1.1.37 remains the previous stable installer. The beta designation stays in the version number.
 
 ## [1.1.37] - 2026-10-03
 
@@ -438,6 +443,7 @@ Pre-release for community testing. **v1.1.37 remains the latest stable release.*
 - Optional CoreChannel (`LIVE` / `PublicTest` / `NO_UPDATES`).
 - Restart OVRService when SteamVR exits (return toward Quest Home without Dash).
 
+[Unreleased]: https://github.com/Eliminater74/MetaQuestTrayTool/compare/v1.2.0-beta.1...HEAD
 [1.2.0-beta.1]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1
 [1.1.37]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37
 [1.1.36]: https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.36

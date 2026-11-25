@@ -4,13 +4,13 @@ Living plan for Meta Quest Tray Tool. Update this when a phase lands or the orde
 
 Inspired by [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/) (ApollyonVR), but this is a new C# app — not a decompiled port.
 
-**Latest stable release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest). The version stays a beta. The updater shipped in v1.1.37 cannot install that tag.
 
-**Pre-release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1). It is not offered by the in-app updater.
+**Previous stable installer:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37).
 
 ---
 
-## Current source checkout (stable v1.1.37, pre-release v1.2.0-beta.1)
+## Current source checkout (latest public release v1.2.0-beta.1)
 
 Steam-first PCVR tray for Meta Quest Link + SteamVR OpenXR:
 

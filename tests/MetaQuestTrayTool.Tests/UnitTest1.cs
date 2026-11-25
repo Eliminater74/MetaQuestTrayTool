@@ -605,6 +605,38 @@ public class RuntimeSafetyTests
         Assert.Equal(stable, UpdateService.IsStableReleaseTag(tag));
     }
 
+    [Theory]
+    [InlineData("1.1.37", "v1.2.0-beta.1", true)]
+    [InlineData("v1.1.37", "1.2.0-beta.1", true)]
+    [InlineData("1.2.0-beta.1", "v1.2.0-beta.2", true)]
+    [InlineData("1.2.0-beta.1", "v1.2.0", true)]
+    [InlineData("1.2.0-beta.1", "v1.2.0-beta.1", false)]
+    [InlineData("1.2.0", "v1.2.0-beta.1", false)]
+    [InlineData("1.2.0-beta.2", "v1.2.0-beta.1", false)]
+    [InlineData("1.2.0", "v1.1.37", false)]
+    public void UpdateComparison_OffersNewerReleasesWithoutADowngrade(string current, string latest, bool newer)
+    {
+        Assert.Equal(newer, UpdateService.IsNewerRelease(current, latest));
+    }
+
+    [Theory]
+    [InlineData("v1.1.37", "MetaQuestTrayTool-Setup-1.1.37.exe")]
+    [InlineData("v1.2.0-beta.1", "MetaQuestTrayTool-Setup-1.2.0-beta.1.exe")]
+    public void UpdateInstallerName_KeepsTheBetaSuffix(string tag, string fileName)
+    {
+        Assert.Equal(fileName, UpdateService.InstallerFileNameForTag(tag));
+    }
+
+    [Theory]
+    [InlineData("v1.2.0-beta.1", true)]
+    [InlineData("v1.1.37", true)]
+    [InlineData("1.2.0-beta.1", false)]
+    [InlineData("v1.2", false)]
+    public void ReleaseTag_AcceptsStableAndBetaTags(string? tag, bool accepted)
+    {
+        Assert.Equal(accepted, UpdateService.IsReleaseTag(tag));
+    }
+
     [Fact]
     public void AppVersion_KeepsThePrereleaseSuffix()
     {

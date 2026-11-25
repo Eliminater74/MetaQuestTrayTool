@@ -21,20 +21,23 @@ public sealed class UpdateCheckResult
     public Uri? InstallerDownloadUrl { get; init; }
     public string? InstallerSha256 { get; init; }
     public long? InstallerSize { get; init; }
+    public string? CurrentDisplayVersion { get; init; }
     public string? Error { get; init; }
 
     public bool Succeeded => Error is null && LatestVersion is not null;
     public bool UpdateAvailable =>
         Succeeded
-        && LatestVersion is not null
-        && LatestVersion > CurrentVersion
-        && InstallerDownloadUrl is not null;
-    public bool IsUpToDate => Succeeded && LatestVersion is not null && LatestVersion <= CurrentVersion;
+        && InstallerDownloadUrl is not null
+        && UpdateService.IsNewerRelease(CurrentDisplayVersion ?? CurrentVersion.ToString(), TagName);
+    public bool IsUpToDate =>
+        Succeeded
+        && !UpdateService.IsNewerRelease(CurrentDisplayVersion ?? CurrentVersion.ToString(), TagName);
 }
 
 /// <summary>
-/// Checks the latest stable GitHub Release and downloads that Setup.exe.
-/// A pre-release tag, including one accidentally marked latest, is not offered.
+/// Checks GitHub's latest release and downloads that Setup.exe.
+/// A beta suffix is accepted when that release is the latest public release.
+/// An older numeric version is not offered.
 /// </summary>
 public sealed class UpdateService
 {
@@ -66,7 +69,8 @@ public sealed class UpdateService
 
     public async Task<UpdateCheckResult> CheckLatestAsync(CancellationToken cancellationToken = default)
     {
-        var current = ParseVersion(AppInfo.Version) ?? new Version(0, 0, 0);
+        var currentLabel = AppInfo.Version;
+        var current = ParseVersion(currentLabel) ?? new Version(0, 0, 0);
         try
         {
             using var response = await _http.GetAsync(LatestReleaseApi, cancellationToken).ConfigureAwait(false);
@@ -76,6 +80,7 @@ public sealed class UpdateService
                 return new UpdateCheckResult
                 {
                     CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                     Error = $"GitHub returned {(int)response.StatusCode}: {Truncate(body)}"
                 };
             }
@@ -84,25 +89,14 @@ public sealed class UpdateService
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
             var root = doc.RootElement;
             var tag = root.TryGetProperty("tag_name", out var tagEl) ? tagEl.GetString() : null;
-            var markedPrerelease = root.TryGetProperty("prerelease", out var preEl)
-                && preEl.ValueKind == JsonValueKind.True;
-            if (markedPrerelease || IsPrereleaseTag(tag))
+            if (tag is null || !IsReleaseTag(tag))
             {
                 return new UpdateCheckResult
                 {
                     CurrentVersion = current,
-                    LatestVersion = current,
-                    TagName = tag
-                };
-            }
-
-            if (tag is null || !IsStableReleaseTag(tag))
-            {
-                return new UpdateCheckResult
-                {
-                    CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                     TagName = tag,
-                    Error = "Latest GitHub release has an invalid version tag (expected v1.0.1 style)."
+                    Error = "Latest GitHub release has an invalid version tag (expected v1.2.0 or v1.2.0-beta.1)."
                 };
             }
 
@@ -112,8 +106,9 @@ public sealed class UpdateService
                 return new UpdateCheckResult
                 {
                     CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                     TagName = tag,
-                    Error = "Latest GitHub release has no usable version tag (expected v1.0.1 style)."
+                    Error = "Latest GitHub release has no usable version tag (expected v1.2.0 or v1.2.0-beta.1)."
                 };
             }
 
@@ -126,7 +121,7 @@ public sealed class UpdateService
                 foreach (var asset in assets.EnumerateArray())
                 {
                     var name = asset.TryGetProperty("name", out var nameEl) ? nameEl.GetString() : null;
-                    var expectedName = $"MetaQuestTrayTool-Setup-{latest.Major}.{latest.Minor}.{latest.Build}.exe";
+                    var expectedName = InstallerFileNameForTag(tag);
                     if (!string.Equals(name, expectedName, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
@@ -160,6 +155,7 @@ public sealed class UpdateService
                         return new UpdateCheckResult
                         {
                             CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                             LatestVersion = latest,
                             TagName = tag,
                             ReleaseHtmlUrl = htmlUrl,
@@ -171,6 +167,7 @@ public sealed class UpdateService
                     return new UpdateCheckResult
                     {
                         CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                         LatestVersion = latest,
                         TagName = tag,
                         ReleaseHtmlUrl = htmlUrl,
@@ -188,6 +185,7 @@ public sealed class UpdateService
                 return new UpdateCheckResult
                 {
                     CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                     LatestVersion = latest,
                     TagName = tag,
                     ReleaseHtmlUrl = htmlUrl,
@@ -199,6 +197,7 @@ public sealed class UpdateService
             return new UpdateCheckResult
             {
                 CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                 LatestVersion = latest,
                 TagName = tag,
                 ReleaseHtmlUrl = htmlUrl,
@@ -216,6 +215,7 @@ public sealed class UpdateService
             return new UpdateCheckResult
             {
                 CurrentVersion = current,
+                    CurrentDisplayVersion = currentLabel,
                 Error = ex.Message
             };
         }
@@ -469,12 +469,15 @@ public sealed class UpdateService
 
             if (!result.UpdateAvailable)
             {
-                _app.Log.Info($"Up to date ({result.CurrentVersion}). Latest release: {result.TagName}.");
+                var shown = string.IsNullOrWhiteSpace(result.CurrentDisplayVersion)
+                    ? result.CurrentVersion.ToString()
+                    : result.CurrentDisplayVersion;
+                _app.Log.Info($"Up to date ({shown}). Latest release: {result.TagName}.");
                 if (!quietIfUpToDate)
                 {
                     ShowMessage(
                         owner,
-                        $"You are on the latest version ({result.CurrentVersion}).",
+                        $"You are on the latest version ({shown}).",
                         App.AppName,
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
@@ -490,10 +493,19 @@ public sealed class UpdateService
             }
 
             var notes = FormatReleaseNotesForPrompt(result.ReleaseNotes);
+            var currentLabel = string.IsNullOrWhiteSpace(result.CurrentDisplayVersion)
+                ? result.CurrentVersion.ToString()
+                : result.CurrentDisplayVersion;
             var prompt =
                 $"A newer version is available.\n\n" +
-                $"Current: {result.CurrentVersion}\n" +
-                $"Latest:  {result.LatestVersion} ({result.TagName})\n\n";
+                $"Current: {currentLabel}\n" +
+                $"Latest:  {result.TagName}\n\n";
+            if (IsPrereleaseTag(result.TagName))
+            {
+                prompt =
+                    "This update is a beta. It is the latest public release, and it is still community-test software. Experimental GPU level 7 and 144/207 Hz stay off unless you opt in. They are not hardware-accepted.\n\n"
+                    + prompt;
+            }
             if (!string.IsNullOrWhiteSpace(notes))
             {
                 prompt += "What's new:\n" + notes + "\n\n";
@@ -624,11 +636,120 @@ public sealed class UpdateService
         return text[..(maxChars - 1)].TrimEnd() + "…";
     }
 
+    public static bool IsReleaseTag(string? tag) =>
+        tag is not null
+        && System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$");
+
     public static bool IsStableReleaseTag(string? tag) =>
         tag is not null && System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v\d+\.\d+\.\d+$");
 
     public static bool IsPrereleaseTag(string? tag) =>
         tag is not null && System.Text.RegularExpressions.Regex.IsMatch(tag, @"^v?\d+\.\d+\.\d+-[0-9A-Za-z.-]+$");
+
+    public static string InstallerFileNameForTag(string tag)
+    {
+        var label = tag.Trim();
+        if (label.StartsWith('v') || label.StartsWith('V'))
+        {
+            label = label[1..];
+        }
+
+        return $"MetaQuestTrayTool-Setup-{label}.exe";
+    }
+
+    /// <summary>
+    /// A higher numeric version is newer, including a beta such as 1.2.0-beta.1 over 1.1.37.
+    /// The same number does not offer a beta over a stable build, and it does not offer an older beta.
+    /// </summary>
+    public static bool IsNewerRelease(string? current, string? latest)
+    {
+        if (!TryParseRelease(current, out var installed) || !TryParseRelease(latest, out var published))
+        {
+            return false;
+        }
+
+        var numeric = published.Number.CompareTo(installed.Number);
+        if (numeric != 0)
+        {
+            return numeric > 0;
+        }
+
+        if (installed.Prerelease is null)
+        {
+            return false;
+        }
+
+        if (published.Prerelease is null)
+        {
+            return true;
+        }
+
+        return ComparePrerelease(published.Prerelease, installed.Prerelease) > 0;
+    }
+
+    private readonly record struct ReleaseIdentity(Version Number, string? Prerelease);
+
+    private static bool TryParseRelease(string? text, out ReleaseIdentity identity)
+    {
+        identity = default;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        var trimmed = text.Trim();
+        if (trimmed.StartsWith('v') || trimmed.StartsWith('V'))
+        {
+            trimmed = trimmed[1..];
+        }
+
+        var match = System.Text.RegularExpressions.Regex.Match(
+            trimmed,
+            @"^(\d+\.\d+\.\d+)(?:-([0-9A-Za-z.-]+))?$");
+        if (!match.Success || !Version.TryParse(match.Groups[1].Value, out var number))
+        {
+            return false;
+        }
+
+        identity = new ReleaseIdentity(number, match.Groups[2].Success ? match.Groups[2].Value : null);
+        return true;
+    }
+
+    private static int ComparePrerelease(string left, string right)
+    {
+        var a = left.Split('.');
+        var b = right.Split('.');
+        var count = Math.Min(a.Length, b.Length);
+        for (var i = 0; i < count; i++)
+        {
+            var aNumeric = int.TryParse(a[i], out var aNumber);
+            var bNumeric = int.TryParse(b[i], out var bNumber);
+            int compared;
+            if (aNumeric && bNumeric)
+            {
+                compared = aNumber.CompareTo(bNumber);
+            }
+            else if (aNumeric)
+            {
+                compared = -1;
+            }
+            else if (bNumeric)
+            {
+                compared = 1;
+            }
+            else
+            {
+                compared = string.Compare(a[i], b[i], StringComparison.Ordinal);
+            }
+
+            if (compared != 0)
+            {
+                return compared;
+            }
+        }
+
+        return a.Length.CompareTo(b.Length);
+    }
 
     public static Version? ParseVersion(string? text)
     {

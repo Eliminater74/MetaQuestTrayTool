@@ -3,8 +3,11 @@
 ## Updates
 
 The in-app updater accepts only the exact `MetaQuestTrayTool-Setup-{version}.exe` asset from
-the project's HTTPS GitHub release URL. Before it launches an installer, it validates the
-release tag, download size, and GitHub-published SHA-256 digest.
+the project's HTTPS GitHub release URL. The `{version}` includes a beta suffix when the tag
+has one, so the v1.2.0-beta.1 asset is `MetaQuestTrayTool-Setup-1.2.0-beta.1.exe`. Before it
+launches an installer, it validates the release tag, download size, and GitHub-published
+SHA-256 digest. The checker shipped in v1.1.37 accepts only a tag shaped exactly like
+`v1.1.37` and a numeric installer name, so that install cannot download the beta tag.
 
 v1.1.31+ builds also download into a private random temp directory, re-check the
 installer size and SHA-256 immediately before launch, and hold the verified installer handle

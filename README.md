@@ -1,8 +1,19 @@
 # Meta Quest Tray Tool
 
-[![Latest release](https://img.shields.io/github/v/release/Eliminater74/MetaQuestTrayTool?label=Release)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/Eliminater74/MetaQuestTrayTool?label=Latest)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Eliminater74/MetaQuestTrayTool/total?label=Downloads)](https://github.com/Eliminater74/MetaQuestTrayTool/releases)
 [![Stars](https://img.shields.io/github/stars/Eliminater74/MetaQuestTrayTool?label=Stars)](https://github.com/Eliminater74/MetaQuestTrayTool/stargazers)
+
+### Download
+
+[![Download v1.2.0-beta.1](https://img.shields.io/badge/Download-v1.2.0--beta.1-blue?style=for-the-badge)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe)
+[![Previous stable v1.1.37](https://img.shields.io/badge/Previous_stable-v1.1.37-2ea44f?style=for-the-badge)](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe)
+
+**v1.2.0-beta.1** is the latest public release. The version number stays a beta: it has the newest features and is for community testing. Experimental GPU level 7 and 144/207 Hz stay off unless you opt in, and they are not hardware-accepted. No page edits ALVR or posts Pyrowave. GitHub issue #27 stays open until the reporter confirms it. [Installer](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe) · [SHA-256](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe.sha256.txt) · [Release page](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1)
+
+**v1.1.37** is the previous stable installer. [Installer](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe) · [SHA-256](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe.sha256.txt) · [Release page](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37)
+
+The updater already installed with **v1.1.37** cannot install this beta. It accepts only a tag shaped exactly like `v1.1.37`, and it looks for `MetaQuestTrayTool-Setup-1.2.0.exe`. `v1.2.0-beta.1` fails that check, so Check for updates on v1.1.37 does not offer this release. Download the installer above once. The updater in the current source accepts a beta tag when GitHub marks that tag Latest, asks you to confirm that the update is a beta, and does not offer an older version. That source change is not inside the published v1.2.0-beta.1 installer.
 
 Windows tray utility for Meta Quest / Oculus Link and SteamVR OpenXR, by **Eliminater74**. This is a **new C# project**, not a continuation of the unfinished conversion of [Oculus Tray Tool](https://techtipsvr.com/oculus-tray-tool/).
 
@@ -49,11 +60,16 @@ All stills captured **25 Aug 2026** on **v1.1.18** (Pure Black theme). Full list
 
 ## Download
 
-**Stable:** [v1.1.37 — MetaQuestTrayTool-Setup-1.1.37.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe)
+**v1.2.0-beta.1** is the latest public release. The beta designation stays in the version number, the release title, and these notes. It is a normal GitHub release, so the repository sidebar labels it Latest and [releases/latest](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) opens it.
 
-**Beta:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1) is a pre-release for community testing. The in-app updater does not offer it. v1.1.37 stays the latest stable release. Experimental GPU level 7 and 144/207 Hz stay off unless you opt in, and they are not hardware-accepted. No page edits ALVR or posts Pyrowave. GitHub issue #27 is fixed in this beta and remains open.
+| Release | What it is | Installer |
+| --- | --- | --- |
+| [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1) | Latest public release. Newest features, for community testing. | [MetaQuestTrayTool-Setup-1.2.0-beta.1.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe) · [SHA-256](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe.sha256.txt) |
+| [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37) | Previous stable installer. | [MetaQuestTrayTool-Setup-1.1.37.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe) · [SHA-256](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe.sha256.txt) |
 
-Or open the [latest release](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) and click the `.exe` asset (the badge at the top of this README always tracks the newest tag).
+The beta adds the notification windows, quick controls, and the stop-on-exit repair for GitHub issue #27. That issue stays open until the reporter confirms it. Experimental GPU level 7 and 144/207 Hz stay off unless you opt in, and they are not hardware-accepted. No page edits ALVR or posts Pyrowave. An older version is not offered over this one.
+
+**Already on v1.1.37?** Its updater was built before this release. It rejects every tag that is not exactly `v` plus three numbers, and it looks for an installer named `MetaQuestTrayTool-Setup-1.2.0.exe`. It will not discover `v1.2.0-beta.1`. Use the download button on this page. The published v1.2.0-beta.1 installer still contains that older checker. The checker in the current source follows a beta tag that GitHub marks Latest, names the installer from the full version, and tells you the update is a beta before you install it.
 
 **Past releases:** [all versions on GitHub](https://github.com/Eliminater74/MetaQuestTrayTool/releases) · **What's new:** [CHANGELOG.md](CHANGELOG.md)
 
@@ -67,7 +83,7 @@ The **Downloads** badge uses GitHub’s public asset `download_count`. It only c
 
 ### 1. Install and first launch
 
-1. Download and run `MetaQuestTrayTool-Setup-*.exe` from [Releases](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest).
+1. Download and run the [v1.2.0-beta.1 installer](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe). That is the latest public release. The [v1.1.37 installer](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.1.37/MetaQuestTrayTool-Setup-1.1.37.exe) remains available as the previous stable build. A v1.1.37 install cannot update itself to this beta tag.
 2. Launch **Meta Quest Tray Tool** from the Start Menu (or let it start with Windows if you enabled that during setup).
 3. The app lives in the **notification area** (system tray). If you do not see the headset icon, click the **^** overflow chevron near the clock.
 4. On first run, approve **Administrator mode** when prompted if you want OpenXR switching, OVRService control, and profile apply to work in-headset without UAC. You can also use **Restart as Administrator** from the tray menu later.
@@ -165,9 +181,9 @@ These are **two different PCVR pipes**. This tray can push far more over **Quest
 
 ## What works now
 
-### v1.1.37 stable release
+### v1.2.0-beta.1 latest public release
 
-Release **[v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is the latest stable release — see **[CHANGELOG.md](CHANGELOG.md)** for every release. **[v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1)** is a separate pre-release and is not offered by the in-app updater. Headset ADB stays idle until a confirmed PCVR session or an explicit headset action. The tray does not poll ADB in the background, does not disconnect phones, TVs, or emulators, and does not kill the shared ADB server when a Link session ends. **Check ADB now** on the Headset page is the one-time probe. v1.1.36 Quest Link encode width still includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both new Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified. The v1.2.0-beta.1 notes are in CHANGELOG.md. That pre-release is not the v1.1.37 download.
+**[v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)** is the latest public release. The beta designation stays in the version. **[v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37)** is the previous stable installer. See **[CHANGELOG.md](CHANGELOG.md)** for every release. Headset ADB stays idle until a confirmed PCVR session or an explicit headset action. The tray does not poll ADB in the background, does not disconnect phones, TVs, or emulators, and does not kill the shared ADB server when a Link session ends. **Check ADB now** on the Headset page is the one-time probe. v1.1.36 Quest Link encode width still includes 4128. Video codec is Default, H.264, or H.265/HEVC: H.265 writes the observed `HEVC=1` override, and H.264 removes that override rather than writing an unverified `HEVC=0`. Sliced encoding is Default or Disabled (`NumSlices=1`). Tray Tool can open Meta Horizon Link once at startup, and can turn Windows HDR off while the tray is running and restore only the displays it changed. Both of those Tray Tool options are off by default. Older `PreferHevc` and `DisableSlicedEncoding` settings still load. v1.1.35 session tracing and the startup Link preflight skip remain. Physical HDR-driver confirmation and an explicit Meta H.264 DWORD are still unverified. Experimental GPU level 7 and 144/207 Hz stay off unless you opt in, and they are not hardware-accepted. No page edits ALVR or posts Pyrowave. GitHub issue #27 stays open.
 
 ### Shell & tray
 

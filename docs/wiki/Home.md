@@ -2,13 +2,13 @@
 
 Windows tray app for **Quest Link / Air Link + SteamVR OpenXR**. Free, modern OTT-inspired settings — a **new C# app**, not a decompile of ApollyonVR’s Oculus Tray Tool.
 
-**Latest stable release:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest)
+**Latest public release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest). The version stays a beta. Experimental GPU level 7 and 144/207 Hz stay off unless opted in and are not hardware-accepted. ALVR and Pyrowave have no production editor. GitHub issue #27 stays open. The updater installed with v1.1.37 cannot install this beta tag; download the installer from the release page.
 
-**Pre-release:** [v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.2.0-beta.1). The in-app updater does not offer it. Experimental GPU level 7 and 144/207 Hz stay off unless opted in and are not hardware-accepted. ALVR and Pyrowave have no production editor. GitHub issue #27 stays open.
+**Previous stable installer:** [v1.1.37](https://github.com/Eliminater74/MetaQuestTrayTool/releases/tag/v1.1.37)
 
 v1.1.37 keeps headset ADB off until a confirmed PCVR session or an explicit action such as **Check ADB now**. It does not disconnect other ADB devices and does not kill the shared ADB server when Link ends. v1.1.36 Quest Link encode width 4128, codec, sliced encoding, startup Meta Horizon Link, and temporary Windows HDR remain.
 
-[[What-s-New|What's new since the old wiki]] · [Download Setup.exe](https://github.com/Eliminater74/MetaQuestTrayTool/releases/latest) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
+[[What-s-New|What's new since the old wiki]] · [Download v1.2.0-beta.1](https://github.com/Eliminater74/MetaQuestTrayTool/releases/download/v1.2.0-beta.1/MetaQuestTrayTool-Setup-1.2.0-beta.1.exe) · [GitHub repo](https://github.com/Eliminater74/MetaQuestTrayTool) · [Donate](https://www.paypal.com/donate/?business=X76ZW4RHA6T9C&no_recurring=0&item_name=Eliminater74+builds+Meta+Quest+Tray+Tool+%E2%80%94+free+Quest+Link+%26+SteamVR+tray+settings.+Your+gift+keeps+it+going.&currency_code=USD)
 
 ---
 

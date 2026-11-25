@@ -11,7 +11,7 @@ on:
         required: true
         default: "1.2.0-beta.1"
       prerelease:
-        description: "Mark as pre-release"
+        description: "Manual runs only. Mark as a GitHub pre-release and do not make it Latest. Leave off to publish, including a beta version, as the latest public release."
         type: boolean
         default: false
 
@@ -47,8 +47,9 @@ jobs:
           if ($version -ne $sourceVersion) {
             throw "Release version $version does not match Directory.Build.props version $sourceVersion."
           }
-          $dispatchPrerelease = $env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and '${{ inputs.prerelease }}' -eq 'true'
-          $prerelease = $version.Contains('-') -or $dispatchPrerelease
+          # A beta suffix stays in the version. Pushing that tag publishes it as the latest
+          # public release. A manual run can still opt into a GitHub pre-release that is not Latest.
+          $prerelease = $env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and '${{ inputs.prerelease }}' -eq 'true'
           "Resolved version: $version"
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=v$version" >> $env:GITHUB_OUTPUT

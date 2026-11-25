@@ -64,7 +64,7 @@ dotnet publish .\src\MetaQuestTrayTool\MetaQuestTrayTool.csproj `
 | --- | --- | --- |
 | **CI** (`.github/workflows/ci.yml`) | Push/PR to `main`, manual | Locked restore + build + tests + coverage gate + publish smoke test |
 | **CodeQL** (`.github/workflows/codeql.yml`) | Push/PR to `main`, weekly, manual | C# security analysis |
-| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (for example `v1.1.37` or `v1.2.0-beta.1`), manual | Pinned Inno Setup + Setup.exe + SHA-256 sidecar + GitHub Release. A tag with a pre-release suffix is published as a GitHub pre-release and is not marked latest. |
+| **Release** (`.github/workflows/release.yml`) | Push tag `v*` (for example `v1.1.37` or `v1.2.0-beta.1`), manual | Pinned Inno Setup + Setup.exe + SHA-256 sidecar + GitHub Release. A beta tag is published as the latest public release. The beta stays in the version number. A manual run can set **prerelease** to publish a GitHub pre-release that is not Latest. |
 
 Tag a stable release:
 
@@ -73,7 +73,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-A pre-release tag such as `v1.2.0-beta.1` uses the same workflow. Windows file version and the installer version resource stay numeric (`1.2.0.0`). The displayed setup name keeps the suffix.
+A beta tag such as `v1.2.0-beta.1` uses the same workflow and is the latest public release unless a manual run sets **prerelease**. Windows file version and the installer version resource stay numeric (`1.2.0.0`). The displayed setup name keeps the suffix. The installer asset name keeps it too: `MetaQuestTrayTool-Setup-1.2.0-beta.1.exe`.
 
 ## Files
 
